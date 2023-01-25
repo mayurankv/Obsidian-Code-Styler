@@ -101,5 +101,5 @@ Example for reading mode:
 ## Support
 
 If you like this plugin, and would like to help support continued development, use the button below!
-
+ 
 <a href="https://www.buymeacoffee.com/ThePirateKing"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px"></a>
