@@ -1,96 +1,105 @@
-# Obsidian Sample Plugin
+# Codeblock Customizer Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+This is a plugin for Obsidian (https://obsidian.md).
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+Since I didn't find any plugin, where I could customize codeblocks, which works realiable, and works in editor and reading mode as well, I created my own. I am not a designer, so if you have created a cool theme, send me the color codes, and I might include it as a default theme in the next release :-)
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+This plugin works in editor mode and in reading mode!
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+The plugin lets you customize the codeblocks in the following way:
+- Default dark and light theme. You can create your own themes as well.
+- Enable editor active line highlight. The active line in Obsidian (including codeblocks) will be highlighted (you can customize the color).
+- Exclude languages. You can define languages separated by a comma, to which the plugin will not apply
+- Enable codeblock active line highlight. The active line inside a codeblock will be highlighted (you can customize the color)
+- Set background color for codeblocks
+- Lets you highlight specific lines
+    - Customize highlight color
+- Display filename
+    - If a filename is defined a header will be inserted, where it is possible to customize the text (color, bold, italic), and the header (color, header line) itself as well
+- Fold code
+    - If the header is displayed (either by defining filename or other way explained below), you can click on the header to fold the codeblock below it 
+- Display codeblock language. This displays the language (if specified) of the codeblock in the header. 
+    - Customize text color, background color, bold text, italic text for the language tag inside the header.
+    - By default the language tag is only displayed, if the header is displayed, and a if a language is defined for a codeblock. You can however force, to always display the codeblock language, even if the header would not be displayed.
+- Add line numbers to codeblocks
+    - Customize if the linenumber should also be highlighted, if a line is highlighted
+    - Customize background color, and color of the line numbers
 
-## First time developing plugins?
+## Themes
 
-Quick starting guide for new plugin devs:
+Default dark theme:
+![[Pasted image 20230125231644.png]]
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+Default light theme:
+![[Pasted image 20230125231735.png]]
 
-## Releasing new releases
+## Highlighting
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+To highlight lines specifiy `hl:` folowed by line numbers in the first line of the codeblock. 
+- You can specify either single line numbers separated with a comma e.g.: `hl:1,3,5,7`.
+- You can specify ranges e.g.: `hl:2-5` This would highlight lines from 2 to 5. 
+- You can also combine the methods e.g.: `hl:1,3,4-6` This would highlight lines 1, 3 and lines from 4 to 6.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+Example:
+` ```cpp hl:1,3,4-6`
 
-## Adding your plugin to the community plugin list
+![[Pasted image 20230125230046.png]]
 
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## Display filename
 
-## How to use
+To display a filename specify `file:` followed by a filename in the first line of the codeblock. If the filename contains space, specify it between `""` e.g.: `file:"long filename.cpp"`.
 
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
+Example:
+` ```cpp file:test.cpp`
+` ```cpp file:"long filename.cpp"`
 
-## Manually installing the plugin
+![[Pasted image 20230125230351.png]]
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## Folding
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+To specify an initial fold state when the document is opened, specify `fold` in the first line of the codeblock. If `fold` is defined in a codeblock, then when you open the document, the codeblock will be automatically collapsed, and only the header will be displayed. You can unfold the codeblock by clicking on the header.
 
-## Funding URL
+Example:
+` ```cpp fold`
 
-You can include funding URLs where people who use your plugin can financially support it.
+![[Pasted image 20230125230928.png]]
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+## Header
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+The header is displayed in the following cases:
+- You specified a `file:`
+- You specified `fold` If you specified `fold` but did not specify `file:` a default text `Collapsed code` will be displayed on the header
+- You enabled the `Always display codeblock language` option in settings, but did not specify `file:` or `fold`
 
-If you have multiple URLs, you can also do:
+If the header is displayed, folding works as well. If `Always display codeblock language` is enabled then the header will display the codeblock language as well.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+Example:
+- Header with fold only
+![[Pasted image 20230125233958.png]]
+- Header with codeblock language only
+![[Pasted image 20230125231233.png]]
+- Header with codeblock language and filename as well
+![[Pasted image 20230125231356.png]]
 
-## API Documentation
+## Line numbers
 
-See https://github.com/obsidianmd/obsidian-api
+To enable line numbers go to the plugin settings and enable the `Enable line numbers` option. After that the line numbers will be displayed before codeblocks.
+
+Example:
+![[Pasted image 20230125232015.png]]
+**Note:** The only reliable way to display line numbers is to display them in a gutter. This means however that they will be displayed before the codeblock, and not inside the codeblock. It is also possible to display line numbers inside codeblocks (this would have been my preferred way), but that way it is possible to delete the line numbers, and long lines are not handled correctly. Therefore this option was dismissed. In reading mode it is the other way around. Line numbers are displayed inside the codeblocks, and not before them. 
+
+Example for reading mode:
+![[Pasted image 20230125232448.png]]
+
+
+## How to install the plugin
+
+- Simply install directly from Obsidian
+- or you can just copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/codeblock-customizer/`.
+
+## Support
+
+If you like this plugin, and would like to help support continued development, use the button below!
+
+<a href="https://www.buymeacoffee.com/ThePirateKing"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px"></a>

@@ -1,8 +1,53 @@
-/*
+/* adjust gutter next to codeblock */
+.cm-gutters{
+  padding-right: 0px !important;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* style gutter */
+.codeblock-customizer-gutterElements{
+  width: 38px;
+  text-align: right;
+	padding-left: 4px;
+	padding-right: 8px;
+}
 
-If your plugin does not need CSS, delete this file.
+/* style codeblock header text */
+.codeblock-customizer-header-text{
+	padding-left: 15px;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+  font-size: 14px;
+}
 
-*/
+/* style codeblock header language tag*/
+.codeblock-customizer-header-language-tag{
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+  font-size: 14px;
+}
+
+/* center donation button */
+.codeblock-customizer-Donation{
+  width: 70%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* styling for reading view */
+.codeblock-customizer-line {
+  display: flex;
+}
+
+.codeblock-customizer-line-number{
+  width: 38px;
+  text-align: right;
+	padding-left: 4px;
+	padding-right: 8px;
+  font-size: 12px;
+}
+
+.codeblock-customizer-line-text {
+  flex-basis: 100%;
+}
