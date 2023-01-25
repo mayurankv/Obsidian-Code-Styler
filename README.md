@@ -31,7 +31,7 @@ Default dark theme:
 ![Pasted_image_20230125231644.png](attachments/Pasted_image_20230125231644.png)
 
 Default light theme:
-![Pasted image 20230125231735.png](attachments/Pasted image 20230125231735.png)
+![Pasted_image_20230125231735.png](attachments/Pasted_image_20230125231735.png)
 
 ## Highlighting
 
@@ -43,7 +43,7 @@ To highlight lines specifiy `hl:` folowed by line numbers in the first line of t
 Example:
 ` ```cpp hl:1,3,4-6`
 
-![Pasted image 20230125230046.png](attachments/Pasted image 20230125230046.png)
+![Pasted_image_20230125230046.png](attachments/Pasted_image_20230125230046.png)
 
 ## Display filename
 
@@ -53,7 +53,7 @@ Example:
 ` ```cpp file:test.cpp`
 ` ```cpp file:"long filename.cpp"`
 
-![Pasted image 20230125230351.png](attachments/Pasted image 20230125230351.png)
+![Pasted_image_20230125230351.png](attachments/Pasted_image_20230125230351.png)
 
 ## Folding
 
@@ -62,7 +62,7 @@ To specify an initial fold state when the document is opened, specify `fold` in 
 Example:
 ` ```cpp fold`
 
-![Pasted image 20230125230928.png](attachments/Pasted image 20230125230928.png)
+![Pasted_image_20230125230928.png](attachments/Pasted_image_20230125230928.png)
 
 ## Header
 
@@ -75,22 +75,22 @@ If the header is displayed, folding works as well. If `Always display codeblock 
 
 Example:
 - Header with fold only
-![Pasted image 20230125233958.png](attachments/Pasted image 20230125233958.png)
+![Pasted_image_20230125233958.png](attachments/Pasted_image_20230125233958.png)
 - Header with codeblock language only
-![Pasted image 20230125231233.png](attachments/Pasted image 20230125231233.png)
+![Pasted_image_20230125231233.png](attachments/Pasted_image_20230125231233.png)
 - Header with codeblock language and filename as well
-![Pasted image 20230125231356.png](attachments/Pasted image 20230125231356.png)
+![Pasted_image_20230125231356.png](attachments/Pasted_image_20230125231356.png)
 
 ## Line numbers
 
 To enable line numbers go to the plugin settings and enable the `Enable line numbers` option. After that the line numbers will be displayed before codeblocks.
 
 Example:
-![Pasted image 20230125232015.png](attachments/Pasted image 20230125232015.png)
+![Pasted_image_20230125232015.png](attachments/Pasted_image_20230125232015.png)
 **Note:** The only reliable way to display line numbers is to display them in a gutter. This means however that they will be displayed before the codeblock, and not inside the codeblock. It is also possible to display line numbers inside codeblocks (this would have been my preferred way), but that way it is possible to delete the line numbers, and long lines are not handled correctly. Therefore this option was dismissed. In reading mode it is the other way around. Line numbers are displayed inside the codeblocks, and not before them. 
 
 Example for reading mode:
-![Pasted image 20230125232448.png](attachments/Pasted image 20230125232448.png)
+![Pasted_image_20230125232448.png](attachments/Pasted_image_20230125232448.png)
 
 
 ## How to install the plugin
