@@ -28,7 +28,7 @@ The plugin lets you customize the codeblocks in the following way:
 ## Themes
 
 Default dark theme:
-![Pasted image 20230125231644.png](attachments/Pasted_image_20230125231644.png)
+![Pasted_image_20230125231644.png](attachments/Pasted_image_20230125231644.png)
 
 Default light theme:
 ![Pasted image 20230125231735.png](attachments/Pasted image 20230125231735.png)
