@@ -28,9 +28,11 @@ The plugin lets you customize the codeblocks in the following way:
 ## Themes
 
 Default dark theme: 
+
 ![Pasted_image_20230125231644.png](attachments/Pasted_image_20230125231644.png)
 
 Default light theme: 
+
 ![Pasted_image_20230125231735.png](attachments/Pasted_image_20230125231735.png)
 
 ## Highlighting
@@ -75,10 +77,13 @@ If the header is displayed, folding works as well. If `Always display codeblock 
 
 Example:
 - Header with fold only
+
 ![Pasted_image_20230125233958.png](attachments/Pasted_image_20230125233958.png)
 - Header with codeblock language only
+
 ![Pasted_image_20230125231233.png](attachments/Pasted_image_20230125231233.png)
 - Header with codeblock language and filename as well
+
 ![Pasted_image_20230125231356.png](attachments/Pasted_image_20230125231356.png)
 
 ## Line numbers
@@ -86,10 +91,13 @@ Example:
 To enable line numbers go to the plugin settings and enable the `Enable line numbers` option. After that the line numbers will be displayed before codeblocks.
 
 Example:
+
 ![Pasted_image_20230125232015.png](attachments/Pasted_image_20230125232015.png)
+
 **Note:** The only reliable way to display line numbers is to display them in a gutter. This means however that they will be displayed before the codeblock, and not inside the codeblock. It is also possible to display line numbers inside codeblocks (this would have been my preferred way), but that way it is possible to delete the line numbers, and long lines are not handled correctly. Therefore this option was dismissed. In reading mode it is the other way around. Line numbers are displayed inside the codeblocks, and not before them. 
 
 Example for reading mode:
+
 ![Pasted_image_20230125232448.png](attachments/Pasted_image_20230125232448.png)
 
 
