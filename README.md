@@ -102,6 +102,13 @@ Example for reading mode:
 
 ![Pasted_image_20230125232448.png](attachments/Pasted_image_20230125232448.png)
 
+## Themes
+
+The plugin automatically sets the default theme, according to the selected mode in Obsidian(Dark/Light). You can customize your colors, and then save them as a "theme". There are two toggles when you create a theme, as shown below:
+
+![Theme.png](attachments/Theme.png)
+
+If you change Obsidians theme frequentely, and you want to use your themes, then these two toggles are important for you. If you save a theme, and you want to use that theme in either dark or light mode by default, then set the appropriate toggle. This way you set your theme as the default light or dark theme.
 
 ## How to install the plugin
 
