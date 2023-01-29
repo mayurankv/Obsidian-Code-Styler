@@ -69,6 +69,29 @@ export class SettingsTab extends PluginSettingTab {
           } else if(this.plugin.settings.SelectedTheme === "Dark Theme" || this.plugin.settings.SelectedTheme === "Light Theme") {
             new Notice('You cannot delete the default themes');
           } else {
+            let isDefaultLightTheme = false, isDefaltDarkTheme = false;
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name == this.plugin.settings.SelectedTheme){
+                isDefaultLightTheme = theme.colors.header.bDefaultLightTheme;
+                isDefaltDarkTheme = theme.colors.header.bDefaultDarkTheme;
+              }
+            });
+            if (isDefaultLightTheme){
+              // restore bDefaultLightTheme for the default Light theme if the deleted theme is the default
+              this.plugin.settings.colorThemes.forEach(theme => {
+                if (theme.name === "Light Theme")
+                  theme.colors.header.bDefaultLightTheme = true;
+              });
+            }
+            
+            if (isDefaltDarkTheme){
+              // restore bDefaultLightTheme for the default Dark theme if the deleted theme is the default
+              this.plugin.settings.colorThemes.forEach(theme => {
+                if (theme.name === "Dark Theme")
+                  theme.colors.header.bDefaultDarkTheme = true;
+              });
+            }
+            
             // Delete the selected theme
             const index = this.plugin.settings.colorThemes.findIndex(t => t.name === this.plugin.settings.SelectedTheme);
             this.plugin.settings.colorThemes.splice(index, 1);
@@ -94,6 +117,8 @@ export class SettingsTab extends PluginSettingTab {
       });// addExtraButton
 
   let text;
+  let darkToggle, lightToggle;
+  this.plugin.settings.ThemeName = "";
   new Setting(containerEl)
     .setName('Create your theme')
     .setDesc('Save or update your current colors as a theme')
@@ -106,6 +131,34 @@ export class SettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
     })
+    .addToggle(toggle => {
+      lightToggle = toggle;
+      return toggle
+      .setTooltip("Save as default Light theme")
+      .setValue(false)
+      .onChange(async (value) => {
+        this.plugin.settings.header.bDefaultLightTheme = value;
+        if (value && this.plugin.settings.header.bDefaultDarkTheme ) {        
+          this.plugin.settings.header.bDefaultDarkTheme = !value;
+          darkToggle.setValue(!value);
+          //await this.plugin.saveSettings();
+        }
+      });
+    })
+    .addToggle((toggle) => {
+      darkToggle = toggle;
+      return toggle
+      .setTooltip("Save as default Dark theme")
+      .setValue(false)
+      .onChange(async (value) => {
+        this.plugin.settings.header.bDefaultDarkTheme = value;
+        if (value && this.plugin.settings.header.bDefaultLightTheme ) {        
+          this.plugin.settings.header.bDefaultLightTheme = !value;
+          lightToggle.setValue(!value);
+          //await this.plugin.saveSettings();
+        } 
+      });
+    })    
     .addExtraButton(button => {
       button.setTooltip("Save theme");
       button.setIcon('plus');
@@ -123,6 +176,8 @@ export class SettingsTab extends PluginSettingTab {
           gutterTextColor: this.plugin.settings.gutterTextColor,
           gutterBackgroundColor: this.plugin.settings.gutterBackgroundColor,
           header: {
+            bDefaultDarkTheme: this.plugin.settings.header.bDefaultDarkTheme,
+            bDefaultLightTheme: this.plugin.settings.header.bDefaultLightTheme,
             color: this.plugin.settings.header.color,
             textColor: this.plugin.settings.header.textColor,
             lineColor: this.plugin.settings.header.lineColor,
@@ -156,9 +211,28 @@ export class SettingsTab extends PluginSettingTab {
           
           new Notice(`${this.plugin.settings.SelectedTheme} theme saved successfully!`);
         }
+        
+        // set bDefaultLightTheme to false in every other theme
+        if (this.plugin.settings.header.bDefaultLightTheme) {
+          this.plugin.settings.colorThemes.forEach(theme => {
+            if (theme.name !== this.plugin.settings.ThemeName)
+              theme.colors.header.bDefaultLightTheme = false;
+          });
+        }
+
+        // set bDefaultDarkTheme to false in every other theme
+        if (this.plugin.settings.header.bDefaultDarkTheme) {
+          this.plugin.settings.colorThemes.forEach(theme => {
+            if (theme.name !== this.plugin.settings.ThemeName)
+              theme.colors.header.bDefaultDarkTheme = false;
+          });
+        }
+
         // Clear the input field        
         this.plugin.settings.ThemeName = "";
         text.setValue("");
+        lightToggle.setValue(false);
+        darkToggle.setValue(false);
         this.plugin.saveSettings();
       }
     });
@@ -168,17 +242,18 @@ export class SettingsTab extends PluginSettingTab {
     .setName('Enable editor active line highlight')
     .setDesc('If enabled, you can set the color for the active line (including codeblocks).')
     .addToggle(toggle => toggle
-    .setValue(this.plugin.settings.bActiveLineHighlight)
-    .onChange(async (value) => {
-      if ((!value) && (!this.plugin.settings.bActiveCodeblockLineHighlight)) {
-        this.removeExtension(codeblockActiveLingHighlight.name);
-      }
-      else if (!this.plugin.extensions.find(ext => ext.name === codeblockActiveLingHighlight.name)) {
-          this.plugin.extensions.push(codeblockActiveLingHighlight(this.plugin.settings));
-      }
-      this.plugin.settings.bActiveLineHighlight = value;
-      await this.plugin.saveSettings();
-    }));
+      .setValue(this.plugin.settings.bActiveLineHighlight)
+      .onChange(async (value) => {
+        if ((!value) && (!this.plugin.settings.bActiveCodeblockLineHighlight)) {
+          this.removeExtension(codeblockActiveLingHighlight.name);
+        }
+        else if (!this.plugin.extensions.find(ext => ext.name === codeblockActiveLingHighlight.name)) {
+            this.plugin.extensions.push(codeblockActiveLingHighlight(this.plugin.settings));
+        }
+        this.plugin.settings.bActiveLineHighlight = value;
+        await this.plugin.saveSettings();
+      })
+    );
      
   this.createPickrSetting(containerEl, 'Editor active line color', 
   'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
@@ -187,46 +262,49 @@ export class SettingsTab extends PluginSettingTab {
     .setName('Exclude languages')
     .setDesc('Define languages, separated by a comma, to which the plugin will not apply.')
     .addText(text => text
-    .setPlaceholder('e.g. dataview, python etc.')
-    .setValue(this.plugin.settings.ExcludeLangs)
-    .onChange(async (value) => {
-      this.plugin.settings.ExcludeLangs = value;
-      await this.plugin.saveSettings();
-    }));
+      .setPlaceholder('e.g. dataview, python etc.')
+      .setValue(this.plugin.settings.ExcludeLangs)
+      .onChange(async (value) => {
+        this.plugin.settings.ExcludeLangs = value;
+        await this.plugin.saveSettings();
+      })
+    );
 
   containerEl.createEl('h3', {text: 'Codeblock settings'});
 
   new Setting(containerEl)
     .setName('Enable line numbers')
     .addToggle(toggle => toggle
-    .setValue(this.plugin.settings.bEnableLineNumbers)
-    .onChange(async (value) => {
-      if (value) {
-        if (!this.plugin.extensions.find(ext => ext.name === codeblockGutter.name)) {
-          this.plugin.extensions.push(codeblockGutter(this.plugin.settings));
-        }
-      } else {
-        this.removeExtension(codeblockGutter.name);
-      }          
-      this.plugin.settings.bEnableLineNumbers = value;
-      await this.plugin.saveSettings();          
-    }));
+      .setValue(this.plugin.settings.bEnableLineNumbers)
+      .onChange(async (value) => {
+        if (value) {
+          if (!this.plugin.extensions.find(ext => ext.name === codeblockGutter.name)) {
+            this.plugin.extensions.push(codeblockGutter(this.plugin.settings));
+          }
+        } else {
+          this.removeExtension(codeblockGutter.name);
+        }          
+        this.plugin.settings.bEnableLineNumbers = value;
+        await this.plugin.saveSettings();          
+      })
+    );
 
   new Setting(containerEl)
     .setName('Enable codeblock active line hihglight')
     .setDesc('If enabled, you can set the color for the active line inside codeblocks only.')
     .addToggle(toggle => toggle
-    .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
-    .onChange(async (value) => {
-      if ((!value) && (!this.plugin.settings.bActiveLineHighlight)) {
-        this.removeExtension(codeblockActiveLingHighlight.name);
-      }
-      else if (!this.plugin.extensions.find(ext => ext.name === codeblockActiveLingHighlight.name)) {
-          this.plugin.extensions.push(codeblockActiveLingHighlight(this.plugin.settings));
-      }
-      this.plugin.settings.bActiveCodeblockLineHighlight = value;          
-      await this.plugin.saveSettings();
-    }));
+      .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
+      .onChange(async (value) => {
+        if ((!value) && (!this.plugin.settings.bActiveLineHighlight)) {
+          this.removeExtension(codeblockActiveLingHighlight.name);
+        }
+        else if (!this.plugin.extensions.find(ext => ext.name === codeblockActiveLingHighlight.name)) {
+            this.plugin.extensions.push(codeblockActiveLingHighlight(this.plugin.settings));
+        }
+        this.plugin.settings.bActiveCodeblockLineHighlight = value;          
+        await this.plugin.saveSettings();
+      })
+    );
         
     this.createPickrSetting(containerEl, 'Codeblock active line color', 
       'To set this color, enable the option "Enable codeblock active line highlight" first.', D_ACTIVE_CODEBLOCK_LINE_COLOR, "activeCodeBlockLineColor");
@@ -236,30 +314,32 @@ export class SettingsTab extends PluginSettingTab {
     
     containerEl.createEl('h3', {text: 'Header settings'});
     
-    this.createPickrSetting(containerEl, 'Header color', '', D_HEADER_COLOR, "headerColor");
-    this.createPickrSetting(containerEl, 'Header text color', '', D_HEADER_TEXT_COLOR, "headerTextColor");
+    this.createPickrSetting(containerEl, 'Header color', '', D_HEADER_COLOR, "color");
+    this.createPickrSetting(containerEl, 'Header text color', '', D_HEADER_TEXT_COLOR, "textColor");
     
     new Setting(containerEl)
       .setName('Header bold text')
       .setDesc('If enabled, the header text will be set to bold.')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.header.bHeaderBold)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bHeaderBold = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.header.bHeaderBold)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bHeaderBold = value;
+          await this.plugin.saveSettings();
+      })
+    );
     
     new Setting(containerEl)
       .setName('Header italic text')
       .setDesc('If enabled, the header text will be set to italic.')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.header.bHeaderItalic)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bHeaderItalic = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.header.bHeaderItalic)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bHeaderItalic = value;
+          await this.plugin.saveSettings();
+      })
+    );
     
-    this.createPickrSetting(containerEl, 'Header line color', '', D_HEADER_LINE_COLOR, "headerLineColor");
+    this.createPickrSetting(containerEl, 'Header line color', '', D_HEADER_LINE_COLOR, "lineColor");
     
     containerEl.createEl('h3', {text: 'Header language settings'});
         
@@ -267,14 +347,15 @@ export class SettingsTab extends PluginSettingTab {
       .setName('Display codeblock language (if language is defined)')
       .setDesc('If enabled, the codeblock language will be displayed in the header. If disabled, all below settings are disabled as well!')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.bDisplayCodeBlockLanguage)
-      .onChange(async (value) => {
-        this.headerLangToggles.forEach(item => {
-          item.setDisabled(!value);
-        });
-        this.plugin.settings.bDisplayCodeBlockLanguage = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.bDisplayCodeBlockLanguage)
+        .onChange(async (value) => {
+          this.headerLangToggles.forEach(item => {
+            item.setDisabled(!value);
+          });
+          this.plugin.settings.bDisplayCodeBlockLanguage = value;
+          await this.plugin.saveSettings();
+      })
+    );
 
     this.createPickrSetting(containerEl, 'Codeblock language text color', 'To set this color, enable the option "Display codeblock language" first.', D_LANG_COLOR, "codeBlockLangColor");    
     this.createPickrSetting(containerEl, 'Codeblock language background color', 'To set this color, enable the option "Display codeblock language" first.', D_LANG_BACKGROUND_COLOR, "codeBlockLangBackgroundColor");    
@@ -283,33 +364,36 @@ export class SettingsTab extends PluginSettingTab {
       .setName('Bold text')
       .setDesc('If enabled, the codeblock language text will be set to bold.')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.header.bCodeblockLangBold)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bCodeblockLangBold = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.header.bCodeblockLangBold)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bCodeblockLangBold = value;
+          await this.plugin.saveSettings();
+      })
+    );
     this.headerLangToggles.push(boldToggle);
     
     const italicToggle = new Setting(containerEl)
       .setName('Italic text')
       .setDesc('If enabled, the codeblock language text will be set to italic.')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.header.bCodeblockLangItalic)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bCodeblockLangItalic = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.header.bCodeblockLangItalic)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bCodeblockLangItalic = value;
+          await this.plugin.saveSettings();
+      })
+    );
     this.headerLangToggles.push(italicToggle);
     
     const alwaysDisplayToggle = new Setting(containerEl)
       .setName('Always display codeblock language')
       .setDesc('If enabled, the codeblock language will always displayed (if a language is defined), even if the file parameter is not specified.')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.header.bAlwaysDisplayCodeblockLang)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bAlwaysDisplayCodeblockLang = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.header.bAlwaysDisplayCodeblockLang)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bAlwaysDisplayCodeblockLang = value;
+          await this.plugin.saveSettings();
+      })
+    );
     this.headerLangToggles.push(alwaysDisplayToggle);
     
     if (!this.plugin.settings.bDisplayCodeBlockLanguage){
@@ -323,11 +407,12 @@ export class SettingsTab extends PluginSettingTab {
       .setName('Highlight gutter')
       .setDesc('If enabled, highlighted lines will also highlight the gutter (line number), not just the line.')
       .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.bGutterHighlight)
-      .onChange(async (value) => {
-        this.plugin.settings.bGutterHighlight = value;
-        await this.plugin.saveSettings();
-    }));
+        .setValue(this.plugin.settings.bGutterHighlight)
+        .onChange(async (value) => {
+          this.plugin.settings.bGutterHighlight = value;
+          await this.plugin.saveSettings();
+      })
+    );
     
     this.createPickrSetting(containerEl, 'Gutter text color', '', D_GUTTER_TEXT_COLOR, "gutterTextColor");
     this.createPickrSetting(containerEl, 'Gutter background color', '', D_GUTTER_BACKGROUND_COLOR, "gutterBackgroundColor");
@@ -371,10 +456,11 @@ export class SettingsTab extends PluginSettingTab {
   }// applyTheme
   
   setColorsForPickers(themeName){
-    const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === themeName);
+    const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === themeName);    
+
     if (!selectedTheme) 
       return;
-    
+
     this.pickerInstances.forEach(picker => {
       const color = getColorByClass(picker.options.appClass, selectedTheme);
       if (color) {
@@ -384,7 +470,11 @@ export class SettingsTab extends PluginSettingTab {
   }// setColorsForPickers
   
   createPickrSetting(containerEl: HTMLElement, name: string, description: string, defaultColor: string, pickrClass: string): Setting {
-    let pickrDefault = this.plugin.settings[pickrClass] || defaultColor;
+    let pickrDefault
+    if (pickrClass.includes("codeBlockLang") || pickrClass === "color" || pickrClass === "textColor" || pickrClass === "lineColor")
+      pickrDefault = this.plugin.settings.header[pickrClass] || defaultColor;
+    else
+      pickrDefault = this.plugin.settings[pickrClass] || defaultColor;
     let pickr: Pickr;
     let desc = "";
     if (description != '')
@@ -453,11 +543,11 @@ export class SettingsTab extends PluginSettingTab {
                 pickrDefault = L_BACKGROUND_COLOR;
               } else if (pickrClass === 'highlightColor') {
                 pickrDefault = L_HIGHLIGHT_COLOR;
-              } else if (pickrClass === 'headerColor') {
+              } else if (pickrClass === 'color') {
                 pickrDefault = L_HEADER_COLOR;
-              } else if (pickrClass === 'headerTextColor') {
+              } else if (pickrClass === 'textColor') {
                 pickrDefault = L_HEADER_TEXT_COLOR;
-              } else if (pickrClass === 'headerLineColor') {
+              } else if (pickrClass === 'lineColor') {
                 pickrDefault = L_HEADER_LINE_COLOR;
               } else if (pickrClass === 'gutterTextColor') {
                 pickrDefault = L_GUTTER_TEXT_COLOR;
@@ -494,11 +584,11 @@ export class SettingsTab extends PluginSettingTab {
       this.plugin.settings.backgroundColor = savedColor;
     } else if (className === 'highlightColor') {
       this.plugin.settings.highlightColor = savedColor;
-    } else if (className === 'headerColor') {
+    } else if (className === 'color') {
       this.plugin.settings.header.color = savedColor;
-    } else if (className === 'headerTextColor') {
+    } else if (className === 'textColor') {
       this.plugin.settings.header.textColor = savedColor;
-    } else if (className === 'headerLineColor') {
+    } else if (className === 'lineColor') {
       this.plugin.settings.header.lineColor = savedColor;
     } else if (className === 'gutterTextColor') {
       this.plugin.settings.gutterTextColor = savedColor;
@@ -531,11 +621,11 @@ function getColorByClass(pickerClass, theme) {
       return theme.colors.backgroundColor;
     case 'highlightColor':
       return theme.colors.highlightColor;
-    case 'headerColor':
+    case 'color':
       return theme.colors.header.color;
-    case 'headerTextColor':
+    case 'textColor':
       return theme.colors.header.textColor;
-    case 'headerLineColor':
+    case 'lineColor':
       return theme.colors.header.lineColor;
     case 'gutterTextColor':
       return theme.colors.gutterTextColor;

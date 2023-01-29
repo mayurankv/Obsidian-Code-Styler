@@ -1,4 +1,4 @@
-import { MarkdownView, MarkdownPostProcessorContext } from "obsidian";
+import { MarkdownView, MarkdownPostProcessorContext, sanitizeHTMLToDom } from "obsidian";
 
 import { searchString, getHighlightedLines, getLanguageName, isExcluded } from "./Utils";
 
@@ -156,7 +156,7 @@ function createLineNumberElement(lineNumber, settings, isHighlighted) {
   lineNumberWrapper.style.backgroundColor = settings.gutterBackgroundColor;
   lineNumberWrapper.style.color = settings.gutterTextColor;
   if (isHighlighted && settings.bGutterHighlight) {
-    lineNumberWrapper.classList.add("codeblock-customizer-line-highlighted");
+    lineNumberWrapper.classList.add("codeblock-customizer-line-number-highlighted");
     lineNumberWrapper.style.backgroundColor = settings.highlightColor;
   }
   lineNumberWrapper.innerHTML = lineNumber;
@@ -164,11 +164,16 @@ function createLineNumberElement(lineNumber, settings, isHighlighted) {
   return lineNumberWrapper;
 }// createLineNumberElement
 
-function createLineTextElement(line, lineNumber, lastLine) {
-  const lineContentWrapper = document.createElement("div");
-  lineContentWrapper.classList.add("codeblock-customizer-line-text");
+function createLineTextElement(line, lineNumber) {
+  let lineText;
+  if (line !== "")
+    lineText = line;
+  else
+    lineText = "<br>"; // display empty lines
+  
+  const sanitizedText = sanitizeHTMLToDom(lineText);
+  const lineContentWrapper = createDiv({cls: "codeblock-customizer-line-text", text: sanitizedText});
   lineContentWrapper.style.paddingLeft = "16px"; //originalVal:0px, add padding between the line numbers and the text
-  lineContentWrapper.innerHTML = line;
   
   return lineContentWrapper;
 }// createLineTextElement
@@ -205,7 +210,7 @@ function highlightLines(codeElements, linesToHighlight, settings) {
       }
 
       // create line text element
-      const lineTextEl = createLineTextElement(line, lineNumber, lines.length - 1);
+      const lineTextEl = createLineTextElement(line, lineNumber);
       lineWrapper.appendChild(lineTextEl);
     }
     codeElements[i].innerHTML = "";

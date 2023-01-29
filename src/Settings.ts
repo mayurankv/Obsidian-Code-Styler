@@ -20,6 +20,8 @@ export interface MyPluginSettings {
     bCodeblockLangBold: boolean;
     bCodeblockLangItalic: boolean;
     bAlwaysDisplayCodeblockLang: boolean;
+    bDefaultDarkTheme: boolean;
+    bDefaultLightTheme: boolean;
     headerColor: string;
     headerTextColor: string;
     headerLineColor: string;    
@@ -81,13 +83,15 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
   bDisplayCodeBlockLanguage: true,  
   gutterTextColor: D_GUTTER_TEXT_COLOR,
   gutterBackgroundColor: D_GUTTER_BACKGROUND_COLOR,
-  SelectedTheme: "Dark Theme",
-  header: {                     //kell eZ?????????????
+  SelectedTheme: "",// Dark Theme
+  header: {
     bHeaderBold: false,
     bHeaderItalic: false,
     bCodeblockLangBold: true,
     bCodeblockLangItalic: true,
     bAlwaysDisplayCodeblockLang: false,
+    bDefaultDarkTheme: false,
+    bDefaultLightTheme: false,
     color: D_HEADER_COLOR,
     textColor: D_HEADER_TEXT_COLOR,
     lineColor: D_HEADER_LINE_COLOR,
@@ -111,12 +115,14 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
           bCodeblockLangBold: true,
           bCodeblockLangItalic: true,
           bAlwaysDisplayCodeblockLang: false,
+          bDefaultDarkTheme: true,
+          bDefaultLightTheme: false,
           color: D_HEADER_COLOR,
           textColor: D_HEADER_TEXT_COLOR,
           lineColor: D_HEADER_LINE_COLOR,
           codeBlockLangColor: D_LANG_COLOR,
           codeBlockLangBackgroundColor: D_LANG_BACKGROUND_COLOR
-        },        
+        },
       }
     },
     {
@@ -134,6 +140,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
           bCodeblockLangBold: true,
           bCodeblockLangItalic: true,
           bAlwaysDisplayCodeblockLang: false,
+          bDefaultDarkTheme: false,
+          bDefaultLightTheme: true,
           color: L_HEADER_COLOR,
           textColor: L_HEADER_TEXT_COLOR,
           lineColor: L_HEADER_LINE_COLOR,
