@@ -110,6 +110,10 @@ The plugin automatically sets the default theme, according to the selected mode 
 
 If you change Obsidians theme frequentely, and you want to use your themes, then these two toggles are important for you. If you save a theme, and you want to use that theme in either dark or light mode by default, then set the appropriate toggle. This way you set your theme as the default light or dark theme.
 
+## Note
+
+If you used version 1.0.0, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/` Only one time. This is neccesary as the file does not contain a few entries which are required by version 1.0.1 or above. After that, everything should work fine.
+
 ## How to install the plugin
 
 - Simply install directly from Obsidian
