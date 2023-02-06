@@ -5,7 +5,7 @@
 	"minAppVersion": "0.15.0",
 	"description": "This Obsidian plugin lets you customize your codeblocks in editing, and reading mode as well.",
 	"author": "mugiwara",
-	"authorUrl": "https://github.com/mugiwara85/CodeblockCustomizer",
+	"authorUrl": "https://github.com/mugiwara85",
 	"fundingUrl": "https://www.buymeacoffee.com/ThePirateKing",
 	"isDesktopOnly": false
 }
