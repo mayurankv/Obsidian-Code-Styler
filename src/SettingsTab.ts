@@ -42,6 +42,7 @@ export class SettingsTab extends PluginSettingTab {
     const {containerEl} = this;
     containerEl.empty();
     containerEl.createEl('h3', {text: 'Codeblock Customizer Settings'});
+    
     let dropdown;
     new Setting(containerEl)
       .setName("Theme")
@@ -470,7 +471,7 @@ export class SettingsTab extends PluginSettingTab {
   }// setColorsForPickers
   
   createPickrSetting(containerEl: HTMLElement, name: string, description: string, defaultColor: string, pickrClass: string): Setting {
-    let pickrDefault
+    let pickrDefault;
     if (pickrClass.includes("codeBlockLang") || pickrClass === "color" || pickrClass === "textColor" || pickrClass === "lineColor")
       pickrDefault = this.plugin.settings.header[pickrClass] || defaultColor;
     else
@@ -521,7 +522,8 @@ export class SettingsTab extends PluginSettingTab {
             );
         })
         .on('save', (color: Pickr.HSVaColor, instance: Pickr) => {
-            if (!color) return;
+            if (!color) 
+              return;
             instance.hide();
             const savedColor = color.toHEXA().toString();
             instance.addSwatch(savedColor);

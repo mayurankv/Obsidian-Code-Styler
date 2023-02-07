@@ -3,7 +3,7 @@ import { EditorView, Decoration, WidgetType } from "@codemirror/view";
 
 import { searchString, getLanguageName, isExcluded } from "./Utils"
 
-function defaultFold(state: EditorState, settings: MyPluginSettings) {
+function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) {
   let CollapseStart = null;
   let CollapseEnd = null;
   let Fold = false;
@@ -42,7 +42,7 @@ function defaultFold(state: EditorState, settings: MyPluginSettings) {
   return builder.finish();
 }// defaultFold
 
-let settings: MyPluginSettings;
+let settings: CodeblockCustomizerSettings;
 export const codeblockHeader = StateField.define<DecorationSet>({
   create(state): DecorationSet {
     return Decoration.none;    
@@ -59,7 +59,7 @@ export const codeblockHeader = StateField.define<DecorationSet>({
       const line = transaction.state.doc.line(i);
       const lang = searchString(lineText, "```");      
       bExclude = isExcluded(lineText, this.settings.ExcludeLangs);
-      if (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1) {        
+      if (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1) {
         if (WidgetStart === null) {
           WidgetStart = line;
           fileName = searchString(lineText, "file:");
@@ -67,12 +67,10 @@ export const codeblockHeader = StateField.define<DecorationSet>({
           const metaInfo = {color: this.settings.header.color, textColor: this.settings.header.textColor, lineColor: this.settings.header.lineColor, 
             codeBlockLangColor: this.settings.header.codeBlockLangColor, codeBlockLangBackgroundColor: this.settings.header.codeBlockLangBackgroundColor,
             bCodeblockLangBold: this.settings.header.bCodeblockLangBold, bCodeblockLangItalic: this.settings.header.bCodeblockLangItalic, bHeaderBold: this.settings.header.bHeaderBold,
-            bHeaderItalic: this.settings.header.bHeaderItalic};
-          const [retVal, Text] = shouldAddWidget(bExclude, fileName, lang, Fold, this.settings)
-          if (retVal) {
+            bHeaderItalic: this.settings.header.bHeaderItalic};            
+          const [retVal, Text] = shouldAddWidget(bExclude, fileName, lang, Fold, this.settings);
+          if (retVal) {            
             builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(Text, getLanguageName(lang), metaInfo, this.settings.bDisplayCodeBlockLanguage));
-            //editorView = new EditorView({state: transaction.state});
-            //console.log(editorView);
             //EditorView.requestMeasure;
           }
         } else {
@@ -111,7 +109,7 @@ function createDecorationWidget(textToDisplay: string, languageName: string, met
 
 const Collapse = StateEffect.define(), UnCollapse = StateEffect.define()
 
-let pluginSettings: MyPluginSettings;
+let pluginSettings: CodeblockCustomizerSettings;
 export const collapseField = StateField.define({  
   create(state) {
     return defaultFold(state, collapseField.pluginSettings);
@@ -121,16 +119,16 @@ export const collapseField = StateField.define({
     value = value.map(tr.changes)
     for (const effect of tr.effects) {
       if (effect.is(Collapse))
-        value = value.update({add: effect.value, sort: true})
+        value = value.update({add: effect.value, sort: true});
       else if (effect.is(UnCollapse)) 
-        value = value.update({filter: effect.value})
+        value = value.update({filter: effect.value});
     }
-    return value
+    return value;
   },
   provide: f => EditorView.decorations.from(f)
 })
 
-const doFold = Decoration.replace({block: true})
+const doFold = Decoration.replace({block: true});
 
 class TextAboveCodeblockWidget extends WidgetType {
   text: string;
@@ -178,7 +176,7 @@ class TextAboveCodeblockWidget extends WidgetType {
     wrapper.appendChild(createFileName(this.text, this.Header));   
     container.appendChild(wrapper);
     
-    this.observer.view = view
+    this.observer.view = view;
     this.observer.observe(container, { attributes: true });   
     
     container.addEventListener("mousedown", event => {
@@ -195,43 +193,36 @@ class TextAboveCodeblockWidget extends WidgetType {
     this.observer.disconnect();
   }
 
-  ignoreEvent() { return false }
+  ignoreEvent() { return false; }
   
 }// TextAboveCodeblockWidget
 
 function createContainer(header: CodeBlockMeta) {
   const container = document.createElement("div");
   container.classList.add("codeblock-customizer-header-container");
-  container.style.cssText = 'user-select: none'; 
-  container.style.borderTopLeftRadius = '5px';
-  container.style.borderTopRightRadius = '5px';
-  container.style.backgroundColor = header.color;
-  container.style.borderBottom = "2px";
-  //container.style.borderBottomWidth = "2px";
-  container.style.borderBottomStyle = "groove";
-  container.style.borderBottomColor = header.lineColor;
+  container.style.setProperty("--header-color", header.color);
+  container.style.setProperty("--header-line-color", header.lineColor);
   
   return container;
 }// createContainer
 
 function createWrapper() {
   const wrapper = document.createElement("div");
-  wrapper.style.display = "flex";
+  wrapper.classList.add("codeblock-customizer-header-wrapper");
 
   return wrapper;
 }// createWrapper
 
 function createCodeblockLang(lang: string, header: CodeBlockMeta) {
   const codeblockLang = document.createElement("div");
-  codeblockLang.classList.add("codeblock-customizer-header-language-tag");
-  codeblockLang.style.backgroundColor = header.codeBlockLangBackgroundColor;
-  codeblockLang.style.color = header.codeBlockLangColor;
-  codeblockLang.style.borderRadius = "5px 5px 5px 0px";
   codeblockLang.innerText = lang;
+  codeblockLang.classList.add("codeblock-customizer-header-language-tag");
+  codeblockLang.style.setProperty("--codeblock-lang-background-color", header.codeBlockLangBackgroundColor);
+  codeblockLang.style.setProperty("--codeblock-lang-color", header.codeBlockLangColor);
   if (header.bCodeblockLangBold)
-    codeblockLang.style.fontWeight = "bold";
+    codeblockLang.style.setProperty("--codeblock-lang-bold", "bold");
   if (header.bCodeblockLangItalic)
-    codeblockLang.style.fontStyle = "italic";
+  codeblockLang.style.setProperty("--codeblock-lang-italic", "italic");
   
   return codeblockLang;
 }// createCodeblockLang
@@ -240,11 +231,11 @@ function createFileName(text: string, header: CodeBlockMeta) {
   const fileName = document.createElement("div");
   fileName.innerText = text;
   fileName.classList.add("codeblock-customizer-header-text");
-  fileName.style.color = header.textColor;
+  fileName.style.setProperty("--header-text-color", header.textColor);
   if (header.bHeaderBold)
-    fileName.style.fontWeight = "bold";
+    fileName.style.setProperty("--header-bold", "bold");
   if (header.bHeaderItalic)
-    fileName.style.fontStyle = "italic";
+    fileName.style.setProperty("--header-italic", "italic");
 
   return fileName;
 }// createFileName
@@ -256,8 +247,8 @@ export function handleClick(view: EditorView, target: HTMLElement){
   const Pos = view.posAtDOM(target);
 
   const effect = view.state.field(collapseField, false);
-  let isFolded = false
-  effect.between(Pos, Pos, () => { isFolded = true})
+  let isFolded = false;
+  effect.between(Pos, Pos, () => { isFolded = true});
   
   let CollapseStart: number | null = null;
   let CollapseEnd: number | null = null;
@@ -282,10 +273,10 @@ export function handleClick(view: EditorView, target: HTMLElement){
     if (blockFound) {
       if (CollapseStart != null && CollapseEnd != null ){
         if (isFolded){
-          view.dispatch({ effects: UnCollapse.of((from, to) => to <= CollapseStart || from >= CollapseEnd) })          
+          view.dispatch({ effects: UnCollapse.of((from, to) => to <= CollapseStart || from >= CollapseEnd) });
         }
         else {
-          view.dispatch({ effects: Collapse.of([doFold.range(CollapseStart, CollapseEnd)]) })
+          view.dispatch({ effects: Collapse.of([doFold.range(CollapseStart, CollapseEnd)]) });
         }
         view.requestMeasure();
         CollapseStart = null;

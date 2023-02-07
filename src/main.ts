@@ -1,7 +1,7 @@
 import { Plugin } from "obsidian";
 import { Extension } from "@codemirror/state";
 
-import { DEFAULT_SETTINGS, MyPluginSettings } from './Settings';
+import { DEFAULT_SETTINGS, CodeblockCustomizerSettings } from './Settings';
 import { codeblockActiveLingHighlight } from "./ActiveLineHighlight"
 import { codeblockHighlight } from "./CodeBlockHighlight"
 import { codeblockGutter } from "./Gutter"
@@ -12,7 +12,7 @@ import { SettingsTab } from "./SettingsTab"
 // npm i @simonwep/pickr
 
 export default class CodeBlockCustomizerPlugin extends Plugin {
-  settings: MyPluginSettings;
+  settings: CodeblockCustomizerSettings;
   extensions: Extension[];
   theme: string;
   
@@ -29,10 +29,10 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
       - header needs to unfold before removing it,
   */
 
-    codeblockHeader.settings = this.settings
+    codeblockHeader.settings = this.settings;
     this.extensions.push(codeblockHeader);
     
-    collapseField.pluginSettings = this.settings
+    collapseField.pluginSettings = this.settings;
     this.extensions.push(collapseField);
     
     this.extensions.push(codeblockHighlight(this.settings));
@@ -46,15 +46,15 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     this.registerEditorExtension(this.extensions);
     
     // theme on startup
-    this.theme = this.getCurrentTheme()
+    this.theme = this.getCurrentTheme();
 
     const settingsTab = new SettingsTab(this.app, this);
     this.addSettingTab(settingsTab);
     
     if (this.settings.SelectedTheme == "")
       this.updateTheme(settingsTab);
-
-    this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this);
+    
+    this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
 
     // reading mode
     this.registerMarkdownPostProcessor((el, ctx) => {    
@@ -62,7 +62,7 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     })
 
     console.log("loading CodeBlock Customizer plugin");
-  }
+  }// onload
   
   handleCssChange(settingsTab) {
     if (this.getCurrentTheme() != this.theme){
@@ -80,7 +80,6 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   }// getCurrentTheme
   
   updateTheme(settingsTab) {
-    this.theme;
     this.settings.colorThemes.forEach(theme => {
       if (this.getCurrentTheme() == "light" && theme.colors.header.bDefaultLightTheme)
         this.theme = theme.name;

@@ -7,11 +7,11 @@ import { splitAndTrimString, searchString } from "./Utils";
 let prevEditorLineColor, prevCBLineColor;
 let previousLineNumber = -1;
 
-export function codeblockActiveLingHighlight(settings: MyPluginSettings) {
+export function codeblockActiveLingHighlight(settings: CodeblockCustomizerSettings) {
   const viewPlugin = ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
-      settings: MyPluginSettings;
+      settings: CodeblockCustomizerSettings;
         
       constructor(view: EditorView) {
         this.settings = settings;
@@ -41,8 +41,8 @@ export function codeblockActiveLingHighlight(settings: MyPluginSettings) {
           const activeEditorColor = this.settings.activeLineColor;
           const bEditorColor = this.settings.bActiveLineHighlight;
           const bCodeBlockColor = this.settings.bActiveCodeblockLineHighlight;
-          const Selection = view.state.selection.main.head
-          const start = view.state.doc.lineAt(Selection).from
+          const Selection = view.state.selection.main.head;
+          const start = view.state.doc.lineAt(Selection).from;
           let editorLineHighlighted = false;
           syntaxTree(view.state).iterate({ from, to,
             enter(node) {

@@ -1,5 +1,6 @@
 // Prism Languages
 // https://prismjs.com/plugins/show-language/
+
 export const Languages = {
   "none": "Plain text",
   "plain": "Plain text",

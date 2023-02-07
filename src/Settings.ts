@@ -1,4 +1,4 @@
-export interface MyPluginSettings {
+export interface CodeblockCustomizerSettings {
   bEnableLineNumbers: boolean;
   bActiveCodeblockLineHighlight: boolean;
   bActiveLineHighlight: boolean;
@@ -12,7 +12,7 @@ export interface MyPluginSettings {
   gutterBackgroundColor: string;
   ThemeName: string;
   SelectedTheme: string;
-  colorThemes: Array<{name: string, colors: MyPluginColors}>;
+  colorThemes: Array<{name: string, colors: CodeblockCustomizerColors}>;
   bDisplayCodeBlockLanguage: boolean;
   headerSettings: {
     bHeaderBold: boolean;
@@ -30,7 +30,7 @@ export interface MyPluginSettings {
   }
 }
 
-interface MyPluginColors {
+interface CodeblockCustomizerColors {
   activeCodeBlockLineColor: string;
   activeLineColor: string;
   backgroundColor: string;
@@ -54,7 +54,7 @@ export const D_HEADER_TEXT_COLOR = '#DADADA';
 export const D_HEADER_LINE_COLOR = '#46cced';
 export const D_GUTTER_TEXT_COLOR = '#6c6c6c';
 export const D_GUTTER_BACKGROUND_COLOR = '#073642';
-export const D_LANG_COLOR = '#000000';//'#2f4f4f';
+export const D_LANG_COLOR = '#000000';
 export const D_LANG_BACKGROUND_COLOR = '#008080';
 
 // light
@@ -70,7 +70,7 @@ export const L_GUTTER_BACKGROUND_COLOR = '#EDE8D6';
 export const L_LANG_COLOR = '#C25F30';
 export const L_LANG_BACKGROUND_COLOR = '#B8B5AA';
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
   bEnableLineNumbers: true,
   bActiveCodeblockLineHighlight: true,
   bActiveLineHighlight: true,
@@ -83,7 +83,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
   bDisplayCodeBlockLanguage: true,  
   gutterTextColor: D_GUTTER_TEXT_COLOR,
   gutterBackgroundColor: D_GUTTER_BACKGROUND_COLOR,
-  SelectedTheme: "",// Dark Theme
+  SelectedTheme: "",
   header: {
     bHeaderBold: false,
     bHeaderItalic: false,

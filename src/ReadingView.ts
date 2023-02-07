@@ -2,9 +2,9 @@ import { MarkdownView, MarkdownPostProcessorContext, sanitizeHTMLToDom } from "o
 
 import { searchString, getHighlightedLines, getLanguageName, isExcluded } from "./Utils";
 
-export async function ReadingView(codeBlockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeBlockRedesignPlugin) {
-	const pluginSettings = plugin.settings
-  const codeElm: HTMLElement = codeBlockElement.querySelector('pre > code')
+export async function ReadingView(codeBlockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
+	const pluginSettings = plugin.settings;
+  const codeElm: HTMLElement = codeBlockElement.querySelector('pre > code');
   
 	if (!codeElm) 
     return;
@@ -16,13 +16,13 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
       await sleep(2);
     
   const codeblocks = codeBlockElement.querySelectorAll("code");
-  const codeBlockSectionInfo = context.getSectionInfo(codeElm)
+  const codeBlockSectionInfo = context.getSectionInfo(codeElm);
 	
   let codeBlockFirstLine = "";
   if (codeBlockSectionInfo) {
-		const view = app.workspace.getActiveViewOfType(MarkdownView)
-		codeBlockFirstLine = view.editor.getLine(codeBlockSectionInfo.lineStart)    
-	}
+    const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+    codeBlockFirstLine = view.editor.getLine(codeBlockSectionInfo.lineStart);
+  }
   
   const codeBlockLang = searchString(codeBlockFirstLine, "```");
   const highlightedLinesParams = searchString(codeBlockFirstLine, "HL:");
@@ -43,13 +43,14 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
  
   const codeElements = codeBlockElement.getElementsByTagName("code");
   const codeBlockPreElement: HTMLPreElement = codeBlockElement.querySelector("pre:not(.frontmatter)");
+  codeBlockPreElement.classList.add("codeblock-customizer-pre");
   
-  if (!isCodeBlockExcluded){
+  if (!isCodeBlockExcluded) {
     let isCodeBlockHeaderEnabled = false;
-    if (FileName !== "" && FileName !== null){
+    if (FileName !== "" && FileName !== null) {
       isCodeBlockHeaderEnabled = true;
       HeaderWidget(codeBlockPreElement, FileName, getLanguageName(codeBlockLang), pluginSettings.header, pluginSettings.bDisplayCodeBlockLanguage, Fold);
-    } else if (Fold){
+    } else if (Fold) {
       isCodeBlockHeaderEnabled = true;
       HeaderWidget(codeBlockPreElement, "Collapsed code", getLanguageName(codeBlockLang), pluginSettings.header, pluginSettings.bDisplayCodeBlockLanguage, Fold);
     } else if (pluginSettings.bDisplayCodeBlockLanguage && pluginSettings.header.bAlwaysDisplayCodeblockLang && codeBlockLang) {
@@ -59,19 +60,15 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
     }
     
     highlightLines(codeElements, linesToHighlight, pluginSettings);
-    if (!isCodeBlockHeaderEnabled && pluginSettings.bEnableLineNumbers){
-      codeBlockPreElement.style.borderTopLeftRadius = "5px";
-      codeBlockPreElement.style.borderBottomLeftRadius = "5px";
+    if (!isCodeBlockHeaderEnabled && pluginSettings.bEnableLineNumbers) {
+      codeBlockPreElement.classList.add("codeblock-customizer-pre-radius");
     } else if (isCodeBlockHeaderEnabled) {
-      codeBlockPreElement.style.borderTopLeftRadius = "0px";
-      codeBlockPreElement.style.borderTopRightRadius = "0px";
+      codeBlockPreElement.classList.add("codeblock-customizer-pre-no-radius");
     }
-    
   }
 }// ReadingView
 
 function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, bDisplayCodeBlockLanguage, Collapse) {
-  preElements.style.marginTop = "0px"; // originalVal: 16px, set it to 0, so the header is displayed above the codeblock
   const parent = preElements.parentNode;
   
   const container = createContainer(metaInfo);
@@ -80,8 +77,7 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
     wrapper.appendChild(createCodeblockLang(codeblockLanguage, metaInfo));
   }
   wrapper.appendChild(createFileName(textToDisplay, metaInfo));   
-  container.appendChild(wrapper);
-  container.style.marginTop = "16px"; // originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock
+  container.appendChild(wrapper);  
   parent.insertBefore(container, preElements);
   
   // Add event listener to the widget element
@@ -90,7 +86,7 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
     preElements.classList.toggle("collapsed");
   });
   
-  if(Collapse){
+  if (Collapse) {
     preElements.classList.add("collapsed");
   }
 
@@ -103,49 +99,42 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
 function createContainer(header: CodeBlockMeta) {
   const container = document.createElement("div");
   container.classList.add("codeblock-customizer-header-container");
-  container.style.cssText = 'user-select: none'; 
-  container.style.borderTopLeftRadius = '5px';
-  container.style.borderTopRightRadius = '5px';
-  container.style.backgroundColor = header.color;
-  container.style.borderBottom = "2px";
-  //container.style.borderBottomWidth = "2px";
-  container.style.borderBottomStyle = "groove";
-  container.style.borderBottomColor = header.lineColor;
+  container.style.setProperty("--header-color", header.color);
+  container.style.setProperty("--header-line-color", header.lineColor);
   
   return container;
 }// createContainer
 
 function createWrapper() {
   const wrapper = document.createElement("div");
-  wrapper.style.display = "flex";
+  wrapper.classList.add("codeblock-customizer-header-wrapper");
   
   return wrapper;
 }// createWrapper
 
 function createCodeblockLang(lang: string, header: CodeBlockMeta) {
   const codeblockLang = document.createElement("div");
-  codeblockLang.classList.add("codeblock-customizer-header-language-tag");
-  codeblockLang.style.backgroundColor = header.codeBlockLangBackgroundColor;
-  codeblockLang.style.color = header.codeBlockLangColor;
-  codeblockLang.style.borderRadius = "5px 5px 5px 0px";
   codeblockLang.innerText = lang;
+  codeblockLang.classList.add("codeblock-customizer-header-language-tag");
+  codeblockLang.style.setProperty("--codeblock-lang-background-color", header.codeBlockLangBackgroundColor);
+  codeblockLang.style.setProperty("--codeblock-lang-color", header.codeBlockLangColor);
   if (header.bCodeblockLangBold)
-    codeblockLang.style.fontWeight = "bold";
+    codeblockLang.style.setProperty("--codeblock-lang-bold", "bold");
   if (header.bCodeblockLangItalic)
-    codeblockLang.style.fontStyle = "italic";
-  
+  codeblockLang.style.setProperty("--codeblock-lang-italic", "italic");
+
   return codeblockLang;
 }// createCodeblockLang
 
 function createFileName(text: string, header: CodeBlockMeta) {
-  const fileName = document.createElement("div");
+  const fileName = document.createElement("div");  
   fileName.innerText = text;
   fileName.classList.add("codeblock-customizer-header-text");
-  fileName.style.color = header.textColor;
+  fileName.style.setProperty("--header-text-color", header.textColor);
   if (header.bHeaderBold)
-    fileName.style.fontWeight = "bold";
+    fileName.style.setProperty("--header-bold", "bold");
   if (header.bHeaderItalic)
-    fileName.style.fontStyle = "italic";
+    fileName.style.setProperty("--header-italic", "italic");
 
   return fileName;
 }// createFileName
@@ -165,15 +154,9 @@ function createLineNumberElement(lineNumber, settings, isHighlighted) {
 }// createLineNumberElement
 
 function createLineTextElement(line, lineNumber) {
-  let lineText;
-  if (line !== "")
-    lineText = line;
-  else
-    lineText = "<br>"; // display empty lines
-  
+  const lineText = line !== "" ? line : "<br>";
   const sanitizedText = sanitizeHTMLToDom(lineText);
-  const lineContentWrapper = createDiv({cls: "codeblock-customizer-line-text", text: sanitizedText});
-  lineContentWrapper.style.paddingLeft = "16px"; //originalVal:0px, add padding between the line numbers and the text
+  const lineContentWrapper = createDiv({cls: "codeblock-customizer-line-text", text: sanitizedText});  
   
   return lineContentWrapper;
 }// createLineTextElement
@@ -184,8 +167,7 @@ function highlightLines(codeElements, linesToHighlight, settings) {
 
     const preElm = codeElements[i].parentNode;
     if (preElm){
-      preElm.style.paddingRight = "0px";  // originalVal: 16px, disable it, so the lines are fully highlighted
-      preElm.style.paddingLeft = "0px";   // originalVal: 16px, disable it, so the lines are fully highlighted
+      preElm.classList.add("codeblock-customizer-pre-parent");      
     }
     
     const codeWrapper = document.createElement("div");

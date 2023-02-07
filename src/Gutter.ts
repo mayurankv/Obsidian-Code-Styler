@@ -24,15 +24,15 @@ class LineNumberMarker extends GutterMarker {
     const parent = target.closest('.codeblock-customizer-gutterElements');
     if (parent) {
       parent.style.backgroundColor = this.metaInfo.gutterBackgroundColor;
-      if (this.metaInfo.bFirstLine) {
-        parent.style.borderTopLeftRadius = "5px";
+      if (this.metaInfo.bFirstLine) {        
+        parent.classList.add("codeblock-customizer-gutterElements-first-radius");
       } else {
-        parent.style.borderTopLeftRadius = "0px";
+        parent.classList.add("codeblock-customizer-gutterElements-first-no-radius");
       }
       if (this.metaInfo.bLastLine) {
-        parent.style.borderBottomLeftRadius = "5px";
+        parent.classList.add("codeblock-customizer-gutterElements-last-radius");
       } else {
-        parent.style.borderBottomLeftRadius = "0px";
+        parent.classList.add("codeblock-customizer-gutterElements-last-no-radius");
       }
     }
   }// updateParentElementStyles
@@ -40,7 +40,7 @@ class LineNumberMarker extends GutterMarker {
   eq(other: LineNumberMarker) {
     return (other.metaInfo.lineNumber == this.metaInfo.lineNumber && other.metaInfo.gutterTextColor == this.metaInfo.gutterTextColor &&
             other.metaInfo.gutterBackgroundColor == this.metaInfo.gutterBackgroundColor/* && other.bDestroy == this.bDestroy*/
-            && other.metaInfo.bFirstLine == this.metaInfo.bFirstLine && other.metaInfo.bLastLine == this.metaInfo.bLastLine) 
+            && other.metaInfo.bFirstLine == this.metaInfo.bFirstLine && other.metaInfo.bLastLine == this.metaInfo.bLastLine);
   }
   
   toDOM(view: EditorView) {
@@ -56,8 +56,6 @@ class LineNumberMarker extends GutterMarker {
   
   destroy(dom: Node){
     dom.removeAttribute("color-changed");
-    dom.removeAttribute("FirstLine");
-    dom.removeAttribute("LastLine");
     dom.removeEventListener("DOMNodeInserted", this.handleMutation);
     this.observer.disconnect();
   }
@@ -72,7 +70,7 @@ const emptyMarker = new class extends GutterMarker {
   elementClass = "codeblock-customizer-gutterElements_empty";
 }
 
-export function codeblockGutter(settings: MyPluginSettings) {
+export function codeblockGutter(settings: CodeblockCustomizerSettings) {
   const Exclude = settings.ExcludeLangs;  
   const ExcludeLangs = splitAndTrimString(Exclude);
   const ret = gutter({

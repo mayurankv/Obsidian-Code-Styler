@@ -8,11 +8,11 @@ let prevBGColor;
 let prevHLColor
 let prevExcludeLangs;
 
-export function codeblockHighlight(settings: MyPluginSettings) {
+export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
   const viewPlugin = ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
-      settings: MyPluginSettings;
+      settings: CodeblockCustomizerSettings;
         
       constructor(view: EditorView) {
         this.settings = settings;

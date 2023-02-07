@@ -105,7 +105,7 @@ export function isExcluded(lineText: string, excludeLangs: string[]) : boolean {
   const codeBlockLang = searchString(lineText, "```");
   const Langs = splitAndTrimString(excludeLangs);
   if (codeBlockLang && Langs.includes(codeBlockLang.toLowerCase())) {
-      return true;
+    return true;
   }
   
   return false;
@@ -118,11 +118,10 @@ export function getLanguageName(code) {
   code = code.toLowerCase();
   if (Languages.hasOwnProperty(code)) {
     return Languages[code];
-  }
-  else if (manualLang.hasOwnProperty(code)) {
+  } else if (manualLang.hasOwnProperty(code)) {
     return manualLang[code];
   } else if (code){
-      return code.charAt(0).toUpperCase() + code.slice(1)
+      return code.charAt(0).toUpperCase() + code.slice(1);
   }
   
   return "";
