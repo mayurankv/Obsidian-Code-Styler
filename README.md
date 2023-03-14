@@ -66,11 +66,11 @@ Example:
 You define three types of highlight colors (`info`, `warn`, `error`). After that specify the color for the light and dark themes. A dark theme will use the specified dark color, and a light theme, will use the specified light color. After that you can use it in the first line of codeblocks:
 ` ```cpp info:2 warn:4-6 error:8`
 
-![[Pasted_image_20230314211256.png]]
+![[Pasted_image_20230314211256.png]](attachments/Pasted_image_20230314211256.png)
 
 Example codeblock with multiple highlight colors:
 
-![[Pasted_image_20230314211417.png]]
+![[Pasted_image_20230314211417.png]](attachments/Pasted_image_20230314211417.png)
 
 ## Display filename
 
@@ -115,7 +115,7 @@ Example:
 ![Pasted_image_20230125231356.png](attachments/Pasted_image_20230125231356.png)
 - Header with codeblock language, filename and icon as well
 
-![[Pasted_image_20230314212111.png]]
+![[Pasted_image_20230314212111.png]](attachments/Pasted_image_20230314212111.png)
 
 ## Line numbers
 
@@ -124,7 +124,7 @@ To enable line numbers go to the plugin settings and enable the `Enable line num
 
 Example:
 
-![[Pasted_image_20230314211657.png]]
+![[Pasted_image_20230314211657.png]](attachments/Pasted_image_20230314211657.png)
 
 Example for reading mode:
 
