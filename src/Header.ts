@@ -1,7 +1,7 @@
 import { StateField, StateEffect, RangeSetBuilder } from "@codemirror/state";
 import { EditorView, Decoration, WidgetType } from "@codemirror/view";
 
-import { searchString, getLanguageName, isExcluded } from "./Utils"
+import { searchString, getLanguageName, getLanguageIcon, isExcluded, createContainer, createWrapper, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils"
 
 function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) {
   let CollapseStart = null;
@@ -70,7 +70,7 @@ export const codeblockHeader = StateField.define<DecorationSet>({
             bHeaderItalic: this.settings.header.bHeaderItalic};            
           const [retVal, Text] = shouldAddWidget(bExclude, fileName, lang, Fold, this.settings);
           if (retVal) {            
-            builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(Text, getLanguageName(lang), metaInfo, this.settings.bDisplayCodeBlockLanguage));
+            builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(Text, getLanguageName(lang), metaInfo, this.settings.bDisplayCodeBlockLanguage, this.settings.bDisplayCodeBlockIcon));
             //EditorView.requestMeasure;
           }
         } else {
@@ -78,14 +78,14 @@ export const codeblockHeader = StateField.define<DecorationSet>({
           Fold = false;
           fileName = null;
         }
-      }// if
-    }// for
+      }
+    }
   
     return builder.finish();
-  },// update
+  },
   provide(field: StateField<DecorationSet>): Extension {
     return EditorView.decorations.from(field);
-  },// provide
+  },
 });// codeblockHeader
 
 function shouldAddWidget(bExclude: boolean, fileName: string | null, codeblockLanguage: string | null, fold: boolean, settings: any): [boolean, string] {
@@ -95,16 +95,19 @@ function shouldAddWidget(bExclude: boolean, fileName: string | null, codeblockLa
   } else if (!bExclude && fold) {
     // filename is not defined, but fold is!
     return [true, 'Collapsed code'];
-  } else if (!bExclude && settings.bDisplayCodeBlockLanguage && settings.header.bAlwaysDisplayCodeblockLang && codeblockLanguage) {
+  } else if (!bExclude && settings.bDisplayCodeBlockLanguage && settings.header.bAlwaysDisplayCodeblockLang && codeblockLanguage ) {
     // always display codeblock language is enabled
-    return [true, '']; //space is required!
+    return [true, ''];
+  } else if (!bExclude && settings.bDisplayCodeBlockIcon && settings.header.bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeblockLanguage)) && codeblockLanguage ) {
+    // always display codeblock language icon is enabled
+    return [true, ''];
   }
   return [false, ''];
 }// shouldAddWidget
 
-function createDecorationWidget(textToDisplay: string, languageName: string, metaInfo: any, bDisplayCodeBlockLanguage: boolean) {
+function createDecorationWidget(textToDisplay: string, languageName: string, metaInfo: any, bDisplayCodeBlockLanguage: boolean, bDisplayCodeBlockIcon: boolean) {
   return Decoration.widget({ 
-    widget: new TextAboveCodeblockWidget(textToDisplay, languageName, metaInfo, bDisplayCodeBlockLanguage), block: true});
+    widget: new TextAboveCodeblockWidget(textToDisplay, languageName, metaInfo, bDisplayCodeBlockLanguage, bDisplayCodeBlockIcon), block: true});
 }// createDecorationWidget
 
 const Collapse = StateEffect.define(), UnCollapse = StateEffect.define()
@@ -135,12 +138,13 @@ class TextAboveCodeblockWidget extends WidgetType {
   observer: MutationObserver;
   view: EditorView;
 
-  constructor(text: string, Lang: string, Header: CodeBlockMeta, bDisplayCodeBlockLanguage: boolean) {
+  constructor(text: string, Lang: string, Header: CodeBlockMeta, bDisplayCodeBlockLanguage: boolean, bDisplayCodeBlockIcon: boolean) {
     super();
     this.text = text;    
     this.Lang = Lang;
     this.Header = Header;
     this.bDisplayCodeBlockLanguage = bDisplayCodeBlockLanguage;
+    this.bDisplayCodeBlockIcon = bDisplayCodeBlockIcon;
     this.observer = new MutationObserver(this.handleMutation);    
   }
   
@@ -164,15 +168,23 @@ class TextAboveCodeblockWidget extends WidgetType {
   other.Header.textColor == this.Header.textColor && other.Header.codeBlockLangBackgroundColor == this.Header.codeBlockLangBackgroundColor && 
   other.Header.codeBlockLangColor == this.Header.codeBlockLangColor && other.bDisplayCodeBlockLanguage == this.bDisplayCodeBlockLanguage &&
   other.Header.bCodeblockLangBold == this.Header.bCodeblockLangBold && other.Header.bCodeblockLangItalic == this.Header.bCodeblockLangItalic &&
-  other.Header.bHeaderBold == this.Header.bHeaderBold && other.Header.bHeaderItalic == this.Header.bHeaderItalic}
+  other.Header.bHeaderBold == this.Header.bHeaderBold && other.Header.bHeaderItalic == this.Header.bHeaderItalic && 
+  other.bDisplayCodeBlockIcon == this.bDisplayCodeBlockIcon}
     
   toDOM(view: EditorView): HTMLElement {
     this.view = view;
     const container = createContainer(this.Header);
     const wrapper = createWrapper();
+    if (this.Lang && this.bDisplayCodeBlockIcon){
+      const Icon = getLanguageIcon(this.Lang)
+      if (Icon) {
+        wrapper.appendChild(createCodeblockIcon(this.Lang, Icon, this.bDisplayCodeBlockLanguage));
+      }
+    }
     if (this.Lang && this.bDisplayCodeBlockLanguage){
       wrapper.appendChild(createCodeblockLang(this.Lang, this.Header));
     }
+
     wrapper.appendChild(createFileName(this.text, this.Header));   
     container.appendChild(wrapper);
     
@@ -196,49 +208,6 @@ class TextAboveCodeblockWidget extends WidgetType {
   ignoreEvent() { return false; }
   
 }// TextAboveCodeblockWidget
-
-function createContainer(header: CodeBlockMeta) {
-  const container = document.createElement("div");
-  container.classList.add("codeblock-customizer-header-container");
-  container.style.setProperty("--header-color", header.color);
-  container.style.setProperty("--header-line-color", header.lineColor);
-  
-  return container;
-}// createContainer
-
-function createWrapper() {
-  const wrapper = document.createElement("div");
-  wrapper.classList.add("codeblock-customizer-header-wrapper");
-
-  return wrapper;
-}// createWrapper
-
-function createCodeblockLang(lang: string, header: CodeBlockMeta) {
-  const codeblockLang = document.createElement("div");
-  codeblockLang.innerText = lang;
-  codeblockLang.classList.add("codeblock-customizer-header-language-tag");
-  codeblockLang.style.setProperty("--codeblock-lang-background-color", header.codeBlockLangBackgroundColor);
-  codeblockLang.style.setProperty("--codeblock-lang-color", header.codeBlockLangColor);
-  if (header.bCodeblockLangBold)
-    codeblockLang.style.setProperty("--codeblock-lang-bold", "bold");
-  if (header.bCodeblockLangItalic)
-  codeblockLang.style.setProperty("--codeblock-lang-italic", "italic");
-  
-  return codeblockLang;
-}// createCodeblockLang
-
-function createFileName(text: string, header: CodeBlockMeta) {
-  const fileName = document.createElement("div");
-  fileName.innerText = text;
-  fileName.classList.add("codeblock-customizer-header-text");
-  fileName.style.setProperty("--header-text-color", header.textColor);
-  if (header.bHeaderBold)
-    fileName.style.setProperty("--header-bold", "bold");
-  if (header.bHeaderItalic)
-    fileName.style.setProperty("--header-italic", "italic");
-
-  return fileName;
-}// createFileName
   
 export function handleClick(view: EditorView, target: HTMLElement){
   //view.state.update();

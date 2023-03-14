@@ -2,12 +2,12 @@ import { Plugin } from "obsidian";
 import { Extension } from "@codemirror/state";
 
 import { DEFAULT_SETTINGS, CodeblockCustomizerSettings } from './Settings';
-import { codeblockActiveLingHighlight } from "./ActiveLineHighlight"
 import { codeblockHighlight } from "./CodeBlockHighlight"
 import { codeblockGutter } from "./Gutter"
 import { codeblockHeader, collapseField } from "./Header"
 import { ReadingView } from "./ReadingView"
 import { SettingsTab } from "./SettingsTab"
+import { loadIcons, BLOBS, updateActiveLineStyles } from "./Utils"
 
 // npm i @simonwep/pickr
 
@@ -25,23 +25,24 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     
   /* Problems to solve:
     - if a language is excluded then:
-      - the gutter is not removed,
       - header needs to unfold before removing it,
   */
+
+    loadIcons();
 
     codeblockHeader.settings = this.settings;
     this.extensions.push(codeblockHeader);
     
     collapseField.pluginSettings = this.settings;
     this.extensions.push(collapseField);
-    
+
     this.extensions.push(codeblockHighlight(this.settings));
     
     if (this.settings.bEnableLineNumbers)
       this.extensions.push(codeblockGutter(this.settings));
-    
+
     if ((this.settings.bActiveCodeblockLineHighlight) || (this.settings.bActiveLineHighlight))
-      this.extensions.push(codeblockActiveLingHighlight(this.settings));
+      updateActiveLineStyles(this.settings);
     
     this.registerEditorExtension(this.extensions);
     
@@ -81,10 +82,14 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   
   updateTheme(settingsTab) {
     this.settings.colorThemes.forEach(theme => {
-      if (this.getCurrentTheme() == "light" && theme.colors.header.bDefaultLightTheme)
+      if (this.getCurrentTheme() == "light" && theme.colors.header.bDefaultLightTheme) {
         this.theme = theme.name;
-      else if (this.getCurrentTheme() == "dark" && theme.colors.header.bDefaultDarkTheme)
+        settingsTab.applyCurrentAlternateHLColor(true);
+      }
+      else if (this.getCurrentTheme() == "dark" && theme.colors.header.bDefaultDarkTheme) {
         this.theme = theme.name;
+        settingsTab.applyCurrentAlternateHLColor(false);
+      }
     });
     this.settings.SelectedTheme = this.theme;
     settingsTab.applyTheme();
@@ -93,14 +98,18 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   
   onunload() {
     console.log("unloading CodeBlock Customizer plugin");
+    // unload icons
+    for (const url of Object.values(BLOBS)) {
+      URL.revokeObjectURL(url)
+    }
 	}
   
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {    
-		await this.saveData(this.settings);    
+	async saveSettings() {
+		await this.saveData(this.settings);
     this.app.workspace.updateOptions();
 	}
 }

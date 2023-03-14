@@ -2,7 +2,7 @@ import { PluginSettingTab, Setting } from "obsidian";
 import Pickr from "@simonwep/pickr";
 
 import { codeblockGutter } from "./Gutter"
-import { codeblockActiveLingHighlight } from "./ActiveLineHighlight"
+import { updateActiveLineStyles } from "./Utils"
 import {
     D_ACTIVE_CODEBLOCK_LINE_COLOR,
     D_ACTIVE_LINE_COLOR,
@@ -36,6 +36,7 @@ export class SettingsTab extends PluginSettingTab {
 		this.plugin = plugin;
     this.pickerInstances = [];
     this.headerLangToggles = [];
+    this.headerLangIconToggles = [];
 	}
 
 	display(): void {
@@ -117,201 +118,240 @@ export class SettingsTab extends PluginSettingTab {
         });// onClick
       });// addExtraButton
 
-  let text;
-  let darkToggle, lightToggle;
-  this.plugin.settings.ThemeName = "";
-  new Setting(containerEl)
-    .setName('Create your theme')
-    .setDesc('Save or update your current colors as a theme')
-    .addText(input => {
-      text = input;
-      text.setPlaceholder('Name for your theme')
-        .setValue(this.plugin.settings.ThemeName)
+    let text;
+    let darkToggle, lightToggle;
+    this.plugin.settings.ThemeName = "";
+    new Setting(containerEl)
+      .setName('Create your theme')
+      .setDesc('Save or update your current colors as a theme')
+      .addText(input => {
+        text = input;
+        text.setPlaceholder('Name for your theme')
+          .setValue(this.plugin.settings.ThemeName)
+          .onChange(async (value) => {
+            this.plugin.settings.ThemeName = value;
+            await this.plugin.saveSettings();
+          });
+      })
+      .addToggle(toggle => {
+        lightToggle = toggle;
+        return toggle
+        .setTooltip("Save as default Light theme")
+        .setValue(false)
         .onChange(async (value) => {
-          this.plugin.settings.ThemeName = value;
-          await this.plugin.saveSettings();
+          this.plugin.settings.header.bDefaultLightTheme = value;
+          if (value && this.plugin.settings.header.bDefaultDarkTheme ) {        
+            this.plugin.settings.header.bDefaultDarkTheme = !value;
+            darkToggle.setValue(!value);
+            //await this.plugin.saveSettings();
+          }
         });
-    })
-    .addToggle(toggle => {
-      lightToggle = toggle;
-      return toggle
-      .setTooltip("Save as default Light theme")
-      .setValue(false)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bDefaultLightTheme = value;
-        if (value && this.plugin.settings.header.bDefaultDarkTheme ) {        
-          this.plugin.settings.header.bDefaultDarkTheme = !value;
-          darkToggle.setValue(!value);
-          //await this.plugin.saveSettings();
-        }
-      });
-    })
-    .addToggle((toggle) => {
-      darkToggle = toggle;
-      return toggle
-      .setTooltip("Save as default Dark theme")
-      .setValue(false)
-      .onChange(async (value) => {
-        this.plugin.settings.header.bDefaultDarkTheme = value;
-        if (value && this.plugin.settings.header.bDefaultLightTheme ) {        
-          this.plugin.settings.header.bDefaultLightTheme = !value;
-          lightToggle.setValue(!value);
-          //await this.plugin.saveSettings();
-        } 
-      });
-    })    
-    .addExtraButton(button => {
-      button.setTooltip("Save theme");
-      button.setIcon('plus');
-      button.onClick(() => {
-      if (this.plugin.settings.ThemeName.trim().length === 0)
-        new Notice('Set a name for your theme!');
-      else if(this.plugin.settings.ThemeName === "Dark Theme" || this.plugin.settings.ThemeName === "Light Theme") {
-        new Notice('You can\'t overwrite default themes');
-      } else {
-        const currentColors = {
-          activeCodeBlockLineColor: this.plugin.settings.activeCodeBlockLineColor,
-          activeLineColor: this.plugin.settings.activeLineColor,
-          backgroundColor: this.plugin.settings.backgroundColor,
-          highlightColor: this.plugin.settings.highlightColor,          
-          gutterTextColor: this.plugin.settings.gutterTextColor,
-          gutterBackgroundColor: this.plugin.settings.gutterBackgroundColor,
-          header: {
-            bDefaultDarkTheme: this.plugin.settings.header.bDefaultDarkTheme,
-            bDefaultLightTheme: this.plugin.settings.header.bDefaultLightTheme,
-            color: this.plugin.settings.header.color,
-            textColor: this.plugin.settings.header.textColor,
-            lineColor: this.plugin.settings.header.lineColor,
-            codeBlockLangColor: this.plugin.settings.header.codeBlockLangColor,
-            codeBlockLangBackgroundColor: this.plugin.settings.header.codeBlockLangBackgroundColor,
-          }
-        };
-        // check if theme already exists
-        const existingTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.ThemeName);
-        if (existingTheme) {
-          // update existing theme
-          existingTheme.colors = currentColors;
-          new Notice(`${this.plugin.settings.SelectedTheme} theme updated successfully!`);
+      })
+      .addToggle((toggle) => {
+        darkToggle = toggle;
+        return toggle
+        .setTooltip("Save as default Dark theme")
+        .setValue(false)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bDefaultDarkTheme = value;
+          if (value && this.plugin.settings.header.bDefaultLightTheme ) {        
+            this.plugin.settings.header.bDefaultLightTheme = !value;
+            lightToggle.setValue(!value);
+            //await this.plugin.saveSettings();
+          } 
+        });
+      })    
+      .addExtraButton(button => {
+        button.setTooltip("Save theme");
+        button.setIcon('plus');
+        button.onClick(() => {
+        if (this.plugin.settings.ThemeName.trim().length === 0)
+          new Notice('Set a name for your theme!');
+        else if(this.plugin.settings.ThemeName === "Dark Theme" || this.plugin.settings.ThemeName === "Light Theme") {
+          new Notice('You can\'t overwrite default themes');
         } else {
-          // add new theme to array
-          this.plugin.settings.colorThemes.push({
-            name: this.plugin.settings.ThemeName,
-            colors: currentColors
-          });
-          // Clear the selected theme
-          this.plugin.settings.SelectedTheme = "";
-          // Update the dropdown options
-          dropdown.selectEl.empty();
-          for (const theme of this.plugin.settings.colorThemes) {
-            dropdown.addOption(theme.color, theme.name);
+          const currentColors = {
+            activeCodeBlockLineColor: this.plugin.settings.activeCodeBlockLineColor,
+            activeLineColor: this.plugin.settings.activeLineColor,
+            backgroundColor: this.plugin.settings.backgroundColor,
+            highlightColor: this.plugin.settings.highlightColor,          
+            gutterTextColor: this.plugin.settings.gutterTextColor,
+            gutterBackgroundColor: this.plugin.settings.gutterBackgroundColor,
+            header: {
+              bDefaultDarkTheme: this.plugin.settings.header.bDefaultDarkTheme,
+              bDefaultLightTheme: this.plugin.settings.header.bDefaultLightTheme,
+              color: this.plugin.settings.header.color,
+              textColor: this.plugin.settings.header.textColor,
+              lineColor: this.plugin.settings.header.lineColor,
+              codeBlockLangColor: this.plugin.settings.header.codeBlockLangColor,
+              codeBlockLangBackgroundColor: this.plugin.settings.header.codeBlockLangBackgroundColor,
+            }
+          };
+
+          // check if theme already exists
+          const existingTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.ThemeName);
+          if (existingTheme) {
+            // update existing theme
+            existingTheme.colors = currentColors;
+            new Notice(`${this.plugin.settings.SelectedTheme} theme updated successfully!`);
+          } else {
+            // add new theme to array
+            this.plugin.settings.colorThemes.push({
+              name: this.plugin.settings.ThemeName,
+              colors: currentColors,
+            });
+            // Clear the selected theme
+            this.plugin.settings.SelectedTheme = "";
+            // Update the dropdown options
+            dropdown.selectEl.empty();
+            for (const theme of this.plugin.settings.colorThemes) {
+              dropdown.addOption(theme.color, theme.name);
+            }
+            // Apply newly created theme
+            this.plugin.settings.SelectedTheme = this.plugin.settings.ThemeName;
+            dropdown.setValue(this.plugin.settings.SelectedTheme);
+            this.applyTheme();
+            
+            new Notice(`${this.plugin.settings.SelectedTheme} theme saved successfully!`);
           }
-          // Apply newly created theme
-          this.plugin.settings.SelectedTheme = this.plugin.settings.ThemeName;
-          dropdown.setValue(this.plugin.settings.SelectedTheme);
-          this.applyTheme();
           
-          new Notice(`${this.plugin.settings.SelectedTheme} theme saved successfully!`);
-        }
-        
-        // set bDefaultLightTheme to false in every other theme
-        if (this.plugin.settings.header.bDefaultLightTheme) {
-          this.plugin.settings.colorThemes.forEach(theme => {
-            if (theme.name !== this.plugin.settings.ThemeName)
-              theme.colors.header.bDefaultLightTheme = false;
-          });
-        }
-
-        // set bDefaultDarkTheme to false in every other theme
-        if (this.plugin.settings.header.bDefaultDarkTheme) {
-          this.plugin.settings.colorThemes.forEach(theme => {
-            if (theme.name !== this.plugin.settings.ThemeName)
-              theme.colors.header.bDefaultDarkTheme = false;
-          });
-        }
-
-        // Clear the input field        
-        this.plugin.settings.ThemeName = "";
-        text.setValue("");
-        lightToggle.setValue(false);
-        darkToggle.setValue(false);
-        this.plugin.saveSettings();
-      }
-    });
-  });
-
-  new Setting(containerEl)
-    .setName('Enable editor active line highlight')
-    .setDesc('If enabled, you can set the color for the active line (including codeblocks).')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.bActiveLineHighlight)
-      .onChange(async (value) => {
-        if ((!value) && (!this.plugin.settings.bActiveCodeblockLineHighlight)) {
-          this.removeExtension(codeblockActiveLingHighlight.name);
-        }
-        else if (!this.plugin.extensions.find(ext => ext.name === codeblockActiveLingHighlight.name)) {
-            this.plugin.extensions.push(codeblockActiveLingHighlight(this.plugin.settings));
-        }
-        this.plugin.settings.bActiveLineHighlight = value;
-        await this.plugin.saveSettings();
-      })
-    );
-     
-  this.createPickrSetting(containerEl, 'Editor active line color', 
-  'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
-     
-  new Setting(containerEl)
-    .setName('Exclude languages')
-    .setDesc('Define languages, separated by a comma, to which the plugin will not apply.')
-    .addText(text => text
-      .setPlaceholder('e.g. dataview, python etc.')
-      .setValue(this.plugin.settings.ExcludeLangs)
-      .onChange(async (value) => {
-        this.plugin.settings.ExcludeLangs = value;
-        await this.plugin.saveSettings();
-      })
-    );
-
-  containerEl.createEl('h3', {text: 'Codeblock settings'});
-
-  new Setting(containerEl)
-    .setName('Enable line numbers')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.bEnableLineNumbers)
-      .onChange(async (value) => {
-        if (value) {
-          if (!this.plugin.extensions.find(ext => ext.name === codeblockGutter.name)) {
-            this.plugin.extensions.push(codeblockGutter(this.plugin.settings));
+          // set bDefaultLightTheme to false in every other theme
+          if (this.plugin.settings.header.bDefaultLightTheme) {
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name !== this.plugin.settings.ThemeName)
+                theme.colors.header.bDefaultLightTheme = false;
+            });
           }
-        } else {
-          this.removeExtension(codeblockGutter.name);
-        }          
-        this.plugin.settings.bEnableLineNumbers = value;
-        await this.plugin.saveSettings();          
-      })
-    );
 
-  new Setting(containerEl)
-    .setName('Enable codeblock active line hihglight')
-    .setDesc('If enabled, you can set the color for the active line inside codeblocks only.')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
-      .onChange(async (value) => {
-        if ((!value) && (!this.plugin.settings.bActiveLineHighlight)) {
-          this.removeExtension(codeblockActiveLingHighlight.name);
+          // set bDefaultDarkTheme to false in every other theme
+          if (this.plugin.settings.header.bDefaultDarkTheme) {
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name !== this.plugin.settings.ThemeName)
+                theme.colors.header.bDefaultDarkTheme = false;
+            });
+          }
+
+          // Clear the input field        
+          this.plugin.settings.ThemeName = "";
+          text.setValue("");
+          lightToggle.setValue(false);
+          darkToggle.setValue(false);
+          this.plugin.saveSettings();
         }
-        else if (!this.plugin.extensions.find(ext => ext.name === codeblockActiveLingHighlight.name)) {
-            this.plugin.extensions.push(codeblockActiveLingHighlight(this.plugin.settings));
-        }
-        this.plugin.settings.bActiveCodeblockLineHighlight = value;          
-        await this.plugin.saveSettings();
-      })
-    );
+      });
+    });
+
+    new Setting(containerEl)
+      .setName('Enable editor active line highlight')
+      .setDesc('If enabled, you can set the color for the active line (including codeblocks).')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.bActiveLineHighlight)
+        .onChange(async (value) => {
+          this.plugin.settings.bActiveLineHighlight = value;
+          await this.plugin.saveSettings();
+          updateActiveLineStyles(this.plugin.settings);
+        })
+      );
+     
+    this.createPickrSetting(containerEl, 'Editor active line color', 
+    'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
+     
+    new Setting(containerEl)
+      .setName('Exclude languages')
+      .setDesc('Define languages, separated by a comma, to which the plugin should not apply.')
+      .addText(text => text
+        .setPlaceholder('e.g. dataview, python etc.')
+        .setValue(this.plugin.settings.ExcludeLangs)
+        .onChange(async (value) => {
+          this.plugin.settings.ExcludeLangs = value;
+          await this.plugin.saveSettings();
+        })
+      );
+
+    containerEl.createEl('h3', {text: 'Codeblock settings'});
+    
+    new Setting(containerEl)
+      .setName('Enable line numbers')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.bEnableLineNumbers)
+        .onChange(async (value) => {
+          if (value) {
+            if (!this.plugin.extensions.find(ext => ext.name === codeblockGutter.name)) {
+              this.plugin.extensions.push(codeblockGutter(this.plugin.settings));
+            }
+          } else {
+            this.removeExtension(codeblockGutter.name);
+          }          
+          this.plugin.settings.bEnableLineNumbers = value;
+          await this.plugin.saveSettings();          
+        })
+      );
+
+    new Setting(containerEl)
+      .setName('Enable codeblock active line hihglight')
+      .setDesc('If enabled, you can set the color for the active line inside codeblocks only.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
+        .onChange(async (value) => {
+          this.plugin.settings.bActiveCodeblockLineHighlight = value;          
+          await this.plugin.saveSettings();
+          updateActiveLineStyles(this.plugin.settings);
+        })
+      );
         
     this.createPickrSetting(containerEl, 'Codeblock active line color', 
       'To set this color, enable the option "Enable codeblock active line highlight" first.', D_ACTIVE_CODEBLOCK_LINE_COLOR, "activeCodeBlockLineColor");
     
     this.createPickrSetting(containerEl, 'Background color', '', D_BACKGROUND_COLOR, "backgroundColor");
-    this.createPickrSetting(containerEl, 'Highlight color', '', D_HIGHLIGHT_COLOR, "highlightColor");
+    this.createPickrSetting(containerEl, 'Highlight color (used by the "hl" parameter)', '', D_HIGHLIGHT_COLOR, "highlightColor");
+
+    containerEl.createEl('h3', {text: 'Alternative highlight colors'});
+    
+    // Add the color input and button
+    let alternateHLName = "";
+    let alternateColorDisplayText;
+    new Setting(containerEl)
+      .setName("Add alternative highlight color")
+      .setDesc('Define a name, by which you will reference the color. You can set the color itself after adding it to the list.')
+      .addText(value => {
+        alternateColorDisplayText = value;
+        alternateColorDisplayText.setPlaceholder('e.g. error, warn')
+        alternateColorDisplayText.onChange(async (alternateHLColorName) => {
+          alternateHLName = alternateHLColorName;
+        });
+      })
+      .addButton(async (button) => {
+        button.setButtonText("Add");
+        button.onClick(async () => {
+          const colorValue = this.getRandomColor();
+          const colorNameRegex = /^[^\d][\w\d]*$/;
+          if (alternateHLName.trim() === "") {
+            new Notice("Please enter a color name.");
+          } else if (!colorNameRegex.test(alternateHLName)) { // check if the input matches the regex
+            new Notice(`"${alternateHLName}" is not a valid color name.`);
+          } else {
+            const alternateColors = this.plugin.settings.alternateColors;
+            const colorExists = alternateColors.some(color => color.name.toLowerCase() === alternateHLName.toLowerCase());
+            if (colorExists) {
+              new Notice(`A color with the name "${alternateHLName}" already exists.`);
+            } else {
+              const newColor = { name: alternateHLName, darkColor: colorValue, lightColor: colorValue };
+              alternateColors.push(newColor);
+              await this.plugin.saveSettings();
+              this.updateCurrentAlternateHLColor();
+              new Notice(`Added color "${alternateHLName}".`);
+              alternateColorDisplayText.setValue("");
+              alternateHLName = "";
+              this.updateColorContainer(colorContainer); // Update the color container after adding a color
+            }
+          }
+        });
+      });
+      
+    const colorContainer = containerEl.createEl("div", { cls: "codeblock-customizer-alternateHLcolorContainer" });
+
+    // Update the color container on page load
+    this.updateColorContainer(colorContainer);
     
     containerEl.createEl('h3', {text: 'Header settings'});
     
@@ -387,7 +427,7 @@ export class SettingsTab extends PluginSettingTab {
     
     const alwaysDisplayToggle = new Setting(containerEl)
       .setName('Always display codeblock language')
-      .setDesc('If enabled, the codeblock language will always displayed (if a language is defined), even if the file parameter is not specified.')
+      .setDesc('If enabled, the codeblock language will always be displayed (if a language is defined), even if the file parameter is not specified.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.header.bAlwaysDisplayCodeblockLang)
         .onChange(async (value) => {
@@ -402,6 +442,41 @@ export class SettingsTab extends PluginSettingTab {
         item.setDisabled(true);
       });
     }
+    
+    containerEl.createEl('h5', {text: 'Header language icon settings'});
+    
+    new Setting(containerEl)
+      .setName('Display codeblock language icon (if available)')
+      .setDesc('If enabled, the codeblock language icon will be displayed in the header. If disabled, all below settings are disabled as well!')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.bDisplayCodeBlockIcon)
+        .onChange(async (value) => {
+          this.headerLangIconToggles.forEach(item => {
+            item.setDisabled(!value);
+          });
+          this.plugin.settings.bDisplayCodeBlockIcon = value;
+          await this.plugin.saveSettings();
+      })
+    );
+    
+    const alwaysDisplayIconToggle = new Setting(containerEl)
+      .setName('Always display codeblock language icon (if available)')
+      .setDesc('If enabled, the codeblock language icon will always be displayed (if a language is defined and it has an icon), even if the file parameter is not specified.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.header.bAlwaysDisplayCodeblockIcon)
+        .onChange(async (value) => {
+          this.plugin.settings.header.bAlwaysDisplayCodeblockIcon = value;
+          await this.plugin.saveSettings();
+      })
+    );
+    this.headerLangIconToggles.push(alwaysDisplayIconToggle);
+    
+    if (!this.plugin.settings.bDisplayCodeBlockIcon){
+      this.headerLangIconToggles.forEach(item => {
+        item.setDisabled(true);
+      });
+    }
+    
     containerEl.createEl('h3', {text: 'Gutter settings'});
     
     new Setting(containerEl)
@@ -433,6 +508,15 @@ export class SettingsTab extends PluginSettingTab {
     ); 
 	}// display
   
+  getRandomColor() {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }// getRandomColor
+
   removeExtension(name){
     for (const ext of this.plugin.extensions) {
       if  (ext.name === name)
@@ -454,7 +538,42 @@ export class SettingsTab extends PluginSettingTab {
     this.plugin.settings.gutterBackgroundColor = selectedTheme.colors.gutterBackgroundColor;
     this.plugin.settings.header.codeBlockLangColor = selectedTheme.colors.header.codeBlockLangColor;
     this.plugin.settings.header.codeBlockLangBackgroundColor = selectedTheme.colors.header.codeBlockLangBackgroundColor;
+    
+    updateActiveLineStyles(this.plugin.settings);
+    this.updateCurrentAlternateHLColor();
   }// applyTheme
+  
+  updateCurrentAlternateHLColor() {
+    const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.SelectedTheme);
+    
+    const isDefaultDarkTheme = selectedTheme.colors.header.bDefaultDarkTheme;
+    const isDefaultLightTheme = selectedTheme.colors.header.bDefaultLightTheme;
+    // moonstone = light, obsidian = dark
+    const obsidianTheme = this.plugin.app.vault.getConfig('theme');
+    
+    if (isDefaultDarkTheme && !isDefaultLightTheme)
+      this.applyCurrentAlternateHLColor(false);
+    else if (!isDefaultDarkTheme && isDefaultLightTheme)
+      this.applyCurrentAlternateHLColor(true);
+    else if (!isDefaultDarkTheme && !isDefaultLightTheme) {
+      if (obsidianTheme === "moonstone")
+        this.applyCurrentAlternateHLColor(true);
+      else 
+        this.applyCurrentAlternateHLColor(false);
+    }
+  }// updateCurrentAlternateHLColor
+  
+  applyCurrentAlternateHLColor(isLight: boolean){
+    const alternateColors = this.plugin.settings.alternateColors;
+
+    for (let i = 0; i < alternateColors.length; i++) {
+      if (isLight)
+        alternateColors[i].currentColor = alternateColors[i].lightColor;
+      else
+        alternateColors[i].currentColor = alternateColors[i].darkColor;
+    }
+    this.plugin.saveSettings();
+  }// applyCurrentAlternateHLColor
   
   setColorsForPickers(themeName){
     const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === themeName);    
@@ -518,7 +637,7 @@ export class SettingsTab extends PluginSettingTab {
             }
             const {result} = (pickr.getRoot() as any).interaction;
             requestAnimationFrame(() =>
-                requestAnimationFrame(() => result.select())
+              requestAnimationFrame(() => result.select())
             );
         })
         .on('save', (color: Pickr.HSVaColor, instance: Pickr) => {
@@ -528,6 +647,10 @@ export class SettingsTab extends PluginSettingTab {
             const savedColor = color.toHEXA().toString();
             instance.addSwatch(savedColor);
             this.setAndSavePickrSetting(pickrClass, savedColor);
+            // if the active line color changed update it
+            if (pickrClass === 'activeLineColor' || pickrClass === 'activeCodeBlockLineColor'){
+              updateActiveLineStyles(this.plugin.settings);
+            }
         })
         .on('cancel', (instance: Pickr) => {
             instance.hide();
@@ -576,6 +699,117 @@ export class SettingsTab extends PluginSettingTab {
     this.pickerInstances.push(pickr);
     return mySetting;
   }// createPickrSetting
+  
+  createAlternatePickr(containerEl: HTMLElement, colorContainer: HTMLElement, name: string, defaultDarkColor: string, defaultLightColor: string): Setting {
+    let lightPickr: Pickr;
+    let darkPickr: Pickr; // add a new variable for the second color picker
+    const desc = "To higlight lines with this color use the \"" + name + "\" parameter. e.g: " + name + ":2,4-6";
+
+    const mySetting = new Setting(containerEl)
+      // @ts-ignore
+      .setName(name)
+      .setDesc(desc)
+      .then((setting) => {
+        lightPickr = Pickr.create({
+          el: setting.controlEl.createDiv({cls: "picker"}),
+          container: containerEl.parentNode,
+          theme: 'nano',
+          position: "left-middle",
+          lockOpacity: false, // If true, the user won't be able to adjust any opacity.
+          default: defaultLightColor, // Default color
+          swatches: [], // Optional color swatches
+          components: {
+            preview: true,
+            hue: true,
+            opacity: true,
+            interaction: {
+              hex: true,
+              rgba: true,
+              hsla: false,
+              input: true,
+              cancel: true,
+              save: true,
+            },
+          },
+          i18n: {
+            'btn:toggle': 'select color for light theme'
+          }
+        })
+        .on('show', (color: Pickr.HSVaColor, instance: Pickr) => { // Pickr got opened
+            const {result} = (lightPickr.getRoot() as any).interaction;
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => result.select())
+            );
+        })
+        .on('save', (color: Pickr.HSVaColor, instance: Pickr) => {
+            if (!color) 
+              return;
+            instance.hide();
+            const savedColor = color.toHEXA().toString();
+            instance.addSwatch(savedColor);
+            this.setAndSaveAlternatePickrSetting(name, savedColor, true);
+        })
+        .on('cancel', (instance: Pickr) => {
+            instance.hide();
+        })
+        darkPickr = Pickr.create({
+          el: setting.controlEl.createDiv({cls: "picker"}),
+          container: containerEl.parentNode,
+          theme: 'nano',
+          position: "left-middle",
+          lockOpacity: false,
+          default: defaultDarkColor,
+          swatches: [],
+          components: {
+            preview: true,
+            hue: true,
+            opacity: true,
+            interaction: {
+              hex: true,
+              rgba: true,
+              hsla: false,
+              input: true,
+              cancel: true,
+              save: true,
+            },
+          },
+          i18n: {
+            'btn:toggle': 'select color for dark theme'
+          }
+        })
+        .on('show', (color: Pickr.HSVaColor, instance: Pickr) => {
+            const {result} = (darkPickr.getRoot() as any).interaction;
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => result.select())
+            );
+        })
+        .on('save', (color: Pickr.HSVaColor, instance: Pickr) => {
+            if (!color) 
+              return;
+            instance.hide();
+            const savedColor = color.toHEXA().toString();
+            instance.addSwatch(savedColor);
+            this.setAndSaveAlternatePickrSetting(name, savedColor, false);
+        })
+        .on('cancel', (instance: Pickr) => {
+            instance.hide();
+        });
+      })
+      .addExtraButton((deleteButton) => {
+        deleteButton
+          .setIcon("trash")
+          .setTooltip("Delete color")
+          .onClick(async () => {
+            const index = this.plugin.settings.alternateColors.findIndex((c: any) => c.name === name);
+            this.plugin.settings.alternateColors.splice(index, 1);
+            await this.plugin.saveSettings();
+            new Notice(`Removed color "${name}".`);
+            this.updateColorContainer(colorContainer); // Update the color container after deleting a color
+          });
+      });
+
+    return mySetting;
+  }// createAlternatePickr
 
   setAndSavePickrSetting(className: string, savedColor: string): void {
     if (className === 'activeCodeBlockLineColor') {
@@ -603,6 +837,30 @@ export class SettingsTab extends PluginSettingTab {
     }
     this.plugin.saveSettings();
   }// setAndSavePickrSetting
+  
+  async setAndSaveAlternatePickrSetting(name: string, color: string, isLight: boolean) {
+    const alternateColors = this.plugin.settings.alternateColors;
+    for (let i = 0; i < alternateColors.length; i++) {
+      if (alternateColors[i].name === name) {
+        if (isLight)
+          alternateColors[i].lightColor = color;
+        else
+          alternateColors[i].darkColor = color;
+        break;
+      }
+    }
+
+    this.updateCurrentAlternateHLColor();
+    await this.plugin.saveSettings();
+  }// setAndSaveAlternatePickrSetting
+  
+  updateColorContainer(colorContainer: HTMLElement) {
+    colorContainer.empty();
+
+    this.plugin.settings.alternateColors.forEach((color: any) => {
+      this.createAlternatePickr(colorContainer, colorContainer, color.name, color.darkColor, color.lightColor);
+    });
+  }// updateColorContainer
     
   createDonateButton = (link: string): HTMLElement => {
     const a = createEl("a");

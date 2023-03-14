@@ -13,13 +13,16 @@ export interface CodeblockCustomizerSettings {
   ThemeName: string;
   SelectedTheme: string;
   colorThemes: Array<{name: string, colors: CodeblockCustomizerColors}>;
+  alternateColors: Array<{name: string, currentColor: string, darkColor: string, lightColor: string}>;
   bDisplayCodeBlockLanguage: boolean;
+  bDisplayCodeBlockIcon: boolean;
   headerSettings: {
     bHeaderBold: boolean;
     bHeaderItalic: boolean;
     bCodeblockLangBold: boolean;
     bCodeblockLangItalic: boolean;
     bAlwaysDisplayCodeblockLang: boolean;
+    bAlwaysDisplayCodeblockIcon: boolean;
     bDefaultDarkTheme: boolean;
     bDefaultLightTheme: boolean;
     headerColor: string;
@@ -80,7 +83,8 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
   activeLineColor: D_ACTIVE_LINE_COLOR,
   backgroundColor: D_BACKGROUND_COLOR,
   highlightColor: D_HIGHLIGHT_COLOR,
-  bDisplayCodeBlockLanguage: true,  
+  bDisplayCodeBlockLanguage: true,
+  bDisplayCodeBlockIcon: false,
   gutterTextColor: D_GUTTER_TEXT_COLOR,
   gutterBackgroundColor: D_GUTTER_BACKGROUND_COLOR,
   SelectedTheme: "",
@@ -90,6 +94,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
     bCodeblockLangBold: true,
     bCodeblockLangItalic: true,
     bAlwaysDisplayCodeblockLang: false,
+    bAlwaysDisplayCodeblockIcon: false,
     bDefaultDarkTheme: false,
     bDefaultLightTheme: false,
     color: D_HEADER_COLOR,
@@ -115,6 +120,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
           bCodeblockLangBold: true,
           bCodeblockLangItalic: true,
           bAlwaysDisplayCodeblockLang: false,
+          bAlwaysDisplayCodeblockIcon: false,
           bDefaultDarkTheme: true,
           bDefaultLightTheme: false,
           color: D_HEADER_COLOR,
@@ -140,6 +146,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
           bCodeblockLangBold: true,
           bCodeblockLangItalic: true,
           bAlwaysDisplayCodeblockLang: false,
+          bAlwaysDisplayCodeblockIcon: false,
           bDefaultDarkTheme: false,
           bDefaultLightTheme: true,
           color: L_HEADER_COLOR,
@@ -150,5 +157,8 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
         },        
       }
     }
+  ],
+  alternateColors:
+  [
   ]
 }
