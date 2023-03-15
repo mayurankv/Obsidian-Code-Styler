@@ -129,6 +129,8 @@
   font-family: var(--font-monospace);
   background-color: var(--codeblock-customizer-RVline-number-color);
   color: var(--codeblock-customizer-RVline-number-textColor);
+  flex-shrink: 0;
+  user-select: none;
 }
 
 .codeblock-customizer-RVline-number-highlighted{
@@ -152,6 +154,10 @@
 
 .codeblock-customizer-pre {
   margin-top: 0px;                /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+}
+
+.codeblock-customizer-codeBlockPreElement-parent{
+  margin-bottom: 16px;
 }
 
 .codeblock-customizer-pre-radius {

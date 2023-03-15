@@ -72,6 +72,9 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
       codeBlockPreElement.classList.add(`codeblock-customizer-pre-radius`);
     } else if (isCodeBlockHeaderEnabled) {
       codeBlockPreElement.classList.add(`codeblock-customizer-pre-no-radius`);
+      if (codeBlockPreElement.parentElement) {
+        codeBlockPreElement.parentElement.classList.add(`codeblock-customizer-codeBlockPreElement-parent`);
+      }
     }
   }
 }// ReadingView
