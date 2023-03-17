@@ -48,7 +48,11 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   }
 
   const codeElements = codeBlockElement.getElementsByTagName("code");
-  const codeBlockPreElement: HTMLPreElement = codeBlockElement.querySelector("pre:not(.frontmatter)");
+  const codeBlockPreElement: HTMLPreElement | null = codeBlockElement.querySelector("pre:not(.frontmatter)");
+  if (codeBlockPreElement === null) {
+    return;
+  }
+
   codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
   
   if (!isCodeBlockExcluded) {
