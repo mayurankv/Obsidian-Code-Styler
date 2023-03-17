@@ -1,8 +1,8 @@
 import { PluginSettingTab, Setting } from "obsidian";
 import Pickr from "@simonwep/pickr";
 
-import { codeblockGutter } from "./Gutter"
-import { updateActiveLineStyles } from "./Utils"
+import { codeblockGutter } from "./Gutter";
+import { updateActiveLineStyles } from "./Utils";
 import {
     D_ACTIVE_CODEBLOCK_LINE_COLOR,
     D_ACTIVE_LINE_COLOR,

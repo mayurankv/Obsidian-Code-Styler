@@ -1,7 +1,7 @@
 import { StateField, StateEffect, RangeSetBuilder } from "@codemirror/state";
 import { EditorView, Decoration, WidgetType } from "@codemirror/view";
 
-import { searchString, getLanguageName, getLanguageIcon, isExcluded, createContainer, createWrapper, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils"
+import { searchString, getLanguageName, getLanguageIcon, isExcluded, createContainer, createWrapper, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils";
 
 function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) {
   let CollapseStart = null;

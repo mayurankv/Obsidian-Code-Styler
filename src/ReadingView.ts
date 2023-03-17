@@ -6,7 +6,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
 	const pluginSettings = plugin.settings;
   const codeElm: HTMLElement = codeBlockElement.querySelector('pre > code');
   
-	if (!codeElm) 
+  if (!codeElm) 
     return;
 
   const classRegex = /^language-\S+/;

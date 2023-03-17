@@ -1,4 +1,4 @@
-import { Languages, manualLang, Icons } from "./Const"
+import { Languages, manualLang, Icons } from "./Const";
 
 export function splitAndTrimString(str) {
   if (!str) {
@@ -186,8 +186,8 @@ export function createCodeblockIcon(displayLang: string, Icon: string, bDisplayC
   
   const img = document.createElement("img");
   img.classList.add("codeblock-customizer-icon");
-  img.width = 28 //32
-  img.src = BLOBS[displayLang.replace(/\s/g, "_")]
+  img.width = 28; //32
+  img.src = BLOBS[displayLang.replace(/\s/g, "_")];
 
   div.appendChild(img);
   

@@ -2,12 +2,12 @@ import { Plugin } from "obsidian";
 import { Extension } from "@codemirror/state";
 
 import { DEFAULT_SETTINGS, CodeblockCustomizerSettings } from './Settings';
-import { codeblockHighlight } from "./CodeBlockHighlight"
-import { codeblockGutter } from "./Gutter"
-import { codeblockHeader, collapseField } from "./Header"
-import { ReadingView } from "./ReadingView"
-import { SettingsTab } from "./SettingsTab"
-import { loadIcons, BLOBS, updateActiveLineStyles } from "./Utils"
+import { codeblockHighlight } from "./CodeBlockHighlight";
+import { codeblockGutter } from "./Gutter";
+import { codeblockHeader, collapseField } from "./Header";
+import { ReadingView } from "./ReadingView";
+import { SettingsTab } from "./SettingsTab";
+import { loadIcons, BLOBS, updateActiveLineStyles } from "./Utils";
 
 // npm i @simonwep/pickr
 
