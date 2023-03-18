@@ -21,7 +21,8 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   let codeBlockFirstLine = "";
   if (codeBlockSectionInfo) {
     const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    codeBlockFirstLine = view.editor.getLine(codeBlockSectionInfo.lineStart);
+    if (view)
+      codeBlockFirstLine = view.editor.getLine(codeBlockSectionInfo.lineStart);
   }
   
   const codeBlockLang = searchString(codeBlockFirstLine, "```");
