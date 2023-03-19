@@ -27,7 +27,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
         const currentHLColor = this.settings.highlightColor;
         const currentExcludeLangs = this.settings.ExcludeLangs;
         const currentAlternateColors = this.settings.alternateColors;
-        if (update.docChanged || update.viewportChanged || currentBGColor !== prevBGColor || currentHLColor !== prevHLColor
+        // update.focusChanged is just a workaround for the bug. Bug in Obsidian or in CodeMirror?
+        if (update.docChanged || update.viewportChanged || update.focusChanged || currentBGColor !== prevBGColor || currentHLColor !== prevHLColor
             || currentExcludeLangs !== prevExcludeLangs || !compareArrays(currentAlternateColors, this.prevAlternateColors) ) {
           prevBGColor = this.settings.backgroundColor;
           prevHLColor = this.settings.highlightColor;

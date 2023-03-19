@@ -21,7 +21,8 @@ export function codeblockGutter(settings: CodeblockCustomizerSettings) {
         const currentTextColor = this.settings.gutterTextColor;
         const currentBackgroundColor = this.settings.gutterBackgroundColor;
         const currentHighlightGutter = this.settings.bGutterHighlight;
-        if (update.docChanged || update.viewportChanged || currentExcludeLangs !== prevExcludeLangs || currentTextColor !== prevTextColor || currentBackgroundColor !== prevBackgroundColor || currentHighlightGutter !== prevHighlightGutter ) {
+        // update.focusChanged is just a workaround for the bug. Bug in Obsidian or in CodeMirror?
+        if (update.docChanged || update.viewportChanged || update.focusChanged || currentExcludeLangs !== prevExcludeLangs || currentTextColor !== prevTextColor || currentBackgroundColor !== prevBackgroundColor || currentHighlightGutter !== prevHighlightGutter ) {
           prevExcludeLangs = this.settings.ExcludeLangs;
           prevTextColor = this.settings.gutterTextColor;
           prevBackgroundColor = this.settings.gutterBackgroundColor;

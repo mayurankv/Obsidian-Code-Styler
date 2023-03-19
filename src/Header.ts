@@ -69,7 +69,7 @@ export const codeblockHeader = StateField.define<DecorationSet>({
             bCodeblockLangBold: this.settings.header.bCodeblockLangBold, bCodeblockLangItalic: this.settings.header.bCodeblockLangItalic, bHeaderBold: this.settings.header.bHeaderBold,
             bHeaderItalic: this.settings.header.bHeaderItalic};            
           const [retVal, Text] = shouldAddWidget(bExclude, fileName, lang, Fold, this.settings);
-          if (retVal) {            
+          if (retVal) {
             builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(Text, getLanguageName(lang), metaInfo, this.settings.bDisplayCodeBlockLanguage, this.settings.bDisplayCodeBlockIcon));
             //EditorView.requestMeasure;
           }
