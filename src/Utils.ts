@@ -240,4 +240,10 @@ export function updateActiveLineStyles(settings) {
     document.body.classList.remove("codeblock-customizer-active-codeblock-line-highlight");
     document.body.classList.remove("codeblock-customizer-active-codeblock-line-important");
   }
+  
+  if (settings.bEnableLineNumbers) {
+    document.body.classList.add("codeblock-customizer-enable-line-numbers");
+  } else {
+    document.body.classList.remove("codeblock-customizer-enable-line-numbers");
+  }
 }// updateActiveLineStyles

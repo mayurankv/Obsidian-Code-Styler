@@ -3,7 +3,6 @@ import { Extension } from "@codemirror/state";
 
 import { DEFAULT_SETTINGS, CodeblockCustomizerSettings } from './Settings';
 import { codeblockHighlight } from "./CodeBlockHighlight";
-import { codeblockGutter } from "./Gutter";
 import { codeblockHeader, collapseField } from "./Header";
 import { ReadingView } from "./ReadingView";
 import { SettingsTab } from "./SettingsTab";
@@ -37,9 +36,6 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     this.extensions.push(collapseField);
 
     this.extensions.push(codeblockHighlight(this.settings));
-    
-    if (this.settings.bEnableLineNumbers)
-      this.extensions.push(codeblockGutter(this.settings));
 
     if ((this.settings.bActiveCodeblockLineHighlight) || (this.settings.bActiveLineHighlight))
       updateActiveLineStyles(this.settings);

@@ -1,7 +1,6 @@
 import { PluginSettingTab, Setting } from "obsidian";
 import Pickr from "@simonwep/pickr";
 
-import { codeblockGutter } from "./Gutter";
 import { updateActiveLineStyles } from "./Utils";
 import {
     D_ACTIVE_CODEBLOCK_LINE_COLOR,
@@ -275,13 +274,6 @@ export class SettingsTab extends PluginSettingTab {
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.bEnableLineNumbers)
         .onChange(async (value) => {
-          if (value) {
-            if (!this.plugin.extensions.find(ext => ext.name === codeblockGutter.name)) {
-              this.plugin.extensions.push(codeblockGutter(this.plugin.settings));
-            }
-          } else {
-            this.removeExtension(codeblockGutter.name);
-          }          
           this.plugin.settings.bEnableLineNumbers = value;
           await this.plugin.saveSettings();          
         })

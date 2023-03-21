@@ -13,13 +13,15 @@
 /* Highlight active line inside codeblocks */
 [class^="codeblock-customizer-line-"].cm-active {
   background-color: var(--codeblock-customizer-codeblock-active-line-color);
-  border-top-left-radius: 7px !important;
-  border-bottom-left-radius: 7px !important;
 }
 
 /* Highlight active line inside codeblocks with !important flag */
 .codeblock-customizer-active-codeblock-line-highlight [class^="codeblock-customizer-line-"].cm-active {
   background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
+}
+
+/* Apply border-radius only when line numbers are enabled */
+.codeblock-customizer-enable-line-numbers .codeblock-customizer-gutter-line + [class^="codeblock-customizer-line-"].cm-active {
   border-top-left-radius: 7px !important;
   border-bottom-left-radius: 7px !important;
 }
