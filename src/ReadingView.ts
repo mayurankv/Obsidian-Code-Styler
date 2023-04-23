@@ -3,7 +3,7 @@ import { MarkdownView, MarkdownPostProcessorContext, sanitizeHTMLToDom } from "o
 import { searchString, getHighlightedLines, getLanguageName, isExcluded, getLanguageIcon, createContainer, createWrapper, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils";
 
 export async function ReadingView(codeBlockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
-	const pluginSettings = plugin.settings;
+  const pluginSettings = plugin.settings;
   const codeElm: HTMLElement = codeBlockElement.querySelector('pre > code');
   
   if (!codeElm) 
@@ -24,7 +24,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
     if (view)
       codeBlockFirstLine = view.editor.getLine(codeBlockSectionInfo.lineStart);
   }
-  
+
   const codeBlockLang = searchString(codeBlockFirstLine, "```");
   const highlightedLinesParams = searchString(codeBlockFirstLine, "HL:");
   const linesToHighlight = getHighlightedLines(highlightedLinesParams);
@@ -44,7 +44,10 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   if (!isCodeBlockExcluded){
     for (let index = 0; index < codeblocks.length; index++) {
       const Currentcodeblock = codeblocks.item(index);
-      Currentcodeblock.parentElement.style.backgroundColor = pluginSettings.backgroundColor;
+      if (Currentcodeblock.parentNode && Currentcodeblock.parentNode.nodeName === "PRE") {
+        // only process code element which have a PRE parent (don't process LI elements)
+        Currentcodeblock.parentElement.style.backgroundColor = pluginSettings.backgroundColor;
+      }
     }
   }
 
@@ -144,12 +147,14 @@ function createLineTextElement(line, lineNumber) {
 function highlightLines(codeElements, linesToHighlight, settings, altHL) {
   for (let i = 0; i < codeElements.length; i++) {
     const lines = codeElements[i].innerHTML.split("\n");
-
+    
     const preElm = codeElements[i].parentNode;
-    if (preElm){
+    if (preElm && preElm.nodeName === "PRE") {
       preElm.classList.add(`codeblock-customizer-pre-parent`);
     }
-
+    else // only process pre > code elements
+      return;
+    
     const codeWrapper = document.createElement("div");
     for (let j = 0; j < lines.length - 1; j++) {
       const line = lines[j];
