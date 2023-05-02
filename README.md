@@ -1,8 +1,11 @@
-# Codeblock Customizer Plugin
+<h1 align="center">Codeblock Customizer Plugin</h1>
+
+<p align=center>
+<a href="https://github.com/mugiwara85/CodeblockCustomizer/releases/latest"><img src="https://img.shields.io/github/v/release/mugiwara85/CodeblockCustomizer?style=for-the-badge" alt="release" /></a>
+<a><img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22codeblock-customizer%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json"></a>
+</p>
 
 This is a plugin for Obsidian (https://obsidian.md).
-
-![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22codeblock-customizer%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
 
 Since I didn't find any plugin, where I could customize codeblocks, which works realiable, and works in editor and reading mode as well, I created my own. I am not a designer, so if you have created a cool theme, send me the color codes, and I might include it as a default theme in the next release :-)
 
