@@ -257,7 +257,7 @@ export class SettingsTab extends PluginSettingTab {
      
     new Setting(containerEl)
       .setName('Exclude languages')
-      .setDesc('Define languages, separated by a comma, to which the plugin should not apply.')
+      .setDesc('Define languages, separated by a comma, to which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
       .addText(text => text
         .setPlaceholder('e.g. dataview, python etc.')
         .setValue(this.plugin.settings.ExcludeLangs)

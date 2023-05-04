@@ -4,6 +4,10 @@ export function splitAndTrimString(str) {
   if (!str) {
     return [];
   }
+  
+  // Replace * with .*
+  str = str.replace(/\*/g, '.*');
+  
   if (!str.includes(",")) {
     return [str];
   }
@@ -104,9 +108,12 @@ export function getHighlightedLines(params: string): number[] {
 
 export function isExcluded(lineText: string, excludeLangs: string[]) : boolean {
   const codeBlockLang = searchString(lineText, "```");
-  const Langs = splitAndTrimString(excludeLangs);
-  if (codeBlockLang && Langs.includes(codeBlockLang.toLowerCase())) {
-    return true;
+  const regexLangs = splitAndTrimString(excludeLangs).map(lang => new RegExp(`^${lang.replace(/\*/g, '.*')}$`, 'i'));
+  
+  for (const regexLang of regexLangs) {
+    if (codeBlockLang && regexLang.test(codeBlockLang)) {
+      return true;
+    }
   }
   
   return false;

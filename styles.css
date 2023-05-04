@@ -64,6 +64,11 @@
   border-bottom: 2px groove var(--header-line-color);
   margin-top: 16px;               /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */
 }
+/* Fix for incorrectly displaying header when usin "minimal" theme */
+.markdown-source-view.mod-cm6.is-readable-line-width .codeblock-customizer-header-container {
+  width: calc(var(--line-width-adaptive) - var(--folding-offset));
+  margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
+}
 
 /* style header-container-icon */
 .codeblock-customizer-icon-container{

@@ -78,7 +78,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
   bActiveCodeblockLineHighlight: true,
   bActiveLineHighlight: true,
   bGutterHighlight: false,
-  ExcludeLangs: "dataview",
+  ExcludeLangs: "dataview, ad-*",
   activeCodeBlockLineColor: D_ACTIVE_CODEBLOCK_LINE_COLOR,
   activeLineColor: D_ACTIVE_LINE_COLOR,
   backgroundColor: D_BACKGROUND_COLOR,

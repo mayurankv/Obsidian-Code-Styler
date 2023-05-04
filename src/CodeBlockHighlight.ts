@@ -2,7 +2,7 @@ import { ViewPlugin, Decoration, WidgetType } from "@codemirror/view";
 import { RangeSet } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 
-import { splitAndTrimString, searchString, getHighlightedLines, getLanguageIcon, getLanguageName } from "./Utils";
+import { splitAndTrimString, searchString, getHighlightedLines, getLanguageIcon, getLanguageName, isExcluded } from "./Utils";
 
 export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
   const viewPlugin = ViewPlugin.fromClass(
@@ -142,9 +142,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               const line = view.state.doc.lineAt(node.from);
               const lineText = view.state.sliceDoc(line.from, line.to);
               const lang = searchString(lineText, "```");
-              if (lang && (ExcludeLangs.includes(lang.toLowerCase()))) {
-                bExclude = true;
-              }
+              if (lang)
+                bExclude = isExcluded(lineText, settings.ExcludeLangs);
               if (node.type.name.includes("HyperMD-codeblock-begin") ) {
                 if (bExclude)
                   return;

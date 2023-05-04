@@ -1,7 +1,7 @@
 {
 	"id": "codeblock-customizer",
 	"name": "Codeblock Customizer",
-	"version": "1.1.6",
+	"version": "1.1.7",
 	"minAppVersion": "0.15.0",
 	"description": "This Obsidian plugin lets you customize your codeblocks in editing, and reading mode as well.",
 	"author": "mugiwara",
