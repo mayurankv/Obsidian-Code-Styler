@@ -101,7 +101,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
 function isAdmonition(lineText: string): boolean {
   const adTypes = ["ad-note", "ad-seealso", "ad-abstract", "ad-summary", "ad-tldr", "ad-info", "ad-todo", "ad-tip", "ad-hint", "ad-important", "ad-success", "ad-check", "ad-done", "ad-question", "ad-help", "ad-faq", "ad-warning", "ad-caution", "ad-attention", "ad-failure", "ad-fail", "ad-missing", "ad-danger", "ad-error", "ad-bug", "ad-example", "ad-quote", "ad-cite"];
   const codeBlockLang = searchString(lineText, "```");
-  return adTypes.some((adType) => codeBlockLang.startsWith(adType));
+  return adTypes.some((adType) => codeBlockLang && codeBlockLang.startsWith(adType));
 }// isAdmonition
 
 function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, bDisplayCodeBlockLanguage, Collapse, bDisplayCodeBlockIcon) {

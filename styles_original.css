@@ -1,0 +1,178 @@
+/* style active line */
+
+/* Highlight active line outside codeblocks */
+.cm-active {
+  background-color: var(--codeblock-customizer-editor-active-line-color);
+}
+
+/* Highlight active line outside codeblocks with !important flag */
+.codeblock-customizer-active-codeblock-line-important .cm-active {
+  background-color: var(--codeblock-customizer-editor-active-line-color) !important;
+}
+
+/* Highlight active line inside codeblocks */
+[class^="codeblock-customizer-line-"].cm-active {
+  background-color: var(--codeblock-customizer-codeblock-active-line-color);
+}
+
+/* Highlight active line inside codeblocks with !important flag */
+.codeblock-customizer-active-codeblock-line-highlight [class^="codeblock-customizer-line-"].cm-active {
+  background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
+}
+
+/* Apply border-radius only when line numbers are enabled */
+.codeblock-customizer-enable-line-numbers .codeblock-customizer-gutter-line + [class^="codeblock-customizer-line-"].cm-active {
+  border-top-left-radius: 7px !important;
+  border-bottom-left-radius: 7px !important;
+}
+
+/* style gutter */
+.codeblock-customizer-gutter{
+  position: absolute;
+  left: 0;
+  padding-left: 4px;
+  padding-right: 8px;
+  text-align: right;
+  display: inline-block;
+  height: 100%;
+  background-color: var(--codeblock-customizer-gutter-color);
+  width: 38px;
+  user-select: none;
+  font-size: var(--code-size);
+  font-family: var(--font-monospace);
+  color: var(--codeblock-customizer-gutter-textColor);
+}
+
+.codeblock-customizer-gutter-line{
+  padding-left: 54px !important;
+}
+
+.codeblock-customizer-gutterElements-first-radius {
+  border-top-left-radius: 5px;
+}
+
+.codeblock-customizer-gutterElements-last-radius {
+  border-bottom-left-radius: 5px;
+}
+
+/* style header-container */
+.codeblock-customizer-header-container {
+  user-select: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  background-color: var(--header-color);
+  border-bottom: 2px groove var(--header-line-color);
+  margin-top: 16px;               /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */
+}
+/* Fix for incorrectly displaying header when usin "minimal" theme */
+.markdown-source-view.mod-cm6.is-readable-line-width .codeblock-customizer-header-container {
+  width: calc(var(--line-width-adaptive) - var(--folding-offset));
+  margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
+}
+
+/* style header-container-icon */
+.codeblock-customizer-icon-container{
+  display: inline-flex;
+  padding-left: 15px;
+}
+
+.codeblock-customizer-icon-container-codeblockLang{
+  padding-right: 15px;
+}
+
+/* style codeblock header wrapper */
+.codeblock-customizer-header-wrapper {
+  display: flex;
+}
+
+/* style codeblock header text */
+.codeblock-customizer-header-text {
+  padding-left: 15px;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  font-size: 14px;
+  color: var(--header-text-color);
+  font-weight: var(--header-bold, normal);
+  font-style: var(--header-italic, normal);
+}
+
+/* style codeblock header language tag*/
+.codeblock-customizer-header-language-tag {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  font-size: 14px;
+  background-color: var(--codeblock-lang-background-color);
+  color: var(--codeblock-lang-color);
+  border-radius: 5px 5px 5px 0px;
+  font-weight: var(--codeblock-lang-bold, normal);
+  font-style: var(--codeblock-lang-italic, normal);
+}
+
+/* center donation button */
+.codeblock-customizer-Donation {
+  width: 70%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* styling for reading view */
+/* Collapse code block in reading view */
+.codeblock-customizer-pre.codeblock-customizer-coedeblock-collapsed {
+  display: none;
+}
+
+.codeblock-customizer-RVline {
+  display: flex;
+}
+
+.codeblock-customizer-RVline-number {
+  width: 38px;
+  text-align: right;
+  padding-left: 4px;
+  padding-right: 8px;
+  font-size: var(--code-size);
+  font-family: var(--font-monospace);
+  background-color: var(--codeblock-customizer-RVline-number-color);
+  color: var(--codeblock-customizer-RVline-number-textColor);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.codeblock-customizer-RVline-number-highlighted{
+  background-color: var(--codeblock-customizer-RVline-number-highlighted-color);
+}
+
+.codeblock-customizer-RVline-highlighted{
+  background-color: var(--codeblock-customizer-RVline-highlighted-color);
+}
+
+.codeblock-customizer-RVline-text {
+  flex-basis: 100%;
+  padding-left: 16px;             /* originalVal:0px, add padding between the line numbers and the text */
+}
+
+/* pre element */
+.codeblock-customizer-pre-parent {
+  padding-right: 0px !important;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
+  padding-left: 0px !important;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
+}
+
+.codeblock-customizer-pre {
+  margin-top: 0px;                /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+}
+
+.codeblock-customizer-codeBlockPreElement-parent{
+  margin-bottom: 16px;
+}
+
+.codeblock-customizer-pre-radius {
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+}
+
+.codeblock-customizer-pre-no-radius {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+}
