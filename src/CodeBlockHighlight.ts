@@ -111,7 +111,6 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
         const BgColor = this.settings.backgroundColor;
         const HLColor = this.settings.highlightColor;
         const Exclude = this.settings.ExcludeLangs;
-        const bGutter = this.settings.bEnableLineNumbers;
         const ExcludeLangs = splitAndTrimString(Exclude);
         let bExclude = false;
         const alternateColors = this.settings.alternateColors || [];
@@ -155,15 +154,19 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                   const altParams = searchString(lineText, `${name}:`);
                   altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, currentColor, lineNumber })));
                 }
-                const radius = (bGutter) ? `border-top-left-radius: 0px` : "";
-                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background`, style: `background-color: ${BgColor}; ${radius}`} }).range(node.from));
+                const FileName = searchString(lineText, "file:");
+                const Fold = searchString(lineText, "fold");
+                const codeBlockLang = searchString(lineText, "```");
+                const isHeaderEnabled = ((FileName !== "" && FileName !== null) || Fold || ((bDisplayCodeBlockLanguage && bAlwaysDisplayCodeblockLang) || ( bDisplayCodeBlockIcon && bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeBlockLang))) && codeBlockLang)) ? true : false;
                 
+                const radius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
+                //const radius = (linenumbers) ? `border-top-left-radius: 0px` : "";
+                //style: `background-color: ${BgColor}; ${radius}`
+                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background ${radius}`, style: `background-color: ${BgColor}`} }).range(node.from));
+
                 if (linenumbers) {
-                  const FileName = searchString(lineText, "file:");
-                  const Fold = searchString(lineText, "fold");
-                  const codeBlockLang = searchString(lineText, "```");
-                  const isHeaderEnabled = ((FileName !== "" && FileName !== null) || Fold || ((bDisplayCodeBlockLanguage && bAlwaysDisplayCodeblockLang) || ( bDisplayCodeBlockIcon && bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeBlockLang))) && codeBlockLang)) ? true : false;
-                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line`} }).range(node.from));
+                  const lineRadius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
+                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line ${lineRadius}`} }).range(node.from));
                   decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", GutterBackgroundColor, GutterTextColor, true, false, isHeaderEnabled),}).range(node.from));
                 }
               }
@@ -200,11 +203,12 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                   bExclude = false;
                   return;
                 }
-                const radius = (bGutter) ? `border-bottom-left-radius: 0px` : "";
-                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background`, style: `background-color: ${BgColor}; ${radius}`} }).range(node.from));
+                //const radius = (linenumbers) ? `border-bottom-left-radius: 0px` : "";
+                //style: `background-color: ${BgColor}; ${radius}`
+                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background`, style: `background-color: ${BgColor}`} }).range(node.from));
 
                 if (linenumbers) {
-                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line`} }).range(node.from));
+                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line codeblock-customizer-lastLine-background-radius`} }).range(node.from));
                   decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", GutterBackgroundColor, GutterTextColor, false, true, false),}).range(node.from));
                 }
                 lineNumber = 1;

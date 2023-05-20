@@ -21,7 +21,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   let codeBlockFirstLine = "";
   if (codeBlockSectionInfo) {
     const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-    if (view)
+    if (view && view.editor)
       codeBlockFirstLine = view.editor.getLine(codeBlockSectionInfo.lineStart);
   } else {
     // PDF export

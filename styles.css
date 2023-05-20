@@ -21,9 +21,28 @@
 }
 
 /* Apply border-radius only when line numbers are enabled */
-.codeblock-customizer-enable-line-numbers .codeblock-customizer-gutter-line + [class^="codeblock-customizer-line-"].cm-active {
+/*.codeblock-customizer-enable-line-numbers .codeblock-customizer-gutter-line + [class^="codeblock-customizer-line-"].cm-active {
   border-top-left-radius: 7px !important;
   border-bottom-left-radius: 7px !important;
+}*/
+/* set border to 0 for codeblock lines */
+/*[class^="codeblock-customizer-line-"] {
+  border: 0px !important;
+}*/
+
+.codeblock-customizer-firstLine-background-radius {
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+}
+
+.codeblock-customizer-firstLine-background-NoRadius {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+}
+
+.codeblock-customizer-lastLine-background-radius{
+  border-bottom-left-radius: 5px !important;
+  border-bottom-right-radius: 5px !important;
 }
 
 /* style gutter */
@@ -74,6 +93,10 @@
 .codeblock-customizer-icon-container{
   display: inline-flex;
   padding-left: 15px;
+}
+
+.codeblock-customizer-icon {
+  border: 0px !important;
 }
 
 .codeblock-customizer-icon-container-codeblockLang{
@@ -160,7 +183,9 @@
 }
 
 .codeblock-customizer-pre {
-  margin-top: 0px;                /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+  margin-top: 0px !important;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+  padding-top: 0px !important;    /* padding-top and bottom must be set at the pre code element*/
+  padding-bottom: 0px !important;
 }
 
 .codeblock-customizer-codeBlockPreElement-parent{
@@ -170,11 +195,22 @@
 .codeblock-customizer-pre-radius {
   border-top-left-radius: 5px !important;
   border-top-right-radius: 5px !important;
+  border-bottom-left-radius: 5px !important;
+  border-bottom-right-radius: 5px !important;
 }
 
 .codeblock-customizer-pre-no-radius {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
+  border-bottom-left-radius: 5px !important;
+  border-bottom-right-radius: 5px !important;
+}
+
+.codeblock-customizer-pre code {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }
 
 /* pickr start */
