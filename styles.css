@@ -1,5 +1,11 @@
 /* style active line */
 
+/* Codeblock background colours */
+.markdown-rendered pre.codeblock-customizer-bg,
+.markdown-source-view .codeblock-customizer-line-background.HyperMD-codeblock {
+  background-color: var(--codeblock-customizer-code-background);
+}
+
 /* Highlight active line outside codeblocks */
 .cm-active {
   background-color: var(--codeblock-customizer-editor-active-line-color);
@@ -142,36 +148,36 @@
 
 /* styling for reading view */
 /* Collapse code block in reading view */
-.codeblock-customizer-pre.codeblock-customizer-coedeblock-collapsed {
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
   display: none;
 }
 
-.codeblock-customizer-RVline {
+.markdown-rendered .codeblock-customizer-line {
   display: flex;
 }
 
-.codeblock-customizer-RVline-number {
+.markdown-rendered .codeblock-customizer-line-number {
   width: 38px;
   text-align: right;
   padding-left: 4px;
   padding-right: 8px;
   font-size: var(--code-size);
   font-family: var(--font-monospace);
-  background-color: var(--codeblock-customizer-RVline-number-color);
-  color: var(--codeblock-customizer-RVline-number-textColor);
+  background-color: var(--codeblock-customizer-line-number-color);
+  color: var(--codeblock-customizer-line-number-textColor);
   flex-shrink: 0;
   user-select: none;
 }
-
-.codeblock-customizer-RVline-number-highlighted{
-  background-color: var(--codeblock-customizer-RVline-number-highlighted-color);
+/* codeblock-customizer-line */
+.markdown-rendered [class*="codeblock-customizer-line-highlighted"],
+.markdown-source-view .codeblock-customizer-gutter-line[class*="codeblock-customizer-line-highlighted"] {
+  background-color: var(--codeblock-customizer-line-highlighted-color);
+}
+.markdown-rendered .codeblock-customizer-line-number[class*="codeblock-customizer-line-number-highlighted"] {
+  background-color: var(--codeblock-customizer-line-number-highlighted-color);
 }
 
-.codeblock-customizer-RVline-highlighted{
-  background-color: var(--codeblock-customizer-RVline-highlighted-color);
-}
-
-.codeblock-customizer-RVline-text {
+.markdown-rendered .codeblock-customizer-line-text {
   flex-basis: 100%;
   padding-left: 16px;             /* originalVal:0px, add padding between the line numbers and the text */
 }

@@ -162,7 +162,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                 const radius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
                 //const radius = (linenumbers) ? `border-top-left-radius: 0px` : "";
                 //style: `background-color: ${BgColor}; ${radius}`
-                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background ${radius}`, style: `background-color: ${BgColor}`} }).range(node.from));
+                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background ${radius}`} }).range(node.from));
 
                 if (linenumbers) {
                   const lineRadius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
@@ -185,7 +185,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                   backgroundClass = `codeblock-customizer-line-highlighted-${altHLMatch[0].name}`;
                   Color = altHLMatch[0].currentColor;
                 }
-                decorations.push(Decoration.line({ attributes: {class: backgroundClass, style: `background-color: ${Color};`} }).range(node.from));
+                decorations.push(Decoration.line({ attributes: {class: backgroundClass, style: `--codeblock-customizer-line-highlighted-color: ${Color};`} }).range(node.from));
                 
                 if (linenumbers) {
                   if (GutterHighlight && HL.includes(lineNumber)) {
@@ -205,7 +205,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                 }
                 //const radius = (linenumbers) ? `border-bottom-left-radius: 0px` : "";
                 //style: `background-color: ${BgColor}; ${radius}`
-                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background`, style: `background-color: ${BgColor}`} }).range(node.from));
+                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background`} }).range(node.from));
 
                 if (linenumbers) {
                   decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line codeblock-customizer-lastLine-background-radius`} }).range(node.from));
@@ -253,7 +253,7 @@ class LineNumberWidget extends WidgetType {
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
     container.classList.add("codeblock-customizer-gutter-container");
-    container.style.setProperty("--codeblock-customizer-gutter-color", this.backgroundColor);
+    document.body.style.setProperty("--codeblock-customizer-gutter-color", this.backgroundColor);
 
     const span = document.createElement("span");
     span.classList.add("codeblock-customizer-gutter");
@@ -261,7 +261,7 @@ class LineNumberWidget extends WidgetType {
       span.classList.add("codeblock-customizer-gutterElements-first-radius");
     if (this.bLastLine)
       span.classList.add("codeblock-customizer-gutterElements-last-radius");
-    span.style.setProperty("--codeblock-customizer-gutter-textColor", this.GutterTextColor);
+      document.body.style.setProperty("--codeblock-customizer-gutter-textColor", this.GutterTextColor);
     
     span.innerText = `${this.lineNumber}`;
 

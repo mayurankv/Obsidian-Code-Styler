@@ -158,8 +158,8 @@ export function loadIcons(){
 export function createContainer(header: CodeBlockMeta) {
   const container = document.createElement("div");
   container.classList.add("codeblock-customizer-header-container");
-  container.style.setProperty("--header-color", header.color);
-  container.style.setProperty("--header-line-color", header.lineColor);
+  document.body.style.setProperty("--header-color", header.color);
+  document.body.style.setProperty("--header-line-color", header.lineColor);
   
   return container;
 }// createContainer
@@ -175,12 +175,12 @@ export function createCodeblockLang(lang: string, header: CodeBlockMeta) {
   const codeblockLang = document.createElement("div");
   codeblockLang.innerText = lang;
   codeblockLang.classList.add("codeblock-customizer-header-language-tag");
-  codeblockLang.style.setProperty("--codeblock-lang-background-color", header.codeBlockLangBackgroundColor);
-  codeblockLang.style.setProperty("--codeblock-lang-color", header.codeBlockLangColor);
+  document.body.style.setProperty("--codeblock-lang-background-color", header.codeBlockLangBackgroundColor);
+  document.body.style.setProperty("--codeblock-lang-color", header.codeBlockLangColor);
   if (header.bCodeblockLangBold)
-    codeblockLang.style.setProperty("--codeblock-lang-bold", "bold");
+  document.body.style.setProperty("--codeblock-lang-bold", "bold");
   if (header.bCodeblockLangItalic)
-  codeblockLang.style.setProperty("--codeblock-lang-italic", "italic");
+  document.body.style.setProperty("--codeblock-lang-italic", "italic");
   
   return codeblockLang;
 }// createCodeblockLang
@@ -205,11 +205,11 @@ export function createFileName(text: string, header: CodeBlockMeta) {
   const fileName = document.createElement("div");
   fileName.innerText = text;
   fileName.classList.add("codeblock-customizer-header-text");
-  fileName.style.setProperty("--header-text-color", header.textColor);
+  document.body.style.setProperty("--header-text-color", header.textColor);
   if (header.bHeaderBold)
-    fileName.style.setProperty("--header-bold", "bold");
+    document.body.style.setProperty("--header-bold", "bold");
   if (header.bHeaderItalic)
-    fileName.style.setProperty("--header-italic", "italic");
+    document.body.style.setProperty("--header-italic", "italic");
 
   return fileName;
 }// createFileName

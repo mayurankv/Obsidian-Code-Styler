@@ -82,7 +82,8 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
       const Currentcodeblock = codeblocks.item(index);
       if (Currentcodeblock.parentNode && Currentcodeblock.parentNode.nodeName === "PRE") {
         // only process code element which have a PRE parent (don't process LI elements)
-        Currentcodeblock.parentElement.style.backgroundColor = pluginSettings.backgroundColor;
+        Currentcodeblock.parentElement.classList.add("codeblock-customizer-bg");
+        document.body.style.setProperty("--codeblock-customizer-code-background",pluginSettings.backgroundColor);
       }
     }
   }
@@ -125,28 +126,28 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
   // Add event listener to the widget element
   container.addEventListener("click", function() {
     // Toggle the "collapsed" class on the codeblock element
-    preElements.classList.toggle("codeblock-customizer-coedeblock-collapsed");
+    preElements.classList.toggle("codeblock-customizer-codeblock-collapsed");
   });
   
   if (Collapse) {
-    preElements.classList.add(`codeblock-customizer-coedeblock-collapsed`);
+    preElements.classList.add(`codeblock-customizer-codeblock-collapsed`);
   }
   
 }// HeaderWidget
 
 function createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch) {
   const lineNumberWrapper = document.createElement("div");
-  lineNumberWrapper.classList.add(`codeblock-customizer-RVline-number`);
-  lineNumberWrapper.style.setProperty("--codeblock-customizer-RVline-number-color", settings.gutterBackgroundColor);
-  lineNumberWrapper.style.setProperty("--codeblock-customizer-RVline-number-textColor", settings.gutterTextColor);
+  lineNumberWrapper.classList.add(`codeblock-customizer-line-number`);
+  document.body.style.setProperty("--codeblock-customizer-line-number-color", settings.gutterBackgroundColor);
+  document.body.style.setProperty("--codeblock-customizer-line-number-textColor", settings.gutterTextColor);
 
   if (isHighlighted && settings.bGutterHighlight) {
-    lineNumberWrapper.classList.add(`codeblock-customizer-RVline-number-highlighted`);
-    lineNumberWrapper.style.setProperty("--codeblock-customizer-RVline-number-highlighted-color", settings.highlightColor);
+    lineNumberWrapper.classList.add(`codeblock-customizer-line-number-highlighted`);
+    document.body.style.setProperty("--codeblock-customizer-line-number-highlighted-color", settings.highlightColor);
   }
   else if (altHLMatch.length > 0 && settings.bGutterHighlight) {
-    lineNumberWrapper.classList.add(`codeblock-customizer-RVline-number-highlighted-${altHLMatch[0].name}`);
-    lineNumberWrapper.style.backgroundColor = altHLMatch[0].currentColor;
+    lineNumberWrapper.classList.add(`codeblock-customizer-line-number-highlighted-${altHLMatch[0].name}`);
+    lineNumberWrapper.style.setProperty("--codeblock-customizer-line-number-highlighted-color", altHLMatch[0].currentColor);
   }
   lineNumberWrapper.setText(lineNumber);
   
@@ -156,7 +157,7 @@ function createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch
 function createLineTextElement(line, lineNumber) {
   const lineText = line !== "" ? line : "<br>";
   const sanitizedText = sanitizeHTMLToDom(lineText);
-  const lineContentWrapper = createDiv({cls: `codeblock-customizer-RVline-text`, text: sanitizedText});  
+  const lineContentWrapper = createDiv({cls: `codeblock-customizer-line-text`, text: sanitizedText});  
   
   return lineContentWrapper;
 }// createLineTextElement
@@ -181,14 +182,14 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
 
       // create line element
       const lineWrapper = document.createElement("div");
-      lineWrapper.classList.add(`codeblock-customizer-RVline`);
+      lineWrapper.classList.add(`codeblock-customizer-line`);
       if (isHighlighted) {
-        lineWrapper.classList.add(`codeblock-customizer-RVline-highlighted`);
-        lineWrapper.style.setProperty("--codeblock-customizer-RVline-highlighted-color", settings.highlightColor);
+        lineWrapper.classList.add(`codeblock-customizer-line-highlighted`);
+        document.body.style.setProperty("--codeblock-customizer-line-highlighted-color", settings.highlightColor);
       }
       else if (altHLMatch.length > 0) {
-        lineWrapper.classList.add(`codeblock-customizer-RVline-highlighted-${altHLMatch[0].name}`);
-        lineWrapper.style.backgroundColor = altHLMatch[0].currentColor;
+        lineWrapper.classList.add(`codeblock-customizer-line-highlighted-${altHLMatch[0].name}`);
+        lineWrapper.style.setProperty("--codeblock-customizer-line-highlighted-color", altHLMatch[0].currentColor);
       }
       codeWrapper.appendChild(lineWrapper);
 
@@ -260,7 +261,8 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
     if (!isCodeBlockExcluded){
       if (codeElm.parentNode && codeElm.parentNode.nodeName === "PRE") {
         // only process code element which have a PRE parent (don't process LI elements)
-        codeElm.parentElement.style.backgroundColor = pluginSettings.backgroundColor;
+        codeElm.parentElement?.classList.add("codeblock-customizer-bg");
+        document.body.style.setProperty("--codeblock-customizer-code-background",pluginSettings.backgroundColor);
       }
     }
 
