@@ -17,13 +17,13 @@
 }
 
 /* Highlight active line inside codeblocks */
-[class^="codeblock-customizer-line-"].cm-active {
+.codeblock-customizer-active-codeblock-line-highlight .markdown-source-view [class*="codeblock-customizer-line-"].cm-active {
   background-color: var(--codeblock-customizer-codeblock-active-line-color);
 }
 
-/* Highlight active line inside codeblocks with !important flag */
-.codeblock-customizer-active-codeblock-line-highlight [class^="codeblock-customizer-line-"].cm-active {
-  background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
+/* Let active line highlight above gutter */
+.codeblock-customizer-active-codeblock-line-highlight [class*="codeblock-customizer-line-"].cm-active .codeblock-customizer-gutter-highlight {
+  background-color: rgba(0,0,0,0);
 }
 
 /* Apply border-radius only when line numbers are enabled */
@@ -66,6 +66,10 @@
   font-size: var(--code-size);
   font-family: var(--font-monospace);
   color: var(--codeblock-customizer-gutter-textColor);
+}
+
+[class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-gutter-highlight {
+  background-color: rgba(0,0,0,0);
 }
 
 .codeblock-customizer-gutter-line{

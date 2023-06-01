@@ -166,9 +166,9 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 
                 if (linenumbers) {
                   const lineRadius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
-                  document.body.style.setProperty("--codeblock-customizer-gutter-color",GutterBackgroundColor)
+                  document.body.style.setProperty("--codeblock-customizer-gutter-color",GutterBackgroundColor);
                   decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line ${lineRadius}`} }).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", "", GutterTextColor, true, false, isHeaderEnabled),}).range(node.from));
+                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", GutterHighlight, GutterTextColor, true, false, isHeaderEnabled),}).range(node.from));
                 }
               }
               if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" ) {
@@ -177,8 +177,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 
                 let backgroundClass = `codeblock-customizer-line-background`;
                 let Color = BgColor;
-                document.body.style.setProperty("--codeblock-customizer-gutter-color",GutterBackgroundColor)
-                let GutterHLClass = "";
+                document.body.style.setProperty("--codeblock-customizer-gutter-color",GutterBackgroundColor);
+                let gutterHL = false;
                 const altHLMatch = altHL.filter((hl) => hl.lineNumber === lineNumber);
                 if (HL.includes(lineNumber)) {
                   backgroundClass = `codeblock-customizer-line-highlighted`;
@@ -189,16 +189,9 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                 }
                 decorations.push(Decoration.line({ attributes: {class: backgroundClass, style: `--codeblock-customizer-line-highlighted-color: ${Color};`} }).range(node.from));
                 
-                if (linenumbers) {
-                  if (GutterHighlight && HL.includes(lineNumber)) {
-                    document.body.style.setProperty("--codeblock-customizer-gutter-highlight-color",HLColor)
-                    GutterHLClass = "codeblock-customizer-gutter-highlight";
-                  } else if (GutterHighlight && altHLMatch.length > 0) {
-                    document.body.style.setProperty(`--codeblock-customizer-gutter-highlight-${altHLMatch[0].name}-color`,altHLMatch[0].currentColor)
-                    GutterHLClass = `codeblock-customizer-gutter-highlight-${altHLMatch[0].name}`;
-                  }                  
+                if (linenumbers) {             
                   decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line`} }).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(lineNumber, GutterHLClass, GutterTextColor, false, false, false),}).range(node.from));
+                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(lineNumber, GutterHighlight, GutterTextColor, false, false, false),}).range(node.from));
                 }
                 lineNumber++;
               }
@@ -213,7 +206,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 
                 if (linenumbers) {
                   decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line codeblock-customizer-lastLine-background-radius`} }).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", "", GutterTextColor, false, true, false),}).range(node.from));
+                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", GutterHighlight, GutterTextColor, false, true, false),}).range(node.from));
                 }
                 lineNumber = 1;
               }                
@@ -246,28 +239,29 @@ function compareArrays(array1, array2) {
 }// compareArrays
 
 class LineNumberWidget extends WidgetType {
-  constructor(private lineNumber: number, private highlightClass: string, private GutterTextColor: string, private bFirstLine: boolean, private bLastLine: boolean, private isHeaderEnabled: boolean) {
+  constructor(private lineNumber: number, private gutterHL: boolean,private GutterTextColor: string, private bFirstLine: boolean, private bLastLine: boolean, private isHeaderEnabled: boolean) {
     super();
   }
 
   eq(other: LineNumberWidget) {
-    return this.lineNumber === other.lineNumber && this.textColor === other.textColor && this.highlightClass === other.highlightClass && other.GutterTextColor === this.GutterTextColor;
+    return this.lineNumber === other.lineNumber && this.textColor === other.textColor && this.gutterHL === other.gutterHL && this.GutterTextColor === other.GutterTextColor;
   }
 
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
     container.classList.add("codeblock-customizer-gutter-container");
-    if (this.highlightClass == "codeblock-customizer-gutter-highlight") {
-      container.classList.add(this.highlightClass);
-    }
+    
 
     const span = document.createElement("span");
+    if (this.gutterHL) {
+      span.classList.add("codeblock-customizer-gutter-highlight");
+    }
     span.classList.add("codeblock-customizer-gutter");
     if (this.bFirstLine && !this.isHeaderEnabled)
       span.classList.add("codeblock-customizer-gutterElements-first-radius");
     if (this.bLastLine)
       span.classList.add("codeblock-customizer-gutterElements-last-radius");
-      document.body.style.setProperty("--codeblock-customizer-gutter-textColor", this.GutterTextColor);
+    document.body.style.setProperty("--codeblock-customizer-gutter-textColor", this.GutterTextColor);
     
     span.innerText = `${this.lineNumber}`;
 
