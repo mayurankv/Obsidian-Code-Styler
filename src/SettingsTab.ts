@@ -280,7 +280,7 @@ export class SettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Enable codeblock active line hihglight')
+      .setName('Enable codeblock active line highlight')
       .setDesc('If enabled, you can set the color for the active line inside codeblocks only.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
