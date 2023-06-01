@@ -174,20 +174,19 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" ) {
                 if (bExclude)
                   return;
-
-                let backgroundClass = `codeblock-customizer-line-background`;
-                let Color = BgColor;
+                let attributesDict = {class: `codeblock-customizer-line-background`}
+                document.body.style.setProperty("--codeblock-customizer-line-background-color",BgColor);
                 document.body.style.setProperty("--codeblock-customizer-gutter-color",GutterBackgroundColor);
                 let gutterHL = false;
                 const altHLMatch = altHL.filter((hl) => hl.lineNumber === lineNumber);
                 if (HL.includes(lineNumber)) {
-                  backgroundClass = `codeblock-customizer-line-highlighted`;
-                  Color = HLColor;
+                  attributesDict.class = `codeblock-customizer-line-highlighted`;
+                  document.body.style.setProperty("--codeblock-customizer-line-highlighted-color",HLColor);
                 } else if (altHLMatch.length > 0) {
-                  backgroundClass = `codeblock-customizer-line-highlighted-${altHLMatch[0].name}`;
-                  Color = altHLMatch[0].currentColor;
+                  attributesDict.class = `codeblock-customizer-line-highlighted-${altHLMatch[0].name}`;
+                  attributesDict.style = `--codeblock-customizer-line-highlighted-color: ${altHLMatch[0].currentColor};`;
                 }
-                decorations.push(Decoration.line({ attributes: {class: backgroundClass, style: `--codeblock-customizer-line-highlighted-color: ${Color};`} }).range(node.from));
+                decorations.push(Decoration.line({ attributes: attributesDict}).range(node.from));
                 
                 if (linenumbers) {             
                   decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line`} }).range(node.from));
