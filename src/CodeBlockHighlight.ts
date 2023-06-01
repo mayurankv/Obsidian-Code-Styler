@@ -257,8 +257,8 @@ class LineNumberWidget extends WidgetType {
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
     container.classList.add("codeblock-customizer-gutter-container");
-    if (this.highlightClass) {
-      container.style.setProperty("--codeblock-customizer-gutter-color", this.highlightClass);
+    if (this.highlightClass == "codeblock-customizer-gutter-highlight") {
+      container.classList.add(this.highlightClass);
     }
 
     const span = document.createElement("span");
