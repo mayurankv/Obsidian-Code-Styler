@@ -1,7 +1,7 @@
 import { PluginSettingTab, Setting } from "obsidian";
 import Pickr from "@simonwep/pickr";
 
-import { updateActiveLineStyles } from "./Utils";
+import { updateSettingStyles } from "./Utils";
 import {
     D_ACTIVE_CODEBLOCK_LINE_COLOR,
     D_ACTIVE_LINE_COLOR,
@@ -248,13 +248,13 @@ export class SettingsTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.bActiveLineHighlight = value;
           await this.plugin.saveSettings();
-          updateActiveLineStyles(this.plugin.settings);
+          updateSettingStyles(this.plugin.settings);
         })
       );
-     
+    
     this.createPickrSetting(containerEl, 'Editor active line color', 
     'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
-     
+    
     new Setting(containerEl)
       .setName('Exclude languages')
       .setDesc('Define languages, separated by a comma, to which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
@@ -287,7 +287,7 @@ export class SettingsTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.bActiveCodeblockLineHighlight = value;          
           await this.plugin.saveSettings();
-          updateActiveLineStyles(this.plugin.settings);
+          updateSettingStyles(this.plugin.settings);
         })
       );
         
@@ -331,6 +331,7 @@ export class SettingsTab extends PluginSettingTab {
               alternateColors.push(newColor);
               await this.plugin.saveSettings();
               this.updateCurrentAlternateHLColor();
+              //STYLE Add style here
               new Notice(`Added color "${alternateHLName}".`);
               alternateColorDisplayText.setValue("");
               alternateHLName = "";
@@ -531,7 +532,7 @@ export class SettingsTab extends PluginSettingTab {
     this.plugin.settings.header.codeBlockLangColor = selectedTheme.colors.header.codeBlockLangColor;
     this.plugin.settings.header.codeBlockLangBackgroundColor = selectedTheme.colors.header.codeBlockLangBackgroundColor;
     
-    updateActiveLineStyles(this.plugin.settings);
+    updateSettingStyles(this.plugin.settings);
     this.updateCurrentAlternateHLColor();
   }// applyTheme
   
@@ -622,9 +623,9 @@ export class SettingsTab extends PluginSettingTab {
         })
         .on('show', (color: Pickr.HSVaColor, instance: Pickr) => { // Pickr got opened
             if ((!this.plugin.settings.bActiveCodeblockLineHighlight && pickrClass === 'activeCodeBlockLineColor') ||
-               (!this.plugin.settings.bActiveLineHighlight && pickrClass === 'activeLineColor') ||
-               (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangColor') ||
-               (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangBackgroundColor')){
+                (!this.plugin.settings.bActiveLineHighlight && pickrClass === 'activeLineColor') ||
+                (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangColor') ||
+                (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangBackgroundColor')){
               pickr?.hide();
             }
             const {result} = (pickr.getRoot() as any).interaction;
@@ -639,9 +640,10 @@ export class SettingsTab extends PluginSettingTab {
             const savedColor = color.toHEXA().toString();
             instance.addSwatch(savedColor);
             this.setAndSavePickrSetting(pickrClass, savedColor);
+            //STYLE add here
             // if the active line color changed update it
             if (pickrClass === 'activeLineColor' || pickrClass === 'activeCodeBlockLineColor'){
-              updateActiveLineStyles(this.plugin.settings);
+              updateSettingStyles(this.plugin.settings);
             }
         })
         .on('cancel', (instance: Pickr) => {
@@ -651,7 +653,7 @@ export class SettingsTab extends PluginSettingTab {
       .addExtraButton((btn) => {
         btn.setIcon("reset")
           .onClick(() => {
-            if (this.plugin.settings.SelectedTheme === "Light Theme" ) {
+            if (this.plugin.settings.SelectedTheme === "Light Theme" ) { //TODO (@mayurankv) Use a dictionary instead here
               if (pickrClass === 'activeCodeBlockLineColor') {
                 pickrDefault = L_ACTIVE_CODEBLOCK_LINE_COLOR;
               } else if (pickrClass === 'activeLineColor') {
@@ -782,6 +784,7 @@ export class SettingsTab extends PluginSettingTab {
             const savedColor = color.toHEXA().toString();
             instance.addSwatch(savedColor);
             this.setAndSaveAlternatePickrSetting(name, savedColor, false);
+            //STYLE add here
         })
         .on('cancel', (instance: Pickr) => {
             instance.hide();
@@ -795,6 +798,7 @@ export class SettingsTab extends PluginSettingTab {
             const index = this.plugin.settings.alternateColors.findIndex((c: any) => c.name === name);
             this.plugin.settings.alternateColors.splice(index, 1);
             await this.plugin.saveSettings();
+            // STYLE remove here
             new Notice(`Removed color "${name}".`);
             this.updateColorContainer(colorContainer); // Update the color container after deleting a color
           });

@@ -3,7 +3,7 @@
 /* Codeblock background colours */
 .markdown-rendered pre.codeblock-customizer-bg,
 .markdown-source-view .codeblock-customizer-line-background.HyperMD-codeblock {
-  background-color: var(--codeblock-customizer-code-background);
+  background-color: var(--codeblock-customizer-codeblock-background-color);
 }
 
 /* Highlight active line outside codeblocks */
@@ -21,8 +21,8 @@
   background-color: var(--codeblock-customizer-codeblock-active-line-color);
 }
 
-/* Let active line highlight above gutter */
-.codeblock-customizer-active-codeblock-line-highlight [class*="codeblock-customizer-line-"].cm-active .codeblock-customizer-gutter-highlight {
+/* Let active line highlight gutter */
+.codeblock-customizer-active-codeblock-line-highlight.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-"].cm-active .codeblock-customizer-gutter{
   background-color: rgba(0,0,0,0);
 }
 
@@ -60,15 +60,16 @@
   text-align: right;
   display: inline-block;
   height: 100%;
-  background-color: var(--codeblock-customizer-gutter-color);
+  background-color: var(--codeblock-customizer-gutter-background-color);
   width: 38px;
   user-select: none;
   font-size: var(--code-size);
   font-family: var(--font-monospace);
-  color: var(--codeblock-customizer-gutter-textColor);
+  color: var(--codeblock-customizer-gutter-text-color);
 }
 
-[class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-gutter-highlight {
+.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-gutter,
+.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-line-number {
   background-color: rgba(0,0,0,0);
 }
 
@@ -89,8 +90,8 @@
   user-select: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  background-color: var(--header-color);
-  border-bottom: 2px groove var(--header-line-color);
+  background-color: var(--codeblock-customizer-header-background-color);
+  border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
   margin-top: 16px;               /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */
 }
 /* Fix for incorrectly displaying header when usin "minimal" theme */
@@ -124,9 +125,9 @@
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   font-size: 14px;
-  color: var(--header-text-color);
-  font-weight: var(--header-bold, normal);
-  font-style: var(--header-italic, normal);
+  color: var(--codeblock-customizer-header-text-color);
+  font-weight: var(--codeblock-customizer-header-text-bold, normal);
+  font-style: var(--codeblock-customizer-header-text-italic, normal);
 }
 
 /* style codeblock header language tag*/
@@ -136,11 +137,11 @@
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   font-size: 14px;
-  background-color: var(--codeblock-lang-background-color);
-  color: var(--codeblock-lang-color);
+  background-color: var(--codeblock-customizer-language-tag-background-color);
+  color: var(--codeblock-customizer-language-tag-text-color);
   border-radius: 5px 5px 5px 0px;
-  font-weight: var(--codeblock-lang-bold, normal);
-  font-style: var(--codeblock-lang-italic, normal);
+  font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
+  font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
 }
 
 /* center donation button */
@@ -167,18 +168,18 @@
   padding-right: 8px;
   font-size: var(--code-size);
   font-family: var(--font-monospace);
-  background-color: var(--codeblock-customizer-line-number-color);
-  color: var(--codeblock-customizer-line-number-textColor);
+  background-color: var(--codeblock-customizer-gutter-background-color);
+  color: var(--codeblock-customizer-gutter-text-color);
   flex-shrink: 0;
   user-select: none;
 }
+
+/* Prevent Line Wraps */
+
+
 /* codeblock-customizer-line */
-.markdown-rendered [class*="codeblock-customizer-line-highlighted"],
-.markdown-source-view .codeblock-customizer-gutter-line[class*="codeblock-customizer-line-highlighted"] {
-  background-color: var(--codeblock-customizer-line-highlighted-color);
-}
-.markdown-rendered .codeblock-customizer-line-number[class*="codeblock-customizer-line-number-highlighted"] {
-  background-color: var(--codeblock-customizer-line-number-highlighted-color);
+.codeblock-customizer-line-highlighted {
+  background-color: var(--codeblock-customizer-highlight-color) !important;
 }
 
 .markdown-rendered .codeblock-customizer-line-text {

@@ -83,7 +83,6 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
       if (Currentcodeblock.parentNode && Currentcodeblock.parentNode.nodeName === "PRE") {
         // only process code element which have a PRE parent (don't process LI elements)
         Currentcodeblock.parentElement.classList.add("codeblock-customizer-bg");
-        document.body.style.setProperty("--codeblock-customizer-code-background",pluginSettings.backgroundColor);
       }
     }
   }
@@ -138,17 +137,6 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
 function createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch) {
   const lineNumberWrapper = document.createElement("div");
   lineNumberWrapper.classList.add(`codeblock-customizer-line-number`);
-  document.body.style.setProperty("--codeblock-customizer-line-number-color", settings.gutterBackgroundColor);
-  document.body.style.setProperty("--codeblock-customizer-line-number-textColor", settings.gutterTextColor);
-
-  if (isHighlighted && settings.bGutterHighlight) {
-    lineNumberWrapper.classList.add(`codeblock-customizer-line-number-highlighted`);
-    document.body.style.setProperty("--codeblock-customizer-line-number-highlighted-color", settings.highlightColor);
-  }
-  else if (altHLMatch.length > 0 && settings.bGutterHighlight) {
-    lineNumberWrapper.classList.add(`codeblock-customizer-line-number-highlighted-${altHLMatch[0].name}`);
-    lineNumberWrapper.style.setProperty("--codeblock-customizer-line-number-highlighted-color", altHLMatch[0].currentColor);
-  }
   lineNumberWrapper.setText(lineNumber);
   
   return lineNumberWrapper;
@@ -185,11 +173,10 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
       lineWrapper.classList.add(`codeblock-customizer-line`);
       if (isHighlighted) {
         lineWrapper.classList.add(`codeblock-customizer-line-highlighted`);
-        document.body.style.setProperty("--codeblock-customizer-line-highlighted-color", settings.highlightColor);
+        // document.body.style.setProperty("--codeblock-customizer-line-highlighted-color", settings.highlightColor);
       }
       else if (altHLMatch.length > 0) {
-        lineWrapper.classList.add(`codeblock-customizer-line-highlighted-${altHLMatch[0].name}`);
-        lineWrapper.style.setProperty("--codeblock-customizer-line-highlighted-color", altHLMatch[0].currentColor);
+        lineWrapper.classList.add(`codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`);
       }
       codeWrapper.appendChild(lineWrapper);
 
@@ -262,7 +249,7 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
       if (codeElm.parentNode && codeElm.parentNode.nodeName === "PRE") {
         // only process code element which have a PRE parent (don't process LI elements)
         codeElm.parentElement?.classList.add("codeblock-customizer-bg");
-        document.body.style.setProperty("--codeblock-customizer-code-background",pluginSettings.backgroundColor);
+        // document.body.style.setProperty("--codeblock-customizer-code-background",pluginSettings.backgroundColor);
       }
     }
 

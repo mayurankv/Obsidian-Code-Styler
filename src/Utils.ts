@@ -158,16 +158,12 @@ export function loadIcons(){
 export function createContainer(header: CodeBlockMeta) {
   const container = document.createElement("div");
   container.classList.add("codeblock-customizer-header-container");
-  document.body.style.setProperty("--header-color", header.color);
-  document.body.style.setProperty("--header-line-color", header.lineColor);
-  
   return container;
 }// createContainer
 
 export function createWrapper() {
   const wrapper = document.createElement("div");
   wrapper.classList.add("codeblock-customizer-header-wrapper");
-
   return wrapper;
 }// createWrapper
 
@@ -175,13 +171,6 @@ export function createCodeblockLang(lang: string, header: CodeBlockMeta) {
   const codeblockLang = document.createElement("div");
   codeblockLang.innerText = lang;
   codeblockLang.classList.add("codeblock-customizer-header-language-tag");
-  document.body.style.setProperty("--codeblock-lang-background-color", header.codeBlockLangBackgroundColor);
-  document.body.style.setProperty("--codeblock-lang-color", header.codeBlockLangColor);
-  if (header.bCodeblockLangBold)
-  document.body.style.setProperty("--codeblock-lang-bold", "bold");
-  if (header.bCodeblockLangItalic)
-  document.body.style.setProperty("--codeblock-lang-italic", "italic");
-  
   return codeblockLang;
 }// createCodeblockLang
 
@@ -205,45 +194,77 @@ export function createFileName(text: string, header: CodeBlockMeta) {
   const fileName = document.createElement("div");
   fileName.innerText = text;
   fileName.classList.add("codeblock-customizer-header-text");
-  document.body.style.setProperty("--header-text-color", header.textColor);
-  if (header.bHeaderBold)
-    document.body.style.setProperty("--header-bold", "bold");
-  if (header.bHeaderItalic)
-    document.body.style.setProperty("--header-italic", "italic");
-
   return fileName;
 }// createFileName
 
 // Functions for displaying header END
 
-export function updateActiveLineStyles(settings) {
+const stylesDict = {
+  activeCodeBlockLineColor: 'codeblock-active-line-color',
+  activeLineColor: 'editor-active-line-color',
+  backgroundColor: 'codeblock-background-color',
+  highlightColor: 'highlight-color',
+  headerColor: 'header-background-color',
+  headerTextColor: 'header-text-color',
+  headerLineColor: 'header-line-color',
+  gutterTextColor: 'gutter-text-color',
+  gutterBackgroundColor: 'gutter-background-color',
+  codeBlockLangColor: 'language-tag-text-color',
+  codeBlockLangBackgroundColor: 'language-tag-background-color',
+}
+
+export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
+  let colorThemes = settings.colorThemes;
+  let styleId = 'codeblock-customizer-styles'
+  let styleTag = document.getElementById(styleId);
+  if (typeof(styleTag) == 'undefined' || styleTag == null) {
+    styleTag = document.createElement('style');
+    styleTag.id = styleId;
+    document.getElementsByTagName('head')[0].appendChild(styleTag);
+  }
+  let defaultThemeColors = settings.colorThemes.find((theme) => {return theme['name'] == settings.SelectedTheme})['colors'];
+  let currentTheme = {name: 'current', colors: {}};
+  for (const key of Object.keys(stylesDict)) {
+    let currentValue = accessSetting(key,settings);
+    if (accessSetting(key,defaultThemeColors) != currentValue) {
+      currentTheme['colors'][key] = currentValue;
+    }
+  }
+  let altHighlightStyling = settings.alternateColors.reduce((styling,altHighlight) => {return styling + `
+    .codeblock-customizer-line-highlighted-${altHighlight['name'].replace(/\s+/g, '-').toLowerCase()} {
+      background-color: var(--codeblock-customiser-highlight-${altHighlight['name'].replace(/\s+/g, '-').toLowerCase()}-color) !important;
+    }
+  `},'');
+  let textSettingsStyles = `
+    body.codeblock-customizer .codeblock-customizer-header-language-tag {
+      --codeblock-customizer-language-tag-text-bold: ${settings.header.bCodeblockLangBold?'bold':'normal'};
+      --codeblock-customizer-language-tag-text-italic: ${settings.header.bCodeblockLangItalic?'italic':'normal'};
+    }
+    body.codeblock-customizer .codeblock-customizer-header-text {
+      --codeblock-customizer-header-text-bold: ${settings.header.bHeaderBold?'bold':'normal'};
+      --codeblock-customizer-header-text-italic: ${settings.header.bHeaderItalic?'italic':'normal'};
+    }
+  `;
+  styleTag.innerText = colorThemes.reduce((styles,theme) => {
+    return styles + formatStyles(theme,settings.alternateColors);
+  },formatStyles(currentTheme,settings.alternateColors)+altHighlightStyling+textSettingsStyles).trim().replace(/[\r\n\s]+/g, ' ');
+  updateSettingClasses(settings);
+}// setStyles
+
+function updateSettingClasses(settings) {
   if (settings.bActiveLineHighlight && settings.bActiveCodeblockLineHighlight) {
     // Inside and outside of codeblocks with different colors
-    document.documentElement.style.setProperty("--codeblock-customizer-editor-active-line-color", settings.activeLineColor);
-    document.documentElement.style.setProperty("--codeblock-customizer-codeblock-active-line-color", settings.activeCodeBlockLineColor);
-
     document.body.classList.add("codeblock-customizer-active-codeblock-line-highlight");
   } else if (settings.bActiveLineHighlight && !settings.bActiveCodeblockLineHighlight) {
     // Only outside codeblocks
-    document.documentElement.style.setProperty("--codeblock-customizer-editor-active-line-color", settings.activeLineColor);
-    document.documentElement.style.removeProperty("--codeblock-customizer-codeblock-active-line-color");
-    
     document.body.classList.add("codeblock-customizer-active-codeblock-line-important");
-    
     document.body.classList.remove("codeblock-customizer-active-codeblock-line-highlight");
   } else if (!settings.bActiveLineHighlight && settings.bActiveCodeblockLineHighlight) {
     // Only inside codeblocks
-    document.documentElement.style.setProperty("--codeblock-customizer-codeblock-active-line-color", settings.activeCodeBlockLineColor);
-    document.documentElement.style.removeProperty("--codeblock-customizer-editor-active-line-color");
-    
     document.body.classList.remove("codeblock-customizer-active-codeblock-line-important");
-    
     document.body.classList.add("codeblock-customizer-active-codeblock-line-highlight");
   } else {
     // Disabled
-    document.documentElement.style.removeProperty("--codeblock-customizer-editor-active-line-color");
-    document.documentElement.style.removeProperty("--codeblock-customizer-codeblock-active-line-color");
-
     document.body.classList.remove("codeblock-customizer-active-codeblock-line-highlight");
     document.body.classList.remove("codeblock-customizer-active-codeblock-line-important");
   }
@@ -253,4 +274,61 @@ export function updateActiveLineStyles(settings) {
   } else {
     document.body.classList.remove("codeblock-customizer-enable-line-numbers");
   }
-}// updateActiveLineStyles
+
+  if (settings.bGutterHighlight) {
+    document.body.classList.add('codeblock-customizer-gutter-highlight');
+  } else {
+    document.body.classList.remove('codeblock-customizer-gutter-highlight');
+  }
+}// updateSettingStyles
+
+function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},alternateColors) { //todo (@mayurankv) Add type hint for alternateColors
+  let current = theme['name'] == "current";
+  let themeClass = ''
+  let altHighlightStyles = ''
+  if (theme['name'] == 'Light Theme') {
+    themeClass = 'theme-light';
+    altHighlightStyles = addAltHighlightColors(alternateColors,true);
+  } else if (theme['name'] == 'Dark Theme') {
+    themeClass = 'theme-dark';
+    altHighlightStyles = addAltHighlightColors(alternateColors,false);
+  } else {
+    themeClass = theme['name'].replace(/\s+/g, '-').toLowerCase();
+  }
+  return `
+    body.codeblock-customizer${current ?'':`.${themeClass}`} {
+      ${Object.keys(stylesDict).reduce((variables,key)=>{
+        let cssVariable = `--codeblock-customizer-${stylesDict[key]}`;
+        let cssValue = accessSetting(key,theme['colors']);
+        let cssImportant = (themeClass == 'current' ?' !important':'');
+        if (cssValue != null) {
+          return variables + `${cssVariable}: ${cssValue + cssImportant};`;
+        } else {
+          return variables;
+        }
+      },altHighlightStyles)}
+    }
+  `;
+}// formatStyles
+
+function addAltHighlightColors(alternateColors, lightTheme: boolean) { //todo (@mayurankv) Add type hint for alternateColors
+  let key = lightTheme?'lightColor':'darkColor';
+  return alternateColors.reduce((altHighlightStyles,altHighlight) => {return altHighlightStyles + `--codeblock-customiser-highlight-${altHighlight['name'].replace(/\s+/g, '-').toLowerCase()}-color: ${altHighlight[key]};`},'')
+}
+
+function accessSetting(key: string, settings: CodeblockCustomizerSettings) {
+  if (key in settings) {
+    return settings[key];
+  } else if ('header' in settings) {
+    if (key in settings['header']) {
+      return settings['header'][key];
+    } else {
+      let alt_key = key.charAt(6).toLowerCase()+key.slice(7);
+      if (alt_key in settings['header']) {
+        return settings['header'][alt_key];
+      } 
+    }
+  } else {
+    return null;
+  }
+}

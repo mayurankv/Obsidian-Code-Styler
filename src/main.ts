@@ -6,7 +6,7 @@ import { codeblockHighlight } from "./CodeBlockHighlight";
 import { codeblockHeader, collapseField } from "./Header";
 import { ReadingView } from "./ReadingView";
 import { SettingsTab } from "./SettingsTab";
-import { loadIcons, BLOBS, updateActiveLineStyles } from "./Utils";
+import { loadIcons, BLOBS, updateSettingStyles } from "./Utils";
 
 // npm i @simonwep/pickr
 
@@ -16,8 +16,8 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   theme: string;
   
   async onload() {
+    document.body.classList.add('codeblock-customizer');
     await this.loadSettings();
-    
     this.extensions = [];
 
     // eslint main.ts
@@ -37,8 +37,7 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 
     this.extensions.push(codeblockHighlight(this.settings));
 
-    if ((this.settings.bActiveCodeblockLineHighlight) || (this.settings.bActiveLineHighlight))
-      updateActiveLineStyles(this.settings);
+    updateSettingStyles(this.settings);
     
     this.registerEditorExtension(this.extensions);
     
@@ -105,6 +104,7 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 	}
 
 	async saveSettings() {
+    updateSettingStyles(this.settings);
 		await this.saveData(this.settings);
     this.app.workspace.updateOptions();
 	}
