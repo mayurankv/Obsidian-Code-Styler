@@ -68,7 +68,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   const Fold = searchString(codeBlockFirstLine, "fold");
   const alternateColors = pluginSettings.alternateColors || [];
   let altHL = [];
-  for (const { name, currentColor } of alternateColors) {
+  for (const { name, _ } of alternateColors) {
     const altParams = searchString(codeBlockFirstLine, `${name}:`);
     altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
   }
@@ -126,6 +126,7 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
 
 function createLineNumberElement(lineNumber) {
   const lineNumberWrapper = document.createElement("div");
+  //TODO (@mayurankv) If the numbers are set with ln parameter, then make this an if statement and instead add a new class called 'codeblock-customizer-line-number-specific' which can then be targeted by css
   lineNumberWrapper.classList.add(`codeblock-customizer-line-number`);
   lineNumberWrapper.setText(lineNumber);
   
@@ -169,10 +170,8 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
       codeWrapper.appendChild(lineWrapper);
 
       // create line number element
-      if (settings.bEnableLineNumbers) {
-        const lineNumberEl = createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch);
-        lineWrapper.appendChild(lineNumberEl);
-      }
+      const lineNumberEl = createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch);
+      lineWrapper.appendChild(lineNumberEl);
 
       // create line text element
       const lineTextEl = createLineTextElement(line, lineNumber);
@@ -221,7 +220,7 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
     const Fold = searchString(codeBlockFirstLine, "fold");
     const alternateColors = pluginSettings.alternateColors || [];
     let altHL = [];
-    for (const { name, currentColor } of alternateColors) {
+    for (const { name, _ } of alternateColors) {
       const altParams = searchString(codeBlockFirstLine, `${name}:`);
       altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
     }

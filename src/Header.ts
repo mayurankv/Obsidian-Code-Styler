@@ -11,7 +11,6 @@ function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) 
   let bExclude = false;
   const builder = new RangeSetBuilder<Decoration>();
   for (let i = 1; i < state.doc.lines; i++) {
-    bExclude = false;
     const lineText = state.doc.line(i).text.toString();
     const line = state.doc.line(i);
     bExclude = isExcluded(lineText, settings.ExcludeLangs);
@@ -173,19 +172,19 @@ class TextAboveCodeblockWidget extends WidgetType {
     
   toDOM(view: EditorView): HTMLElement {
     this.view = view;
-    const container = createContainer(this.Header);
+    const container = createContainer(false);
     const wrapper = createWrapper();
     if (this.Lang && this.bDisplayCodeBlockIcon){
       const Icon = getLanguageIcon(this.Lang)
       if (Icon) {
-        wrapper.appendChild(createCodeblockIcon(this.Lang, Icon, this.bDisplayCodeBlockLanguage));
+        wrapper.appendChild(createCodeblockIcon(this.Lang, this.bDisplayCodeBlockLanguage));
       }
     }
     if (this.Lang && this.bDisplayCodeBlockLanguage){
-      wrapper.appendChild(createCodeblockLang(this.Lang, this.Header));
+      wrapper.appendChild(createCodeblockLang(this.Lang));
     }
 
-    wrapper.appendChild(createFileName(this.text, this.Header));   
+    wrapper.appendChild(createFileName(this.text));   
     container.appendChild(wrapper);
     
     this.observer.view = view;

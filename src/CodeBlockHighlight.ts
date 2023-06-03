@@ -136,62 +136,44 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               const line = view.state.doc.lineAt(node.from);
               const lineText = view.state.sliceDoc(line.from, line.to);
               const lang = searchString(lineText, "```");
-              if (lang)
+              const startLine = node.type.name.includes("HyperMD-codeblock-begin")
+              const endLine = node.type.name.includes("HyperMD-codeblock-end")
+              if (lang) {
                 bExclude = isExcluded(lineText, settings.ExcludeLangs);
-              if (node.type.name.includes("HyperMD-codeblock-begin") ) {
-                if (bExclude)
-                  return;
-                
+              }
+              if (bExclude) {
+                if (endLine) {
+                  bExclude = false;
+                }
+                return;
+              }
+              if (startLine) {
+                lineNumber = 0;
                 const params = searchString(lineText, "HL:");
                 HL = getHighlightedLines(params);
                 altHL = [];
-                for (const { name, currentColor } of alternateColors) {
+                for (const { name, _ } of alternateColors) {
                   const altParams = searchString(lineText, `${name}:`);
-                  altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, currentColor, lineNumber })));
-                }
-                const FileName = searchString(lineText, "file:");
-                const Fold = searchString(lineText, "fold");
-                const codeBlockLang = searchString(lineText, "```");
-                const isHeaderEnabled = ((FileName !== "" && FileName !== null) || Fold || ((bDisplayCodeBlockLanguage && bAlwaysDisplayCodeblockLang) || ( bDisplayCodeBlockIcon && bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeBlockLang))) && codeBlockLang)) ? true : false;
-                
-                decorations.push(Decoration.line({attributes: {class: 'codeblock-customizer-line'}}).range(node.from));
-
-                if (linenumbers) {
-                  decorations.push(Decoration.line({}).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" "),}).range(node.from));
+                  altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
                 }
               }
-              if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" ) {
-                if (bExclude)
-                  return;
-                let lineClass = 'codeblock-customizer-line';
+              let lineClass = 'codeblock-customizer-line';
+              if (HL.includes(lineNumber)) {
+                lineClass = 'codeblock-customizer-line-highlighted';
+              } else {
                 const altHLMatch = altHL.filter((hl) => hl.lineNumber === lineNumber);
-                if (HL.includes(lineNumber)) {
-                  lineClass = 'codeblock-customizer-line-highlighted';
-                } else if (altHLMatch.length > 0) {
+                if (altHLMatch.length > 0) {
                   lineClass = `codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`;
                 }
-                decorations.push(Decoration.line({ attributes: {class: lineClass}}).range(node.from));
-                
-                if (linenumbers) {             
-                  decorations.push(Decoration.line({}).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(lineNumber),}).range(node.from));
-                }
+              }
+
+              if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" || startLine || endLine) {
+                decorations.push(Decoration.line({attributes: {class: lineClass}}).range(node.from));
+
+                decorations.push(Decoration.line({}).range(node.from));
+                decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber),}).range(node.from));
                 lineNumber++;
               }
-              if (node.type.name.includes("HyperMD-codeblock-end") ) {
-                if (bExclude){
-                  bExclude = false;
-                  return;
-                }
-                decorations.push(Decoration.line({attributes: {class: 'codeblock-customizer-line'}}).range(node.from));
-
-                if (linenumbers) {
-                  decorations.push(Decoration.line({}).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" "),}).range(node.from));
-                }
-                lineNumber = 1;
-              }                
             },
           });
         }
@@ -232,7 +214,8 @@ class LineNumberWidget extends WidgetType {
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
     const span = document.createElement("span");
-    span.classList.add("codeblock-customizer-gutter");
+    //TODO (@mayurankv) If the numbers are set with ln parameter, then make this an if statement and instead add a new class called 'codeblock-customizer-line-number-specific' which can then be targeted by css
+    span.classList.add("codeblock-customizer-line-number");
     span.innerText = `${this.lineNumber}`;
 
     container.appendChild(span);

@@ -1,5 +1,5 @@
 :root {
-  --gutter-width: 38px;
+  --line-number-gutter-width: 38px;
   --border-radius: 5px;
 }
 
@@ -10,82 +10,85 @@
 }
 
 /* Maintain gutter color when padded */
-.codeblock-customizer-enable-line-numbers .markdown-rendered pre.codeblock-customizer-pre {
-  background: linear-gradient(var(--codeblock-customizer-codeblock-background-color),var(--codeblock-customizer-codeblock-background-color)) var(--gutter-width) bottom/100% border-box no-repeat,var(--codeblock-customizer-gutter-background-color);
+.codeblock-customizer-show-line-numbers .markdown-rendered pre.codeblock-customizer-pre {
+  background: linear-gradient(var(--codeblock-customizer-codeblock-background-color),var(--codeblock-customizer-codeblock-background-color)) var(--line-number-gutter-width) bottom/100% border-box no-repeat,var(--codeblock-customizer-gutter-background-color);
 }
 
-/* Highlight active line outside codeblocks */
+/* Highlight active line outside codeblocks
 .cm-active {
   background-color: var(--codeblock-customizer-editor-active-line-color);
-}
+} */
 
 /* Highlight active line outside codeblocks with !important flag */
-.codeblock-customizer-active-codeblock-line-important .cm-active {
+.codeblock-customizer-active-line-highlight .cm-active,
+.codeblock-customizer-active-line-highlight-editor .cm-active {
   background-color: var(--codeblock-customizer-editor-active-line-color) !important;
 }
 
 /* Highlight active line inside codeblocks */
-.codeblock-customizer-active-codeblock-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
+.codeblock-customizer-active-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active,
+.codeblock-customizer-active-line-highlight-codeblock .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
   background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
 }
 
-/* Let active line highlight gutter */
-.codeblock-customizer-active-codeblock-line-highlight.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-gutter {
-  background-color: rgba(0,0,0,0);
-}
-
 :not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin,
-.cm-content:first-child .HyperMD-codeblock-begin {
+.cm-content .HyperMD-codeblock-begin:first-child {
   border-top-left-radius: var(--border-radius) !important;
   border-top-right-radius: var(--border-radius) !important;
 }
-
 .codeblock-customizer-header-container + .HyperMD-codeblock-begin {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
 }
-
 .HyperMD-codeblock-end{
   border-bottom-left-radius: var(--border-radius) !important;
   border-bottom-right-radius: var(--border-radius) !important;
 }
 
 /* style gutter */
-.codeblock-customizer-gutter{
-  position: absolute;
-  left: 0;
+.codeblock-customizer:not(.codeblock-customizer-show-line-numbers) .codeblock-customizer-line-number {
+  display: none;
+}
+.codeblock-customizer-line-number,
+.codeblock-customizer-line-number-specific {
   padding-left: 4px;
   padding-right: 8px;
   text-align: right;
-  display: inline-block;
-  height: 100%;
   background-color: var(--codeblock-customizer-gutter-background-color);
   width: 38px;
-  user-select: none;
   font-size: var(--code-size);
   font-family: var(--font-monospace);
   color: var(--codeblock-customizer-gutter-text-color);
 }
+.markdown-source-view .codeblock-customizer-line-number,
+.markdown-source-view .codeblock-customizer-line-number-specific {
+  position: absolute;
+  left: 0;
+  display: inline-block;
+  height: 100%;
+  user-select: none;
+}
+.markdown-rendered [class^='codeblock-customizer-line-number'] {
+  flex-shrink: 0;
+  user-select: none;
+}
 
-.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-gutter,
-.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-line-number {
+/* Let gutter be highlighted */
+.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
+.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
+.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] [class^='codeblock-customizer-line-number'] {
   background-color: rgba(0,0,0,0);
 }
-
-.HyperMD-codeblock:has(.codeblock-customizer-gutter){
+.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has([class^='codeblock-customizer-line-number']){
   padding-left: 54px !important;
 }
-
-:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin .codeblock-customizer-gutter,
-.cm-content:first-child .HyperMD-codeblock-begin .codeblock-customizer-gutter {
+:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+.cm-content .HyperMD-codeblock-begin:first-child [class^='codeblock-customizer-line-number'] {
   border-top-left-radius: var(--border-radius);
 }
-
-.HyperMD-codeblock-end .codeblock-customizer-gutter  {
+.HyperMD-codeblock-end [class^='codeblock-customizer-line-number']  {
   border-bottom-left-radius: var(--border-radius);
 }
-
-
 
 /* style header-container */
 .codeblock-customizer-header-container {
@@ -117,7 +120,7 @@
 }
 
 /* style codeblock header wrapper */
-.codeblock-customizer-header-wrapper {
+.codeblock-customizer-header-container > div {
   display: flex;
 }
 
@@ -133,7 +136,7 @@
 }
 
 /* style codeblock header language tag*/
-.codeblock-customizer-header-language-tag {
+.codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"] {
   padding-left: 15px;
   padding-right: 15px;
   padding-top: 0.3em;
@@ -163,19 +166,6 @@
   display: flex;
 }
 
-.markdown-rendered .codeblock-customizer-line-number {
-  width: 38px;
-  text-align: right;
-  padding-left: 4px;
-  padding-right: 8px;
-  font-size: var(--code-size);
-  font-family: var(--font-monospace);
-  background-color: var(--codeblock-customizer-gutter-background-color);
-  color: var(--codeblock-customizer-gutter-text-color);
-  flex-shrink: 0;
-  user-select: none;
-}
-
 /* Prevent Line Wraps */
 .HyperMD-codeblock:has(> .cm-widgetBuffer) {
 	white-space: nowrap;
@@ -199,31 +189,24 @@
   padding-right: 0px !important;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
   padding-left: 0px !important;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
 }
-
 .codeblock-customizer-pre {
   margin-top: 0px !important;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
   border-radius: var(--border-radius) !important;
   padding-top: 0px !important;    /* padding-top and bottom must be set at the pre code element*/
   padding-bottom: 0px !important;
 }
-
 .codeblock-customizer-pre-parent{
   margin-bottom: 16px;
 }
-
 .codeblock-customizer-header-container + .codeblock-customizer-pre {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
 }
-
 .codeblock-customizer-pre code {
   padding-top: 8px !important;
   padding-bottom: 8px !important;
   padding-left: 0px !important;
   padding-right: 0px !important;
-}
-
-.codeblock-customizer-pre code > div > div:first-child div.codeblock-customizer-line-number {
 }
 
 /* pickr start */

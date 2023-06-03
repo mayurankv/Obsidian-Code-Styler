@@ -155,26 +155,25 @@ export function loadIcons(){
 }// loadIcons
 
 // Functions for displaying header BEGIN
-export function createContainer() {
+export function createContainer(specific: boolean) {
   const container = document.createElement("div");
-  container.classList.add("codeblock-customizer-header-container");
+  container.classList.add(`codeblock-customizer-header-container${specific?'-specific':''}`);
   return container;
 }// createContainer
 
 export function createWrapper() {
   const wrapper = document.createElement("div");
-  wrapper.classList.add("codeblock-customizer-header-wrapper");
   return wrapper;
 }// createWrapper
 
 export function createCodeblockLang(lang: string) {
   const codeblockLang = document.createElement("div");
   codeblockLang.innerText = lang;
-  codeblockLang.classList.add("codeblock-customizer-header-language-tag");
+  codeblockLang.classList.add(`codeblock-customizer-header-language-tag-${lang.replace(/\s+/g, '-').toLowerCase()}`);
   return codeblockLang;
 }// createCodeblockLang
 
-export function createCodeblockIcon(displayLang: string, Icon: string, bDisplayCodeBlockLanguage: boolean) {
+export function createCodeblockIcon(displayLang: string, bDisplayCodeBlockLanguage: boolean) {
   const div = document.createElement("div");
   div.classList.add("codeblock-customizer-icon-container");
   if (bDisplayCodeBlockLanguage)
@@ -236,7 +235,7 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
     }
   `},'');
   let textSettingsStyles = `
-    body.codeblock-customizer .codeblock-customizer-header-language-tag {
+    body.codeblock-customizer [class^="codeblock-customizer-header-language-tag"] {
       --codeblock-customizer-language-tag-text-bold: ${settings.header.bCodeblockLangBold?'bold':'normal'};
       --codeblock-customizer-language-tag-text-italic: ${settings.header.bCodeblockLangItalic?'italic':'normal'};
     }
@@ -252,27 +251,28 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
 }// setStyles
 
 function updateSettingClasses(settings) {
+  document.body.classList.remove("codeblock-customizer-active-line-highlight","codeblock-customizer-active-line-highlight-codeblock","codeblock-customizer-active-line-highlight-editor")
   if (settings.bActiveLineHighlight && settings.bActiveCodeblockLineHighlight) {
     // Inside and outside of codeblocks with different colors
-    document.body.classList.add("codeblock-customizer-active-codeblock-line-highlight");
+    document.body.classList.add("codeblock-customizer-active-line-highlight");
   } else if (settings.bActiveLineHighlight && !settings.bActiveCodeblockLineHighlight) {
     // Only outside codeblocks
-    document.body.classList.add("codeblock-customizer-active-codeblock-line-important");
-    document.body.classList.remove("codeblock-customizer-active-codeblock-line-highlight");
+    document.body.classList.add("codeblock-customizer-active-line-highlight-editor");
   } else if (!settings.bActiveLineHighlight && settings.bActiveCodeblockLineHighlight) {
     // Only inside codeblocks
-    document.body.classList.remove("codeblock-customizer-active-codeblock-line-important");
-    document.body.classList.add("codeblock-customizer-active-codeblock-line-highlight");
-  } else {
-    // Disabled
-    document.body.classList.remove("codeblock-customizer-active-codeblock-line-highlight");
-    document.body.classList.remove("codeblock-customizer-active-codeblock-line-important");
+    document.body.classList.add("codeblock-customizer-active-line-highlight-codeblock");
   }
   
   if (settings.bEnableLineNumbers) {
-    document.body.classList.add("codeblock-customizer-enable-line-numbers");
+    document.body.classList.add("codeblock-customizer-show-line-numbers");
   } else {
-    document.body.classList.remove("codeblock-customizer-enable-line-numbers");
+    document.body.classList.remove("codeblock-customizer-show-line-numbers");
+  }
+
+  if (settings.bEnableLineNumbers) {
+    document.body.classList.add("codeblock-customizer-show-line-numbers");
+  } else {
+    document.body.classList.remove("codeblock-customizer-show-line-numbers");
   }
 
   if (settings.bGutterHighlight) {
