@@ -76,24 +76,14 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   let isCodeBlockExcluded = false;
   isCodeBlockExcluded = isExcluded(codeBlockFirstLine, pluginSettings.ExcludeLangs);
 
-  // set background color
-  if (!isCodeBlockExcluded){
-    for (let index = 0; index < codeblocks.length; index++) {
-      const Currentcodeblock = codeblocks.item(index);
-      if (Currentcodeblock.parentNode && Currentcodeblock.parentNode.nodeName === "PRE") {
-        // only process code element which have a PRE parent (don't process LI elements)
-        Currentcodeblock.parentElement.classList.add("codeblock-customizer-bg");
-      }
-    }
-  }
-
   const codeElements = codeBlockElement.getElementsByTagName("code");
   const codeBlockPreElement: HTMLPreElement | null = codeBlockElement.querySelector("pre:not(.frontmatter)");
   if (codeBlockPreElement === null) {
     return;
   }
-
-  codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
+  if (!isCodeBlockExcluded) {
+    codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
+  }
   
   AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, pluginSettings, Fold, codeElements, linesToHighlight, altHL );
 }// ReadingView
@@ -156,7 +146,7 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
     
     const preElm = codeElements[i].parentNode;
     if (preElm && preElm.nodeName === "PRE") {
-      preElm.classList.add(`codeblock-customizer-pre-parent`);
+      preElm.classList.add(`codeblock-customizer-pre-parent-deprc`); //TODO (@mayurankv) what is the difference between codeblock-customizer-pre-parent-deprc and codeblock-customizer-pre?? Want to remove parent-pre-deprc
     }
     else // only process pre > code elements
       return;
@@ -170,7 +160,6 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
 
       // create line element
       const lineWrapper = document.createElement("div");
-      lineWrapper.classList.add(`codeblock-customizer-line`);
       if (isHighlighted) {
         lineWrapper.classList.add(`codeblock-customizer-line-highlighted`);
       }
@@ -212,12 +201,9 @@ function AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElemen
     }
 
     highlightLines(codeElements, linesToHighlight, pluginSettings, altHL);
-    if (!isCodeBlockHeaderEnabled && pluginSettings.bEnableLineNumbers) {
-      codeBlockPreElement.classList.add(`codeblock-customizer-pre-radius`);
-    } else if (isCodeBlockHeaderEnabled) {
-      codeBlockPreElement.classList.add(`codeblock-customizer-pre-no-radius`);
+    if (isCodeBlockHeaderEnabled) {
       if (codeBlockPreElement.parentElement) {
-        codeBlockPreElement.parentElement.classList.add(`codeblock-customizer-codeBlockPreElement-parent`);
+        codeBlockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
       }
     }
   }
@@ -243,20 +229,14 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
     let isCodeBlockExcluded = false;
     isCodeBlockExcluded = isExcluded(codeBlockFirstLine, pluginSettings.ExcludeLangs);
 
-    // set background color
-    if (!isCodeBlockExcluded){
-      if (codeElm.parentNode && codeElm.parentNode.nodeName === "PRE") {
-        // only process code element which have a PRE parent (don't process LI elements)
-        codeElm.parentElement?.classList.add("codeblock-customizer-bg");
-      }
-    }
-
     const codeBlockPreElement: HTMLPreElement | null = codeElm.parentElement;
     if (codeBlockPreElement === null) {
       return;
     }
 
-    codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
+    if (!isCodeBlockExcluded){
+      codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
+    }
     const codeElements = codeBlockPreElement.getElementsByTagName("code");
 
     AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, pluginSettings, Fold, codeElements, linesToHighlight, altHL );

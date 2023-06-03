@@ -4,13 +4,13 @@
 }
 
 /* Codeblock background colours */
-.codeblock-customizer .markdown-rendered .codeblock-customizer-bg,
-.codeblock-customizer .markdown-source-view .HyperMD-codeblock {
+.codeblock-customizer .markdown-rendered pre.codeblock-customizer-pre,
+.codeblock-customizer .markdown-source-view .HyperMD-codeblock.codeblock-customizer-line {
   background-color: var(--codeblock-customizer-codeblock-background-color);
 }
 
 /* Maintain gutter color when padded */
-.codeblock-customizer-enable-line-numbers .markdown-rendered pre.codeblock-customizer-bg {
+.codeblock-customizer-enable-line-numbers .markdown-rendered pre.codeblock-customizer-pre {
   background: linear-gradient(var(--codeblock-customizer-codeblock-background-color),var(--codeblock-customizer-codeblock-background-color)) var(--gutter-width) bottom/100% border-box no-repeat,var(--codeblock-customizer-gutter-background-color);
 }
 
@@ -25,16 +25,17 @@
 }
 
 /* Highlight active line inside codeblocks */
-.codeblock-customizer-active-codeblock-line-highlight .markdown-source-view [class*="codeblock-customizer-line-"].cm-active {
-  background-color: var(--codeblock-customizer-codeblock-active-line-color);
+.codeblock-customizer-active-codeblock-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
+  background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
 }
 
 /* Let active line highlight gutter */
-.codeblock-customizer-active-codeblock-line-highlight.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-"].cm-active .codeblock-customizer-gutter{
+.codeblock-customizer-active-codeblock-line-highlight.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-gutter {
   background-color: rgba(0,0,0,0);
 }
 
-:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin {
+:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin,
+.cm-content:first-child .HyperMD-codeblock-begin {
   border-top-left-radius: var(--border-radius) !important;
   border-top-right-radius: var(--border-radius) !important;
 }
@@ -75,7 +76,8 @@
   padding-left: 54px !important;
 }
 
-:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin .codeblock-customizer-gutter {
+:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin .codeblock-customizer-gutter,
+.cm-content:first-child .HyperMD-codeblock-begin .codeblock-customizer-gutter {
   border-top-left-radius: var(--border-radius);
 }
 
@@ -157,7 +159,7 @@
   display: none;
 }
 
-.markdown-rendered .codeblock-customizer-line {
+.markdown-rendered div:has(> .codeblock-customizer-line-text) {
   display: flex;
 }
 
@@ -182,7 +184,7 @@
 	white-space: break-spaces;
 }
 
-/* codeblock-customizer-line */
+/* Highlighting */
 .codeblock-customizer-line-highlighted {
   background-color: var(--codeblock-customizer-highlight-color) !important;
 }
@@ -193,33 +195,25 @@
 }
 
 /* pre element */
-.codeblock-customizer-pre-parent {
+.codeblock-customizer-pre-parent-deprc {
   padding-right: 0px !important;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
   padding-left: 0px !important;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
 }
 
 .codeblock-customizer-pre {
   margin-top: 0px !important;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+  border-radius: var(--border-radius) !important;
   padding-top: 0px !important;    /* padding-top and bottom must be set at the pre code element*/
   padding-bottom: 0px !important;
 }
 
-.codeblock-customizer-codeBlockPreElement-parent{
+.codeblock-customizer-pre-parent{
   margin-bottom: 16px;
 }
 
-.codeblock-customizer-pre-radius {
-  border-top-left-radius: var(--border-radius) !important;
-  border-top-right-radius: var(--border-radius) !important;
-  border-bottom-left-radius: var(--border-radius) !important;
-  border-bottom-right-radius: var(--border-radius) !important;
-}
-
-.codeblock-customizer-pre-no-radius {
+.codeblock-customizer-header-container + .codeblock-customizer-pre {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
-  border-bottom-left-radius: var(--border-radius) !important;
-  border-bottom-right-radius: var(--border-radius) !important;
 }
 
 .codeblock-customizer-pre code {

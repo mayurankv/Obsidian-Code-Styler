@@ -154,7 +154,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                 const codeBlockLang = searchString(lineText, "```");
                 const isHeaderEnabled = ((FileName !== "" && FileName !== null) || Fold || ((bDisplayCodeBlockLanguage && bAlwaysDisplayCodeblockLang) || ( bDisplayCodeBlockIcon && bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeBlockLang))) && codeBlockLang)) ? true : false;
                 
-                decorations.push(Decoration.line({}).range(node.from));
+                decorations.push(Decoration.line({attributes: {class: 'codeblock-customizer-line'}}).range(node.from));
 
                 if (linenumbers) {
                   decorations.push(Decoration.line({}).range(node.from));
@@ -164,14 +164,14 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" ) {
                 if (bExclude)
                   return;
-                let attributesDict = {};
+                let lineClass = 'codeblock-customizer-line';
                 const altHLMatch = altHL.filter((hl) => hl.lineNumber === lineNumber);
                 if (HL.includes(lineNumber)) {
-                  attributesDict['class'] = 'codeblock-customizer-line-highlighted';
+                  lineClass = 'codeblock-customizer-line-highlighted';
                 } else if (altHLMatch.length > 0) {
-                  attributesDict['class'] = `codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`;
+                  lineClass = `codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`;
                 }
-                decorations.push(Decoration.line({ attributes: attributesDict}).range(node.from));
+                decorations.push(Decoration.line({ attributes: {class: lineClass}}).range(node.from));
                 
                 if (linenumbers) {             
                   decorations.push(Decoration.line({}).range(node.from));
@@ -184,7 +184,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                   bExclude = false;
                   return;
                 }
-                decorations.push(Decoration.line({}).range(node.from));
+                decorations.push(Decoration.line({attributes: {class: 'codeblock-customizer-line'}}).range(node.from));
 
                 if (linenumbers) {
                   decorations.push(Decoration.line({}).range(node.from));
