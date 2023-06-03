@@ -155,7 +155,7 @@ export function loadIcons(){
 }// loadIcons
 
 // Functions for displaying header BEGIN
-export function createContainer(header: CodeBlockMeta) {
+export function createContainer() {
   const container = document.createElement("div");
   container.classList.add("codeblock-customizer-header-container");
   return container;
@@ -167,7 +167,7 @@ export function createWrapper() {
   return wrapper;
 }// createWrapper
 
-export function createCodeblockLang(lang: string, header: CodeBlockMeta) {
+export function createCodeblockLang(lang: string) {
   const codeblockLang = document.createElement("div");
   codeblockLang.innerText = lang;
   codeblockLang.classList.add("codeblock-customizer-header-language-tag");
@@ -190,7 +190,7 @@ export function createCodeblockIcon(displayLang: string, Icon: string, bDisplayC
   return div;
 }// createCodeblockIcon
 
-export function createFileName(text: string, header: CodeBlockMeta) {
+export function createFileName(text: string) {
   const fileName = document.createElement("div");
   fileName.innerText = text;
   fileName.classList.add("codeblock-customizer-header-text");

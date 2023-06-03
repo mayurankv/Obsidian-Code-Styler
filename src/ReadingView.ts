@@ -70,7 +70,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   let altHL = [];
   for (const { name, currentColor } of alternateColors) {
     const altParams = searchString(codeBlockFirstLine, `${name}:`);
-    altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, currentColor, lineNumber })));
+    altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
   }
 
   let isCodeBlockExcluded = false;
@@ -134,7 +134,7 @@ function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, b
   
 }// HeaderWidget
 
-function createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch) {
+function createLineNumberElement(lineNumber) {
   const lineNumberWrapper = document.createElement("div");
   lineNumberWrapper.classList.add(`codeblock-customizer-line-number`);
   lineNumberWrapper.setText(lineNumber);
@@ -173,7 +173,6 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
       lineWrapper.classList.add(`codeblock-customizer-line`);
       if (isHighlighted) {
         lineWrapper.classList.add(`codeblock-customizer-line-highlighted`);
-        // document.body.style.setProperty("--codeblock-customizer-line-highlighted-color", settings.highlightColor);
       }
       else if (altHLMatch.length > 0) {
         lineWrapper.classList.add(`codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`);
@@ -238,7 +237,7 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
     let altHL = [];
     for (const { name, currentColor } of alternateColors) {
       const altParams = searchString(codeBlockFirstLine, `${name}:`);
-      altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, currentColor, lineNumber })));
+      altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
     }
 
     let isCodeBlockExcluded = false;
@@ -249,7 +248,6 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
       if (codeElm.parentNode && codeElm.parentNode.nodeName === "PRE") {
         // only process code element which have a PRE parent (don't process LI elements)
         codeElm.parentElement?.classList.add("codeblock-customizer-bg");
-        // document.body.style.setProperty("--codeblock-customizer-code-background",pluginSettings.backgroundColor);
       }
     }
 

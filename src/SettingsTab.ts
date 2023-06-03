@@ -331,7 +331,6 @@ export class SettingsTab extends PluginSettingTab {
               alternateColors.push(newColor);
               await this.plugin.saveSettings();
               this.updateCurrentAlternateHLColor();
-              //STYLE Add style here
               new Notice(`Added color "${alternateHLName}".`);
               alternateColorDisplayText.setValue("");
               alternateHLName = "";
@@ -640,7 +639,6 @@ export class SettingsTab extends PluginSettingTab {
             const savedColor = color.toHEXA().toString();
             instance.addSwatch(savedColor);
             this.setAndSavePickrSetting(pickrClass, savedColor);
-            //STYLE add here
             // if the active line color changed update it
             if (pickrClass === 'activeLineColor' || pickrClass === 'activeCodeBlockLineColor'){
               updateSettingStyles(this.plugin.settings);
@@ -784,7 +782,6 @@ export class SettingsTab extends PluginSettingTab {
             const savedColor = color.toHEXA().toString();
             instance.addSwatch(savedColor);
             this.setAndSaveAlternatePickrSetting(name, savedColor, false);
-            //STYLE add here
         })
         .on('cancel', (instance: Pickr) => {
             instance.hide();
@@ -798,7 +795,6 @@ export class SettingsTab extends PluginSettingTab {
             const index = this.plugin.settings.alternateColors.findIndex((c: any) => c.name === name);
             this.plugin.settings.alternateColors.splice(index, 1);
             await this.plugin.saveSettings();
-            // STYLE remove here
             new Notice(`Removed color "${name}".`);
             this.updateColorContainer(colorContainer); // Update the color container after deleting a color
           });

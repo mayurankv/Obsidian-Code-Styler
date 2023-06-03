@@ -1,9 +1,17 @@
-/* style active line */
+:root {
+  --gutter-width: 38px;
+  --border-radius: 5px;
+}
 
 /* Codeblock background colours */
-.markdown-rendered pre.codeblock-customizer-bg,
-.markdown-source-view .codeblock-customizer-line-background.HyperMD-codeblock {
+.codeblock-customizer .markdown-rendered .codeblock-customizer-bg,
+.codeblock-customizer .markdown-source-view .HyperMD-codeblock {
   background-color: var(--codeblock-customizer-codeblock-background-color);
+}
+
+/* Maintain gutter color when padded */
+.codeblock-customizer-enable-line-numbers .markdown-rendered pre.codeblock-customizer-bg {
+  background: linear-gradient(var(--codeblock-customizer-codeblock-background-color),var(--codeblock-customizer-codeblock-background-color)) var(--gutter-width) bottom/100% border-box no-repeat,var(--codeblock-customizer-gutter-background-color);
 }
 
 /* Highlight active line outside codeblocks */
@@ -26,29 +34,19 @@
   background-color: rgba(0,0,0,0);
 }
 
-/* Apply border-radius only when line numbers are enabled */
-/*.codeblock-customizer-enable-line-numbers .codeblock-customizer-gutter-line + [class^="codeblock-customizer-line-"].cm-active {
-  border-top-left-radius: 7px !important;
-  border-bottom-left-radius: 7px !important;
-}*/
-/* set border to 0 for codeblock lines */
-/*[class^="codeblock-customizer-line-"] {
-  border: 0px !important;
-}*/
-
-.codeblock-customizer-firstLine-background-radius {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 5px !important;
+:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin {
+  border-top-left-radius: var(--border-radius) !important;
+  border-top-right-radius: var(--border-radius) !important;
 }
 
-.codeblock-customizer-firstLine-background-NoRadius {
+.codeblock-customizer-header-container + .HyperMD-codeblock-begin {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
 }
 
-.codeblock-customizer-lastLine-background-radius{
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
+.HyperMD-codeblock-end{
+  border-bottom-left-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
 }
 
 /* style gutter */
@@ -73,23 +71,25 @@
   background-color: rgba(0,0,0,0);
 }
 
-.codeblock-customizer-gutter-line{
+.HyperMD-codeblock:has(.codeblock-customizer-gutter){
   padding-left: 54px !important;
 }
 
-.codeblock-customizer-gutterElements-first-radius {
-  border-top-left-radius: 5px;
+:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin .codeblock-customizer-gutter {
+  border-top-left-radius: var(--border-radius);
 }
 
-.codeblock-customizer-gutterElements-last-radius {
-  border-bottom-left-radius: 5px;
+.HyperMD-codeblock-end .codeblock-customizer-gutter  {
+  border-bottom-left-radius: var(--border-radius);
 }
+
+
 
 /* style header-container */
 .codeblock-customizer-header-container {
   user-select: none;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
   background-color: var(--codeblock-customizer-header-background-color);
   border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
   margin-top: 16px;               /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */
@@ -139,7 +139,7 @@
   font-size: 14px;
   background-color: var(--codeblock-customizer-language-tag-background-color);
   color: var(--codeblock-customizer-language-tag-text-color);
-  border-radius: 5px 5px 5px 0px;
+  border-radius: var(--border-radius) 5px 5px 0px;
   font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
   font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
 }
@@ -175,7 +175,12 @@
 }
 
 /* Prevent Line Wraps */
-
+.HyperMD-codeblock:has(> .cm-widgetBuffer) {
+	white-space: nowrap;
+}
+.HyperMD-codeblock:has(> .cm-widgetBuffer) > .cm-hmd-codeblock {
+	white-space: break-spaces;
+}
 
 /* codeblock-customizer-line */
 .codeblock-customizer-line-highlighted {
@@ -204,17 +209,17 @@
 }
 
 .codeblock-customizer-pre-radius {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 5px !important;
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
+  border-top-left-radius: var(--border-radius) !important;
+  border-top-right-radius: var(--border-radius) !important;
+  border-bottom-left-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
 }
 
 .codeblock-customizer-pre-no-radius {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
+  border-bottom-left-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
 }
 
 .codeblock-customizer-pre code {
@@ -222,6 +227,9 @@
   padding-bottom: 8px !important;
   padding-left: 0px !important;
   padding-right: 0px !important;
+}
+
+.codeblock-customizer-pre code > div > div:first-child div.codeblock-customizer-line-number {
 }
 
 /* pickr start */
