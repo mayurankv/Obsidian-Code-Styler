@@ -97,7 +97,7 @@ function isAdmonition(lineText: string): boolean {
 function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, bDisplayCodeBlockLanguage, Collapse, bDisplayCodeBlockIcon) {
   const parent = preElements.parentNode;
   
-  const container = createContainer(metaInfo);
+  const container = createContainer(false);
   const wrapper = createWrapper();
   if (codeblockLanguage && bDisplayCodeBlockIcon){
     const Icon = getLanguageIcon(codeblockLanguage)
