@@ -105,19 +105,15 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
       }// deduplicateCodeblocks
   
       buildDecorations(view: EditorView): DecorationSet {
-        let lineNumber = 1;
+        let lineNumber = 0;
         let HL = [];
         let altHL = [];
         let lineNumberOffset = 0;
-        const Exclude = this.settings.ExcludeLangs;
-        const ExcludeLangs = splitAndTrimString(Exclude);
+        let showNumbers = true;
+        // const Exclude = this.settings.ExcludeLangs;
+        // const ExcludeLangs = splitAndTrimString(Exclude);
         let bExclude = false;
         const alternateColors = this.settings.alternateColors || [];
-        const bDisplayCodeBlockLanguage = this.settings.bDisplayCodeBlockLanguage;
-        const bDisplayCodeBlockIcon = this.settings.bDisplayCodeBlockIcon;
-        const bAlwaysDisplayCodeblockLang = this.settings.header.bAlwaysDisplayCodeblockLang;
-        const bAlwaysDisplayCodeblockIcon = this.settings.header.bAlwaysDisplayCodeblockIcon;
-        const linenumbers = this.settings.bEnableLineNumbers;
         const decorations = [];
 
         if (!view.visibleRanges || view.visibleRanges.length === 0) {
@@ -150,7 +146,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               }
               if (startLine) {
                 lineNumber = 0;
-                lineNumberOffset = 0; //TODO (@mayurankv) Set offset here
+                lineNumberOffset = 0; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
+                showNumbers = true; //TODO (@mayurankv) Set showNumbers to be true if ln:<number> or ln:true or false if ln:false
                 const params = searchString(lineText, "HL:");
                 HL = getHighlightedLines(params);
                 altHL = [];
@@ -173,7 +170,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                 decorations.push(Decoration.line({attributes: {class: lineClass}}).range(node.from));
 
                 decorations.push(Decoration.line({}).range(node.from));
-                decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber+lineNumberOffset),}).range(node.from));
+                decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber+lineNumberOffset,showNumbers),}).range(node.from));
                 lineNumber++;
               }
             },
@@ -205,18 +202,17 @@ function compareArrays(array1, array2) {
 }// compareArrays
 
 class LineNumberWidget extends WidgetType {
-  constructor(private lineNumber: number) {
+  constructor(private lineNumber: number, private showNumbers: boolean) {
     super();
   }
 
   eq(other: LineNumberWidget) {
-    return this.lineNumber === other.lineNumber;
+    return this.lineNumber === other.lineNumber && this.showNumbers === other.showNumbers;
   }
 
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
-    //TODO (@mayurankv) If the numbers are set with ln parameter, then make this an if statement and instead add a new class called 'codeblock-customizer-line-number-specific' which can then be targeted by css
-    container.classList.add("codeblock-customizer-line-number");
+    container.classList.add(`codeblock-customizer-line-number${this.showNumbers?'':'-hide'}`);
     container.innerText = `${this.lineNumber}`;
 
     return container;

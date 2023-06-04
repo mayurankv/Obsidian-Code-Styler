@@ -4,6 +4,7 @@
   --line-number-gutter-padding: 16px;
   --border-radius: 10px;
   --code-padding: 8px;
+  --header-padding: 5px;
 }
 
 /* Codeblock background colours */
@@ -26,7 +27,8 @@
 }
 
 /* Line number gutter styling */
-.codeblock-customizer:not(.codeblock-customizer-show-line-numbers) .codeblock-customizer-line-number {
+.codeblock-customizer:not(.codeblock-customizer-show-line-numbers) .codeblock-customizer-line-number,
+.codeblock-customizer-line-number-hide {
   display: none;
 }
 .markdown-rendered .codeblock-customizer-pre > code > div:first-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
@@ -50,8 +52,7 @@
   color: var(--codeblock-customizer-gutter-text-color);
   user-select: none;
 }
-.markdown-source-view .codeblock-customizer-line-number,
-.markdown-source-view .codeblock-customizer-line-number-specific {
+.markdown-source-view .codeblock-customizer-line-number {
   position: absolute;
   display: inline-block;
   height: 100%;
@@ -60,17 +61,16 @@
   direction: rtl;
   left: 0;
 }
-.markdown-rendered .codeblock-customizer-line-number,
-.markdown-rendered .codeblock-customizer-line-number-specific {
+.markdown-rendered .codeblock-customizer-line-number {
   flex-shrink: 0;
   flex-grow: 1;
 }
-.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
-.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
-.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] [class^='codeblock-customizer-line-number'] {
+.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
+.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
+.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-line-number {
   background-color: rgba(0,0,0,0);
 }
-.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has([class^='codeblock-customizer-line-number']){
+.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number){
   padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
 }
 
@@ -86,6 +86,7 @@ body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-head
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific {
   user-select: none;
+  padding-top: var(--header-padding);
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
   background-color: var(--codeblock-customizer-header-background-color);
@@ -93,11 +94,13 @@ body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-head
   font-size: 14px;
   margin-top: 16px;           /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */    
   display: flex !important;
+  overflow: visible;
 }
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed),
 .markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) {
+  padding-bottom: var(--header-padding);
   border-bottom-left-radius: var(--border-radius) !important;
   border-bottom-right-radius: var(--border-radius) !important;
   border-bottom: none;
@@ -109,16 +112,23 @@ body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-head
 }
 .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
 .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"] {
+  height: 100%;
   padding-left: 15px;
   padding-right: 15px;
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   font-size: inherit;
-  border-radius: var(--border-radius) var(--border-radius) var(--border-radius) 0px;
+  border-radius: var(--border-radius) var(--border-radius) 0px 0px;
   background-color: var(--codeblock-customizer-language-tag-background-color);
   color: var(--codeblock-customizer-language-tag-text-color);
   font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
   font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
+}
+.markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
+.markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
+.markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) [class^="codeblock-customizer-header-language-tag"],
+.markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) [class^="codeblock-customizer-header-language-tag"] {
+  border-radius: var(--border-radius);
 }
 .codeblock-customizer-header-text {
   padding-left: 15px;
@@ -194,7 +204,7 @@ div:has(> img.codeblock-customizer-icon):has(+ [class^="codeblock-customizer-hea
   border-bottom-left-radius: var(--border-radius) !important;
   border-bottom-right-radius: var(--border-radius) !important;
 }
-.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end [class^='codeblock-customizer-line-number'] {
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end .codeblock-customizer-line-number {
   border-bottom-left-radius: var(--border-radius) !important;
 }
 body:not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin,
@@ -206,12 +216,12 @@ body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-head
   border-top-left-radius: var(--border-radius) !important;
   border-top-right-radius: var(--border-radius) !important;
 }
-body:not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not([class*='codeblock-customizer-show-langicons']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not(.codeblock-customizer-show-langicons-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not(.codeblock-customizer-show-langicons-always.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] {
+body:not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body:not([class*='codeblock-customizer-show-langicons']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body:not(.codeblock-customizer-show-langicons-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body:not(.codeblock-customizer-show-langicons-always.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number {
   border-top-left-radius: var(--border-radius);
 }
 body:not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific + .codeblock-customizer-pre,

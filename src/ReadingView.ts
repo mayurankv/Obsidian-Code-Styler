@@ -64,6 +64,8 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   const linesToHighlight = getHighlightedLines(highlightedLinesParams);
   const FileName = searchString(codeBlockFirstLine, "file:");
   const Fold = searchString(codeBlockFirstLine, "fold");
+  const lineNumberOffset = 0; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
+  const showNumbers = true; //TODO (@mayurankv) Set showNumbers to be true if ln:<number> or ln:true or false if ln:false
   const alternateColors = plugin.settings.alternateColors || [];
   let altHL = [];
   for (const { name } of alternateColors) {
@@ -83,7 +85,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
     codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
   }
   
-  AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, linesToHighlight, altHL );
+  AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, showNumbers, lineNumberOffset, linesToHighlight, altHL );
 }// ReadingView
 
 function isAdmonition(lineText: string): boolean {
@@ -118,10 +120,9 @@ function HeaderWidget(preElements, textToDisplay: string, specificHeader: boolea
   
 }// HeaderWidget
 
-function createLineNumberElement(lineNumber) {
+function createLineNumberElement(lineNumber,showNumbers) {
   const lineNumberWrapper = document.createElement("div");
-  //TODO (@mayurankv) If the numbers are set with ln parameter, then make this an if statement and instead add a new class called 'codeblock-customizer-line-number-specific' which can then be targeted by css
-  lineNumberWrapper.classList.add(`codeblock-customizer-line-number`);
+  lineNumberWrapper.classList.add(`codeblock-customizer-line-number${showNumbers?'':'-hide'}`);
   lineNumberWrapper.setText(lineNumber);
   
   return lineNumberWrapper;
@@ -135,16 +136,13 @@ function createLineTextElement(line) {
   return lineContentWrapper;
 }// createLineTextElement
 
-function highlightLines(codeElements, linesToHighlight, altHL) {
+function highlightLines(codeElements, showNumbers, lineNumberOffset, linesToHighlight, altHL) {
   for (let i = 0; i < codeElements.length; i++) {
     const lines = codeElements[i].innerHTML.split("\n");
-    
     const preElm = codeElements[i].parentNode;
-    if (preElm === null || preElm.nodeName !== "PRE") { // only process pre > code elements
+    if (preElm === null || preElm.nodeName !== "PRE") // only process pre > code elements
       return;
-    }
 
-    const lineNumberOffset = 0; //TODO (@mayurankv) Set offset here
     codeElements[i].innerHTML = "";
     for (let j = 0; j < lines.length - 1; j++) {
       const line = lines[j];
@@ -163,7 +161,7 @@ function highlightLines(codeElements, linesToHighlight, altHL) {
       codeElements[i].appendChild(lineWrapper);
 
       // create line number element
-      const lineNumberEl = createLineNumberElement(lineNumber+lineNumberOffset);
+      const lineNumberEl = createLineNumberElement(lineNumber+lineNumberOffset,showNumbers);
       lineWrapper.appendChild(lineNumberEl);
 
       // create line text element
@@ -173,7 +171,7 @@ function highlightLines(codeElements, linesToHighlight, altHL) {
   }
 }// highlightLines
 
-function AddHeaderAndHighlight(isCodeBlockExcluded, fileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, linesToHighlight, altHL ){
+function AddHeaderAndHighlight(isCodeBlockExcluded, fileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, showNumbers, lineNumberOffset, linesToHighlight, altHL ){
   if (!isCodeBlockExcluded) {
     let specificHeader = true;
     if (fileName === null || fileName === "") {
@@ -185,8 +183,8 @@ function AddHeaderAndHighlight(isCodeBlockExcluded, fileName, codeBlockPreElemen
       }
     }
     HeaderWidget(codeBlockPreElement, fileName, specificHeader, getLanguageName(codeBlockLang), Fold);
-
-    highlightLines(codeElements, linesToHighlight, altHL);
+    highlightLines(codeElements, showNumbers, lineNumberOffset, linesToHighlight, altHL);
+    
     if (codeBlockPreElement.parentElement) {
       codeBlockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
     }
@@ -195,15 +193,16 @@ function AddHeaderAndHighlight(isCodeBlockExcluded, fileName, codeBlockPreElemen
 
 function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlugin, codeBlockFirstLines: string[]) {
   const codeBlocks = codeBlockElement.querySelectorAll('pre > code');
-  const pluginSettings = plugin.settings;
 	codeBlocks.forEach((codeElm, key) => {
     const codeBlockFirstLine = codeBlockFirstLines[key];
     const codeBlockLang = searchString(codeBlockFirstLine, "```");
     const highlightedLinesParams = searchString(codeBlockFirstLine, "HL:");
     const linesToHighlight = getHighlightedLines(highlightedLinesParams);
-    const FileName = searchString(codeBlockFirstLine, "file:");
+    const fileName = searchString(codeBlockFirstLine, "file:");
     const Fold = searchString(codeBlockFirstLine, "fold");
-    const alternateColors = pluginSettings.alternateColors || [];
+    const lineNumberOffset = 0; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
+    const showNumbers = true; //TODO (@mayurankv) Set showNumbers to be true if ln:<number> or ln:true or false if ln:false
+    const alternateColors = plugin.settings.alternateColors || [];
     let altHL = [];
     for (const { name, _ } of alternateColors) {
       const altParams = searchString(codeBlockFirstLine, `${name}:`);
@@ -211,7 +210,7 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
     }
 
     let isCodeBlockExcluded = false;
-    isCodeBlockExcluded = isExcluded(codeBlockFirstLine, pluginSettings.ExcludeLangs);
+    isCodeBlockExcluded = isExcluded(codeBlockFirstLine, plugin.settings.ExcludeLangs);
 
     const codeBlockPreElement: HTMLPreElement | null = codeElm.parentElement;
     if (codeBlockPreElement === null) {
@@ -223,6 +222,6 @@ function PDFExport(codeBlockElement: HTMLElement, plugin: CodeblockCustomizerPlu
     }
     const codeElements = codeBlockPreElement.getElementsByTagName("code");
 
-    AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, pluginSettings, Fold, codeElements, linesToHighlight, altHL );
+    AddHeaderAndHighlight(isCodeBlockExcluded, fileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, showNumbers, lineNumberOffset, linesToHighlight, altHL );
 	})
 }// PDFExport

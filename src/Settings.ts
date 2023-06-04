@@ -1,4 +1,4 @@
-export interface CodeblockCustomizerSettings {
+export interface CodeblockCustomizerSettings { //TODO (@mayurankv) Refactor the settings interface and respect it
   bEnableLineNumbers: boolean;
   bActiveCodeblockLineHighlight: boolean;
   bActiveLineHighlight: boolean;

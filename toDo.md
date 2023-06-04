@@ -1,19 +1,21 @@
 # ToDo
 
-1. Fix delay issue for opening 
-2. Sort css issue too large line numbers with dynamic padding in source mode
-3. CSS border radius collapsed code LP and Reading
-4. Clean up settings interfaces
-5. Refactor to make cleaner
-   1. Sort settings structure and change corresponding code
-6. Turn ==icons and headers== on/off via css display none and a global css class
-   1. icon-specific and header-specific and language-tag-specific
-7. Prevent delay to render in reading mode:
+@mayurankv
+
+1. Appearance issues:
+   1. Too large line numbers with dynamic padding in source mode
+   2. Folding transition animation? CSS won't work for this.
+2. Prevent delay to render in reading mode:
    1. Caused by changes to HTML such as:
-      1. Changing highlighted lines
-      2. Changing file name
-      3. Changing line offset
-      4. Currently:
-         1. Displaying codeblock language (and always)
-         2. Displaying codeblock icon (and always)
-8. Check startup times
+      - Changing highlighted lines
+      - Changing file name
+      - Presumably changing line offset
+      - Presumably changing fold name
+3. Refactor to make cleaner
+   1. Sort settings structure and change corresponding code
+   2. Reuse functions across live preview and reading mode
+4. Extra Settings
+   1. Placeholder text for collapsed code
+      1. Global placeholder in settings
+      2. Optional parameter after fold:
+   2. Let users redirect certain languages to icon of choice? Definitely not urgent if at all

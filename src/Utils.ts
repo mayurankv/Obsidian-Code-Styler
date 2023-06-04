@@ -259,16 +259,16 @@ function updateSettingClasses(settings) {
   } else {
     document.body.classList.remove("codeblock-customizer-show-line-numbers");
   }
-  
+
   document.body.classList.remove("codeblock-customizer-show-langnames","codeblock-customizer-show-langnames-always");
-  if (settings.header.bAlwaysDisplayCodeblockLang) {
+  if (settings.header.bAlwaysDisplayCodeblockLang && settings.bDisplayCodeBlockLanguage) {
     document.body.classList.add("codeblock-customizer-show-langnames-always");
   } else if (settings.bDisplayCodeBlockLanguage) {
     document.body.classList.add("codeblock-customizer-show-langnames");
   }
 
   document.body.classList.remove("codeblock-customizer-show-langicons","codeblock-customizer-show-langicons-always");
-  if (settings.header.bAlwaysDisplayCodeblockIcon) {
+  if (settings.header.bAlwaysDisplayCodeblockIcon && settings.bDisplayCodeBlockIcon) {
     document.body.classList.add("codeblock-customizer-show-langicons-always");
   } else if (settings.bDisplayCodeBlockIcon) {
     document.body.classList.add("codeblock-customizer-show-langicons");
@@ -281,7 +281,7 @@ function updateSettingClasses(settings) {
   }
 }// updateSettingStyles
 
-function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},alternateColors) { //todo (@mayurankv) Add type hint for alternateColors
+function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},alternateColors) { //TODO (@mayurankv) Add type hint for alternateColors
   let current = theme['name'] == "current";
   let themeClass = ''
   let altHighlightStyles = ''
@@ -310,7 +310,7 @@ function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},a
   `;
 }// formatStyles
 
-function addAltHighlightColors(alternateColors, lightTheme: boolean) { //todo (@mayurankv) Add type hint for alternateColors
+function addAltHighlightColors(alternateColors, lightTheme: boolean) { //TODO (@mayurankv) Add type hint for alternateColors
   let key = lightTheme?'lightColor':'darkColor';
   return alternateColors.reduce((altHighlightStyles,altHighlight) => {return altHighlightStyles + `--codeblock-customiser-highlight-${altHighlight['name'].replace(/\s+/g, '-').toLowerCase()}-color: ${altHighlight[key]};`},'')
 }
