@@ -161,24 +161,15 @@ export function createContainer(specific: boolean) {
   return container;
 }// createContainer
 
-export function createWrapper() {
-  const wrapper = document.createElement("div");
-  return wrapper;
-}// createWrapper
-
 export function createCodeblockLang(lang: string) {
   const codeblockLang = document.createElement("div");
   codeblockLang.innerText = lang;
-  codeblockLang.classList.add(`codeblock-customizer-header-language-tag-${lang.replace(/\s+/g, '-').toLowerCase()}`);
+  codeblockLang.classList.add(`codeblock-customizer-header-language-tag-${getLanguageName(lang)}`);
   return codeblockLang;
 }// createCodeblockLang
 
 export function createCodeblockIcon(displayLang: string) {
   const div = document.createElement("div");
-  div.classList.add("codeblock-customizer-icon-container");
-  if (true)
-    div.classList.add("codeblock-customizer-icon-container-codeblockLang");
-  
   const img = document.createElement("img");
   img.classList.add("codeblock-customizer-icon");
   img.width = 28; //32
@@ -268,11 +259,19 @@ function updateSettingClasses(settings) {
   } else {
     document.body.classList.remove("codeblock-customizer-show-line-numbers");
   }
+  
+  document.body.classList.remove("codeblock-customizer-show-langnames","codeblock-customizer-show-langnames-always");
+  if (settings.header.bAlwaysDisplayCodeblockLang) {
+    document.body.classList.add("codeblock-customizer-show-langnames-always");
+  } else if (settings.bDisplayCodeBlockLanguage) {
+    document.body.classList.add("codeblock-customizer-show-langnames");
+  }
 
-  if (settings.bEnableLineNumbers) {
-    document.body.classList.add("codeblock-customizer-show-line-numbers");
-  } else {
-    document.body.classList.remove("codeblock-customizer-show-line-numbers");
+  document.body.classList.remove("codeblock-customizer-show-langicons","codeblock-customizer-show-langicons-always");
+  if (settings.header.bAlwaysDisplayCodeblockIcon) {
+    document.body.classList.add("codeblock-customizer-show-langicons-always");
+  } else if (settings.bDisplayCodeBlockIcon) {
+    document.body.classList.add("codeblock-customizer-show-langicons");
   }
 
   if (settings.bGutterHighlight) {
