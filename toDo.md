@@ -13,7 +13,8 @@
       - Presumably changing fold name
 3. Refactor to make cleaner
    1. Sort settings structure and change corresponding code
-   2. Reuse functions across live preview and reading mode
+   2. Modularise code better 
+   3. Reuse functions across live preview and reading mode
 4. Extra Settings
    1. Placeholder text for collapsed code
       1. Global placeholder in settings
