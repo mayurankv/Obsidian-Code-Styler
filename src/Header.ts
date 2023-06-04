@@ -52,11 +52,13 @@ export const codeblockHeader = StateField.define<DecorationSet>({
     let Fold = false;
     let fileName = null;
     let bExclude = false;
+    let specificHeader = true;     
     for (let i = 1; i < transaction.state.doc.lines; i++) {
       const lineText = transaction.state.doc.line(i).text.toString();
       const line = transaction.state.doc.line(i);
       const lang = searchString(lineText, "```");      
       bExclude = isExcluded(lineText, this.settings.ExcludeLangs);
+      specificHeader = true;
       if (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1) {
         if (WidgetStart === null) {
           WidgetStart = line;
