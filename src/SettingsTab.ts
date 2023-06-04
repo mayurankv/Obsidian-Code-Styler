@@ -330,7 +330,7 @@ export class SettingsTab extends PluginSettingTab {
               const newColor = { name: alternateHLName, darkColor: colorValue, lightColor: colorValue };
               alternateColors.push(newColor);
               await this.plugin.saveSettings();
-              this.updateCurrentAlternateHLColor();
+              this.plugin.saveSettings();
               new Notice(`Added color "${alternateHLName}".`);
               alternateColorDisplayText.setValue("");
               alternateHLName = "";
@@ -532,40 +532,8 @@ export class SettingsTab extends PluginSettingTab {
     this.plugin.settings.header.codeBlockLangBackgroundColor = selectedTheme.colors.header.codeBlockLangBackgroundColor;
     
     updateSettingStyles(this.plugin.settings);
-    this.updateCurrentAlternateHLColor();
-  }// applyTheme
-  
-  updateCurrentAlternateHLColor() {
-    const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.SelectedTheme);
-    
-    const isDefaultDarkTheme = selectedTheme.colors.header.bDefaultDarkTheme;
-    const isDefaultLightTheme = selectedTheme.colors.header.bDefaultLightTheme;
-    // moonstone = light, obsidian = dark
-    const obsidianTheme = this.plugin.app.vault.getConfig('theme');
-    
-    if (isDefaultDarkTheme && !isDefaultLightTheme)
-      this.applyCurrentAlternateHLColor(false);
-    else if (!isDefaultDarkTheme && isDefaultLightTheme)
-      this.applyCurrentAlternateHLColor(true);
-    else if (!isDefaultDarkTheme && !isDefaultLightTheme) {
-      if (obsidianTheme === "moonstone")
-        this.applyCurrentAlternateHLColor(true);
-      else 
-        this.applyCurrentAlternateHLColor(false);
-    }
-  }// updateCurrentAlternateHLColor
-  
-  applyCurrentAlternateHLColor(isLight: boolean){
-    const alternateColors = this.plugin.settings.alternateColors;
-
-    for (let i = 0; i < alternateColors.length; i++) {
-      if (isLight)
-        alternateColors[i].currentColor = alternateColors[i].lightColor;
-      else
-        alternateColors[i].currentColor = alternateColors[i].darkColor;
-    }
     this.plugin.saveSettings();
-  }// applyCurrentAlternateHLColor
+  }// applyTheme
   
   setColorsForPickers(themeName){
     const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === themeName);    
@@ -842,7 +810,6 @@ export class SettingsTab extends PluginSettingTab {
       }
     }
 
-    this.updateCurrentAlternateHLColor();
     await this.plugin.saveSettings();
   }// setAndSaveAlternatePickrSetting
   
