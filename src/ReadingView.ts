@@ -1,9 +1,8 @@
 import { MarkdownView, MarkdownPostProcessorContext, sanitizeHTMLToDom } from "obsidian";
 
-import { searchString, getHighlightedLines, getLanguageName, isExcluded, getLanguageIcon, createContainer, createWrapper, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils";
+import { searchString, getHighlightedLines, getLanguageName, isExcluded, getLanguageIcon, createContainer, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils";
 
 export async function ReadingView(codeBlockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
-  const pluginSettings = plugin.settings;
   const codeElm: HTMLElement = codeBlockElement.querySelector('pre > code');
   
   if (!codeElm) 
@@ -15,7 +14,6 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
     while(!codeElm.classList.contains("is-loaded"))
       await sleep(2);
     
-  const codeblocks = codeBlockElement.querySelectorAll("code");
   const codeBlockSectionInfo = context.getSectionInfo(codeElm);
 
   let codeBlockFirstLine = "";
@@ -66,15 +64,15 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   const linesToHighlight = getHighlightedLines(highlightedLinesParams);
   const FileName = searchString(codeBlockFirstLine, "file:");
   const Fold = searchString(codeBlockFirstLine, "fold");
-  const alternateColors = pluginSettings.alternateColors || [];
+  const alternateColors = plugin.settings.alternateColors || [];
   let altHL = [];
-  for (const { name, _ } of alternateColors) {
+  for (const { name } of alternateColors) {
     const altParams = searchString(codeBlockFirstLine, `${name}:`);
     altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
   }
 
   let isCodeBlockExcluded = false;
-  isCodeBlockExcluded = isExcluded(codeBlockFirstLine, pluginSettings.ExcludeLangs);
+  isCodeBlockExcluded = isExcluded(codeBlockFirstLine, plugin.settings.ExcludeLangs);
 
   const codeElements = codeBlockElement.getElementsByTagName("code");
   const codeBlockPreElement: HTMLPreElement | null = codeBlockElement.querySelector("pre:not(.frontmatter)");
@@ -85,31 +83,27 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
     codeBlockPreElement.classList.add(`codeblock-customizer-pre`);
   }
   
-  AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, pluginSettings, Fold, codeElements, linesToHighlight, altHL );
+  AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, linesToHighlight, altHL );
 }// ReadingView
 
 function isAdmonition(lineText: string): boolean {
-  const adTypes = ["ad-note", "ad-seealso", "ad-abstract", "ad-summary", "ad-tldr", "ad-info", "ad-todo", "ad-tip", "ad-hint", "ad-important", "ad-success", "ad-check", "ad-done", "ad-question", "ad-help", "ad-faq", "ad-warning", "ad-caution", "ad-attention", "ad-failure", "ad-fail", "ad-missing", "ad-danger", "ad-error", "ad-bug", "ad-example", "ad-quote", "ad-cite"];
+  const adTypes = ["ad-note", "ad-seealso", "ad-abstract", "ad-summary", "ad-tldr", "ad-info", "ad-todo", "ad-tip", "ad-hint", "ad-important", "ad-success", "ad-check", "ad-done", "ad-question", "ad-help", "ad-faq", "ad-warning", "ad-caution", "ad-attention", "ad-failure", "ad-fail", "ad-missing", "ad-danger", "ad-error", "ad-bug", "ad-example", "ad-quote", "ad-cite"]; //TODO (@mayurankv) refactor to use regex
   const codeBlockLang = searchString(lineText, "```");
   return adTypes.some((adType) => codeBlockLang && codeBlockLang.startsWith(adType));
 }// isAdmonition
 
-function HeaderWidget(preElements, textToDisplay, codeblockLanguage, metaInfo, bDisplayCodeBlockLanguage, Collapse, bDisplayCodeBlockIcon) {
+function HeaderWidget(preElements, textToDisplay: string, specificHeader: boolean, codeblockLanguage: string, Collapse: boolean) {
   const parent = preElements.parentNode;
   
-  const container = createContainer(false);
-  const wrapper = createWrapper();
-  if (codeblockLanguage && bDisplayCodeBlockIcon){
+  const container = createContainer(specificHeader);
+  if (codeblockLanguage){
     const Icon = getLanguageIcon(codeblockLanguage)
     if (Icon) {
-      wrapper.appendChild(createCodeblockIcon(codeblockLanguage, Icon, bDisplayCodeBlockLanguage));
+      container.appendChild(createCodeblockIcon(codeblockLanguage));
     }
+    container.appendChild(createCodeblockLang(codeblockLanguage));
   }
-  if (codeblockLanguage && bDisplayCodeBlockLanguage){
-    wrapper.appendChild(createCodeblockLang(codeblockLanguage, metaInfo));
-  }
-  wrapper.appendChild(createFileName(textToDisplay, metaInfo));   
-  container.appendChild(wrapper);  
+  container.appendChild(createFileName(textToDisplay));   
   parent.insertBefore(container, preElements);
   
   // Add event listener to the widget element
@@ -133,7 +127,7 @@ function createLineNumberElement(lineNumber) {
   return lineNumberWrapper;
 }// createLineNumberElement
 
-function createLineTextElement(line, lineNumber) {
+function createLineTextElement(line) {
   const lineText = line !== "" ? line : "<br>";
   const sanitizedText = sanitizeHTMLToDom(lineText);
   const lineContentWrapper = createDiv({cls: `codeblock-customizer-line-text`, text: sanitizedText});  
@@ -141,18 +135,17 @@ function createLineTextElement(line, lineNumber) {
   return lineContentWrapper;
 }// createLineTextElement
 
-function highlightLines(codeElements, linesToHighlight, settings, altHL) {
+function highlightLines(codeElements, linesToHighlight, altHL) {
   for (let i = 0; i < codeElements.length; i++) {
     const lines = codeElements[i].innerHTML.split("\n");
     
     const preElm = codeElements[i].parentNode;
-    if (preElm && preElm.nodeName === "PRE") {
-      preElm.classList.add(`codeblock-customizer-pre-parent-deprc`); //TODO (@mayurankv) what is the difference between codeblock-customizer-pre-parent-deprc and codeblock-customizer-pre?? Want to remove parent-pre-deprc
-    }
-    else // only process pre > code elements
+    if (preElm === null || preElm.nodeName !== "PRE") { // only process pre > code elements
       return;
+    }
 
-    const codeWrapper = document.createElement("div");
+    const lineNumberOffset = 0; //TODO (@mayurankv) Set offset here
+    codeElements[i].innerHTML = "";
     for (let j = 0; j < lines.length - 1; j++) {
       const line = lines[j];
       const lineNumber = j + 1;
@@ -167,43 +160,35 @@ function highlightLines(codeElements, linesToHighlight, settings, altHL) {
       else if (altHLMatch.length > 0) {
         lineWrapper.classList.add(`codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`);
       }
-      codeWrapper.appendChild(lineWrapper);
+      codeElements[i].appendChild(lineWrapper);
 
       // create line number element
-      const lineNumberEl = createLineNumberElement(lineNumber, settings, isHighlighted, altHLMatch);
+      const lineNumberEl = createLineNumberElement(lineNumber+lineNumberOffset);
       lineWrapper.appendChild(lineNumberEl);
 
       // create line text element
-      const lineTextEl = createLineTextElement(line, lineNumber);
+      const lineTextEl = createLineTextElement(line);
       lineWrapper.appendChild(lineTextEl);
     }
-    codeElements[i].innerHTML = "";
-    codeElements[i].appendChild(codeWrapper);
   }
 }// highlightLines
 
-function AddHeaderAndHighlight(isCodeBlockExcluded, FileName, codeBlockPreElement, codeBlockLang, pluginSettings, Fold, codeElements, linesToHighlight, altHL ){
+function AddHeaderAndHighlight(isCodeBlockExcluded, fileName, codeBlockPreElement, codeBlockLang, Fold, codeElements, linesToHighlight, altHL ){
   if (!isCodeBlockExcluded) {
-    let isCodeBlockHeaderEnabled = false;
-    if (FileName !== "" && FileName !== null) {
-      isCodeBlockHeaderEnabled = true;
-      HeaderWidget(codeBlockPreElement, FileName, getLanguageName(codeBlockLang), pluginSettings.header, pluginSettings.bDisplayCodeBlockLanguage, Fold, pluginSettings.bDisplayCodeBlockIcon);
-    } else if (Fold) {
-      isCodeBlockHeaderEnabled = true;
-      HeaderWidget(codeBlockPreElement, "Collapsed code", getLanguageName(codeBlockLang), pluginSettings.header, pluginSettings.bDisplayCodeBlockLanguage, Fold, pluginSettings.bDisplayCodeBlockIcon);
-    } else if (pluginSettings.bDisplayCodeBlockLanguage && pluginSettings.header.bAlwaysDisplayCodeblockLang && codeBlockLang) {
-      isCodeBlockHeaderEnabled = true;
-      HeaderWidget(codeBlockPreElement, "", getLanguageName(codeBlockLang), pluginSettings.header, pluginSettings.bDisplayCodeBlockLanguage, Fold, pluginSettings.bDisplayCodeBlockIcon);
-    } else if (pluginSettings.bDisplayCodeBlockIcon && pluginSettings.header.bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeBlockLang)) && codeBlockLang) {
-      isCodeBlockHeaderEnabled = true;
-      HeaderWidget(codeBlockPreElement, "", getLanguageName(codeBlockLang), pluginSettings.header, pluginSettings.bDisplayCodeBlockLanguage, Fold, pluginSettings.bDisplayCodeBlockIcon);
-    }
-
-    highlightLines(codeElements, linesToHighlight, pluginSettings, altHL);
-    if (isCodeBlockHeaderEnabled) {
-      if (codeBlockPreElement.parentElement) {
-        codeBlockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
+    let specificHeader = true;
+    if (fileName === null || fileName === "") {
+      if (Fold) {
+        fileName = 'Collapsed Code';
+      } else {
+        fileName = '';
+        specificHeader = false;
       }
+    }
+    HeaderWidget(codeBlockPreElement, fileName, specificHeader, getLanguageName(codeBlockLang), Fold);
+
+    highlightLines(codeElements, linesToHighlight, altHL);
+    if (codeBlockPreElement.parentElement) {
+      codeBlockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
     }
   }
 }// AddHeaderAndHighlight

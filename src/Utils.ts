@@ -173,10 +173,10 @@ export function createCodeblockLang(lang: string) {
   return codeblockLang;
 }// createCodeblockLang
 
-export function createCodeblockIcon(displayLang: string, bDisplayCodeBlockLanguage: boolean) {
+export function createCodeblockIcon(displayLang: string) {
   const div = document.createElement("div");
   div.classList.add("codeblock-customizer-icon-container");
-  if (bDisplayCodeBlockLanguage)
+  if (true)
     div.classList.add("codeblock-customizer-icon-container-codeblockLang");
   
   const img = document.createElement("img");
