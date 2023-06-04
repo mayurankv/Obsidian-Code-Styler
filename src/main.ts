@@ -53,8 +53,8 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
 
     // reading mode
-    this.registerMarkdownPostProcessor((el, ctx) => {    
-      ReadingView(el, ctx, this)
+    this.registerMarkdownPostProcessor(async (el, ctx) => {    
+      await ReadingView(el, ctx, this)
     })
 
     console.log("loading CodeBlock Customizer plugin");
