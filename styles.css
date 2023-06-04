@@ -1,7 +1,9 @@
 /* Define CSS variables */
 :root {
-  --line-number-gutter-width: 38px;
-  --border-radius: 5px;
+  --line-number-gutter-width: 32px;
+  --line-number-gutter-padding: 16px;
+  --border-radius: 10px;
+  --code-padding: 8px;
 }
 
 /* Codeblock background colours */
@@ -27,31 +29,41 @@
 .codeblock-customizer:not(.codeblock-customizer-show-line-numbers) .codeblock-customizer-line-number {
   display: none;
 }
-.codeblock-customizer-show-line-numbers .markdown-rendered pre.codeblock-customizer-pre { /* Maintain gutter color when padded */
-  background: linear-gradient(var(--codeblock-customizer-codeblock-background-color),var(--codeblock-customizer-codeblock-background-color)) var(--line-number-gutter-width) bottom/100% border-box no-repeat,var(--codeblock-customizer-gutter-background-color);
+.markdown-rendered .codeblock-customizer-pre > code > div:first-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
+  box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
+}
+.markdown-rendered .codeblock-customizer-pre > code > div:last-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
+  box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
+}
+.markdown-rendered .codeblock-customizer-pre > code > div:only-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
+  box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color),0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
 .codeblock-customizer-line-number,
 .codeblock-customizer-line-number-specific {
   padding-left: 4px;
-  padding-right: 8px;
+  padding-right: 6px;
   text-align: right;
+  min-width: var(--line-number-gutter-width);
   background-color: var(--codeblock-customizer-gutter-background-color);
-  width: 38px;
   font-size: var(--code-size);
   font-family: var(--font-monospace);
   color: var(--codeblock-customizer-gutter-text-color);
+  user-select: none;
 }
 .markdown-source-view .codeblock-customizer-line-number,
 .markdown-source-view .codeblock-customizer-line-number-specific {
   position: absolute;
-  left: 0;
   display: inline-block;
   height: 100%;
-  user-select: none;
+  width: var(--line-number-gutter-width);
+  overflow: scroll;
+  direction: rtl;
+  left: 0;
 }
-.markdown-rendered [class^='codeblock-customizer-line-number'] {
+.markdown-rendered .codeblock-customizer-line-number,
+.markdown-rendered .codeblock-customizer-line-number-specific {
   flex-shrink: 0;
-  user-select: none;
+  flex-grow: 1;
 }
 .codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
 .codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
@@ -59,37 +71,52 @@
   background-color: rgba(0,0,0,0);
 }
 .codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has([class^='codeblock-customizer-line-number']){
-  padding-left: 54px !important;
+  padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
 }
 
 /* Header styling */
-.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
-  display: none;
+body:not([class*='codeblock-customizer-show-language-names']) .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"],
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
+body:not([class*='codeblock-customizer-show-language-icons']) .codeblock-customizer-header-container-specific img.codeblock-customizer-icon,
+body:not(.codeblock-customizer-show-language-icons-always) .codeblock-customizer-header-container img.codeblock-customizer-icon,
+body:not(.codeblock-customizer-show-language-icons-always.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container,
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) {
+  display: None !important;
 }
-.codeblock-customizer-header-container {
+.codeblock-customizer-header-container,
+.codeblock-customizer-header-container-specific {
   user-select: none;
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
   background-color: var(--codeblock-customizer-header-background-color);
   border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
-  margin-top: 16px;               /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */
+  font-size: 14px;
+  margin-top: 16px;           /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */    
+  display: flex !important;
 }
-.markdown-source-view.mod-cm6.is-readable-line-width .codeblock-customizer-header-container { /* Fix for incorrectly displaying header when usin "minimal" theme */
+.markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)),
+.markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)),
+.markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed),
+.markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) {
+  border-bottom-left-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
+  border-bottom: none;
+}
+.markdown-source-view.mod-cm6.is-readable-line-width .codeblock-customizer-header-container,
+.markdown-source-view.mod-cm6.is-readable-line-width .codeblock-customizer-header-container-specific { /* Fix for incorrectly displaying header when usin "minimal" theme */
   width: calc(var(--line-width-adaptive) - var(--folding-offset));
   margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
 }
-.codeblock-customizer-header-container > div {
-  display: flex;
-}
-.codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"] {
+.codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
+.codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"] {
   padding-left: 15px;
   padding-right: 15px;
   padding-top: 0.3em;
   padding-bottom: 0.3em;
-  font-size: 14px;
+  font-size: inherit;
+  border-radius: var(--border-radius) var(--border-radius) var(--border-radius) 0px;
   background-color: var(--codeblock-customizer-language-tag-background-color);
   color: var(--codeblock-customizer-language-tag-text-color);
-  border-radius: var(--border-radius) 5px 5px 0px;
   font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
   font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
 }
@@ -97,64 +124,50 @@
   padding-left: 15px;
   padding-top: 0.3em;
   padding-bottom: 0.3em;
-  font-size: 14px;
+  font-size: inherit;
   color: var(--codeblock-customizer-header-text-color);
   font-weight: var(--codeblock-customizer-header-text-bold, normal);
   font-style: var(--codeblock-customizer-header-text-italic, normal);
 }
-.codeblock-customizer-icon-container{
+div:has(> img.codeblock-customizer-icon) {
   display: inline-flex;
   padding-left: 15px;
+}
+div:has(> img.codeblock-customizer-icon):has(+ [class^="codeblock-customizer-header-language-tag"]){
+  padding-right: 15px;
 }
 .codeblock-customizer-icon {
   border: 0px !important;
 }
 
-/* Source mode styling */
-
-
-/* Border radius styling */
-:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin,
-.cm-content .HyperMD-codeblock-begin:first-child {
-  border-top-left-radius: var(--border-radius) !important;
-  border-top-right-radius: var(--border-radius) !important;
+/* Pre element styling */
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
+  display: none;
 }
-.codeblock-customizer-header-container + .HyperMD-codeblock-begin {
+.codeblock-customizer-pre-parent{
+  margin-bottom: 16px;
+}
+.codeblock-customizer-pre {
+  margin-top: 0px !important;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
-}
-.HyperMD-codeblock-end{
   border-bottom-left-radius: var(--border-radius) !important;
   border-bottom-right-radius: var(--border-radius) !important;
+  padding-top: 0px !important;    /* padding-top and bottom must be set at the pre code element*/
+  padding-bottom: 0px !important;
+  padding-right: 0px !important;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
+  padding-left: 0px !important;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
 }
-.codeblock-customizer-header-container + .codeblock-customizer-pre {
-  border-top-left-radius: 0px !important;
-  border-top-right-radius: 0px !important;
-}
-:not(.codeblock-customizer-header-container) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-.cm-content .HyperMD-codeblock-begin:first-child [class^='codeblock-customizer-line-number'] {
-  border-top-left-radius: var(--border-radius);
-}
-.HyperMD-codeblock-end [class^='codeblock-customizer-line-number']  {
-  border-bottom-left-radius: var(--border-radius);
-}
-
-
-
-
-
-
-
-
-
-/* -------------------------------------------------------- */
-.codeblock-customizer-icon-container-codeblockLang{
-  padding-right: 15px;
+.codeblock-customizer-pre code {
+  display: block;
+  padding-top: var(--code-padding) !important;
+  padding-bottom: var(--code-padding) !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  border-radius: 0px;
 }
 
-/* style codeblock header wrapper */
-
-
+/* Source mode text styling */
 .HyperMD-codeblock:has(> .cm-widgetBuffer) { /* Prevent Line Wraps */
 	white-space: nowrap;
 }
@@ -162,44 +175,54 @@
 	white-space: break-spaces;
 }
 
-
-/* styling for reading view */
+/* Reading mode text styling */
 .markdown-rendered div:has(> .codeblock-customizer-line-text) {
   display: flex;
 }
 .markdown-rendered .codeblock-customizer-line-text {
   flex-basis: 100%;
-  padding-left: 16px;             /* originalVal:0px, add padding between the line numbers and the text */
+  padding-left: var(--line-number-gutter-padding);             /* originalVal:0px, add padding between the line numbers and the text */
 }
 
-/* pre element */
-.codeblock-customizer-pre-parent-deprc {
-  padding-right: 0px !important;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
-  padding-left: 0px !important;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
+/* Border radius styling */
+/* :not([class^="codeblock-customizer-header-container"])*/
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
 }
-.codeblock-customizer-pre {
-  margin-top: 0px !important;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
-  border-radius: var(--border-radius) !important;
-  padding-top: 0px !important;    /* padding-top and bottom must be set at the pre code element*/
-  padding-bottom: 0px !important;
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end {
+  border-bottom-left-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
 }
-.codeblock-customizer-pre-parent{
-  margin-bottom: 16px;
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end [class^='codeblock-customizer-line-number'] {
+  border-bottom-left-radius: var(--border-radius) !important;
 }
-.codeblock-customizer-pre code {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
+body:not([class*='codeblock-customizer-show-language-names']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not([class*='codeblock-customizer-show-language-icons']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-language-icons-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-language-icons-always.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin {
+  border-top-left-radius: var(--border-radius) !important;
+  border-top-right-radius: var(--border-radius) !important;
 }
-
-/* -------------------------------------------------------- */
-
-
-
-
-
-
+body:not([class*='codeblock-customizer-show-language-names']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not([class*='codeblock-customizer-show-language-icons']) .codeblock-customizer-header-container-specific + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not(.codeblock-customizer-show-language-icons-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not(.codeblock-customizer-show-language-icons-always.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] {
+  border-top-left-radius: var(--border-radius);
+}
+body:not([class*='codeblock-customizer-show-language-names']) .codeblock-customizer-header-container-specific + .codeblock-customizer-pre,
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
+body:not([class*='codeblock-customizer-show-language-icons']) .codeblock-customizer-header-container-specific + .codeblock-customizer-pre,
+body:not(.codeblock-customizer-show-language-icons-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
+body:not(.codeblock-customizer-show-language-icons-always.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
+body:not(.codeblock-customizer-show-language-names-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre {
+  border-top-left-radius: var(--border-radius) !important;
+  border-top-right-radius: var(--border-radius) !important;
+}
 
 /* Settings */
 .codeblock-customizer-Donation {
