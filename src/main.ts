@@ -68,10 +68,14 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     
   getCurrentTheme() {
     const body = document.querySelector('body');
-    if (body.classList.contains('theme-light')) {
-      return "light";
-    } else if (body.classList.contains('theme-dark')) {
-      return "dark";
+    if (body !== null){
+      if (body.classList.contains('theme-light')) {
+        return "light";
+      } else if (body.classList.contains('theme-dark')) {
+        return "dark";
+      }
+    } else {
+      console.log('Error - getCurrentTheme')
     }
   }// getCurrentTheme
   
