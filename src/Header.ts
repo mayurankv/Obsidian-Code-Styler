@@ -53,7 +53,6 @@ export const codeblockHeader = StateField.define<DecorationSet>({
     let fileName = null;
     let bExclude = false;
     for (let i = 1; i < transaction.state.doc.lines; i++) {
-      bExclude = false;
       const lineText = transaction.state.doc.line(i).text.toString();
       const line = transaction.state.doc.line(i);
       const lang = searchString(lineText, "```");      
@@ -63,13 +62,16 @@ export const codeblockHeader = StateField.define<DecorationSet>({
           WidgetStart = line;
           fileName = searchString(lineText, "file:");
           Fold = searchString(lineText, "fold");
-          const metaInfo = {color: this.settings.header.color, textColor: this.settings.header.textColor, lineColor: this.settings.header.lineColor, 
-            codeBlockLangColor: this.settings.header.codeBlockLangColor, codeBlockLangBackgroundColor: this.settings.header.codeBlockLangBackgroundColor,
-            bCodeblockLangBold: this.settings.header.bCodeblockLangBold, bCodeblockLangItalic: this.settings.header.bCodeblockLangItalic, bHeaderBold: this.settings.header.bHeaderBold,
-            bHeaderItalic: this.settings.header.bHeaderItalic};            
-          const [retVal, Text] = shouldAddWidget(bExclude, fileName, lang, Fold, this.settings);
-          if (retVal) {
-            builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(Text, getLanguageName(lang), metaInfo, this.settings.bDisplayCodeBlockLanguage, this.settings.bDisplayCodeBlockIcon));
+          if (!bExclude) {
+            if (fileName === null || fileName === "") {
+              if (Fold) {
+                fileName = 'Collapsed Code';
+              } else {
+                fileName = '';
+                specificHeader = false;
+              }
+            }
+            builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(fileName, getLanguageName(lang), specificHeader));
             //EditorView.requestMeasure;
           }
         } else {
@@ -87,26 +89,9 @@ export const codeblockHeader = StateField.define<DecorationSet>({
   },
 });// codeblockHeader
 
-function shouldAddWidget(bExclude: boolean, fileName: string | null, codeblockLanguage: string | null, fold: boolean, settings: any): [boolean, string] {
-  if (!bExclude && fileName !== null && fileName !== "") {
-    // filename is defined
-    return [true, fileName];
-  } else if (!bExclude && fold) {
-    // filename is not defined, but fold is!
-    return [true, 'Collapsed code'];
-  } else if (!bExclude && settings.bDisplayCodeBlockLanguage && settings.header.bAlwaysDisplayCodeblockLang && codeblockLanguage ) {
-    // always display codeblock language is enabled
-    return [true, ''];
-  } else if (!bExclude && settings.bDisplayCodeBlockIcon && settings.header.bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeblockLanguage)) && codeblockLanguage ) {
-    // always display codeblock language icon is enabled
-    return [true, ''];
-  }
-  return [false, ''];
-}// shouldAddWidget
-
-function createDecorationWidget(textToDisplay: string, languageName: string, metaInfo: any, bDisplayCodeBlockLanguage: boolean, bDisplayCodeBlockIcon: boolean) {
+function createDecorationWidget(textToDisplay: string, languageName: string, specificHeader: boolean) {
   return Decoration.widget({ 
-    widget: new TextAboveCodeblockWidget(textToDisplay, languageName, metaInfo, bDisplayCodeBlockLanguage, bDisplayCodeBlockIcon), block: true});
+    widget: new TextAboveCodeblockWidget(textToDisplay, languageName, specificHeader), block: true});
 }// createDecorationWidget
 
 const Collapse = StateEffect.define(), UnCollapse = StateEffect.define()
@@ -137,13 +122,11 @@ class TextAboveCodeblockWidget extends WidgetType {
   observer: MutationObserver;
   view: EditorView;
 
-  constructor(text: string, Lang: string, Header: CodeBlockMeta, bDisplayCodeBlockLanguage: boolean, bDisplayCodeBlockIcon: boolean) {
+  constructor(text: string, Lang: string, specificHeader: boolean) {
     super();
     this.text = text;    
     this.Lang = Lang;
-    this.Header = Header;
-    this.bDisplayCodeBlockLanguage = bDisplayCodeBlockLanguage;
-    this.bDisplayCodeBlockIcon = bDisplayCodeBlockIcon;
+    this.specificHeader = specificHeader;
     this.observer = new MutationObserver(this.handleMutation);    
   }
   
@@ -162,30 +145,21 @@ class TextAboveCodeblockWidget extends WidgetType {
   }
     
   eq(other: TextAboveCodeblockWidget) {
-  return other.text == this.text && other.Lang == this.Lang &&
-  other.Header.color == this.Header.color && other.Header.lineColor == this.Header.lineColor && 
-  other.Header.textColor == this.Header.textColor && other.Header.codeBlockLangBackgroundColor == this.Header.codeBlockLangBackgroundColor && 
-  other.Header.codeBlockLangColor == this.Header.codeBlockLangColor && other.bDisplayCodeBlockLanguage == this.bDisplayCodeBlockLanguage &&
-  other.Header.bCodeblockLangBold == this.Header.bCodeblockLangBold && other.Header.bCodeblockLangItalic == this.Header.bCodeblockLangItalic &&
-  other.Header.bHeaderBold == this.Header.bHeaderBold && other.Header.bHeaderItalic == this.Header.bHeaderItalic && 
-  other.bDisplayCodeBlockIcon == this.bDisplayCodeBlockIcon}
+    return other.text == this.text && other.Lang == this.Lang && other.specificHeader == this.specificHeader
+  }
     
   toDOM(view: EditorView): HTMLElement {
     this.view = view;
-    const container = createContainer(false);
-    const wrapper = createWrapper();
-    if (this.Lang && this.bDisplayCodeBlockIcon){
+    const container = createContainer(this.specificHeader);
+    if (this.Lang){
       const Icon = getLanguageIcon(this.Lang)
       if (Icon) {
-        wrapper.appendChild(createCodeblockIcon(this.Lang, this.bDisplayCodeBlockLanguage));
+        container.appendChild(createCodeblockIcon(this.Lang));
       }
-    }
-    if (this.Lang && this.bDisplayCodeBlockLanguage){
-      wrapper.appendChild(createCodeblockLang(this.Lang));
+      container.appendChild(createCodeblockLang(this.Lang));
     }
 
-    wrapper.appendChild(createFileName(this.text));   
-    container.appendChild(wrapper);
+    container.appendChild(createFileName(this.text));   
     
     this.observer.view = view;
     this.observer.observe(container, { attributes: true });   
