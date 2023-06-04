@@ -66,8 +66,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
         this.prevBGColor = this.settings.backgroundColor;
         this.prevHLColor = this.settings.highlightColor;
         this.prevExcludeLangs = this.settings.ExcludeLangs;
-        this.prevAlternateColors = this.settings.alternateColors.map(({name, currentColor}) => {
-          return {name, currentColor};
+        this.prevAlternateColors = this.settings.alternateColors.map(({name}) => {
+          return {name};
         });
         this.prevTextColor = this.settings.gutterTextColor;
         this.prevBackgroundColor = this.settings.gutterBackgroundColor;
@@ -108,6 +108,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
         let lineNumber = 1;
         let HL = [];
         let altHL = [];
+        let lineNumberOffset = 0;
         const Exclude = this.settings.ExcludeLangs;
         const ExcludeLangs = splitAndTrimString(Exclude);
         let bExclude = false;
@@ -149,10 +150,11 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               }
               if (startLine) {
                 lineNumber = 0;
+                lineNumberOffset = 0; //TODO (@mayurankv) Set offset here
                 const params = searchString(lineText, "HL:");
                 HL = getHighlightedLines(params);
                 altHL = [];
-                for (const { name, _ } of alternateColors) {
+                for (const { name } of alternateColors) {
                   const altParams = searchString(lineText, `${name}:`);
                   altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
                 }
@@ -171,7 +173,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
                 decorations.push(Decoration.line({attributes: {class: lineClass}}).range(node.from));
 
                 decorations.push(Decoration.line({}).range(node.from));
-                decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber),}).range(node.from));
+                decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber+lineNumberOffset),}).range(node.from));
                 lineNumber++;
               }
             },
@@ -213,12 +215,9 @@ class LineNumberWidget extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
-    const span = document.createElement("span");
     //TODO (@mayurankv) If the numbers are set with ln parameter, then make this an if statement and instead add a new class called 'codeblock-customizer-line-number-specific' which can then be targeted by css
-    span.classList.add("codeblock-customizer-line-number");
-    span.innerText = `${this.lineNumber}`;
-
-    container.appendChild(span);
+    container.classList.add("codeblock-customizer-line-number");
+    container.innerText = `${this.lineNumber}`;
 
     return container;
   }
