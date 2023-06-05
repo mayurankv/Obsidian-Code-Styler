@@ -87,7 +87,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
   bDisplayCodeBlockIcon: false,
   gutterTextColor: D_GUTTER_TEXT_COLOR,
   gutterBackgroundColor: D_GUTTER_BACKGROUND_COLOR,
-  SelectedTheme: "",
+  SelectedTheme: "Dark Theme",
   header: {
     bHeaderBold: false,
     bHeaderItalic: false,
