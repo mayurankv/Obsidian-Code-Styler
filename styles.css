@@ -57,7 +57,7 @@
   display: inline-block;
   height: 100%;
   width: var(--line-number-gutter-width);
-  overflow: scroll;
+  overflow-x: scroll;
   direction: rtl;
   left: 0;
 }
@@ -115,7 +115,7 @@ body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-head
   height: 100%;
   padding-left: 15px;
   padding-right: 15px;
-  margin-right: 15git adpx;
+  margin-right: 15px;
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   font-size: inherit;
