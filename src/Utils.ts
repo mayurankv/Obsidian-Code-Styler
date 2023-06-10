@@ -279,6 +279,9 @@ function updateSettingClasses(settings) {
   } else {
     document.body.classList.remove('codeblock-customizer-gutter-highlight');
   }
+
+  settings.colorThemes.splice(0,2)
+  console.log(settings.colorThemes)
 }// updateSettingStyles
 
 function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},alternateColors) { //TODO (@mayurankv) Add type hint for alternateColors

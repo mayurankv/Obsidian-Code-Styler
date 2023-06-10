@@ -70,11 +70,11 @@ export class SettingsTab extends PluginSettingTab {
           } else if(this.plugin.settings.SelectedTheme === "Dark Theme" || this.plugin.settings.SelectedTheme === "Light Theme") {
             new Notice('You cannot delete the default themes');
           } else {
-            let isDefaultLightTheme = false, isDefaltDarkTheme = false;
+            let isDefaultLightTheme = false, isDefaultDarkTheme = false;
             this.plugin.settings.colorThemes.forEach(theme => {
               if (theme.name == this.plugin.settings.SelectedTheme){
                 isDefaultLightTheme = theme.colors.header.bDefaultLightTheme;
-                isDefaltDarkTheme = theme.colors.header.bDefaultDarkTheme;
+                isDefaultDarkTheme = theme.colors.header.bDefaultDarkTheme;
               }
             });
             if (isDefaultLightTheme){
@@ -85,7 +85,7 @@ export class SettingsTab extends PluginSettingTab {
               });
             }
             
-            if (isDefaltDarkTheme){
+            if (isDefaultDarkTheme){
               // restore bDefaultLightTheme for the default Dark theme if the deleted theme is the default
               this.plugin.settings.colorThemes.forEach(theme => {
                 if (theme.name === "Dark Theme")
