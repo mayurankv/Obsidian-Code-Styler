@@ -231,9 +231,13 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
   let themeColors = settings.colorThemes.find((theme) => {return theme['name'] == settings.SelectedTheme})['colors'];
   let currentTheme = {name: 'current', colors: {}};
   for (const key of Object.keys(stylesDict)) {
-    let currentValue = accessSetting(key,themeColors).toLowerCase();
-    if (accessSetting(key,defaultColors).toLowerCase() != currentValue) {
-      currentTheme['colors'][key] = currentValue;
+    let defaultValue = accessSetting(key,defaultColors).toLowerCase();
+    let themeValue = accessSetting(key,themeColors).toLowerCase();
+    let settingsValue = accessSetting(key,settings).toLowerCase();
+    if (defaultValue !== settingsValue) {
+      currentTheme['colors'][key] = settingsValue;
+    } else if (defaultValue !== themeValue) {
+      currentTheme['colors'][key] = themeValue;
     }
   }
   let altHighlightStyling = settings.alternateColors.reduce((styling,altHighlight) => {return styling + `

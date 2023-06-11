@@ -6,7 +6,7 @@
   --code-padding: 8px;
   --header-padding: 0px;
   --header-spacing: 15px;
-  --icon-size: 28px;
+  --language-icon-size: 28px;
 }
 
 /* Codeblock background colours */
@@ -98,14 +98,14 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific {
   user-select: none;
-  height: var(--icon-size);
+  height: var(--language-icon-size);
   padding-top: var(--header-padding);
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
   background-color: var(--codeblock-customizer-header-background-color);
   border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
   font-size: 14px;
-  margin-top: 16px;           /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */    
+  margin-top: 16px;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
   display: flex !important;
   overflow: visible;
 }
