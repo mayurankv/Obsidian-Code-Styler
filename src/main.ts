@@ -37,8 +37,6 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 
     this.extensions.push(codeblockHighlight(this.settings));
 
-    updateSettingStyles(this.settings);
-    
     this.registerEditorExtension(this.extensions);
     
     // theme on startup
@@ -47,8 +45,11 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     const settingsTab = new SettingsTab(this.app, this);
     this.addSettingTab(settingsTab);
     
-    if (this.settings.SelectedTheme == "")
+    if (this.settings.SelectedTheme == "") {
       this.updateTheme(settingsTab);
+    } else {
+      updateSettingStyles(this.settings);
+    }
     
     this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
 
