@@ -109,6 +109,10 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
   display: flex !important;
   overflow: visible;
 }
+.markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container,
+.markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container-specific {
+  margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+}
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed),
