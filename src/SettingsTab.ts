@@ -230,6 +230,20 @@ export class SettingsTab extends PluginSettingTab {
             });
           }
 
+          // check if default themes need resetting
+          if (this.plugin.settings.colorThemes.every((theme) => {return !theme.colors.header.bDefaultLightTheme})) {
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name === "Light Theme")
+                theme.colors.header.bDefaultLightTheme = true;
+            });
+          }
+          if (this.plugin.settings.colorThemes.every((theme) => {return !theme.colors.header.bDefaultDarkTheme})) {
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name === "Dark Theme")
+                theme.colors.header.bDefaultDarkTheme = true;
+            });
+          }
+
           // Clear the input field        
           this.plugin.settings.ThemeName = "";
           text.setValue("");
