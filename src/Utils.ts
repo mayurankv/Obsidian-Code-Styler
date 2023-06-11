@@ -1,5 +1,19 @@
 import { Languages, manualLang, Icons } from "./Const";
 
+export function getCurrentMode() {
+  const body = document.querySelector('body');
+  if (body !== null){
+    if (body.classList.contains('theme-light')) {
+      return "light";
+    } else if (body.classList.contains('theme-dark')) {
+      return "dark";
+    }
+  } else {
+    console.log('Error - getCurrentTheme')
+  }
+  return '';
+}// getCurrentTheme
+
 export function splitAndTrimString(str) {
   if (!str) {
     return [];
@@ -212,14 +226,13 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
     styleTag.id = styleId;
     document.getElementsByTagName('head')[0].appendChild(styleTag);
   }
-  let defaultThemeColors = settings.colorThemes.find((theme) => {return theme['name'] == settings.SelectedTheme})['colors'];
+  let currentMode = getCurrentMode()
+  let defaultColors = settings.colorThemes.find((theme) => {return theme['name'] == `${currentMode.charAt(0).toUpperCase()+currentMode.slice(1)} Theme`})['colors'];
+  let themeColors = settings.colorThemes.find((theme) => {return theme['name'] == settings.SelectedTheme})['colors'];
   let currentTheme = {name: 'current', colors: {}};
   for (const key of Object.keys(stylesDict)) {
-    let currentValue = accessSetting(key,settings);
-    console.log(key)
-    console.log(accessSetting(key,defaultThemeColors))
-    console.log(currentValue)
-    if (accessSetting(key,defaultThemeColors) != currentValue) {
+    let currentValue = accessSetting(key,themeColors).toLowerCase();
+    if (accessSetting(key,defaultColors).toLowerCase() != currentValue) {
       currentTheme['colors'][key] = currentValue;
     }
   }
@@ -238,7 +251,6 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
       --codeblock-customizer-header-text-italic: ${settings.header.bHeaderItalic?'italic':'normal'};
     }
   `;
-  console.log(currentTheme)
   styleTag.innerText = colorThemes.reduce((styles,theme) => {
     return styles + formatStyles(theme,settings.alternateColors);
   },formatStyles(currentTheme,settings.alternateColors)+altHighlightStyling+textSettingsStyles).trim().replace(/[\r\n\s]+/g, ' ');
@@ -287,25 +299,24 @@ function updateSettingClasses(settings) {
 
 function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},alternateColors) { //TODO (@mayurankv) Add type hint for alternateColors
   let current = theme['name'] == "current";
-  console.log(current,theme['name'])
   let themeClass = ''
   let altHighlightStyles = ''
   if (theme['name'] == 'Light Theme') {
-    themeClass = 'theme-light';
+    themeClass = '.theme-light';
     altHighlightStyles = addAltHighlightColors(alternateColors,true);
   } else if (theme['name'] == 'Dark Theme') {
-    themeClass = 'theme-dark';
+    themeClass = '.theme-dark';
     altHighlightStyles = addAltHighlightColors(alternateColors,false);
-  } else {
+  } else if (theme['name'] != 'current') {
     return '';
     // themeClass = theme['name'].replace(/\s+/g, '-').toLowerCase();
   }
   return `
-    body.codeblock-customizer${current ?'':`.${themeClass}`} {
+    body.codeblock-customizer${current ?'':themeClass} {
       ${Object.keys(stylesDict).reduce((variables,key)=>{
         let cssVariable = `--codeblock-customizer-${stylesDict[key]}`;
         let cssValue = accessSetting(key,theme['colors']);
-        let cssImportant = (themeClass == 'current' ?' !important':'');
+        let cssImportant = (current?' !important':'');
         if (cssValue != null) {
           return variables + `${cssVariable}: ${cssValue + cssImportant};`;
         } else {

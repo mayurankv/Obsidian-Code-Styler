@@ -6,7 +6,7 @@ import { codeblockHighlight } from "./CodeBlockHighlight";
 import { codeblockHeader, collapseField } from "./Header";
 import { ReadingView } from "./ReadingView";
 import { SettingsTab } from "./SettingsTab";
-import { loadIcons, BLOBS, updateSettingStyles } from "./Utils";
+import { getCurrentMode, loadIcons, BLOBS, updateSettingStyles } from "./Utils";
 
 // npm i @simonwep/pickr
 
@@ -42,7 +42,7 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
     this.registerEditorExtension(this.extensions);
     
     // theme on startup
-    this.theme = this.getCurrentTheme();
+    this.theme = getCurrentMode();
 
     const settingsTab = new SettingsTab(this.app, this);
     this.addSettingTab(settingsTab);
@@ -61,31 +61,18 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   }// onload
   
   handleCssChange(settingsTab) {
-    if (this.getCurrentTheme() != this.theme){
+    if (getCurrentMode() != this.theme){
       this.updateTheme(settingsTab);
     }
   }// handleCssChange
     
-  getCurrentTheme() {
-    const body = document.querySelector('body');
-    if (body !== null){
-      if (body.classList.contains('theme-light')) {
-        return "light";
-      } else if (body.classList.contains('theme-dark')) {
-        return "dark";
-      }
-    } else {
-      console.log('Error - getCurrentTheme')
-    }
-  }// getCurrentTheme
-  
   updateTheme(settingsTab) {
     this.settings.colorThemes.forEach(theme => {
-      if (this.getCurrentTheme() == "light" && theme.colors.header.bDefaultLightTheme) {
+      if (getCurrentMode() == "light" && theme.colors.header.bDefaultLightTheme) {
         this.theme = theme.name;
         settingsTab.applyCurrentAlternateHLColor(true);
       }
-      else if (this.getCurrentTheme() == "dark" && theme.colors.header.bDefaultDarkTheme) {
+      else if (getCurrentMode() == "dark" && theme.colors.header.bDefaultDarkTheme) {
         this.theme = theme.name;
         settingsTab.applyCurrentAlternateHLColor(false);
       }
