@@ -63,7 +63,7 @@
   left: 0;
 }
 .markdown-source-view .codeblock-customizer-line-number::-webkit-scrollbar {
-  /* display: none; */
+  display: none;
 }
 .markdown-rendered .codeblock-customizer-line-number {
   flex-shrink: 0;
