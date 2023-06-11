@@ -105,7 +105,7 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
   background-color: var(--codeblock-customizer-header-background-color);
   border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
   font-size: 14px;
-  margin-top: 16px;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+  margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
   display: flex !important;
   overflow: visible;
 }
