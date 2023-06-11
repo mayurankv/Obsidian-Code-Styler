@@ -216,6 +216,9 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
   let currentTheme = {name: 'current', colors: {}};
   for (const key of Object.keys(stylesDict)) {
     let currentValue = accessSetting(key,settings);
+    console.log(key)
+    console.log(accessSetting(key,defaultThemeColors))
+    console.log(currentValue)
     if (accessSetting(key,defaultThemeColors) != currentValue) {
       currentTheme['colors'][key] = currentValue;
     }
@@ -235,6 +238,7 @@ export function updateSettingStyles(settings: CodeblockCustomizerSettings) {
       --codeblock-customizer-header-text-italic: ${settings.header.bHeaderItalic?'italic':'normal'};
     }
   `;
+  console.log(currentTheme)
   styleTag.innerText = colorThemes.reduce((styles,theme) => {
     return styles + formatStyles(theme,settings.alternateColors);
   },formatStyles(currentTheme,settings.alternateColors)+altHighlightStyling+textSettingsStyles).trim().replace(/[\r\n\s]+/g, ' ');
@@ -283,6 +287,7 @@ function updateSettingClasses(settings) {
 
 function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},alternateColors) { //TODO (@mayurankv) Add type hint for alternateColors
   let current = theme['name'] == "current";
+  console.log(current,theme['name'])
   let themeClass = ''
   let altHighlightStyles = ''
   if (theme['name'] == 'Light Theme') {
@@ -292,7 +297,8 @@ function formatStyles(theme: {name: string, colors: CodeblockCustomizerColors},a
     themeClass = 'theme-dark';
     altHighlightStyles = addAltHighlightColors(alternateColors,false);
   } else {
-    themeClass = theme['name'].replace(/\s+/g, '-').toLowerCase();
+    return '';
+    // themeClass = theme['name'].replace(/\s+/g, '-').toLowerCase();
   }
   return `
     body.codeblock-customizer${current ?'':`.${themeClass}`} {

@@ -218,9 +218,9 @@ div:has(> img.codeblock-customizer-icon) {
 .codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end .codeblock-customizer-line-number {
   border-bottom-left-radius: var(--border-radius);
 }
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
-body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
-body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin {
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
+body .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin {
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
 }
