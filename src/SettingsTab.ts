@@ -518,7 +518,7 @@ export class SettingsTab extends PluginSettingTab {
       
   applyTheme() {
     const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.SelectedTheme);
-    
+    console.log(selectedTheme)
     this.plugin.settings.activeCodeBlockLineColor = selectedTheme.colors.activeCodeBlockLineColor;
     this.plugin.settings.activeLineColor = selectedTheme.colors.activeLineColor;
     this.plugin.settings.backgroundColor = selectedTheme.colors.backgroundColor;
