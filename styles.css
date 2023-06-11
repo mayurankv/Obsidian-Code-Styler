@@ -1,216 +1,256 @@
-/* style active line */
-
-/* Highlight active line outside codeblocks */
-.cm-active {
-  background-color: var(--codeblock-customizer-editor-active-line-color);
+/* Define CSS variables */
+:root {
+  --line-number-gutter-width: 32px;
+  --line-number-gutter-padding: 16px;
+  --border-radius: 10px;
+  --code-padding: 8px;
+  --header-padding: 0px;
+  --header-spacing: 15px;
+  --language-icon-size: 28px;
 }
 
-/* Highlight active line outside codeblocks with !important flag */
-.codeblock-customizer-active-codeblock-line-important .cm-active {
+/* Codeblock background colours */
+.codeblock-customizer .markdown-rendered pre.codeblock-customizer-pre,
+.codeblock-customizer .markdown-source-view .HyperMD-codeblock.codeblock-customizer-line {
+  background-color: var(--codeblock-customizer-codeblock-background-color);
+}
+
+/* Highlighting */
+.codeblock-customizer-line-highlighted {
+  background-color: var(--codeblock-customizer-highlight-color) !important;
+}
+.codeblock-customizer-active-line-highlight .cm-active,
+.codeblock-customizer-active-line-highlight-editor .cm-active {
   background-color: var(--codeblock-customizer-editor-active-line-color) !important;
 }
-
-/* Highlight active line inside codeblocks */
-[class^="codeblock-customizer-line-"].cm-active {
-  background-color: var(--codeblock-customizer-codeblock-active-line-color);
-}
-
-/* Highlight active line inside codeblocks with !important flag */
-.codeblock-customizer-active-codeblock-line-highlight [class^="codeblock-customizer-line-"].cm-active {
+.codeblock-customizer-active-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active,
+.codeblock-customizer-active-line-highlight-codeblock .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
   background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
 }
 
-/* Apply border-radius only when line numbers are enabled */
-/*.codeblock-customizer-enable-line-numbers .codeblock-customizer-gutter-line + [class^="codeblock-customizer-line-"].cm-active {
-  border-top-left-radius: 7px !important;
-  border-bottom-left-radius: 7px !important;
-}*/
-/* set border to 0 for codeblock lines */
-/*[class^="codeblock-customizer-line-"] {
-  border: 0px !important;
-}*/
-
-.codeblock-customizer-firstLine-background-radius {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 5px !important;
+/* Line number gutter styling */
+.codeblock-customizer:not(.codeblock-customizer-show-line-numbers) .codeblock-customizer-line-number,
+.codeblock-customizer-line-number-hide {
+  display: none;
 }
-
-.codeblock-customizer-firstLine-background-NoRadius {
-  border-top-left-radius: 0px !important;
-  border-top-right-radius: 0px !important;
+.markdown-rendered .codeblock-customizer-pre > code > div:first-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
+  box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
 }
-
-.codeblock-customizer-lastLine-background-radius{
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
+.markdown-rendered .codeblock-customizer-pre > code > div:last-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
+  box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
-
-/* style gutter */
-.codeblock-customizer-gutter{
-  position: absolute;
-  left: 0;
+.markdown-rendered .codeblock-customizer-pre > code > div:only-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
+  box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color),0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
+}
+.codeblock-customizer-line-number,
+.codeblock-customizer-line-number-specific {
   padding-left: 4px;
   padding-right: 8px;
   text-align: right;
-  display: inline-block;
-  height: 100%;
-  background-color: var(--codeblock-customizer-gutter-color);
-  width: 38px;
-  user-select: none;
+  min-width: var(--line-number-gutter-width);
+  background-color: var(--codeblock-customizer-gutter-background-color);
   font-size: var(--code-size);
   font-family: var(--font-monospace);
-  color: var(--codeblock-customizer-gutter-textColor);
-}
-
-.codeblock-customizer-gutter-line{
-  padding-left: 54px !important;
-}
-
-.codeblock-customizer-gutterElements-first-radius {
-  border-top-left-radius: 5px;
-}
-
-.codeblock-customizer-gutterElements-last-radius {
-  border-bottom-left-radius: 5px;
-}
-
-/* style header-container */
-.codeblock-customizer-header-container {
+  color: var(--codeblock-customizer-gutter-text-color);
   user-select: none;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  background-color: var(--header-color);
-  border-bottom: 2px groove var(--header-line-color);
-  margin-top: 16px;               /* originalVal: none, set it to 16px, so the headergets the marginTop, which was removed from the first line of the codeblock */
 }
-/* Fix for incorrectly displaying header when usin "minimal" theme */
-.markdown-source-view.mod-cm6.is-readable-line-width .codeblock-customizer-header-container {
+.markdown-source-view .codeblock-customizer-line-number {
+  position: absolute;
+  display: inline-block;
+  height: 100%;
+  width: var(--line-number-gutter-width);
+  overflow-x: auto;
+  direction: rtl;
+  left: 0;
+}
+.markdown-source-view .codeblock-customizer-line-number::-webkit-scrollbar {
+  display: none;
+}
+.markdown-rendered .codeblock-customizer-line-number {
+  flex-shrink: 0;
+  flex-grow: 1;
+}
+.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
+.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
+.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-line-number {
+  background-color: rgba(0,0,0,0);
+}
+.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number){
+  padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
+}
+
+/* Header styling */
+body:not([class*='codeblock-customizer-show-langicons']) .codeblock-customizer-header-container-specific div:has(> img.codeblock-customizer-icon),
+body:not(.codeblock-customizer-show-langicons-always) .codeblock-customizer-header-container div:has(> img.codeblock-customizer-icon) {
+  display: none;
+}
+body:not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"],
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"] {
+  display: none;
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container,
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) {
+  display: none !important;
+}
+body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) {
+  display: none !important;
+}
+.codeblock-customizer-header-container,
+.codeblock-customizer-header-container-specific {
+  user-select: none;
+  height: var(--language-icon-size);
+  padding-top: var(--header-padding);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  background-color: var(--codeblock-customizer-header-background-color);
+  border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
+  font-size: 14px;
+  margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+  display: flex !important;
+  overflow: visible;
+}
+.markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container,
+.markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container-specific {
+  margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+}
+.markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)),
+.markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)),
+.markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed),
+.markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) {
+  padding-bottom: var(--header-padding);
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+  border-bottom: none;
+}
+.markdown-source-view .codeblock-customizer-header-container,
+.markdown-source-view .codeblock-customizer-header-container-specific { /* Fix for incorrectly displaying header when usin "minimal" theme */
   width: calc(var(--line-width-adaptive) - var(--folding-offset));
   margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
 }
-
-/* style header-container-icon */
-.codeblock-customizer-icon-container{
+.codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
+.codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"] {
+  height: 100%;
+  padding-left: var(--header-spacing);
+  padding-right: var(--header-spacing);
+  margin-right: var(--header-spacing);
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  font-size: inherit;
+  border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+  background-color: var(--codeblock-customizer-language-tag-background-color);
+  color: var(--codeblock-customizer-language-tag-text-color);
+  font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
+  font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
+}
+.markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
+.markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
+.markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) [class^="codeblock-customizer-header-language-tag"],
+.markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) [class^="codeblock-customizer-header-language-tag"] {
+  border-radius: var(--border-radius);
+}
+.codeblock-customizer-header-text {
+  padding-left: 0px;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  font-size: inherit;
+  color: var(--codeblock-customizer-header-text-color);
+  font-weight: var(--codeblock-customizer-header-text-bold, normal);
+  font-style: var(--codeblock-customizer-header-text-italic, normal);
+}
+body:not([class*='codeblock-customizer-show-langicons']):not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific .codeblock-customizer-header-text,
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-container .codeblock-customizer-header-text,
+body .codeblock-customizer-header-container-specific:not(:has( [class^="codeblock-customizer-header-language-tag-"])) .codeblock-customizer-header-text {
+  padding-left: var(--header-spacing);
+}
+div:has(> img.codeblock-customizer-icon) {
   display: inline-flex;
-  padding-left: 15px;
+  padding-left: var(--header-spacing);
+  padding-right: var(--header-spacing);
 }
-
 .codeblock-customizer-icon {
-  border: 0px !important;
+  border: 0px;
 }
 
-.codeblock-customizer-icon-container-codeblockLang{
-  padding-right: 15px;
+/* Pre element styling */
+.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
+  display: none;
+}
+.codeblock-customizer-pre-parent{
+  margin-bottom: 16px;
+}
+.markdown-rendered pre.codeblock-customizer-pre {
+  margin-top: 0px;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+  padding-top: 0px;    /* padding-top and bottom must be set at the pre code element*/
+  padding-bottom: 0px;
+  padding-right: 0px;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
+  padding-left: 0px;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
+}
+.markdown-rendered pre.codeblock-customizer-pre code {
+  display: block;
+  padding-top: var(--code-padding);
+  padding-bottom: var(--code-padding);
+  padding-left: 0px;
+  padding-right: 0px;
+  border-radius: 0px;
 }
 
-/* style codeblock header wrapper */
-.codeblock-customizer-header-wrapper {
+/* Source mode text styling */
+.HyperMD-codeblock:has(> .cm-widgetBuffer) { /* Prevent Line Wraps */
+	white-space: nowrap;
+}
+.HyperMD-codeblock:has(> .cm-widgetBuffer) > .cm-hmd-codeblock { /* Prevent Line Wraps */
+	white-space: break-spaces;
+}
+
+/* Reading mode text styling */
+.markdown-rendered div:has(> .codeblock-customizer-line-text) {
   display: flex;
 }
-
-/* style codeblock header text */
-.codeblock-customizer-header-text {
-  padding-left: 15px;
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
-  font-size: 14px;
-  color: var(--header-text-color);
-  font-weight: var(--header-bold, normal);
-  font-style: var(--header-italic, normal);
+.markdown-rendered .codeblock-customizer-line-text {
+  flex-basis: 100%;
+  padding-left: var(--line-number-gutter-padding);             /* originalVal:0px, add padding between the line numbers and the text */
 }
 
-/* style codeblock header language tag*/
-.codeblock-customizer-header-language-tag {
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
-  font-size: 14px;
-  background-color: var(--codeblock-lang-background-color);
-  color: var(--codeblock-lang-color);
-  border-radius: 5px 5px 5px 0px;
-  font-weight: var(--codeblock-lang-bold, normal);
-  font-style: var(--codeblock-lang-italic, normal);
+/* Border radius styling */
+/* :not([class^="codeblock-customizer-header-container"])*/
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end {
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end .codeblock-customizer-line-number {
+  border-bottom-left-radius: var(--border-radius);
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
+body .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin {
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number {
+  border-top-left-radius: var(--border-radius);
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre,
+body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre {
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
 }
 
-/* center donation button */
+/* Settings */
 .codeblock-customizer-Donation {
   width: 70%;
   margin: 0 auto;
   text-align: center;
-}
-
-/* styling for reading view */
-/* Collapse code block in reading view */
-.codeblock-customizer-pre.codeblock-customizer-coedeblock-collapsed {
-  display: none;
-}
-
-.codeblock-customizer-RVline {
-  display: flex;
-}
-
-.codeblock-customizer-RVline-number {
-  width: 38px;
-  text-align: right;
-  padding-left: 4px;
-  padding-right: 8px;
-  font-size: var(--code-size);
-  font-family: var(--font-monospace);
-  background-color: var(--codeblock-customizer-RVline-number-color);
-  color: var(--codeblock-customizer-RVline-number-textColor);
-  flex-shrink: 0;
-  user-select: none;
-}
-
-.codeblock-customizer-RVline-number-highlighted{
-  background-color: var(--codeblock-customizer-RVline-number-highlighted-color);
-}
-
-.codeblock-customizer-RVline-highlighted{
-  background-color: var(--codeblock-customizer-RVline-highlighted-color);
-}
-
-.codeblock-customizer-RVline-text {
-  flex-basis: 100%;
-  padding-left: 16px;             /* originalVal:0px, add padding between the line numbers and the text */
-}
-
-/* pre element */
-.codeblock-customizer-pre-parent {
-  padding-right: 0px !important;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
-  padding-left: 0px !important;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
-}
-
-.codeblock-customizer-pre {
-  margin-top: 0px !important;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
-  padding-top: 0px !important;    /* padding-top and bottom must be set at the pre code element*/
-  padding-bottom: 0px !important;
-}
-
-.codeblock-customizer-codeBlockPreElement-parent{
-  margin-bottom: 16px;
-}
-
-.codeblock-customizer-pre-radius {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 5px !important;
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
-}
-
-.codeblock-customizer-pre-no-radius {
-  border-top-left-radius: 0px !important;
-  border-top-right-radius: 0px !important;
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
-}
-
-.codeblock-customizer-pre code {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
 }
 
 /* pickr start */
@@ -220,5 +260,4 @@
 
 /*! Pickr 1.8.2 MIT | https://github.com/Simonwep/pickr */
 .pickr {position: relative;overflow: visible;transform: translateY(0)}  .pickr * {box-sizing: border-box;outline: none;border: none;-webkit-appearance: none}  .pickr .pcr-button {position: relative;height: 2em;width: 2em;padding: 0.5em;cursor: pointer;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;border-radius: .15em;background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" stroke="%2342445A" stroke-width="5px" stroke-linecap="round"><path d="M45,45L5,5"></path><path d="M45,5L5,45"></path></svg>') no-repeat center;background-size: 0;transition: all 0.3s}  .pickr .pcr-button::before {position: absolute;content: '';top: 0;left: 0;width: 100%;height: 100%;background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size: .5em;border-radius: .15em;z-index: -1}  .pickr .pcr-button::before {z-index: initial}  .pickr .pcr-button::after {position: absolute;content: '';top: 0;left: 0;height: 100%;width: 100%;transition: background 0.3s;background: var(--pcr-color);border-radius: .15em}  .pickr .pcr-button.clear {background-size: 70%}  .pickr .pcr-button.clear::before {opacity: 0}  .pickr .pcr-button.clear:focus {box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px var(--pcr-color)}  .pickr .pcr-button.disabled {cursor: not-allowed}  .pickr *, .pcr-app * {box-sizing: border-box;outline: none;border: none;-webkit-appearance: none}  .pickr input:focus, .pickr input.pcr-active, .pickr button:focus, .pickr button.pcr-active, .pcr-app input:focus, .pcr-app input.pcr-active, .pcr-app button:focus, .pcr-app button.pcr-active {box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px var(--pcr-color)}  .pickr .pcr-palette, .pickr .pcr-slider, .pcr-app .pcr-palette, .pcr-app .pcr-slider {transition: box-shadow 0.3s}  .pickr .pcr-palette:focus, .pickr .pcr-slider:focus, .pcr-app .pcr-palette:focus, .pcr-app .pcr-slider:focus {box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px rgba(0, 0, 0, 0.25)}  .pcr-app {position: fixed;display: flex;flex-direction: column;z-index: 10000;border-radius: 0.1em;background: #fff;opacity: 0;visibility: hidden;transition: opacity 0.3s, visibility 0s 0.3s;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;box-shadow: 0 0.15em 1.5em 0 rgba(0, 0, 0, 0.1), 0 0 1em 0 rgba(0, 0, 0, 0.03);left: 0;top: 0}  .pcr-app.visible {transition: opacity 0.3s;visibility: visible;opacity: 1}  .pcr-app .pcr-swatches {display: flex;flex-wrap: wrap;margin-top: 0.75em}  .pcr-app .pcr-swatches.pcr-last {margin: 0}  @supports (display: grid) {  .pcr-app .pcr-swatches {display: grid;align-items: center;grid-template-columns: repeat(auto-fit, 1.75em)}  }  .pcr-app .pcr-swatches > button {font-size: 1em;position: relative;width: calc(1.75em - 10px);height: calc(1.75em - 10px);border-radius: 0.15em;cursor: pointer;margin: 2.5px;flex-shrink: 0;justify-self: center;transition: all 0.15s;overflow: hidden;background: transparent;z-index: 1}  .pcr-app .pcr-swatches > button::before {position: absolute;content: '';top: 0;left: 0;width: 100%;height: 100%;background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size: 6px;border-radius: .15em;z-index: -1}  .pcr-app .pcr-swatches > button::after {content: '';position: absolute;top: 0;left: 0;width: 100%;height: 100%;background: var(--pcr-color);border: 1px solid rgba(0, 0, 0, 0.05);border-radius: 0.15em;box-sizing: border-box}  .pcr-app .pcr-swatches > button:hover {filter: brightness(1.05)}  .pcr-app .pcr-swatches > button:not(.pcr-active) {box-shadow: none}  .pcr-app .pcr-interaction {display: flex;flex-wrap: wrap;align-items: center;margin: 0 -0.2em 0 -0.2em}  .pcr-app .pcr-interaction > * {margin: 0 0.2em}  .pcr-app .pcr-interaction input {letter-spacing: 0.07em;font-size: 0.75em;text-align: center;cursor: pointer;color: #75797e;background: #f1f3f4;border-radius: .15em;transition: all 0.15s;padding: 0.45em 0.5em;margin-top: 0.75em}  .pcr-app .pcr-interaction input:hover {filter: brightness(0.975)}  .pcr-app .pcr-interaction input:focus {box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px rgba(66, 133, 244, 0.75)}  .pcr-app .pcr-interaction .pcr-result {color: #75797e;text-align: left;flex: 1 1 8em;min-width: 8em;transition: all 0.2s;border-radius: .15em;background: #f1f3f4;cursor: text}  .pcr-app .pcr-interaction .pcr-result::-moz-selection {background: #4285f4;color: #fff}  .pcr-app .pcr-interaction .pcr-result::selection {background: #4285f4;color: #fff}  .pcr-app .pcr-interaction .pcr-type.active {color: #fff;background: #4285f4}  .pcr-app .pcr-interaction .pcr-save, .pcr-app .pcr-interaction .pcr-cancel, .pcr-app .pcr-interaction .pcr-clear {color: #fff;width: auto}  .pcr-app .pcr-interaction .pcr-save, .pcr-app .pcr-interaction .pcr-cancel, .pcr-app .pcr-interaction .pcr-clear {color: #fff}  .pcr-app .pcr-interaction .pcr-save:hover, .pcr-app .pcr-interaction .pcr-cancel:hover, .pcr-app .pcr-interaction .pcr-clear:hover {filter: brightness(0.925)}  .pcr-app .pcr-interaction .pcr-save {background: #4285f4}  .pcr-app .pcr-interaction .pcr-clear, .pcr-app .pcr-interaction .pcr-cancel {background: #f44250}  .pcr-app .pcr-interaction .pcr-clear:focus, .pcr-app .pcr-interaction .pcr-cancel:focus {box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px rgba(244, 66, 80, 0.75)}  .pcr-app .pcr-selection .pcr-picker {position: absolute;height: 18px;width: 18px;border: 2px solid #fff;border-radius: 100%;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none}  .pcr-app .pcr-selection .pcr-color-palette, .pcr-app .pcr-selection .pcr-color-chooser, .pcr-app .pcr-selection .pcr-color-opacity {position: relative;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;display: flex;flex-direction: column;cursor: grab;cursor: -webkit-grab}  .pcr-app .pcr-selection .pcr-color-palette:active, .pcr-app .pcr-selection .pcr-color-chooser:active, .pcr-app .pcr-selection .pcr-color-opacity:active {cursor: grabbing;cursor: -webkit-grabbing}  .pcr-app[data-theme='nano'] {width: 14.25em;max-width: 95vw}  .pcr-app[data-theme='nano'] .pcr-swatches {margin-top: .6em;padding: 0 .6em}  .pcr-app[data-theme='nano'] .pcr-interaction {padding: 0 .6em .6em .6em}  .pcr-app[data-theme='nano'] .pcr-selection {display: grid;grid-gap: .6em;grid-template-columns: 1fr 4fr;grid-template-rows: 5fr auto auto;align-items: center;height: 10.5em;width: 100%;align-self: flex-start}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview {grid-area: 2 / 1 / 4 / 1;height: 100%;width: 100%;display: flex;flex-direction: row;justify-content: center;margin-left: .6em}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview .pcr-last-color {display: none}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview .pcr-current-color {position: relative;background: var(--pcr-color);width: 2em;height: 2em;border-radius: 50em;overflow: hidden}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview .pcr-current-color::before {position: absolute;content: '';top: 0;left: 0;width: 100%;height: 100%;background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size: .5em;border-radius: .15em;z-index: -1}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-palette {grid-area: 1 / 1 / 2 / 3;width: 100%;height: 100%;z-index: 1}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-palette .pcr-palette {border-radius: .15em;width: 100%;height: 100%}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-palette .pcr-palette::before {position: absolute;content: '';top: 0;left: 0;width: 100%;height: 100%;background: url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size: .5em;border-radius: .15em;z-index: -1}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser {grid-area: 2 / 2 / 2 / 2}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity {grid-area: 3 / 2 / 3 / 2}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser, .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity {height: 0.5em;margin: 0 .6em}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser .pcr-picker, .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity .pcr-picker {top: 50%;transform: translateY(-50%)}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser .pcr-slider, .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity .pcr-slider {flex-grow: 1;border-radius: 50em}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser .pcr-slider {background: linear-gradient(to right, red, #ff0, lime, cyan, blue, #f0f, red)}  .pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity .pcr-slider {background: linear-gradient(to right, transparent, black), url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size: 100%, 0.25em}
-
 /* pickr end */

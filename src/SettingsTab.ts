@@ -1,7 +1,7 @@
 import { PluginSettingTab, Setting } from "obsidian";
 import Pickr from "@simonwep/pickr";
 
-import { updateActiveLineStyles } from "./Utils";
+import { updateSettingStyles } from "./Utils";
 import {
     D_ACTIVE_CODEBLOCK_LINE_COLOR,
     D_ACTIVE_LINE_COLOR,
@@ -70,11 +70,11 @@ export class SettingsTab extends PluginSettingTab {
           } else if(this.plugin.settings.SelectedTheme === "Dark Theme" || this.plugin.settings.SelectedTheme === "Light Theme") {
             new Notice('You cannot delete the default themes');
           } else {
-            let isDefaultLightTheme = false, isDefaltDarkTheme = false;
+            let isDefaultLightTheme = false, isDefaultDarkTheme = false;
             this.plugin.settings.colorThemes.forEach(theme => {
               if (theme.name == this.plugin.settings.SelectedTheme){
                 isDefaultLightTheme = theme.colors.header.bDefaultLightTheme;
-                isDefaltDarkTheme = theme.colors.header.bDefaultDarkTheme;
+                isDefaultDarkTheme = theme.colors.header.bDefaultDarkTheme;
               }
             });
             if (isDefaultLightTheme){
@@ -85,7 +85,7 @@ export class SettingsTab extends PluginSettingTab {
               });
             }
             
-            if (isDefaltDarkTheme){
+            if (isDefaultDarkTheme){
               // restore bDefaultLightTheme for the default Dark theme if the deleted theme is the default
               this.plugin.settings.colorThemes.forEach(theme => {
                 if (theme.name === "Dark Theme")
@@ -230,6 +230,20 @@ export class SettingsTab extends PluginSettingTab {
             });
           }
 
+          // check if default themes need resetting
+          if (this.plugin.settings.colorThemes.every((theme) => {return !theme.colors.header.bDefaultLightTheme})) {
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name === "Light Theme")
+                theme.colors.header.bDefaultLightTheme = true;
+            });
+          }
+          if (this.plugin.settings.colorThemes.every((theme) => {return !theme.colors.header.bDefaultDarkTheme})) {
+            this.plugin.settings.colorThemes.forEach(theme => {
+              if (theme.name === "Dark Theme")
+                theme.colors.header.bDefaultDarkTheme = true;
+            });
+          }
+
           // Clear the input field        
           this.plugin.settings.ThemeName = "";
           text.setValue("");
@@ -248,13 +262,13 @@ export class SettingsTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.bActiveLineHighlight = value;
           await this.plugin.saveSettings();
-          updateActiveLineStyles(this.plugin.settings);
+          updateSettingStyles(this.plugin.settings);
         })
       );
-     
+    
     this.createPickrSetting(containerEl, 'Editor active line color', 
     'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
-     
+    
     new Setting(containerEl)
       .setName('Exclude languages')
       .setDesc('Define languages, separated by a comma, to which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
@@ -280,14 +294,14 @@ export class SettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Enable codeblock active line hihglight')
+      .setName('Enable codeblock active line highlight')
       .setDesc('If enabled, you can set the color for the active line inside codeblocks only.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
         .onChange(async (value) => {
           this.plugin.settings.bActiveCodeblockLineHighlight = value;          
           await this.plugin.saveSettings();
-          updateActiveLineStyles(this.plugin.settings);
+          updateSettingStyles(this.plugin.settings);
         })
       );
         
@@ -330,7 +344,7 @@ export class SettingsTab extends PluginSettingTab {
               const newColor = { name: alternateHLName, darkColor: colorValue, lightColor: colorValue };
               alternateColors.push(newColor);
               await this.plugin.saveSettings();
-              this.updateCurrentAlternateHLColor();
+              this.plugin.saveSettings();
               new Notice(`Added color "${alternateHLName}".`);
               alternateColorDisplayText.setValue("");
               alternateHLName = "";
@@ -518,7 +532,6 @@ export class SettingsTab extends PluginSettingTab {
       
   applyTheme() {
     const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.SelectedTheme);
-    
     this.plugin.settings.activeCodeBlockLineColor = selectedTheme.colors.activeCodeBlockLineColor;
     this.plugin.settings.activeLineColor = selectedTheme.colors.activeLineColor;
     this.plugin.settings.backgroundColor = selectedTheme.colors.backgroundColor;
@@ -531,41 +544,9 @@ export class SettingsTab extends PluginSettingTab {
     this.plugin.settings.header.codeBlockLangColor = selectedTheme.colors.header.codeBlockLangColor;
     this.plugin.settings.header.codeBlockLangBackgroundColor = selectedTheme.colors.header.codeBlockLangBackgroundColor;
     
-    updateActiveLineStyles(this.plugin.settings);
-    this.updateCurrentAlternateHLColor();
-  }// applyTheme
-  
-  updateCurrentAlternateHLColor() {
-    const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.SelectedTheme);
-    
-    const isDefaultDarkTheme = selectedTheme.colors.header.bDefaultDarkTheme;
-    const isDefaultLightTheme = selectedTheme.colors.header.bDefaultLightTheme;
-    // moonstone = light, obsidian = dark
-    const obsidianTheme = this.plugin.app.vault.getConfig('theme');
-    
-    if (isDefaultDarkTheme && !isDefaultLightTheme)
-      this.applyCurrentAlternateHLColor(false);
-    else if (!isDefaultDarkTheme && isDefaultLightTheme)
-      this.applyCurrentAlternateHLColor(true);
-    else if (!isDefaultDarkTheme && !isDefaultLightTheme) {
-      if (obsidianTheme === "moonstone")
-        this.applyCurrentAlternateHLColor(true);
-      else 
-        this.applyCurrentAlternateHLColor(false);
-    }
-  }// updateCurrentAlternateHLColor
-  
-  applyCurrentAlternateHLColor(isLight: boolean){
-    const alternateColors = this.plugin.settings.alternateColors;
-
-    for (let i = 0; i < alternateColors.length; i++) {
-      if (isLight)
-        alternateColors[i].currentColor = alternateColors[i].lightColor;
-      else
-        alternateColors[i].currentColor = alternateColors[i].darkColor;
-    }
+    updateSettingStyles(this.plugin.settings);
     this.plugin.saveSettings();
-  }// applyCurrentAlternateHLColor
+  }// applyTheme
   
   setColorsForPickers(themeName){
     const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === themeName);    
@@ -622,9 +603,9 @@ export class SettingsTab extends PluginSettingTab {
         })
         .on('show', (color: Pickr.HSVaColor, instance: Pickr) => { // Pickr got opened
             if ((!this.plugin.settings.bActiveCodeblockLineHighlight && pickrClass === 'activeCodeBlockLineColor') ||
-               (!this.plugin.settings.bActiveLineHighlight && pickrClass === 'activeLineColor') ||
-               (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangColor') ||
-               (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangBackgroundColor')){
+                (!this.plugin.settings.bActiveLineHighlight && pickrClass === 'activeLineColor') ||
+                (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangColor') ||
+                (!this.plugin.settings.bDisplayCodeBlockLanguage && pickrClass === 'codeBlockLangBackgroundColor')){
               pickr?.hide();
             }
             const {result} = (pickr.getRoot() as any).interaction;
@@ -641,7 +622,7 @@ export class SettingsTab extends PluginSettingTab {
             this.setAndSavePickrSetting(pickrClass, savedColor);
             // if the active line color changed update it
             if (pickrClass === 'activeLineColor' || pickrClass === 'activeCodeBlockLineColor'){
-              updateActiveLineStyles(this.plugin.settings);
+              updateSettingStyles(this.plugin.settings);
             }
         })
         .on('cancel', (instance: Pickr) => {
@@ -651,7 +632,7 @@ export class SettingsTab extends PluginSettingTab {
       .addExtraButton((btn) => {
         btn.setIcon("reset")
           .onClick(() => {
-            if (this.plugin.settings.SelectedTheme === "Light Theme" ) {
+            if (this.plugin.settings.SelectedTheme === "Light Theme" ) { //TODO (@mayurankv) Use a dictionary instead here
               if (pickrClass === 'activeCodeBlockLineColor') {
                 pickrDefault = L_ACTIVE_CODEBLOCK_LINE_COLOR;
               } else if (pickrClass === 'activeLineColor') {
@@ -842,7 +823,6 @@ export class SettingsTab extends PluginSettingTab {
       }
     }
 
-    this.updateCurrentAlternateHLColor();
     await this.plugin.saveSettings();
   }// setAndSaveAlternatePickrSetting
   

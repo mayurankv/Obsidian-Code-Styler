@@ -6,7 +6,7 @@ import { codeblockHighlight } from "./CodeBlockHighlight";
 import { codeblockHeader, collapseField } from "./Header";
 import { ReadingView } from "./ReadingView";
 import { SettingsTab } from "./SettingsTab";
-import { loadIcons, BLOBS, updateActiveLineStyles } from "./Utils";
+import { getCurrentMode, loadIcons, BLOBS, updateSettingStyles } from "./Utils";
 
 // npm i @simonwep/pickr
 
@@ -16,8 +16,8 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   theme: string;
   
   async onload() {
+    document.body.classList.add('codeblock-customizer');
     await this.loadSettings();
-    
     this.extensions = [];
 
     // eslint main.ts
@@ -37,54 +37,43 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 
     this.extensions.push(codeblockHighlight(this.settings));
 
-    if ((this.settings.bActiveCodeblockLineHighlight) || (this.settings.bActiveLineHighlight))
-      updateActiveLineStyles(this.settings);
-    
     this.registerEditorExtension(this.extensions);
     
     // theme on startup
-    this.theme = this.getCurrentTheme();
+    this.theme = getCurrentMode();
 
     const settingsTab = new SettingsTab(this.app, this);
     this.addSettingTab(settingsTab);
     
-    if (this.settings.SelectedTheme == "")
+    if (this.settings.SelectedTheme == "") {
       this.updateTheme(settingsTab);
+    } else {
+      updateSettingStyles(this.settings);
+    }
     
     this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
 
     // reading mode
-    this.registerMarkdownPostProcessor((el, ctx) => {    
-      ReadingView(el, ctx, this)
+    this.registerMarkdownPostProcessor(async (el, ctx) => {    
+      await ReadingView(el, ctx, this)
     })
 
     console.log("loading CodeBlock Customizer plugin");
   }// onload
   
   handleCssChange(settingsTab) {
-    if (this.getCurrentTheme() != this.theme){
+    if (getCurrentMode() != this.theme){
       this.updateTheme(settingsTab);
     }
   }// handleCssChange
     
-  getCurrentTheme() {
-    const body = document.querySelector('body');
-    if (body.classList.contains('theme-light')) {
-      return "light";
-    } else if (body.classList.contains('theme-dark')) {
-      return "dark";
-    }
-  }// getCurrentTheme
-  
   updateTheme(settingsTab) {
     this.settings.colorThemes.forEach(theme => {
-      if (this.getCurrentTheme() == "light" && theme.colors.header.bDefaultLightTheme) {
+      if (getCurrentMode() == "light" && theme.colors.header.bDefaultLightTheme) {
         this.theme = theme.name;
-        settingsTab.applyCurrentAlternateHLColor(true);
       }
-      else if (this.getCurrentTheme() == "dark" && theme.colors.header.bDefaultDarkTheme) {
+      else if (getCurrentMode() == "dark" && theme.colors.header.bDefaultDarkTheme) {
         this.theme = theme.name;
-        settingsTab.applyCurrentAlternateHLColor(false);
       }
     });
     this.settings.SelectedTheme = this.theme;
@@ -105,6 +94,7 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 	}
 
 	async saveSettings() {
+    updateSettingStyles(this.settings);
 		await this.saveData(this.settings);
     this.app.workspace.updateOptions();
 	}

@@ -66,8 +66,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
         this.prevBGColor = this.settings.backgroundColor;
         this.prevHLColor = this.settings.highlightColor;
         this.prevExcludeLangs = this.settings.ExcludeLangs;
-        this.prevAlternateColors = this.settings.alternateColors.map(({name, currentColor}) => {
-          return {name, currentColor};
+        this.prevAlternateColors = this.settings.alternateColors.map(({name}) => {
+          return {name};
         });
         this.prevTextColor = this.settings.gutterTextColor;
         this.prevBackgroundColor = this.settings.gutterBackgroundColor;
@@ -105,23 +105,15 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
       }// deduplicateCodeblocks
   
       buildDecorations(view: EditorView): DecorationSet {
-        let lineNumber = 1;
+        let lineNumber = 0;
         let HL = [];
         let altHL = [];
-        const BgColor = this.settings.backgroundColor;
-        const HLColor = this.settings.highlightColor;
-        const Exclude = this.settings.ExcludeLangs;
-        const ExcludeLangs = splitAndTrimString(Exclude);
+        let lineNumberOffset = 0;
+        let showNumbers = true;
+        // const Exclude = this.settings.ExcludeLangs;
+        // const ExcludeLangs = splitAndTrimString(Exclude);
         let bExclude = false;
         const alternateColors = this.settings.alternateColors || [];
-        const GutterBackgroundColor = this.settings.gutterBackgroundColor;
-        const GutterHighlight = this.settings.bGutterHighlight;
-        const GutterTextColor = settings.gutterTextColor;
-        const bDisplayCodeBlockLanguage = this.settings.bDisplayCodeBlockLanguage;
-        const bDisplayCodeBlockIcon = this.settings.bDisplayCodeBlockIcon;
-        const bAlwaysDisplayCodeblockLang = this.settings.header.bAlwaysDisplayCodeblockLang;
-        const bAlwaysDisplayCodeblockIcon = this.settings.header.bAlwaysDisplayCodeblockIcon;
-        const linenumbers = this.settings.bEnableLineNumbers;
         const decorations = [];
 
         if (!view.visibleRanges || view.visibleRanges.length === 0) {
@@ -141,78 +133,46 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               const line = view.state.doc.lineAt(node.from);
               const lineText = view.state.sliceDoc(line.from, line.to);
               const lang = searchString(lineText, "```");
-              if (lang)
+              const startLine = node.type.name.includes("HyperMD-codeblock-begin")
+              const endLine = node.type.name.includes("HyperMD-codeblock-end")
+              if (lang) {
                 bExclude = isExcluded(lineText, settings.ExcludeLangs);
-              if (node.type.name.includes("HyperMD-codeblock-begin") ) {
-                if (bExclude)
-                  return;
-                
+              }
+              if (bExclude) {
+                if (endLine) {
+                  bExclude = false;
+                }
+                return;
+              }
+              if (startLine) {
+                lineNumber = 0;
+                lineNumberOffset = 0; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
+                showNumbers = true; //TODO (@mayurankv) Set showNumbers to be true if ln:<number> or ln:true or false if ln:false
                 const params = searchString(lineText, "HL:");
                 HL = getHighlightedLines(params);
                 altHL = [];
-                for (const { name, currentColor } of alternateColors) {
+                for (const { name } of alternateColors) {
                   const altParams = searchString(lineText, `${name}:`);
-                  altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, currentColor, lineNumber })));
-                }
-                const FileName = searchString(lineText, "file:");
-                const Fold = searchString(lineText, "fold");
-                const codeBlockLang = searchString(lineText, "```");
-                const isHeaderEnabled = ((FileName !== "" && FileName !== null) || Fold || ((bDisplayCodeBlockLanguage && bAlwaysDisplayCodeblockLang) || ( bDisplayCodeBlockIcon && bAlwaysDisplayCodeblockIcon && getLanguageIcon(getLanguageName(codeBlockLang))) && codeBlockLang)) ? true : false;
-                
-                const radius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
-                //const radius = (linenumbers) ? `border-top-left-radius: 0px` : "";
-                //style: `background-color: ${BgColor}; ${radius}`
-                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background ${radius}`, style: `background-color: ${BgColor}`} }).range(node.from));
-
-                if (linenumbers) {
-                  const lineRadius = (isHeaderEnabled) ? `codeblock-customizer-firstLine-background-NoRadius` : `codeblock-customizer-firstLine-background-radius`;
-                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line ${lineRadius}`} }).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", GutterBackgroundColor, GutterTextColor, true, false, isHeaderEnabled),}).range(node.from));
+                  altHL = altHL.concat(getHighlightedLines(altParams).map((lineNumber) => ({ name, lineNumber })));
                 }
               }
-              if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" ) {
-                if (bExclude)
-                  return;
-
-                let backgroundClass = `codeblock-customizer-line-background`;
-                let Color = BgColor;
-                let GutterHLColor = GutterBackgroundColor;
+              let lineClass = 'codeblock-customizer-line';
+              if (HL.includes(lineNumber)) {
+                lineClass = 'codeblock-customizer-line-highlighted';
+              } else {
                 const altHLMatch = altHL.filter((hl) => hl.lineNumber === lineNumber);
-                if (HL.includes(lineNumber)) {
-                  backgroundClass = `codeblock-customizer-line-highlighted`;
-                  Color = HLColor;
-                } else if (altHLMatch.length > 0) {
-                  backgroundClass = `codeblock-customizer-line-highlighted-${altHLMatch[0].name}`;
-                  Color = altHLMatch[0].currentColor;
+                if (altHLMatch.length > 0) {
+                  lineClass = `codeblock-customizer-line-highlighted-${altHLMatch[0].name.replace(/\s+/g, '-').toLowerCase()}`;
                 }
-                decorations.push(Decoration.line({ attributes: {class: backgroundClass, style: `background-color: ${Color};`} }).range(node.from));
-                
-                if (linenumbers) {
-                  if (GutterHighlight && HL.includes(lineNumber)) {
-                    GutterHLColor = HLColor;
-                  } else if (GutterHighlight && altHLMatch.length > 0) {
-                    GutterHLColor = altHLMatch[0].currentColor;
-                  }                  
-                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line`} }).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(lineNumber, GutterHLColor, GutterTextColor, false, false, false),}).range(node.from));
-                }
+              }
+
+              if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" || startLine || endLine) {
+                decorations.push(Decoration.line({attributes: {class: lineClass}}).range(node.from));
+
+                decorations.push(Decoration.line({}).range(node.from));
+                decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber+lineNumberOffset,showNumbers),}).range(node.from));
                 lineNumber++;
               }
-              if (node.type.name.includes("HyperMD-codeblock-end") ) {
-                if (bExclude){
-                  bExclude = false;
-                  return;
-                }
-                //const radius = (linenumbers) ? `border-bottom-left-radius: 0px` : "";
-                //style: `background-color: ${BgColor}; ${radius}`
-                decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-line-background`, style: `background-color: ${BgColor}`} }).range(node.from));
-
-                if (linenumbers) {
-                  decorations.push(Decoration.line({ attributes: {class: `codeblock-customizer-gutter-line codeblock-customizer-lastLine-background-radius`} }).range(node.from));
-                  decorations.push(Decoration.widget({ widget: new LineNumberWidget(" ", GutterBackgroundColor, GutterTextColor, false, true, false),}).range(node.from));
-                }
-                lineNumber = 1;
-              }                
             },
           });
         }
@@ -242,30 +202,18 @@ function compareArrays(array1, array2) {
 }// compareArrays
 
 class LineNumberWidget extends WidgetType {
-  constructor(private lineNumber: number, private backgroundColor: string, private GutterTextColor: string, private bFirstLine: boolean, private bLastLine: boolean, private isHeaderEnabled: boolean) {
+  constructor(private lineNumber: number, private showNumbers: boolean) {
     super();
   }
 
   eq(other: LineNumberWidget) {
-    return this.lineNumber === other.lineNumber && this.textColor === other.textColor && this.backgroundColor === other.backgroundColor && other.GutterTextColor === this.GutterTextColor;
+    return this.lineNumber === other.lineNumber && this.showNumbers === other.showNumbers;
   }
 
   toDOM(view: EditorView): HTMLElement {
     const container = document.createElement("span");
-    container.classList.add("codeblock-customizer-gutter-container");
-    container.style.setProperty("--codeblock-customizer-gutter-color", this.backgroundColor);
-
-    const span = document.createElement("span");
-    span.classList.add("codeblock-customizer-gutter");
-    if (this.bFirstLine && !this.isHeaderEnabled)
-      span.classList.add("codeblock-customizer-gutterElements-first-radius");
-    if (this.bLastLine)
-      span.classList.add("codeblock-customizer-gutterElements-last-radius");
-    span.style.setProperty("--codeblock-customizer-gutter-textColor", this.GutterTextColor);
-    
-    span.innerText = `${this.lineNumber}`;
-
-    container.appendChild(span);
+    container.classList.add(`codeblock-customizer-line-number${this.showNumbers?'':'-hide'}`);
+    container.innerText = `${this.lineNumber}`;
 
     return container;
   }
@@ -290,7 +238,7 @@ function findCodeblocks(doc: Text, from: number, to: number): SyntaxNode[] {
   return codeblocks;
 }// findCodeblocks
 
-function setupMutationObserver(editorView: EditorView, pluginInstance: any) {
+function setupMutationObserver(editorView: EditorView, pluginInstance: any) { //TODO (@mayurankv) What does this do? Work out
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (
