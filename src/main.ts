@@ -67,9 +67,7 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   }// handleCssChange
     
   updateTheme(settingsTab) {
-    console.log(getCurrentMode())
     this.settings.colorThemes.forEach(theme => {
-      console.log(theme.colors.header.bDefaultLightTheme)
       if (getCurrentMode() == "light" && theme.colors.header.bDefaultLightTheme) {
         this.theme = theme.name;
       }
@@ -77,7 +75,6 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
         this.theme = theme.name;
       }
     });
-    console.log(this.theme)
     this.settings.SelectedTheme = this.theme;
     settingsTab.applyTheme();
     this.saveSettings();
