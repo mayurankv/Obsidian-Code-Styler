@@ -6,6 +6,7 @@
   --code-padding: 8px;
   --header-padding: 0px;
   --header-spacing: 15px;
+  --icon-size: 28px;
 }
 
 /* Codeblock background colours */
@@ -97,6 +98,7 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific {
   user-select: none;
+  height: var(--icon-size);
   padding-top: var(--header-padding);
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
