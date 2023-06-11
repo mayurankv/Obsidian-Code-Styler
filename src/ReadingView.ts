@@ -138,11 +138,14 @@ function createLineTextElement(line) {
 
 function highlightLines(codeElements, showNumbers, lineNumberOffset, linesToHighlight, altHL) {
   for (let i = 0; i < codeElements.length; i++) {
-    const lines = codeElements[i].innerHTML.split("\n");
+    let lines = codeElements[i].innerHTML.split("\n");
     const preElm = codeElements[i].parentNode;
     if (preElm === null || preElm.nodeName !== "PRE") // only process pre > code elements
       return;
 
+    if (lines.length == 1) {
+      lines = ['',''];
+    }
     codeElements[i].innerHTML = "";
     for (let j = 0; j < lines.length - 1; j++) {
       const line = lines[j];
