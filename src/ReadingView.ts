@@ -64,7 +64,7 @@ export async function ReadingView(codeBlockElement: HTMLElement, context: Markdo
   const linesToHighlight = getHighlightedLines(highlightedLinesParams);
   const FileName = searchString(codeBlockFirstLine, "file:");
   const Fold = searchString(codeBlockFirstLine, "fold");
-  const lineNumberOffset = 0; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
+  const lineNumberOffset = 10000; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
   const showNumbers = true; //TODO (@mayurankv) Set showNumbers to be true if ln:<number> or ln:true or false if ln:false
   const alternateColors = plugin.settings.alternateColors || [];
   let altHL = [];

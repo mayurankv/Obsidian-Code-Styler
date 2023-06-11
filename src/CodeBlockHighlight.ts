@@ -146,7 +146,7 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
               }
               if (startLine) {
                 lineNumber = 0;
-                lineNumberOffset = 0; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
+                lineNumberOffset = 10000; //searchString(codeBlockFirstLine, "ln:")//TODO (@mayurankv) Set line number offset here - Should be ln_value - 1 since it is offset, not starting line number - 0 if true OR false
                 showNumbers = true; //TODO (@mayurankv) Set showNumbers to be true if ln:<number> or ln:true or false if ln:false
                 const params = searchString(lineText, "HL:");
                 HL = getHighlightedLines(params);
