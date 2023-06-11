@@ -149,7 +149,7 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
   font-style: var(--codeblock-customizer-header-text-italic, normal);
 }
 body:not([class*='codeblock-customizer-show-langicons']):not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific .codeblock-customizer-header-text,
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-text {
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-container .codeblock-customizer-header-text {
   padding-left: var(--header-spacing);
 }
 div:has(> img.codeblock-customizer-icon) {
