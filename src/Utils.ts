@@ -178,7 +178,7 @@ export function createContainer(specific: boolean) {
 export function createCodeblockLang(lang: string) {
   const codeblockLang = document.createElement("div");
   codeblockLang.innerText = lang;
-  codeblockLang.classList.add(`codeblock-customizer-header-language-tag-${getLanguageName(lang)}`);
+  codeblockLang.classList.add(`codeblock-customizer-header-language-tag-${getLanguageName(lang).toLowerCase()}`);
   return codeblockLang;
 }// createCodeblockLang
 
