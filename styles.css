@@ -61,8 +61,6 @@
   overflow-x: auto;
   direction: rtl;
   left: 0;
-  /*-ms-overflow-style: none; /* for Internet Explorer, Edge */
-  /*scrollbar-width: none; /* for Firefox */
 }
 .markdown-source-view .codeblock-customizer-line-number::-webkit-scrollbar {
   /*display: none; /* for Chrome, Safari, and Opera */
