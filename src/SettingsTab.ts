@@ -1,312 +1,298 @@
-import { PluginSettingTab, Setting } from "obsidian";
+import { PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent } from "obsidian";
 import Pickr from "@simonwep/pickr";
 
+import { CodeBlockCustomizerPlugin } from "./main";
 import { updateSettingStyles } from "./Utils";
-import {
-    D_ACTIVE_CODEBLOCK_LINE_COLOR,
-    D_ACTIVE_LINE_COLOR,
-    D_BACKGROUND_COLOR,
-    D_HIGHLIGHT_COLOR,
-    D_HEADER_COLOR,
-    D_HEADER_TEXT_COLOR,
-    D_HEADER_LINE_COLOR,
-    D_GUTTER_TEXT_COLOR,
-    D_GUTTER_BACKGROUND_COLOR,
-    D_LANG_COLOR,
-    D_LANG_BACKGROUND_COLOR,
-    L_ACTIVE_CODEBLOCK_LINE_COLOR,
-    L_ACTIVE_LINE_COLOR,
-    L_BACKGROUND_COLOR,
-    L_HIGHLIGHT_COLOR,
-    L_HEADER_COLOR,
-    L_HEADER_TEXT_COLOR,
-    L_HEADER_LINE_COLOR,
-    L_GUTTER_TEXT_COLOR,
-    L_GUTTER_BACKGROUND_COLOR,
-    L_LANG_COLOR,
-    L_LANG_BACKGROUND_COLOR
-} from './Settings';
+import { CodeblockCustomizerSettings, CodeblockCustomizerTheme, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
+
+const DISPLAY_OPTIONS: Record<string,string> = {
+  "never": "Never",
+  "title_only": "Title Only",
+  "always": "Always",
+}
 
 export class SettingsTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: CodeBlockCustomizerPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: CodeBlockCustomizerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
     this.pickerInstances = [];
-    this.headerLangToggles = [];
-    this.headerLangIconToggles = [];
 	}
 
-	display(): void {
+  /**
+	 *  Builds the html page that is showed in the settings.
+	 */
+	display() {
     const {containerEl} = this;
     containerEl.empty();
-    containerEl.createEl('h3', {text: 'Codeblock Customizer Settings'});
-    
-    let dropdown;
+
+    containerEl.createEl('h2', {text: 'Settings for the Codeblock Customizer Plugin.'});
+
+    // ========== General ==========
+		containerEl.createEl('h3', {text: 'General Settings'});
+
     new Setting(containerEl)
-      .setName("Theme")
-      .setDesc("Select which theme to use")
-      .addDropdown((dropdownObj) => {
-        this.plugin.settings.colorThemes.forEach(theme => {          
-          dropdownObj.addOption(theme.color, theme.name);            
+      .setName('Exclude Languages')
+      .setDesc('Define languages in a comma separated list on which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
+      .addText(text => text
+        .setPlaceholder('e.g. dataview, python etc.')
+        .setValue(this.plugin.settings.excludedLangs)
+        .onChange(async (value) => {
+          this.plugin.settings.excludedLangs = value;
+          await this.plugin.saveSettings();
+        }));
+    new Setting(containerEl)
+      .setName('Enable Line Numbers')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.codeblock.lineNumbers = value;
+          await this.plugin.saveSettings();          
+        }));
+    new Setting(containerEl)
+      .setName('Highlight Line Numbers')
+      .setDesc('If enabled, highlights will also highlight the line numbers.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.currentTheme.settings.gutter.highlight)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.gutter.highlight = value;
+          await this.plugin.saveSettings();
+        }));
+    new Setting(containerEl)
+      .setName('Enable Codeblock Active Line Highlight')
+      .setDesc('If enabled, highlights the active line inside codeblocks.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine = value;          
+          await this.plugin.saveSettings();
+        }));
+    new Setting(containerEl)
+      .setName('Enable Editor Active Line Highlight')
+      .setDesc('If enabled, highlights the active line outside codeblocks.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.currentTheme.settings.highlights.activeEditorLine)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.highlights.activeEditorLine = value;
+          await this.plugin.saveSettings();
+        }));
+    new Setting(containerEl)
+      .setName('Title Styling')
+      .setDesc('Style the title text using bold and italic toggles or by setting a font.')
+      .addText(text => {return text
+        .setPlaceholder('Font')
+        .setValue("textFont" in this.plugin.settings.currentTheme.settings.header.title?this.plugin.settings.currentTheme.settings.header.title.textFont:'')
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.header.title.textFont = value;
+          await this.plugin.saveSettings();
         });
-        dropdownObj.setValue(this.plugin.settings.SelectedTheme);
-        dropdownObj.onChange(value => {
+      })
+      .addToggle(toggle => {return toggle
+        .setTooltip("Toggle bold title text")
+        .setValue(this.plugin.settings.currentTheme.settings.header.title.textBold)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.header.title.textBold = value;
+          await this.plugin.saveSettings();
+        });
+      })
+      .addToggle(toggle => {return toggle
+        .setTooltip("Toggle italic title text")
+        .setValue(this.plugin.settings.currentTheme.settings.header.title.textItalic)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.header.title.textItalic = value;
+          await this.plugin.saveSettings();
+        });
+      })
+    new Setting(containerEl)
+      .setName('Display Language Tags')
+      .setDesc('Determine when to show language tags. "Title Only" will only show language tags when the title parameter is set. If "Never", styling is disabled.')
+      .addDropdown((dropdown) => dropdown
+        .addOptions(DISPLAY_OPTIONS)
+        .setValue(this.plugin.settings.currentTheme.settings.header.languageTag.display)
+        .onChange(async (value: string) => {
+          this.plugin.settings.currentTheme.settings.header.languageTag.display = value;
+          if (value === "Never") {
+            //todo (@mayurankv) disable styling settings - this.headerLangToggles.forEach(item => {item.setDisabled(!value);});
+          }
+          await this.plugin.saveSettings();
+        }));
+    new Setting(containerEl)
+      .setName('Language Tag Styling')
+      .setDesc('Style the language tag text using bold and italic toggles or by setting a font.')
+      .addText(text => {return text
+        .setPlaceholder('Font')
+        .setValue("textFont" in this.plugin.settings.currentTheme.settings.header.languageTag?this.plugin.settings.currentTheme.settings.header.languageTag.textFont:'')
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.header.languageTag.textFont = value;
+          await this.plugin.saveSettings();
+        });
+      })
+      .addToggle(toggle => {return toggle
+        .setTooltip("Toggle bold language tag text")
+        .setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textBold)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.header.languageTag.textBold = value;
+          await this.plugin.saveSettings();
+        });
+      })
+      .addToggle(toggle => {return toggle
+        .setTooltip("Toggle italic language tag text")
+        .setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textItalic)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.header.languageTag.textItalic = value;
+          await this.plugin.saveSettings();
+        });
+      })
+    new Setting(containerEl)
+      .setName('Display Language Icons')
+      .setDesc('Determine when to show language icons where available. "Title Only" will only show language tags when the title parameter is set. If "Never", styling is disabled.')
+      .addDropdown((dropdown) => dropdown
+        .addOptions(DISPLAY_OPTIONS)
+        .setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.display)
+        .onChange(async (value: string) => {
+          this.plugin.settings.currentTheme.settings.header.languageIcon.display = value;
+          if (value === "Never") {
+            //todo (@mayurankv) disable styling settings - this.headerLangToggles.forEach(item => {item.setDisabled(!value);});
+          }
+          await this.plugin.saveSettings();
+        }));
+    new Setting(containerEl)
+      .setName('Language Icons Colored')
+      .setDesc('If disabled, language icons will be black and white.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.currentTheme.settings.languageIcon.displayColor)
+        .onChange(async (value) => {
+          this.plugin.settings.currentTheme.settings.languageIcon.displayColor = value;
+          await this.plugin.saveSettings();
+        }));
+
+    // ========== Themes ==========
+		containerEl.createEl('h3', {text: 'Theme Settings'});
+
+    let themeDropdown: DropdownComponent;
+    new Setting(containerEl)
+      .setName("Select Theme")
+      .addDropdown((dropdown) => {
+        themeDropdown = dropdown;
+        this.updateDropdown(themeDropdown,this.plugin.settings);
+        themeDropdown.onChange(value => {
           this.plugin.settings.SelectedTheme = value;
-          // Apply the selected theme
           this.applyTheme();
-          this.setColorsForPickers(value);
+          this.setColorsForPickers(this.plugin.settings.SelectedTheme);
           this.plugin.saveSettings();
-        });// onChange
-        dropdown = dropdownObj;
-      })// addDropdown
+        });
+        ;
+      })
       .addExtraButton(button => {
         button.setTooltip("Delete theme");
         button.setIcon('trash');
         button.onClick(() => {
-          if (this.plugin.settings.SelectedTheme.trim().length === 0) {
+          if (this.plugin.settings.selectedTheme.trim().length === 0) {
             new Notice('Select a theme first to delete');
-          } else if(this.plugin.settings.SelectedTheme === "Dark Theme" || this.plugin.settings.SelectedTheme === "Light Theme") {
+          } else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes) {
             new Notice('You cannot delete the default themes');
           } else {
-            let isDefaultLightTheme = false, isDefaultDarkTheme = false;
-            this.plugin.settings.colorThemes.forEach(theme => {
-              if (theme.name == this.plugin.settings.SelectedTheme){
-                isDefaultLightTheme = theme.colors.header.bDefaultLightTheme;
-                isDefaultDarkTheme = theme.colors.header.bDefaultDarkTheme;
-              }
-            });
-            if (isDefaultLightTheme){
-              // restore bDefaultLightTheme for the default Light theme if the deleted theme is the default
-              this.plugin.settings.colorThemes.forEach(theme => {
-                if (theme.name === "Light Theme")
-                  theme.colors.header.bDefaultLightTheme = true;
-              });
-            }
-            
-            if (isDefaultDarkTheme){
-              // restore bDefaultLightTheme for the default Dark theme if the deleted theme is the default
-              this.plugin.settings.colorThemes.forEach(theme => {
-                if (theme.name === "Dark Theme")
-                  theme.colors.header.bDefaultDarkTheme = true;
-              });
-            }
-            
-            // Delete the selected theme
-            const index = this.plugin.settings.colorThemes.findIndex(t => t.name === this.plugin.settings.SelectedTheme);
-            this.plugin.settings.colorThemes.splice(index, 1);
+            if (this.plugin.settings.defaultTheme === this.plugin.settings.selectedTheme)
+              this.plugin.settings.defaultTheme = 'Default';
+            delete this.plugin.settings.themes[this.plugin.settings.selectedTheme]
             new Notice(`${this.plugin.settings.SelectedTheme} theme deleted successfully!`);
-            // Clear the selected theme
-            this.plugin.settings.SelectedTheme = "";
-            // Update the dropdown options
-            dropdown.selectEl.empty();
-            for (const theme of this.plugin.settings.colorThemes) {
-              dropdown.addOption(theme.color, theme.name);
-            }
-            // Select the first item in the options list
-            if (this.plugin.settings.colorThemes.length > 0) {
-              this.plugin.settings.SelectedTheme = this.plugin.settings.colorThemes[0].name;
-              dropdown.setValue(this.plugin.settings.SelectedTheme);
-            }
-            // Apply default theme
+            this.plugin.settings.selectedTheme = "Default";
+            
+            this.updateDropdown(themeDropdown,this.plugin.settings);
             this.applyTheme();
             this.setColorsForPickers(this.plugin.settings.SelectedTheme);
             this.plugin.saveSettings();
           }
-        });// onClick
-      });// addExtraButton
-
-    let text;
-    let darkToggle, lightToggle;
-    this.plugin.settings.ThemeName = "";
+        });
+      });
+    let newThemeName: TextComponent;
+    this.plugin.settings.currentTheme.settings.newTheme = NEW_THEME_DEFAULT
     new Setting(containerEl)
-      .setName('Create your theme')
-      .setDesc('Save or update your current colors as a theme')
-      .addText(input => {
-        text = input;
-        text.setPlaceholder('Name for your theme')
-          .setValue(this.plugin.settings.ThemeName)
-          .onChange(async (value) => {
-            this.plugin.settings.ThemeName = value;
-            await this.plugin.saveSettings();
-          });
-      })
-      .addToggle(toggle => {
-        lightToggle = toggle;
-        return toggle
-        .setTooltip("Save as default Light theme")
-        .setValue(false)
+      .setName('Add New Theme')
+      .setDesc('Create a new theme from the current settings.')
+      .addText(text => {
+        newThemeName = text;
+        newThemeName
+        .setPlaceholder('New theme name')
+        .setValue(this.plugin.settings.currentTheme.settings.newTheme.name)
         .onChange(async (value) => {
-          this.plugin.settings.header.bDefaultLightTheme = value;
-          if (value && this.plugin.settings.header.bDefaultDarkTheme ) {        
-            this.plugin.settings.header.bDefaultDarkTheme = !value;
-            darkToggle.setValue(!value);
-            //await this.plugin.saveSettings();
-          }
+          this.plugin.settings.currentTheme.settings.newTheme.name = value;
+          //await this.plugin.saveSettings();
         });
       })
-      .addToggle((toggle) => {
-        darkToggle = toggle;
-        return toggle
-        .setTooltip("Save as default Dark theme")
+      .addToggle(toggle => {return toggle
+        .setTooltip("Save as default theme")
         .setValue(false)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bDefaultDarkTheme = value;
-          if (value && this.plugin.settings.header.bDefaultLightTheme ) {        
-            this.plugin.settings.header.bDefaultLightTheme = !value;
-            lightToggle.setValue(!value);
-            //await this.plugin.saveSettings();
-          } 
+        .onChange((value) => {
+          this.plugin.settings.newTheme.default = value;
         });
-      })    
+      })  
       .addExtraButton(button => {
         button.setTooltip("Save theme");
         button.setIcon('plus');
-        button.onClick(() => {
-        if (this.plugin.settings.ThemeName.trim().length === 0)
-          new Notice('Set a name for your theme!');
-        else if(this.plugin.settings.ThemeName === "Dark Theme" || this.plugin.settings.ThemeName === "Light Theme") {
-          new Notice('You can\'t overwrite default themes');
+        button.onClick(async () => {
+        if (this.plugin.settings.newTheme.name.trim().length === 0) {
+          new Notice('Set a name for your theme');
+        } else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes) {
+          new Notice('You can\'t overwrite the default themes');
         } else {
-          const currentColors = {
-            activeCodeBlockLineColor: this.plugin.settings.activeCodeBlockLineColor,
-            activeLineColor: this.plugin.settings.activeLineColor,
-            backgroundColor: this.plugin.settings.backgroundColor,
-            highlightColor: this.plugin.settings.highlightColor,          
-            gutterTextColor: this.plugin.settings.gutterTextColor,
-            gutterBackgroundColor: this.plugin.settings.gutterBackgroundColor,
-            header: {
-              bDefaultDarkTheme: this.plugin.settings.header.bDefaultDarkTheme,
-              bDefaultLightTheme: this.plugin.settings.header.bDefaultLightTheme,
-              color: this.plugin.settings.header.color,
-              textColor: this.plugin.settings.header.textColor,
-              lineColor: this.plugin.settings.header.lineColor,
-              codeBlockLangColor: this.plugin.settings.header.codeBlockLangColor,
-              codeBlockLangBackgroundColor: this.plugin.settings.header.codeBlockLangBackgroundColor,
-            }
-          };
-
-          // check if theme already exists
-          const existingTheme = this.plugin.settings.colorThemes.find(t => t.name === this.plugin.settings.ThemeName);
-          if (existingTheme) {
-            // update existing theme
-            existingTheme.colors = currentColors;
-            new Notice(`${this.plugin.settings.SelectedTheme} theme updated successfully!`);
+          if (this.plugin.settings.newTheme.name in this.plugin.settings.themes) {
+            new Notice(`${this.plugin.settings.newTheme.name} theme updated successfully!`);
           } else {
-            // add new theme to array
-            this.plugin.settings.colorThemes.push({
-              name: this.plugin.settings.ThemeName,
-              colors: currentColors,
-            });
-            // Clear the selected theme
-            this.plugin.settings.SelectedTheme = "";
-            // Update the dropdown options
-            dropdown.selectEl.empty();
-            for (const theme of this.plugin.settings.colorThemes) {
-              dropdown.addOption(theme.color, theme.name);
-            }
-            // Apply newly created theme
-            this.plugin.settings.SelectedTheme = this.plugin.settings.ThemeName;
-            dropdown.setValue(this.plugin.settings.SelectedTheme);
-            this.applyTheme();
-            
-            new Notice(`${this.plugin.settings.SelectedTheme} theme saved successfully!`);
+            new Notice(`${this.plugin.settings.newTheme.name} theme saved successfully!`);
           }
-          
-          // set bDefaultLightTheme to false in every other theme
-          if (this.plugin.settings.header.bDefaultLightTheme) {
-            this.plugin.settings.colorThemes.forEach(theme => {
-              if (theme.name !== this.plugin.settings.ThemeName)
-                theme.colors.header.bDefaultLightTheme = false;
-            });
-          }
+          this.plugin.settings.themes[this.plugin.settings.newTheme.name] = this.plugin.settings.currentTheme;
+          this.plugin.settings.selectedTheme = this.plugin.settings.newTheme.name;
+          if (this.plugin.settings.newTheme.default)
+            this.plugin.settings.defaultTheme = this.plugin.settings.selectedTheme;
+          this.updateDropdown(themeDropdown,this.plugin.settings);
+          this.applyTheme();
 
-          // set bDefaultDarkTheme to false in every other theme
-          if (this.plugin.settings.header.bDefaultDarkTheme) {
-            this.plugin.settings.colorThemes.forEach(theme => {
-              if (theme.name !== this.plugin.settings.ThemeName)
-                theme.colors.header.bDefaultDarkTheme = false;
-            });
-          }
-
-          // check if default themes need resetting
-          if (this.plugin.settings.colorThemes.every((theme) => {return !theme.colors.header.bDefaultLightTheme})) {
-            this.plugin.settings.colorThemes.forEach(theme => {
-              if (theme.name === "Light Theme")
-                theme.colors.header.bDefaultLightTheme = true;
-            });
-          }
-          if (this.plugin.settings.colorThemes.every((theme) => {return !theme.colors.header.bDefaultDarkTheme})) {
-            this.plugin.settings.colorThemes.forEach(theme => {
-              if (theme.name === "Dark Theme")
-                theme.colors.header.bDefaultDarkTheme = true;
-            });
-          }
-
-          // Clear the input field        
-          this.plugin.settings.ThemeName = "";
-          text.setValue("");
-          lightToggle.setValue(false);
-          darkToggle.setValue(false);
-          this.plugin.saveSettings();
+          this.plugin.settings.newTheme = NEW_THEME_DEFAULT;
+          newThemeName.setValue("");
+          await this.plugin.saveSettings();
         }
       });
     });
-
+    
+    // ========== Advanced ==========
+		containerEl.createEl('h3', {text: 'Advanced Settings'});
+    
     new Setting(containerEl)
-      .setName('Enable editor active line highlight')
-      .setDesc('If enabled, you can set the color for the active line (including codeblocks).')
+      .setName('Gradient Highlighting')
+      .setDesc('If enabled, highlights fade away to the right.')
       .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.bActiveLineHighlight)
+        .setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
         .onChange(async (value) => {
-          this.plugin.settings.bActiveLineHighlight = value;
+          this.plugin.settings.currentTheme.settings.advanced.gradientHighlights = value;
           await this.plugin.saveSettings();
-          updateSettingStyles(this.plugin.settings);
-        })
-      );
-    
-    this.createPickrSetting(containerEl, 'Editor active line color', 
-    'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
-    
+        }));
     new Setting(containerEl)
-      .setName('Exclude languages')
-      .setDesc('Define languages, separated by a comma, to which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
-      .addText(text => text
-        .setPlaceholder('e.g. dataview, python etc.')
-        .setValue(this.plugin.settings.ExcludeLangs)
+      .setName('Language Colored Borders')
+      .setDesc('If enabled, languages with icons display a left border with the color of the icon.')
+      .addToggle((toggle) => toggle
+        .setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
         .onChange(async (value) => {
-          this.plugin.settings.ExcludeLangs = value;
+          this.plugin.settings.currentTheme.settings.advanced.languageBorderColor = value;
           await this.plugin.saveSettings();
-        })
-      );
+        }));
+    //todo (@mayurankv) Add settings for advanced.iconSize (type Number)
+
+
+
+  
+
+
+
+
+
+
+
+    this.createPickrSetting(containerEl, 'Editor active line color', 'To set this color, enable the option "Enable editor active line highlighting" first.', D_ACTIVE_LINE_COLOR, "activeLineColor");		
 
     containerEl.createEl('h3', {text: 'Codeblock settings'});
-    
-    new Setting(containerEl)
-      .setName('Enable line numbers')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.bEnableLineNumbers)
-        .onChange(async (value) => {
-          this.plugin.settings.bEnableLineNumbers = value;
-          await this.plugin.saveSettings();          
-        })
-      );
-
-    new Setting(containerEl)
-      .setName('Enable codeblock active line highlight')
-      .setDesc('If enabled, you can set the color for the active line inside codeblocks only.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.bActiveCodeblockLineHighlight)
-        .onChange(async (value) => {
-          this.plugin.settings.bActiveCodeblockLineHighlight = value;          
-          await this.plugin.saveSettings();
-          updateSettingStyles(this.plugin.settings);
-        })
-      );
-        
-    this.createPickrSetting(containerEl, 'Codeblock active line color', 
-      'To set this color, enable the option "Enable codeblock active line highlight" first.', D_ACTIVE_CODEBLOCK_LINE_COLOR, "activeCodeBlockLineColor");
+    this.createPickrSetting(containerEl, 'Codeblock active line color', 'To set this color, enable the option "Enable codeblock active line highlight" first.', D_ACTIVE_CODEBLOCK_LINE_COLOR, "activeCodeBlockLineColor");
     
     this.createPickrSetting(containerEl, 'Background color', '', D_BACKGROUND_COLOR, "backgroundColor");
     this.createPickrSetting(containerEl, 'Highlight color (used by the "hl" parameter)', '', D_HIGHLIGHT_COLOR, "highlightColor");
@@ -360,123 +346,20 @@ export class SettingsTab extends PluginSettingTab {
     this.updateColorContainer(colorContainer);
     
     containerEl.createEl('h3', {text: 'Header settings'});
-    
     this.createPickrSetting(containerEl, 'Header color', '', D_HEADER_COLOR, "color");
     this.createPickrSetting(containerEl, 'Header text color', '', D_HEADER_TEXT_COLOR, "textColor");
-    
-    new Setting(containerEl)
-      .setName('Header bold text')
-      .setDesc('If enabled, the header text will be set to bold.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.header.bHeaderBold)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bHeaderBold = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    
-    new Setting(containerEl)
-      .setName('Header italic text')
-      .setDesc('If enabled, the header text will be set to italic.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.header.bHeaderItalic)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bHeaderItalic = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    
     this.createPickrSetting(containerEl, 'Header line color', '', D_HEADER_LINE_COLOR, "lineColor");
     
     containerEl.createEl('h3', {text: 'Header language settings'});
-        
-    new Setting(containerEl)
-      .setName('Display codeblock language (if language is defined)')
-      .setDesc('If enabled, the codeblock language will be displayed in the header. If disabled, all below settings are disabled as well!')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.bDisplayCodeBlockLanguage)
-        .onChange(async (value) => {
-          this.headerLangToggles.forEach(item => {
-            item.setDisabled(!value);
-          });
-          this.plugin.settings.bDisplayCodeBlockLanguage = value;
-          await this.plugin.saveSettings();
-      })
-    );
-
     this.createPickrSetting(containerEl, 'Codeblock language text color', 'To set this color, enable the option "Display codeblock language" first.', D_LANG_COLOR, "codeBlockLangColor");    
     this.createPickrSetting(containerEl, 'Codeblock language background color', 'To set this color, enable the option "Display codeblock language" first.', D_LANG_BACKGROUND_COLOR, "codeBlockLangBackgroundColor");    
     
-    const boldToggle = new Setting(containerEl)
-      .setName('Bold text')
-      .setDesc('If enabled, the codeblock language text will be set to bold.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.header.bCodeblockLangBold)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bCodeblockLangBold = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    this.headerLangToggles.push(boldToggle);
-    
-    const italicToggle = new Setting(containerEl)
-      .setName('Italic text')
-      .setDesc('If enabled, the codeblock language text will be set to italic.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.header.bCodeblockLangItalic)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bCodeblockLangItalic = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    this.headerLangToggles.push(italicToggle);
-    
-    const alwaysDisplayToggle = new Setting(containerEl)
-      .setName('Always display codeblock language')
-      .setDesc('If enabled, the codeblock language will always be displayed (if a language is defined), even if the file parameter is not specified.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.header.bAlwaysDisplayCodeblockLang)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bAlwaysDisplayCodeblockLang = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    this.headerLangToggles.push(alwaysDisplayToggle);
     
     if (!this.plugin.settings.bDisplayCodeBlockLanguage){
       this.headerLangToggles.forEach(item => {
         item.setDisabled(true);
       });
     }
-    
-    containerEl.createEl('h5', {text: 'Header language icon settings'});
-    
-    new Setting(containerEl)
-      .setName('Display codeblock language icon (if available)')
-      .setDesc('If enabled, the codeblock language icon will be displayed in the header. If disabled, all below settings are disabled as well!')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.bDisplayCodeBlockIcon)
-        .onChange(async (value) => {
-          this.headerLangIconToggles.forEach(item => {
-            item.setDisabled(!value);
-          });
-          this.plugin.settings.bDisplayCodeBlockIcon = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    
-    const alwaysDisplayIconToggle = new Setting(containerEl)
-      .setName('Always display codeblock language icon (if available)')
-      .setDesc('If enabled, the codeblock language icon will always be displayed (if a language is defined and it has an icon), even if the file parameter is not specified.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.header.bAlwaysDisplayCodeblockIcon)
-        .onChange(async (value) => {
-          this.plugin.settings.header.bAlwaysDisplayCodeblockIcon = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    this.headerLangIconToggles.push(alwaysDisplayIconToggle);
-    
     if (!this.plugin.settings.bDisplayCodeBlockIcon){
       this.headerLangIconToggles.forEach(item => {
         item.setDisabled(true);
@@ -484,36 +367,47 @@ export class SettingsTab extends PluginSettingTab {
     }
     
     containerEl.createEl('h3', {text: 'Gutter settings'});
-    
-    new Setting(containerEl)
-      .setName('Highlight gutter')
-      .setDesc('If enabled, highlighted lines will also highlight the gutter (line number), not just the line.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.bGutterHighlight)
-        .onChange(async (value) => {
-          this.plugin.settings.bGutterHighlight = value;
-          await this.plugin.saveSettings();
-      })
-    );
-    
     this.createPickrSetting(containerEl, 'Gutter text color', '', D_GUTTER_TEXT_COLOR, "gutterTextColor");
     this.createPickrSetting(containerEl, 'Gutter background color', '', D_GUTTER_BACKGROUND_COLOR, "gutterBackgroundColor");
     
-    // donation
-    const cDonationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-Donation", });    
-    const credit = createEl("p");
-    const donateText = createEl("p");
-    donateText.appendText("If you like this plugin, and would like to help support continued development, use the button below!");
-    
-    credit.setAttribute("style", "color: var(--text-muted)");
-    cDonationDiv.appendChild(donateText);
-    cDonationDiv.appendChild(credit);
-
-    cDonationDiv.appendChild(
-      this.createDonateButton("https://www.buymeacoffee.com/ThePirateKing")
-    ); 
-	}// display
+    // Donation
+    const donationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-donation", });    
+    const credit = createEl("p", { cls: "codeblock-customizer-credit", });
+    const donationText = createEl("p");
+    donationText.appendText("If you like this plugin, and would like to help support continued development, use the button below!");
+    const donationButton = createEl("a");
+    donationButton.setAttribute("href", "https://www.buymeacoffee.com/ThePirateKing");
+    donationButton.addClass("buymeacoffee-ThePirateKing-img");
+    donationButton.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px">`;
+    donationDiv.appendChild(donationText);
+    donationDiv.appendChild(credit);
+    donationDiv.appendChild(donationButton); 
+	}//display
   
+
+
+
+
+  updateDropdown(dropdown: DropdownComponent, settings: CodeblockCustomizerSettings) {
+    //dropdown.selectEl.empty();
+    Object.keys(settings.themes).forEach((theme_name: string) => {
+      dropdown.addOption(theme_name, theme_name);            
+    })
+    dropdown.setValue(settings.selectedTheme);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
   getRandomColor() {
     const letters = "0123456789ABCDEF";
     let color = "#";
@@ -834,13 +728,7 @@ export class SettingsTab extends PluginSettingTab {
     });
   }// updateColorContainer
     
-  createDonateButton = (link: string): HTMLElement => {
-    const a = createEl("a");
-    a.setAttribute("href", link);
-    a.addClass("buymeacoffee-ThePirateKing-img");
-    a.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px">`;
-    return a;
-  };// createDonateButton
+  
 }// SettingsTab
 
 function getColorByClass(pickerClass, theme) {

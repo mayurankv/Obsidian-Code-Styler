@@ -4,6 +4,7 @@ type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
 type HEX = `#${string}`;
 type CSS = `var(--${string})`;
 type Color = HEX | RGB | RGBA | CSS;
+type Display = "none" | "title_only" | "always";
 
 // Interface Creation
 export interface CodeblockCustomizerThemeModeColors {
@@ -41,19 +42,19 @@ export interface CodeblockCustomizerThemeSettings {
     highlight: boolean;
   },
   header: {
-    file: {
+    title: {
+      textFont?: string;
       textBold: boolean;
       textItalic: boolean;
     },
     languageTag: {
-      display: boolean;
-      displayAlways: boolean;
+      display: Display;
+      textFont?: string;
       textBold: boolean;
       textItalic: boolean;
     },
     languageIcon: {
-      display: boolean;
-      displayAlways: boolean;
+      display: Display;
       displayColor: boolean;
     },
   },
@@ -79,6 +80,10 @@ export interface CodeblockCustomizerSettings {
   selectedTheme: string;
   defaultTheme: string;
   currentTheme: CodeblockCustomizerTheme;
+  newTheme: {
+    name: string;
+    default: boolean;
+  },
   themes: Record<string,CodeblockCustomizerTheme>;
   excludedLangs: string;
 }
@@ -92,19 +97,17 @@ const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
     highlight: true,
   },
   header: {
-    file: {
+    title: {
       textBold: false,
       textItalic: false,
     },
     languageTag: {
-      display: true,
-      displayAlways: true,
+      display: "always",
       textBold: true,
       textItalic: true,
     },
     languageIcon: {
-      display: true,
-      displayAlways: true,
+      display: "always",
       displayColor: true,
     },
   },
@@ -117,6 +120,10 @@ const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
     languageBorderColor: false,
     iconSize: 28,
   },
+}
+export const NEW_THEME_DEFAULT: {name: string, default: boolean} = {
+  name: '',
+  default: false,
 }
 export const THEME_FALLBACK_COLORS: CodeblockCustomizerThemeModeColors = {
   codeblock: {
@@ -239,6 +246,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
   selectedTheme: '',
   defaultTheme: 'Default',
   currentTheme: DEFAULT_THEME,
+  newTheme: NEW_THEME_DEFAULT,
   themes: {
     'Default': DEFAULT_THEME,
     'Solarized': SOLARIZED_THEME,

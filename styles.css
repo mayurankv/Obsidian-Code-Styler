@@ -247,10 +247,13 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 }
 
 /* Settings */
-.codeblock-customizer-Donation {
+.codeblock-customizer-donation {
   width: 70%;
   margin: 0 auto;
   text-align: center;
+}
+.codeblock-customizer-credit {
+  color: var(--text-muted);
 }
 
 /* pickr start */
