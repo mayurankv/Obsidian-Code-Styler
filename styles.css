@@ -247,13 +247,13 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 }
 
 /* Settings */
+.setting-item.codeblock-customizer-spaced .checkbox-container + .pickr {
+  padding-left: 10px;
+}
 .codeblock-customizer-donation {
   width: 70%;
   margin: 0 auto;
   text-align: center;
-}
-.codeblock-customizer-credit {
-  color: var(--text-muted);
 }
 
 /* pickr start */

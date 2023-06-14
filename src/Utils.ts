@@ -1,4 +1,5 @@
 import { Languages, manualLang, Icons } from "./Const";
+import { Color, CSS, HEX, CodeblockCustomizerTheme, CodeblockCustomizerSettings } from "./Settings";
 
 export function getCurrentMode() {
   const body = document.querySelector('body');
@@ -11,7 +12,7 @@ export function getCurrentMode() {
   } else {
     console.log('Error - getCurrentTheme')
   }
-  return '';
+  return "light";
 }// getCurrentTheme
 
 export function splitAndTrimString(str) {
@@ -352,3 +353,75 @@ function accessSetting(key: string, settings: CodeblockCustomizerSettings) {
     return null;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export function getNestedValue(theme: CodeblockCustomizerTheme,stringKeys: string) {
+  let keys = stringKeys.split('.');
+  return keys.reduce((object,key) => object[key], theme)
+}
+
+function getCssVariable(cssVariable: CSS): HEX {
+  let variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable);
+  if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
+    return `#${variableValue.trim().substring(1)}`;
+  else {
+    console.log('Warning: Non-hex value');
+    return '#00000000'
+  }
+}
+
+function isCss(possibleCss: string): possibleCss is CSS {
+  return possibleCss.startsWith('--') && typeof possibleCss === 'string';
+}
+
+export function getThemeColor(themeColor: Color): Color {
+  themeColor = isCss(themeColor)?getCssVariable(themeColor):themeColor
+  return themeColor
+}
+
+// export function setDefaultThemeColors(theme: Partial<CodeblockCustomizerTheme>): CodeblockCustomizerTheme {
+//   function setDefaultThemeModeColors(themeModeColors: Partial<CodeblockCustomizerThemeModeColors>): CodeblockCustomizerThemeModeColors {
+//     return {
+//       codeblock: {...themeModeColors.codeblock,...THEME_FALLBACK_COLORS.codeblock},
+//       gutter: {...themeModeColors.gutter,...THEME_FALLBACK_COLORS.gutter},
+//       header: {
+//         backgroundColor: (typeof themeModeColors.header.backgroundColor === 'undefined')?THEME_FALLBACK_COLORS.header.backgroundColor:themeModeColors.header.backgroundColor,
+//         file: {...themeModeColors.header.file,...THEME_FALLBACK_COLORS.header.file},
+//         languageTag: {...themeModeColors.header.languageTag,...THEME_FALLBACK_COLORS.header.languageTag},
+//         lineColor: (typeof themeModeColors.header.lineColor === 'undefined')?THEME_FALLBACK_COLORS.header.lineColor:themeModeColors.header.lineColor,
+//       },
+//       highlights: {...themeModeColors.highlights,...THEME_FALLBACK_COLORS.highlights},
+//     }
+//   }
+//   return {
+//     settings: theme.settings,
+//     colors: {
+//       light: setDefaultThemeModeColors(theme.colors.light),
+//       dark: setDefaultThemeModeColors(theme.colors.dark),
+//     },
+//   }
+// }

@@ -1,42 +1,49 @@
 // Color Typing
-type RGB = `rgb(${number}, ${number}, ${number})`;
-type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
-type HEX = `#${string}`;
-type CSS = `var(--${string})`;
-type Color = HEX | RGB | RGBA | CSS;
+// type HexDigit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'a' | 'b' | 'c' | 'd' | 'e'| 'f' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+// type ShortHexColor = `${HexDigit}${HexDigit}${HexDigit}`;
+// type LongHexColor = `${ShortHexColor}${ShortHexColor}`;
+// type LongAlphaHexColor = `${LongHexColor}${HexDigit}${HexDigit}`;
+// export type HEX = `#${ShortHexColor}` | `#${LongHexColor}` | `#${LongAlphaHexColor}`;
+export type HEX = `#${string}`;
+export type RGB = `rgb(${number}, ${number}, ${number})`;
+export type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
+export type CSS = `--${string}`;
+export type Color = HEX | CSS;
+export type Percentage = `${number}%`;
 type Display = "none" | "title_only" | "always";
 
 // Interface Creation
 export interface CodeblockCustomizerThemeModeColors {
   codeblock: {
-    backgroundColor?: Color;
-    textColor?: Color;
+    backgroundColor: Color;
+    textColor: Color;
   },
   gutter: {
-    backgroundColor?: Color;
-    textColor?: Color;
+    backgroundColor: Color;
+    textColor: Color;
   },
   header: {
-    backgroundColor?: Color;
-    file: {
-      textColor?: Color;
+    backgroundColor: Color;
+    title: {
+      textColor: Color;
     },
     languageTag: {
-      backgroundColor?: Color;
-      textColor?: Color;
+      backgroundColor: Color;
+      textColor: Color;
     },
-    lineColor?: Color;
+    lineColor: Color;
   },
   highlights: {
-    activeCodeblockLineColor?: Color;
-    activeEditorLineColor?: Color;
-    defaultColor?: Color;
+    activeCodeblockLineColor: Color;
+    activeEditorLineColor: Color;
+    defaultColor: Color;
     alternativeHighlights: Record<string,Color>;
   },
 }
 export interface CodeblockCustomizerThemeSettings {
   codeblock: {
     lineNumbers: boolean;
+    curvature: number;
   },
   gutter: {
     highlight: boolean;
@@ -64,6 +71,7 @@ export interface CodeblockCustomizerThemeSettings {
   },
   advanced: {
     gradientHighlights: boolean;
+    gradientHighlightsColorStop: Percentage;
     languageBorderColor: boolean;
     iconSize: number;
   };
@@ -77,6 +85,7 @@ export interface CodeblockCustomizerTheme {
   colors: CodeblockCustomizerThemeColors;
 }
 export interface CodeblockCustomizerSettings {
+  themes: Record<string,CodeblockCustomizerTheme>;
   selectedTheme: string;
   defaultTheme: string;
   currentTheme: CodeblockCustomizerTheme;
@@ -84,7 +93,7 @@ export interface CodeblockCustomizerSettings {
     name: string;
     default: boolean;
   },
-  themes: Record<string,CodeblockCustomizerTheme>;
+  newHighlight: string;
   excludedLangs: string;
 }
 
@@ -92,6 +101,7 @@ export interface CodeblockCustomizerSettings {
 const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
   codeblock: {
     lineNumbers: true,
+    curvature: 10,
   },
   gutter: {
     highlight: true,
@@ -117,6 +127,7 @@ const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
   },
   advanced: {
     gradientHighlights: false,
+    gradientHighlightsColorStop: '70%',
     languageBorderColor: false,
     iconSize: 28,
   },
@@ -127,58 +138,38 @@ export const NEW_THEME_DEFAULT: {name: string, default: boolean} = {
 }
 export const THEME_FALLBACK_COLORS: CodeblockCustomizerThemeModeColors = {
   codeblock: {
-    backgroundColor: 'var(--code-background)',
-    textColor: 'var(--code-normal)',
+    backgroundColor: '--code-background',
+    textColor: '--code-normal',
   },
   gutter: {
-    backgroundColor: 'var(--code-background)',
-    textColor: 'var(--code-comment)',
+    backgroundColor: '--code-background',
+    textColor: '--code-comment',
   },
   header: {
-    backgroundColor: 'var(--code-background)',
-    file: {
-      textColor: 'var(--code-comment)',
+    backgroundColor: '--code-background',
+    title: {
+      textColor: '--code-comment',
     },
     languageTag: {
-      backgroundColor: 'var(--code-background)',
-      textColor: 'var(--code-comment)',
+      backgroundColor: '--code-background',
+      textColor: '--code-comment',
     },
-    lineColor: 'var(--code-background)',
+    lineColor: '--code-background',
   },
   highlights: {
-    activeCodeblockLineColor: 'var(--color-base-30)',
-    activeEditorLineColor: 'var(--color-base-20)',
-    defaultColor: 'var(--text-highlight-bg)',
+    activeCodeblockLineColor: '--color-base-30',
+    activeEditorLineColor: '--color-base-20',
+    defaultColor: '--text-highlight-bg',
     alternativeHighlights: {},
   },
 }
 
 // Theme Creation
-const DEFAULT_THEME = {
+const DEFAULT_THEME: CodeblockCustomizerTheme = {
   settings: THEME_DEFAULT_SETTINGS,
   colors: {
-    light: {
-      codeblock: {},
-      gutter: {},
-      header: {
-        file: {},
-        languageTag: {},
-      },
-      highlights: {
-        alternativeHighlights: {},
-      },
-    },
-    dark: {
-      codeblock: {},
-      gutter: {},
-      header: {
-        file: {},
-        languageTag: {},
-      },
-      highlights: {
-        alternativeHighlights: {},
-      },
-    },
+    light: THEME_FALLBACK_COLORS,
+    dark: THEME_FALLBACK_COLORS,
   },
 }
 const SOLARIZED_THEME: CodeblockCustomizerTheme = {
@@ -195,7 +186,7 @@ const SOLARIZED_THEME: CodeblockCustomizerTheme = {
       },
       header: {
         backgroundColor: '#D5CCB4',
-        file: {
+        title: {
           textColor: '#866704',
         },
         languageTag: {
@@ -243,13 +234,14 @@ const SOLARIZED_THEME: CodeblockCustomizerTheme = {
 
 // Plugin default settings
 export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
-  selectedTheme: '',
-  defaultTheme: 'Default',
-  currentTheme: DEFAULT_THEME,
-  newTheme: NEW_THEME_DEFAULT,
   themes: {
     'Default': DEFAULT_THEME,
     'Solarized': SOLARIZED_THEME,
   },
+  selectedTheme: 'Default',
+  defaultTheme: 'Default',
+  currentTheme: structuredClone(DEFAULT_THEME),
+  newTheme: NEW_THEME_DEFAULT,
+  newHighlight: '',
   excludedLangs: "dataview, dataviewjs, ad-*",
 }
