@@ -2,8 +2,8 @@ import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponen
 import Pickr from "@simonwep/pickr";
 
 import CodeBlockCustomizerPlugin from "./main";
-import { updateSettingStyles, getCurrentMode, getThemeColor } from "./Utils";
-import { Color, CodeblockCustomizerSettings, CodeblockCustomizerTheme, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
+import { getCurrentMode, getThemeColor } from "./Utils";
+import { Color, CodeblockCustomizerSettings, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
 
 const DISPLAY_OPTIONS: Record<string,string> = {
   "never": "Never",
@@ -13,10 +13,12 @@ const DISPLAY_OPTIONS: Record<string,string> = {
 
 export class SettingsTab extends PluginSettingTab {
 	plugin: CodeBlockCustomizerPlugin;
+  pickrs: Array<Pickr>;
 
 	constructor(app: App, plugin: CodeBlockCustomizerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+    this.pickrs = [];
 	}
 
   /**
@@ -53,7 +55,7 @@ export class SettingsTab extends PluginSettingTab {
         themeDropdown.onChange(value => {
           this.plugin.settings.selectedTheme = value;
           this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
-          this.setColorsForPickers(this.plugin.settings.selectedTheme);
+          this.updatePickrColors(this.plugin.settings.selectedTheme);
           this.plugin.saveSettings();
         });
         ;
@@ -74,7 +76,7 @@ export class SettingsTab extends PluginSettingTab {
       .addExtraButton(button => {
         button.setTooltip("Delete theme");
         button.setIcon('trash');
-        button.onClick(() => {
+        button.onClick(async () => {
           if (this.plugin.settings.selectedTheme.trim().length === 0) {
             new Notice('Select a theme first to delete');
           } else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes) {
@@ -87,8 +89,8 @@ export class SettingsTab extends PluginSettingTab {
             this.plugin.settings.selectedTheme = "Default";
             this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
             this.updateDropdown(themeDropdown,this.plugin.settings);
-            this.setColorsForPickers(this.plugin.settings.selectedTheme); //todo What is this?
-            this.plugin.saveSettings();
+            this.updatePickrColors(this.plugin.settings.selectedTheme); //todo (@mayurankv) What is this?
+            await this.plugin.saveSettings();
           }
         });
       });
@@ -174,7 +176,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Codeblock Text Color')
@@ -200,7 +203,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Codeblock Curvature')
@@ -252,7 +256,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Line Number Color')
@@ -278,7 +283,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Highlight Line Numbers')
@@ -314,7 +320,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Header Title Text Styling')
@@ -365,7 +372,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Header Divider Color')
@@ -392,7 +400,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
 		containerEl.createEl('h5', {text: 'Header Language Tag Appearance'});
     new Setting(containerEl)
@@ -432,7 +441,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Header Language Tag Text Styling')
@@ -483,7 +493,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
 		containerEl.createEl('h5', {text: 'Header Language Icon Appearance'});
     new Setting(containerEl)
@@ -543,7 +554,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Codeblock Active Line Highlight')
@@ -578,7 +590,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     new Setting(containerEl)
       .setName('Default Highlight Color')
@@ -605,7 +618,8 @@ export class SettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
           .setTooltip('Restore default color');
-        })
+        });
+        this.pickrs.push(pickr);
       })
     let newHighlightText: TextComponent;
     new Setting(containerEl)
@@ -708,10 +722,9 @@ export class SettingsTab extends PluginSettingTab {
             resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.iconSize)
             await this.plugin.saveSettings();
           })
-          .setTooltip('Restore default curvature');
+          .setTooltip('Restore default icon size');
         })
       })
-      .addSlider((slider) => slider
 
     // ========== Donation ==========
     const donationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-donation", });    
@@ -773,7 +786,7 @@ export class SettingsTab extends PluginSettingTab {
               lightPickr.setColor(lightResetColor)
               const darkResetColor: Color = getThemeColor(this.plugin.settings.themes[this.plugin.settings.selectedTheme].colors.dark.highlights.alternativeHighlights[alternativeHighlightName])
               this.plugin.settings.currentTheme.colors.dark.highlights.alternativeHighlights[alternativeHighlightName] = darkResetColor;
-              lightPickr.setColor(darkResetColor)
+              darkPickr.setColor(darkResetColor)
               await this.plugin.saveSettings();
             });
           })
@@ -787,86 +800,33 @@ export class SettingsTab extends PluginSettingTab {
               this.updateAlternativeHighlights(alternativeHighlightsContainer)
               await this.plugin.saveSettings();
             });
-          })
+          });
+          this.pickrs.push(lightPickr);
+          this.pickrs.push(darkPickr);
         })
     })
+  }
+  updatePickrColors() {
+    this.pickrs.forEach((pickr) => {pickr.setColor()}) //todo (@mayurankv) Finish
   }
   getRandomColor(): Color {
     const letters = "0123456789ABCDEF";
     let color = "";
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 6; i++)
       color += letters[Math.floor(Math.random() * 16)];
-    }
     return `#${color}`;
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  setColorsForPickers(themeName){
-    const selectedTheme = this.plugin.settings.colorThemes.find(t => t.name === themeName);    
-    if (!selectedTheme) 
-      return;
-    this.pickerInstances.forEach(picker => {
-      const color = getColorByClass(picker.options.appClass, selectedTheme);
-      if (color) {
-        picker.setColor(color);
-      }
-    });
   }
 }// SettingsTab
 
-function getColorByClass(pickerClass, theme) {
-  switch (pickerClass) {
-    case 'activeCodeBlockLineColor':
-      return theme.colors.activeCodeBlockLineColor;
-    case 'activeLineColor':
-      return theme.colors.activeLineColor;
-    case 'backgroundColor':
-      return theme.colors.backgroundColor;
-    case 'highlightColor':
-      return theme.colors.highlightColor;
-    case 'color':
-      return theme.colors.header.color;
-    case 'textColor':
-      return theme.colors.header.textColor;
-    case 'lineColor':
-      return theme.colors.header.lineColor;
-    case 'gutterTextColor':
-      return theme.colors.gutterTextColor;
-    case 'gutterBackgroundColor':
-      return theme.colors.gutterBackgroundColor;
-    case 'codeBlockLangColor':
-      return theme.colors.header.codeBlockLangColor;
-    case 'codeBlockLangBackgroundColor':
-      return theme.colors.header.codeBlockLangBackgroundColor;
-    default:
-      return null;
+class PickrResettable extends Pickr {
+reset: ()=>{};
+  constructor(options: Pickr.Options,resetFunction: ()=>{}) {
+    super(options);
+    this.reset = resetFunction;
   }
 }
 
-
-
-
-
-
-
-
-
-
 //todo (@mayurankv) Modularise setting creation
-
 
 const COLOR_NAME_REGEX = /^[^\d][\w\d]*$/
 

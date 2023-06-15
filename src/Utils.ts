@@ -1,5 +1,5 @@
 import { Languages, manualLang, Icons } from "./Const";
-import { Color, CSS, HEX, CodeblockCustomizerTheme, CodeblockCustomizerSettings } from "./Settings";
+import { Color, CSS, HEX, RGB, RGBA, CodeblockCustomizerTheme, CodeblockCustomizerSettings } from "./Settings";
 
 export function getCurrentMode() {
   const body = document.querySelector('body');
@@ -389,11 +389,19 @@ function getCssVariable(cssVariable: CSS): HEX {
   if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
     return `#${variableValue.trim().substring(1)}`;
   else {
-    console.log('Warning: Non-hex value');
-    return '#00000000'
+    return convertRgbToHex(variableValue);
   }
 }
 
+function convertRgbToHex(rgb: string, forceRemoveAlpha = false): HEX {
+  return `#${rgb.replace(/^\s*?rgba?\(|\s+|\)$/g,'').split(',')
+    .filter((string, index) => !forceRemoveAlpha || index !== 3)
+    .map(string => parseFloat(string))
+    .map((number, index) => index === 3 ? Math.round(number * 255) : number)
+    .map(number => number.toString(16))
+    .map(string => string.length === 1 ? "0" + string : string).join("")}`
+}
+  
 function isCss(possibleCss: string): possibleCss is CSS {
   return possibleCss.startsWith('--') && typeof possibleCss === 'string';
 }
