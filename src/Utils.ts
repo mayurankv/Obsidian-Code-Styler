@@ -1,19 +1,5 @@
 import { Languages, manualLang, Icons } from "./Const";
-import { Color, CSS, HEX, RGB, RGBA, CodeblockCustomizerTheme, CodeblockCustomizerSettings } from "./Settings";
-
-export function getCurrentMode() {
-  const body = document.querySelector('body');
-  if (body !== null){
-    if (body.classList.contains('theme-light')) {
-      return "light";
-    } else if (body.classList.contains('theme-dark')) {
-      return "dark";
-    }
-  } else {
-    console.log('Error - getCurrentTheme')
-  }
-  return "light";
-}// getCurrentTheme
+import { Color, CSS, HEX, CodeblockCustomizerSettings } from "./Settings";
 
 export function splitAndTrimString(str) {
   if (!str) {
@@ -376,14 +362,33 @@ function accessSetting(key: string, settings: CodeblockCustomizerSettings) {
 
 
 
-
-
-
-export function getNestedValue(theme: CodeblockCustomizerTheme,stringKeys: string) {
-  let keys = stringKeys.split('.');
-  return keys.reduce((object,key) => object[key], theme)
+// Setting Management
+export function getCurrentMode() {
+  const body = document.querySelector('body');
+  if (body !== null){
+    if (body.classList.contains('theme-light')) {
+      return "light";
+    } else if (body.classList.contains('theme-dark')) {
+      return "dark";
+    }
+  } else {
+    console.log('Error - getCurrentTheme')
+  }
+  return "light";
 }
 
+// Color Management
+function isCss(possibleCss: string): possibleCss is CSS {
+  return possibleCss.startsWith('--') && typeof possibleCss === 'string';
+}
+function convertRgbToHex(rgb: string, forceRemoveAlpha = false): HEX {
+  return `#${rgb.replace(/(?:^\s*?rgba?\()|\s+|(?:\)$)/g,'').split(',')
+    .filter((string, index) => !forceRemoveAlpha || index !== 3)
+    .map(string => parseFloat(string))
+    .map((number, index) => index === 3 ? Math.round(number * 255) : number)
+    .map(number => number.toString(16))
+    .map(string => string.length === 1 ? "0" + string : string).join("")}`
+}
 function getCssVariable(cssVariable: CSS): HEX {
   let variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable);
   if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
@@ -392,44 +397,6 @@ function getCssVariable(cssVariable: CSS): HEX {
     return convertRgbToHex(variableValue);
   }
 }
-
-function convertRgbToHex(rgb: string, forceRemoveAlpha = false): HEX {
-  return `#${rgb.replace(/^\s*?rgba?\(|\s+|\)$/g,'').split(',')
-    .filter((string, index) => !forceRemoveAlpha || index !== 3)
-    .map(string => parseFloat(string))
-    .map((number, index) => index === 3 ? Math.round(number * 255) : number)
-    .map(number => number.toString(16))
-    .map(string => string.length === 1 ? "0" + string : string).join("")}`
+export function getColor(themeColor: Color): Color {
+  return isCss(themeColor)?getCssVariable(themeColor):themeColor;;
 }
-  
-function isCss(possibleCss: string): possibleCss is CSS {
-  return possibleCss.startsWith('--') && typeof possibleCss === 'string';
-}
-
-export function getThemeColor(themeColor: Color): Color {
-  themeColor = isCss(themeColor)?getCssVariable(themeColor):themeColor
-  return themeColor
-}
-
-// export function setDefaultThemeColors(theme: Partial<CodeblockCustomizerTheme>): CodeblockCustomizerTheme {
-//   function setDefaultThemeModeColors(themeModeColors: Partial<CodeblockCustomizerThemeModeColors>): CodeblockCustomizerThemeModeColors {
-//     return {
-//       codeblock: {...themeModeColors.codeblock,...THEME_FALLBACK_COLORS.codeblock},
-//       gutter: {...themeModeColors.gutter,...THEME_FALLBACK_COLORS.gutter},
-//       header: {
-//         backgroundColor: (typeof themeModeColors.header.backgroundColor === 'undefined')?THEME_FALLBACK_COLORS.header.backgroundColor:themeModeColors.header.backgroundColor,
-//         file: {...themeModeColors.header.file,...THEME_FALLBACK_COLORS.header.file},
-//         languageTag: {...themeModeColors.header.languageTag,...THEME_FALLBACK_COLORS.header.languageTag},
-//         lineColor: (typeof themeModeColors.header.lineColor === 'undefined')?THEME_FALLBACK_COLORS.header.lineColor:themeModeColors.header.lineColor,
-//       },
-//       highlights: {...themeModeColors.highlights,...THEME_FALLBACK_COLORS.highlights},
-//     }
-//   }
-//   return {
-//     settings: theme.settings,
-//     colors: {
-//       light: setDefaultThemeModeColors(theme.colors.light),
-//       dark: setDefaultThemeModeColors(theme.colors.dark),
-//     },
-//   }
-// }

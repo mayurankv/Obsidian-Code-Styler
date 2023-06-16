@@ -1,16 +1,11 @@
 // Color Typing
-// type HexDigit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'a' | 'b' | 'c' | 'd' | 'e'| 'f' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
-// type ShortHexColor = `${HexDigit}${HexDigit}${HexDigit}`;
-// type LongHexColor = `${ShortHexColor}${ShortHexColor}`;
-// type LongAlphaHexColor = `${LongHexColor}${HexDigit}${HexDigit}`;
-// export type HEX = `#${ShortHexColor}` | `#${LongHexColor}` | `#${LongAlphaHexColor}`;
 export type HEX = `#${string}`;
 export type RGB = `rgb(${number}, ${number}, ${number})`;
 export type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
 export type CSS = `--${string}`;
 export type Color = HEX | CSS;
 export type Percentage = `${number}%`;
-type Display = "none" | "title_only" | "always";
+export type Display = "none" | "title_only" | "always";
 
 // Interface Creation
 export interface CodeblockCustomizerThemeModeColors {
@@ -50,13 +45,13 @@ export interface CodeblockCustomizerThemeSettings {
   },
   header: {
     title: {
-      textFont?: string;
+      textFont: string;
       textBold: boolean;
       textItalic: boolean;
     },
     languageTag: {
       display: Display;
-      textFont?: string;
+      textFont: string;
       textBold: boolean;
       textItalic: boolean;
     },
@@ -108,11 +103,13 @@ const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
   },
   header: {
     title: {
+      textFont: '',
       textBold: false,
       textItalic: false,
     },
     languageTag: {
       display: "always",
+      textFont: '',
       textBold: true,
       textItalic: true,
     },
@@ -213,7 +210,7 @@ const SOLARIZED_THEME: CodeblockCustomizerTheme = {
       },
       header: {
         backgroundColor: '#0a4554',
-        file: {
+        title: {
           textColor: '#dadada',
         },
         languageTag: {

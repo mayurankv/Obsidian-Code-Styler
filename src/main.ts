@@ -10,10 +10,9 @@ import { getCurrentMode, loadIcons, BLOBS, updateSettingStyles } from "./Utils";
 
 // npm i @simonwep/pickr
 
-export default class CodeBlockCustomizerPlugin extends Plugin {
+export default class CodeblockCustomizerPlugin extends Plugin {
   settings: CodeblockCustomizerSettings;
   extensions: Extension[];
-  theme: string;
   
   async onload() {
     document.body.classList.add('codeblock-customizer');
@@ -39,17 +38,10 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 
     this.registerEditorExtension(this.extensions);
     
-    // theme on startup
-    this.theme = getCurrentMode();
-
     const settingsTab = new SettingsTab(this.app, this);
     this.addSettingTab(settingsTab);
     
-    if (this.settings.SelectedTheme == "") {
-      this.updateTheme(settingsTab);
-    } else {
-      updateSettingStyles(this.settings);
-    }
+    updateSettingStyles(this.settings);
     
     this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
 
@@ -62,24 +54,8 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
   }// onload
   
   handleCssChange(settingsTab) {
-    if (getCurrentMode() != this.theme){
-      this.updateTheme(settingsTab);
-    }
+    console.log('updating css');
   }// handleCssChange
-    
-  updateTheme(settingsTab) {
-    this.settings.colorThemes.forEach(theme => {
-      if (getCurrentMode() == "light" && theme.colors.header.bDefaultLightTheme) {
-        this.theme = theme.name;
-      }
-      else if (getCurrentMode() == "dark" && theme.colors.header.bDefaultDarkTheme) {
-        this.theme = theme.name;
-      }
-    });
-    this.settings.SelectedTheme = this.theme;
-    settingsTab.applyTheme();
-    this.saveSettings();
-  }// updateTheme
   
   onunload() {
     console.log("unloading CodeBlock Customizer plugin");
@@ -94,8 +70,8 @@ export default class CodeBlockCustomizerPlugin extends Plugin {
 	}
 
 	async saveSettings() {
-    updateSettingStyles(this.settings);
 		await this.saveData(this.settings);
     this.app.workspace.updateOptions();
+    // updateSettingStyles(this.settings);
 	}
 }
