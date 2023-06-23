@@ -22,6 +22,7 @@
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
-		"@simonwep/pickr": "^1.8.2"
+		"@simonwep/pickr": "^1.8.2",
+		"colortranslator": "^2.0.0"
 	}
 }

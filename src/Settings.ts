@@ -1,7 +1,9 @@
 // Color Typing
 export type HEX = `#${string}`;
-export type RGB = `rgb(${number}, ${number}, ${number})`;
-export type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
+// export type RGB = `rgb(${number}, ${number}, ${number})`;
+// export type RGBA = `rgba(${number},${number},${number},${number})`;
+// export type HSL = `hsl(${number},${number}%,${number}%)`;
+// export type HSLA = `hsl(${number},${number}%,${number}%,${number})`;
 export type CSS = `--${string}`;
 export type Color = HEX | CSS;
 export type Percentage = `${number}%`;
