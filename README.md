@@ -18,19 +18,19 @@ The plugin lets you customize the codeblocks in the following way:
 - Exclude languages. You can define languages separated by a comma, to which the plugin will not apply.
 - Set background color for codeblocks.
 - Lets you highlight specific lines.
-    - Customize highlight color
+		- Customize highlight color
 - Lets you define multiple highlight colors to highlight lines.
 - Display filename
-    - If a filename is defined a header will be inserted, where it is possible to customize the text (color, bold, italic), and the header (color, header line) itself as well
+		- If a filename is defined a header will be inserted, where it is possible to customize the text (color, bold, italic), and the header (color, header line) itself as well
 - Fold code
-    - If the header is displayed (either by defining filename or other way explained below), you can click on the header to fold the codeblock below it 
+		- If the header is displayed (either by defining filename or other way explained below), you can click on the header to fold the codeblock below it 
 - Display codeblock language. This displays the language (if specified) of the codeblock in the header. 
-    - Customize text color, background color, bold text, italic text for the language tag inside the header.
-    - By default the language tag is only displayed, if the header is displayed, and a if a language is defined for a codeblock. You can however force, to always display the codeblock language, even if the header would not be displayed.
+		- Customize text color, background color, bold text, italic text for the language tag inside the header.
+		- By default the language tag is only displayed, if the header is displayed, and a if a language is defined for a codeblock. You can however force, to always display the codeblock language, even if the header would not be displayed.
 - Display codeblock language icon (if available for the specified language) in the header.
 - Add line numbers to codeblocks
-    - Customize if the linenumber should also be highlighted, if a line is highlighted
-    - Customize background color, and color of the line numbers
+		- Customize if the linenumber should also be highlighted, if a line is highlighted
+		- Customize background color, and color of the line numbers
 
 ## Themes
 

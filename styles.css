@@ -1,201 +1,201 @@
 /* Define CSS variables */
 :root {
-  --line-number-gutter-width: 32px;
-  --line-number-gutter-padding: 16px;
-  --border-radius: 10px;
-  --code-padding: 8px;
-  --header-padding: 0px;
-  --header-spacing: 15px;
-  --language-icon-size: 28px;
+	--line-number-gutter-width: 32px;
+	--line-number-gutter-padding: 16px;
+	--border-radius: 10px;
+	--code-padding: 8px;
+	--header-padding: 0px;
+	--header-spacing: 15px;
+	--language-icon-size: 28px;
 }
 
 /* Codeblock background colours */
 .codeblock-customizer .markdown-rendered pre.codeblock-customizer-pre,
 .codeblock-customizer .markdown-source-view .HyperMD-codeblock.codeblock-customizer-line {
-  background-color: var(--codeblock-customizer-codeblock-background-color);
+	background-color: var(--codeblock-customizer-codeblock-background-color);
 }
 
 /* Highlighting */
 .codeblock-customizer-line-highlighted {
-  background-color: var(--codeblock-customizer-highlight-color) !important;
+	background-color: var(--codeblock-customizer-highlight-color) !important;
 }
 .codeblock-customizer-active-line-highlight .cm-active,
 .codeblock-customizer-active-line-highlight-editor .cm-active {
-  background-color: var(--codeblock-customizer-editor-active-line-color) !important;
+	background-color: var(--codeblock-customizer-editor-active-line-color) !important;
 }
 .codeblock-customizer-active-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active,
 .codeblock-customizer-active-line-highlight-codeblock .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
-  background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
+	background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
 }
 
 /* Line number gutter styling */
 .codeblock-customizer:not(.codeblock-customizer-show-line-numbers) .codeblock-customizer-line-number,
 .codeblock-customizer-line-number-hide {
-  display: none;
+	display: none;
 }
 .markdown-rendered .codeblock-customizer-pre > code > div:first-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
-  box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
+	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
 }
 .markdown-rendered .codeblock-customizer-pre > code > div:last-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
-  box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
+	box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
 .markdown-rendered .codeblock-customizer-pre > code > div:only-child > .codeblock-customizer-line-number { /* Maintain gutter color when padded */
-  box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color),0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
+	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color),0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
 .codeblock-customizer-line-number,
 .codeblock-customizer-line-number-specific {
-  padding-left: 4px;
-  padding-right: 8px;
-  text-align: right;
-  min-width: var(--line-number-gutter-width);
-  background-color: var(--codeblock-customizer-gutter-background-color);
-  font-size: var(--code-size);
-  font-family: var(--font-monospace);
-  color: var(--codeblock-customizer-gutter-text-color);
-  user-select: none;
+	padding-left: 4px;
+	padding-right: 8px;
+	text-align: right;
+	min-width: var(--line-number-gutter-width);
+	background-color: var(--codeblock-customizer-gutter-background-color);
+	font-size: var(--code-size);
+	font-family: var(--font-monospace);
+	color: var(--codeblock-customizer-gutter-text-color);
+	user-select: none;
 }
 .markdown-source-view .codeblock-customizer-line-number {
-  position: absolute;
-  display: inline-block;
-  height: 100%;
-  width: var(--line-number-gutter-width);
-  overflow-x: auto;
-  direction: rtl;
-  left: 0;
+	position: absolute;
+	display: inline-block;
+	height: 100%;
+	width: var(--line-number-gutter-width);
+	overflow-x: auto;
+	direction: rtl;
+	left: 0;
 }
 .markdown-source-view .codeblock-customizer-line-number::-webkit-scrollbar {
-  display: none;
+	display: none;
 }
 .markdown-rendered .codeblock-customizer-line-number {
-  flex-shrink: 0;
-  flex-grow: 1;
+	flex-shrink: 0;
+	flex-grow: 1;
 }
 .codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
 .codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
 .codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-line-number {
-  background-color: rgba(0,0,0,0);
+	background-color: rgba(0,0,0,0);
 }
 .codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number){
-  padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
+	padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
 }
 
 /* Header styling */
 body:not([class*='codeblock-customizer-show-langicons']) .codeblock-customizer-header-container-specific div:has(> img.codeblock-customizer-icon),
 body:not(.codeblock-customizer-show-langicons-always) .codeblock-customizer-header-container div:has(> img.codeblock-customizer-icon) {
-  display: none;
+	display: none;
 }
 body:not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"],
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"] {
-  display: none;
+	display: none;
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container,
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) {
-  display: none !important;
+	display: none !important;
 }
 body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) {
-  display: none !important;
+	display: none !important;
 }
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific {
-  user-select: none;
-  height: var(--language-icon-size);
-  padding-top: var(--header-padding);
-  border-top-left-radius: var(--border-radius);
-  border-top-right-radius: var(--border-radius);
-  background-color: var(--codeblock-customizer-header-background-color);
-  border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
-  font-size: 14px;
-  margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
-  display: flex !important;
-  overflow: visible;
+	user-select: none;
+	height: var(--language-icon-size);
+	padding-top: var(--header-padding);
+	border-top-left-radius: var(--border-radius);
+	border-top-right-radius: var(--border-radius);
+	background-color: var(--codeblock-customizer-header-background-color);
+	border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
+	font-size: 14px;
+	margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+	display: flex !important;
+	overflow: visible;
 }
 .markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container,
 .markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container-specific {
-  margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+	margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
 }
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed),
 .markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) {
-  padding-bottom: var(--header-padding);
-  border-bottom-left-radius: var(--border-radius);
-  border-bottom-right-radius: var(--border-radius);
-  border-bottom: none;
+	padding-bottom: var(--header-padding);
+	border-bottom-left-radius: var(--border-radius);
+	border-bottom-right-radius: var(--border-radius);
+	border-bottom: none;
 }
 .markdown-source-view .codeblock-customizer-header-container,
 .markdown-source-view .codeblock-customizer-header-container-specific { /* Fix for incorrectly displaying header when using "minimal" theme */
-  width: calc(var(--line-width-adaptive) - var(--folding-offset));
-  margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
+	width: calc(var(--line-width-adaptive) - var(--folding-offset));
+	margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
 }
 .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
 .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"] {
-  height: 100%;
-  padding-left: var(--header-spacing);
-  padding-right: var(--header-spacing);
-  margin-right: var(--header-spacing);
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
-  font-size: inherit;
-  border-radius: var(--border-radius) var(--border-radius) 0px 0px;
-  background-color: var(--codeblock-customizer-language-tag-background-color);
-  color: var(--codeblock-customizer-language-tag-text-color);
-  font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
-  font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
+	height: 100%;
+	padding-left: var(--header-spacing);
+	padding-right: var(--header-spacing);
+	margin-right: var(--header-spacing);
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	font-size: inherit;
+	border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+	background-color: var(--codeblock-customizer-language-tag-background-color);
+	color: var(--codeblock-customizer-language-tag-text-color);
+	font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
+	font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
 }
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
 .markdown-rendered .codeblock-customizer-header-container:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) [class^="codeblock-customizer-header-language-tag"],
 .markdown-rendered .codeblock-customizer-header-container-specific:has( + .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed) [class^="codeblock-customizer-header-language-tag"] {
-  border-radius: var(--border-radius);
+	border-radius: var(--border-radius);
 }
 .codeblock-customizer-header-text {
-  padding-left: 0px;
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
-  font-size: inherit;
-  color: var(--codeblock-customizer-header-text-color);
-  font-weight: var(--codeblock-customizer-header-text-bold, normal);
-  font-style: var(--codeblock-customizer-header-text-italic, normal);
+	padding-left: 0px;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	font-size: inherit;
+	color: var(--codeblock-customizer-header-text-color);
+	font-weight: var(--codeblock-customizer-header-text-bold, normal);
+	font-style: var(--codeblock-customizer-header-text-italic, normal);
 }
 body:not([class*='codeblock-customizer-show-langicons']):not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific .codeblock-customizer-header-text,
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-container .codeblock-customizer-header-text,
 body .codeblock-customizer-header-container-specific:not(:has( [class^="codeblock-customizer-header-language-tag-"])) .codeblock-customizer-header-text {
-  padding-left: var(--header-spacing);
+	padding-left: var(--header-spacing);
 }
 div:has(> img.codeblock-customizer-icon) {
-  display: inline-flex;
-  padding-left: var(--header-spacing);
-  padding-right: var(--header-spacing);
+	display: inline-flex;
+	padding-left: var(--header-spacing);
+	padding-right: var(--header-spacing);
 }
 .codeblock-customizer-icon {
-  border: 0px;
+	border: 0px;
 }
 
 /* Pre element styling */
 .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed {
-  display: none;
+	display: none;
 }
 .codeblock-customizer-pre-parent{
-  margin-bottom: 16px;
+	margin-bottom: 16px;
 }
 .markdown-rendered pre.codeblock-customizer-pre {
-  margin-top: 0px;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
-  border-bottom-left-radius: var(--border-radius);
-  border-bottom-right-radius: var(--border-radius);
-  padding-top: 0px;    /* padding-top and bottom must be set at the pre code element*/
-  padding-bottom: 0px;
-  padding-right: 0px;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
-  padding-left: 0px;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
+	margin-top: 0px;     /* originalVal: 16px, set it to 0, so the header is displayed above the codeblock */
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	border-bottom-left-radius: var(--border-radius);
+	border-bottom-right-radius: var(--border-radius);
+	padding-top: 0px;    /* padding-top and bottom must be set at the pre code element*/
+	padding-bottom: 0px;
+	padding-right: 0px;  /* originalVal: 16px, disable it, so the lines are fully highlighted */
+	padding-left: 0px;   /* originalVal: 16px, disable it, so the lines are fully highlighted */
 }
 .markdown-rendered pre.codeblock-customizer-pre code {
-  display: block;
-  padding-top: var(--code-padding);
-  padding-bottom: var(--code-padding);
-  padding-left: 0px;
-  padding-right: 0px;
-  border-radius: 0px;
+	display: block;
+	padding-top: var(--code-padding);
+	padding-bottom: var(--code-padding);
+	padding-left: 0px;
+	padding-right: 0px;
+	border-radius: 0px;
 }
 
 /* Source mode text styling */
@@ -208,57 +208,57 @@ div:has(> img.codeblock-customizer-icon) {
 
 /* Reading mode text styling */
 .markdown-rendered div:has(> .codeblock-customizer-line-text) {
-  display: flex;
+	display: flex;
 }
 .markdown-rendered .codeblock-customizer-line-text {
-  flex-basis: 100%;
-  padding-left: var(--line-number-gutter-padding);             /* originalVal:0px, add padding between the line numbers and the text */
+	flex-basis: 100%;
+	padding-left: var(--line-number-gutter-padding);             /* originalVal:0px, add padding between the line numbers and the text */
 }
 
 /* Border radius styling */
 /* :not([class^="codeblock-customizer-header-container"])*/
 .codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin {
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
 }
 .codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end {
-  border-bottom-left-radius: var(--border-radius);
-  border-bottom-right-radius: var(--border-radius);
+	border-bottom-left-radius: var(--border-radius);
+	border-bottom-right-radius: var(--border-radius);
 }
 .codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end .codeblock-customizer-line-number {
-  border-bottom-left-radius: var(--border-radius);
+	border-bottom-left-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
 body .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin {
-  border-top-left-radius: var(--border-radius);
-  border-top-right-radius: var(--border-radius);
+	border-top-left-radius: var(--border-radius);
+	border-top-right-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
 body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number {
-  border-top-left-radius: var(--border-radius);
+	border-top-left-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre,
 body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre {
-  border-top-left-radius: var(--border-radius);
-  border-top-right-radius: var(--border-radius);
+	border-top-left-radius: var(--border-radius);
+	border-top-right-radius: var(--border-radius);
 }
 
 /* Settings */
 .setting-item.codeblock-customizer-spaced .checkbox-container + .pickr {
-  padding-left: 10px;
+	padding-left: 10px;
 }
 .codeblock-customizer-donation {
-  width: 70%;
-  margin: 0 auto;
-  text-align: center;
+	width: 70%;
+	margin: 0 auto;
+	text-align: center;
 }
 
 /* pickr start */
 .pcr-app .pcr-swatches > button {
-    padding: 0;
+		padding: 0;
 }
 
 /*! Pickr 1.8.2 MIT | https://github.com/Simonwep/pickr */
