@@ -1,9 +1,10 @@
 import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent, SliderComponent, ToggleComponent, ExtraButtonComponent } from "obsidian";
 import Pickr from "@simonwep/pickr";
+import { ColorTranslator } from "colortranslator";
 
 import CodeblockCustomizerPlugin from "./main";
-import { getCurrentMode, getColor } from "./Utils";
-import { Color, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
+import { getCurrentMode } from "./Utils";
+import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
 
 const DISPLAY_OPTIONS: Record<string,string> = {
   "none": "Never",
@@ -113,9 +114,7 @@ export class SettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Add New Theme')
       .setDesc('Create a new theme from the current settings.')
-      .addText(text => {
-        newThemeName = text;
-        newThemeName
+      .addText(text => {newThemeName = text
         .setPlaceholder('New theme name')
         .setValue(this.plugin.settings.newTheme.name)
         .onChange((value) => {
@@ -201,11 +200,12 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.createEl('h4', {text: 'Gutter Appearance'});
     new Setting(containerEl)
       .setName('Enable Line Numbers')
+      .setDesc('If disabled, the below settings are disabled too.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
         .onChange((value) => {
           this.plugin.settings.currentTheme.settings.codeblock.lineNumbers = value;
-          this.disableableComponents['lineNumbers'].forEach(component => component.setDisabled(!value));
+          this.disableableComponents['lineNumbers'].forEach(component => {component.setDisabled(!value)});
           (async () => {await this.plugin.saveSettings()})();         
         }));
     new Setting(containerEl)
@@ -294,13 +294,13 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.createEl('h5', {text: 'Header Language Tag Appearance'});
     new Setting(containerEl)
       .setName('Display Header Language Tags')
-      .setDesc('Determine when to show language tags in the header. "Title Only" will only show language tags when the title parameter is set.')
+      .setDesc('Determine when to show language tags in the header. "Title Only" will only show language tags when the title parameter is set. If set to "None", the below settings are disabled too.')
       .addDropdown((dropdown) => dropdown
         .addOptions(DISPLAY_OPTIONS)
         .setValue(this.plugin.settings.currentTheme.settings.header.languageTag.display)
         .onChange((value: Display) => {
           this.plugin.settings.currentTheme.settings.header.languageTag.display = value;
-          this.disableableComponents['headerLanguageTags'].forEach(component => component.setDisabled(value==="none"));
+          this.disableableComponents['headerLanguageTags'].forEach(component => {component.setDisabled(value==="none")});
           (async () => {await this.plugin.saveSettings()})();
         }));
     new Setting(containerEl)
@@ -360,13 +360,13 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.createEl('h5', {text: 'Header Language Icon Appearance'});
     new Setting(containerEl)
       .setName('Display Language Icons')
-      .setDesc('Determine when to show language icons where available. "Title Only" will only show language tags when the title parameter is set.')
+      .setDesc('Determine when to show language icons where available. "Title Only" will only show language tags when the title parameter is set. If set to "None", the below settings are disabled too.')
       .addDropdown((dropdown) => dropdown
         .addOptions(DISPLAY_OPTIONS)
         .setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.display)
         .onChange((value: Display) => {
           this.plugin.settings.currentTheme.settings.header.languageIcon.display = value;
-          this.disableableComponents['headerLanguageIcons'].forEach(component => component.setDisabled(value==="none"));
+          this.disableableComponents['headerLanguageIcons'].forEach(component => {component.setDisabled(value==="none")});
           (async () => {await this.plugin.saveSettings()})();
         }));
     let languageIconsColoredToggle: ToggleComponent;
@@ -382,6 +382,35 @@ export class SettingsTab extends PluginSettingTab {
         })
         this.disableableComponents['headerLanguageIcons'].push(languageIconsColoredToggle);
       });
+    new Setting(containerEl)
+      .setName('Language Icon Size')
+      .setDesc('Set the size of the displayed language icons.')
+      .then((setting) => {
+        let resettableSlider: SliderComponent;
+        setting.addSlider((slider) => {resettableSlider = slider
+          .setLimits(10,40,1)
+          .setValue(this.plugin.settings.currentTheme.settings.advanced.iconSize)
+          .setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
+          .setDynamicTooltip()
+          .onChange((value) => {
+            this.plugin.settings.currentTheme.settings.advanced.iconSize = value;
+            (async () => {await this.plugin.saveSettings()})();    
+          })
+          this.disableableComponents['headerLanguageIcons'].push(resettableSlider);
+        });
+        let resetButton: ExtraButtonComponent;
+        setting.addExtraButton((button) => {resetButton = button
+          .setIcon("reset")
+          .setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
+          .onClick(() => {
+            this.plugin.settings.currentTheme.settings.advanced.iconSize = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.iconSize;
+            resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.iconSize);
+            (async () => {await this.plugin.saveSettings()})();
+          })
+          .setTooltip('Restore default icon size');
+          this.disableableComponents['headerLanguageIcons'].push(resetButton);
+        })
+      })
 		containerEl.createEl('h4', {text: 'Highlighting Appearance'});
     new Setting(containerEl)
       .setName('Editor Active Line Highlight')
@@ -392,7 +421,7 @@ export class SettingsTab extends PluginSettingTab {
         .setValue(this.plugin.settings.currentTheme.settings.highlights.activeEditorLine)
         .onChange((value) => {
           this.plugin.settings.currentTheme.settings.highlights.activeEditorLine = value;
-          this.disableableComponents['editorActiveLineHighlight'].forEach(component => component.setDisabled(!value));
+          this.disableableComponents['editorActiveLineHighlight'].forEach(component => {component.setDisabled(!value)});
           (async () => {await this.plugin.saveSettings()})();
         });
       })
@@ -412,7 +441,7 @@ export class SettingsTab extends PluginSettingTab {
         .setValue(this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine)
         .onChange((value) => {
           this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine = value; 
-          this.disableableComponents['codeblockActiveLineHighlight'].forEach(component => component.setDisabled(!value));
+          this.disableableComponents['codeblockActiveLineHighlight'].forEach(component => {component.setDisabled(!value)});
           (async () => {await this.plugin.saveSettings()})();
         });
       })
@@ -482,7 +511,7 @@ export class SettingsTab extends PluginSettingTab {
         .setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
         .onChange((value) => {
           this.plugin.settings.currentTheme.settings.advanced.gradientHighlights = value;
-          this.disableableComponents['gradientHighlighting'].forEach(component => component.setDisabled(!value));
+          this.disableableComponents['gradientHighlighting'].forEach(component => {component.setDisabled(!value)});
           (async () => {await this.plugin.saveSettings()})();
         }))
       .then((setting) => {
@@ -518,35 +547,6 @@ export class SettingsTab extends PluginSettingTab {
           this.plugin.settings.currentTheme.settings.advanced.languageBorderColor = value;
           (async () => {await this.plugin.saveSettings()})();
         }))
-    new Setting(containerEl)
-      .setName('Language Icon Size')
-      .setDesc('Set the size of the displayed language icons.')
-      .then((setting) => {
-        let resettableSlider: SliderComponent;
-        setting.addSlider((slider) => {resettableSlider = slider
-          .setLimits(10,40,1)
-          .setValue(this.plugin.settings.currentTheme.settings.advanced.iconSize)
-          .setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
-          .setDynamicTooltip()
-          .onChange((value) => {
-            this.plugin.settings.currentTheme.settings.advanced.iconSize = value;
-            (async () => {await this.plugin.saveSettings()})();    
-          })
-          this.disableableComponents['headerLanguageIcons'].push(resettableSlider);
-        });
-        let resetButton: ExtraButtonComponent;
-        setting.addExtraButton((button) => {resetButton = button
-          .setIcon("reset")
-          .setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
-          .onClick(() => {
-            this.plugin.settings.currentTheme.settings.advanced.iconSize = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.iconSize;
-            resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.iconSize);
-            (async () => {await this.plugin.saveSettings()})();
-          })
-          .setTooltip('Restore default icon size');
-          this.disableableComponents['headerLanguageIcons'].push(resetButton);
-        })
-      })
 
     // ========== Donation ==========
     const donationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-donation", });    
@@ -715,7 +715,7 @@ class PickrResettable extends Pickr {
   }
 }
 
-const COLOR_NAME_REGEX = /^[^\d]\w*$/
+// Color Management
 function getRandomColor(): Color {
   const letters = "0123456789ABCDEF";
   let color = "";
@@ -723,3 +723,38 @@ function getRandomColor(): Color {
     color += letters[Math.floor(Math.random() * 16)];
   return `#${color}FF`;
 }
+function isCss(possibleCss: string): possibleCss is CSS {
+  return possibleCss.startsWith('--') && typeof possibleCss === 'string';
+}
+function calc(calcString: string): string {
+  const splitString = calcString.replace(/(\d*)%/g,'$1').split(' ');
+  const operators: {[key: string]: (num1:number, num2:number) => number} = {
+    '+': (num1:number, num2:number):number => Math.max(num1+num2,0),
+    '-': (num1:number ,num2:number):number => Math.max(num1-num2,0),
+  }
+  if (splitString.length === 3)
+    if (splitString[1] in operators){
+      return `${operators[splitString[1]](parseFloat(splitString[0]),parseFloat(splitString[2]))}%`
+    }
+  console.log('Warning: Couldn\'t parse calc string');
+  return calcString;
+}
+function getCssVariable(cssVariable: CSS): HEX {
+  let variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable).trim();
+  if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
+    return `#${variableValue.trim().substring(1)}`;
+  else if (variableValue.startsWith('rgb'))
+    return `#${ColorTranslator.toHEXA(variableValue.replace(/calc\((.*?)\)/g,(match,capture)=>calc(capture))).substring(1)}`;
+  else if (variableValue.startsWith('hsl'))
+    return `#${ColorTranslator.toHEXA(variableValue.replace(/calc\((.*?)\)/g,(match,capture)=>calc(capture))).substring(1)}`;
+  else {
+    console.log(`Warning: Couldn't determine color format - ${variableValue}`);
+  }
+  return `#${ColorTranslator.toHEXA(variableValue).substring(1)}`;
+}
+export function getColor(themeColor: Color): Color {
+  return isCss(themeColor)?getCssVariable(themeColor):themeColor;;
+}
+
+// Regex Tests
+const COLOR_NAME_REGEX = /^[^\d]\w*$/

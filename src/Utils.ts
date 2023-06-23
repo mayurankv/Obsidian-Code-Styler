@@ -1,7 +1,5 @@
-import { ColorTranslator } from "colortranslator";
-
 import { Languages, manualLang, Icons } from "./Const";
-import { Color, CSS, HEX, CodeblockCustomizerSettings } from "./Settings";
+import { CodeblockCustomizerSettings } from "./Settings";
 
 export function splitAndTrimString(str) {
   if (!str) {
@@ -376,38 +374,4 @@ export function getCurrentMode() {
   }
   console.log('Warning: Couldn\'t get current theme');
   return "light";
-}
-
-// Color Management
-function isCss(possibleCss: string): possibleCss is CSS {
-  return possibleCss.startsWith('--') && typeof possibleCss === 'string';
-}
-function calc(calcString: string): string {
-  const splitString = calcString.replace(/(\d*)%/g,'$1').split(' ');
-  const operators: {[key: string]: (num1:number, num2:number) => number} = {
-    '+': (num1:number, num2:number):number => Math.max(num1+num2,0),
-    '-': (num1:number ,num2:number):number => Math.max(num1-num2,0),
-  }
-  if (splitString.length === 3)
-    if (splitString[1] in operators){
-      return `${operators[splitString[1]](parseFloat(splitString[0]),parseFloat(splitString[2]))}%`
-    }
-  console.log('Warning: Couldn\'t parse calc string');
-  return calcString;
-}
-function getCssVariable(cssVariable: CSS): HEX {
-  let variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable).trim();
-  if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
-    return `#${variableValue.trim().substring(1)}`;
-  else if (variableValue.startsWith('rgb'))
-    return `#${ColorTranslator.toHEXA(variableValue.replace(/calc\((.*?)\)/g,(match,capture)=>calc(capture))).substring(1)}`;
-  else if (variableValue.startsWith('hsl'))
-    return `#${ColorTranslator.toHEXA(variableValue.replace(/calc\((.*?)\)/g,(match,capture)=>calc(capture))).substring(1)}`;
-  else {
-    console.log(`Warning: Couldn\'t determine color format - ${variableValue}`);
-  }
-  return `#${ColorTranslator.toHEXA(variableValue).substring(1)}`;
-}
-export function getColor(themeColor: Color): Color {
-  return isCss(themeColor)?getCssVariable(themeColor):themeColor;;
 }
