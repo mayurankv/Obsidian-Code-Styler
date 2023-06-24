@@ -67,8 +67,8 @@ export class SettingsTab extends PluginSettingTab {
 		themeDropdown.onChange((value) => {
 			this.plugin.settings.selectedTheme = value;
 			this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
-			this.updatePickrColors();
 			this.updateAlternativeHighlights(alternativeHighlightsContainer);
+			this.updatePickrColors();
 			(async () => {await this.plugin.saveSettings()})();
 		});
 		;
@@ -110,7 +110,7 @@ export class SettingsTab extends PluginSettingTab {
 			});
 		});
 	let newThemeName: TextComponent;
-	this.plugin.settings.newTheme = NEW_THEME_DEFAULT
+	this.plugin.settings.newTheme = structuredClone(NEW_THEME_DEFAULT);
 	new Setting(containerEl)
 		.setName('Add New Theme')
 		.setDesc('Create a new theme from the current settings.')
@@ -149,7 +149,7 @@ export class SettingsTab extends PluginSettingTab {
 			this.plugin.settings.defaultTheme = this.plugin.settings.selectedTheme;
 			this.updateDropdown(themeDropdown,this.plugin.settings);
 			this.updateAlternativeHighlights(alternativeHighlightsContainer);
-			this.plugin.settings.newTheme = NEW_THEME_DEFAULT;
+			this.plugin.settings.newTheme = structuredClone(NEW_THEME_DEFAULT);
 			newThemeName.setValue("");
 			(async () => {await this.plugin.saveSettings()})();
 		}
@@ -489,8 +489,10 @@ export class SettingsTab extends PluginSettingTab {
 			new Notice("Please enter a color name."); //NOSONAR
 			} else if (!/^[^\d]\w*$/.test(this.plugin.settings.newHighlight)) {
 			new Notice(`"${this.plugin.settings.newHighlight}" is not a valid color name.`); //NOSONAR
-			} else if (this.plugin.settings.newHighlight === 'hl') {
+			} else if (this.plugin.settings.newHighlight.trim().toLowerCase() === 'hl') {
 			new Notice("Cannot override the default highlight parameter."); //NOSONAR
+			} else if (['title','fold','ln'].includes(this.plugin.settings.newHighlight.trim().toLowerCase())) {
+			new Notice("Cannot use other default parameters."); //NOSONAR
 			} else {
 			if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights) {
 				//todo (@mayurankv) Future: Focus on existing highlighter
@@ -674,18 +676,12 @@ export class SettingsTab extends PluginSettingTab {
 		.setName(alternativeHighlightName)
 		.setDesc(`To highlight lines with this highlight, use the ${alternativeHighlightName} parameter.`)
 		.then((setting) => {
-			this.createDualPickr(
+			this.createPickr(
 			this.plugin,alternativeHighlightsContainer,setting,
 			`alternative_highlight_${alternativeHighlightName}`,
-			{
-				'light':(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors.light.highlights.alternativeHighlights[alternativeHighlightName],
-				'dark':(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors.dark.highlights.alternativeHighlights[alternativeHighlightName],
-			},
-			{
-				'light':(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors.light.highlights.alternativeHighlights[alternativeHighlightName] = saveColor},
-				'dark':(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors.dark.highlights.alternativeHighlights[alternativeHighlightName] = saveColor},
-			},
-			() => alternativeHighlightName in this.plugin.settings.themes[this.plugin.settings.selectedTheme].colors.light.highlights.alternativeHighlights,
+			(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName],
+			(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName] = saveColor},
+			() => !(alternativeHighlightName in this.plugin.settings.themes[this.plugin.settings.selectedTheme].colors.light.highlights.alternativeHighlights),
 			);
 			setting.addExtraButton((button) => {button
 			.setIcon("trash")

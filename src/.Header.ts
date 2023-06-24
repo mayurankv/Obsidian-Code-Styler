@@ -1,7 +1,7 @@
 import { StateField, StateEffect, RangeSetBuilder } from "@codemirror/state";
-import { EditorView, Decoration, WidgetType } from "@codemirror/view";
+import { EditorView, Decoration } from "@codemirror/view";
 
-import { searchString, getLanguageName, getLanguageIcon, isExcluded, createContainer, createWrapper, createCodeblockLang, createCodeblockIcon, createFileName } from "./Utils";
+import { searchString, getLanguageName, isExcluded } from "./Utils";
 
 function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) {
 	let CollapseStart = null;
@@ -41,7 +41,6 @@ function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) 
 	return builder.finish();
 }// defaultFold
 
-let settings: CodeblockCustomizerSettings;
 export const codeblockHeader = StateField.define<DecorationSet>({
 	create(state): DecorationSet {
 		return Decoration.none;    
@@ -103,7 +102,6 @@ function createDecorationWidget(textToDisplay: string, languageName: string, spe
 
 const Collapse = StateEffect.define(), UnCollapse = StateEffect.define()
 
-let pluginSettings: CodeblockCustomizerSettings;
 export const collapseField = StateField.define({  
 	create(state) {
 		return defaultFold(state, collapseField.pluginSettings);
@@ -124,75 +122,8 @@ export const collapseField = StateField.define({
 
 const doFold = Decoration.replace({block: true});
 
-class TextAboveCodeblockWidget extends WidgetType {
-	text: string;
-	observer: MutationObserver;
-	view: EditorView;
-
-	constructor(text: string, Lang: string, specificHeader: boolean) {
-		super();
-		this.text = text;    
-		this.Lang = Lang;
-		this.specificHeader = specificHeader;
-		this.observer = new MutationObserver(this.handleMutation);    
-	}
-	
-	handleMutation = (mutations, view) => {
-		mutations.forEach(mutation => {
-			if (mutation.target.hasAttribute("data-clicked")){
-				handleClick(this.view, mutation.target);        
-				//this.view.update([]);
-				//this.view.state.update();
-				//EditorView.requestMeasure;
-			}
-		});
-		//this.view.update([]);
-		//this.view.state.update();
-		//this.view.requestMeasure();
-	}
-		
-	eq(other: TextAboveCodeblockWidget) {
-		return other.text == this.text && other.Lang == this.Lang && other.specificHeader == this.specificHeader
-	}
-		
-	toDOM(view: EditorView): HTMLElement {
-		this.view = view;
-		const headerContainer = createContainer(this.specificHeader);
-		if (this.Lang){
-			const Icon = getLanguageIcon(this.Lang)
-			if (Icon) {
-				headerContainer.appendChild(createCodeblockIcon(this.Lang));
-			}
-			headerContainer.appendChild(createCodeblockLang(this.Lang));
-		}
-
-		headerContainer.appendChild(createFileName(this.text));   
-		
-		this.observer.view = view;
-		this.observer.observe(headerContainer, { attributes: true });   
-		
-		headerContainer.addEventListener("mousedown", event => {
-			headerContainer.setAttribute("data-clicked", "true");
-		});
-		//EditorView.requestMeasure;
-
-		return headerContainer;
-	}
-			
-	destroy(dom: HTMLElement) {
-		dom.removeAttribute("data-clicked");
-		dom.removeEventListener("mousedown", handleClick);
-		this.observer.disconnect();
-	}
-
-	ignoreEvent() { return false; }
-	
-}// TextAboveCodeblockWidget
 	
 export function handleClick(view: EditorView, target: HTMLElement){
-	//view.state.update();
-	//view.update([]);
-	//view.requestMeasure({});  
 	const Pos = view.posAtDOM(target);
 
 	const effect = view.state.field(collapseField, false);

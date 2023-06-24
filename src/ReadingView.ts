@@ -58,8 +58,31 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 	}
 }
 
+function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockFirstLine: string, plugin: CodeblockCustomizerPlugin) {
+	const codeblockParameters = parseCodeblockParameters(codeblockFirstLine,plugin.settings.currentTheme);
+		
+	const excludeCodeblock = isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages);
+	if (excludeCodeblock)
+		return;
+
+	codeblockPreElement.classList.add(`codeblock-customizer-pre`);
+	if (codeblockPreElement.parentElement)
+		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
+
+	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings);
+}
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
-	createHeader(codeblockPreElement,codeblockParameters,themeSettings)
+	const headerContainer = createHeader(codeblockParameters, themeSettings);
+	const codeblockPreParent = codeblockPreElement.parentNode;
+	if (codeblockPreParent)
+		codeblockPreParent.insertBefore(headerContainer, codeblockPreElement);
+	
+	headerContainer.addEventListener("click", ()=>{
+		codeblockPreElement.classList.toggle("codeblock-customizer-codeblock-collapsed")
+	});
+	if (codeblockParameters.fold.enabled)
+		codeblockPreElement.classList.add(`codeblock-customizer-codeblock-collapsed`);
+
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
 		codeblockLines = ['',''];
@@ -85,19 +108,6 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: lineNumber.toString()}));
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	})
-}
-function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockFirstLine: string, plugin: CodeblockCustomizerPlugin) {
-	const codeblockParameters = parseCodeblockParameters(codeblockFirstLine,plugin.settings.currentTheme);
-		
-	const excludeCodeblock = isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages);
-	if (excludeCodeblock)
-		return;
-
-	codeblockPreElement.classList.add(`codeblock-customizer-pre`);
-	if (codeblockPreElement.parentElement)
-		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
-
-	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings);
 }
 function PDFExport(element: HTMLElement, plugin: CodeblockCustomizerPlugin, codeBlockFirstLines: string[]) {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');

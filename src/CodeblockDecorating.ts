@@ -1,7 +1,7 @@
 import { LANGUAGE_NAMES, LANGUAGE_ICONS, CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters } from "./CodeblockParsing";
 
-export function createHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
+export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings): HTMLElement {
 	const headerContainer = createDiv({cls: `codeblock-customizer-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
 	if (codeblockParameters.language !== ''){
 		const IconURL = getLanguageIcon(codeblockParameters.language)
@@ -9,7 +9,6 @@ export function createHeader(codeblockPreElement: HTMLElement, codeblockParamete
 			const imageWrapper = createDiv();
 			const img = document.createElement("img");
 			img.classList.add("codeblock-customizer-icon");
-			//img.width = themeSettings.advanced.iconSize; //todo (@mayurankv) Remove
 			img.src = IconURL;
 			imageWrapper.appendChild(img);
 			headerContainer.appendChild(imageWrapper);
@@ -23,14 +22,8 @@ export function createHeader(codeblockPreElement: HTMLElement, codeblockParamete
 	else if (codeblockParameters.fold.enabled)
 		headerText = codeblockParameters.fold.placeholder!==''?codeblockParameters.fold.placeholder:themeSettings.header.collapsePlaceholder;
 	headerContainer.appendChild(createDiv({cls: "codeblock-customizer-header-text", text: headerText}));   
-	
-	const codeblockPreParent = codeblockPreElement.parentNode;
-	if (codeblockPreParent)
-		codeblockPreParent.insertBefore(headerContainer, codeblockPreElement);
-	
-	headerContainer.addEventListener("click", ()=>{codeblockPreElement.classList.toggle("codeblock-customizer-codeblock-collapsed")});
-	if (codeblockParameters.fold.enabled)
-		codeblockPreElement.classList.add(`codeblock-customizer-codeblock-collapsed`);
+
+	return headerContainer;
 }
 
 function getLanguageTag(language: string) {

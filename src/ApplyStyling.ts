@@ -9,7 +9,7 @@ export function updateStyling(settings: CodeblockCustomizerSettings): void {
 		styleTag.id = styleId;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
-	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)).trim().replace(/[\r\n\s]+/g,' ');
+	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
 
@@ -49,7 +49,8 @@ function getThemeColors (themeModeColors: CodeblockCustomizerThemeModeColors): s
 			return result;
 		},{})
 	}).reduce((result: string, [cssVariable,color]: [string,Color]): string => {
-		return result + `--codeblock-customizer-${cssVariable}: ${isCss(color)?`var(${color})`:color};`
+		const styleColor = isCss(color)?`var(${color})`:color;
+		return result + `--codeblock-customizer-${cssVariable}: ${styleColor};`
 	},``)
 }
 

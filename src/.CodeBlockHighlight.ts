@@ -12,32 +12,8 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 			prevAlternateColors: ColorSettings[];
 			view: EditorView;
 			mutationObserver: MutationObserver;
-			prevBGColor: string;
-			prevHLColor: string;
 			prevExcludeLangs: string;
-			prevTextColor: string;
-			prevBackgroundColor: string;
 			prevHighlightGutter: boolean;
-			prevLineNumbers: boolean;
-
-			constructor(view: EditorView) {
-				this.initialize(view, settings);
-			}
-
-			initialize(view: EditorView, settings: CodeblockCustomizerSettings) {
-				this.view = view;
-				this.settings = settings;
-				this.decorations = this.buildDecorations(view);
-				this.prevAlternateColors = [];
-				this.mutationObserver = setupMutationObserver(view, this);
-				this.prevBGColor = '';
-				this.prevHLColor = '';
-				this.prevExcludeLangs = '';
-				this.prevTextColor = '';
-				this.prevBackgroundColor = '';
-				this.prevHighlightGutter = false;
-				this.prevLineNumbers = false;
-			}// initialize
 
 			forceUpdate(editorView: EditorView) {
 				this.view = editorView;
@@ -45,34 +21,24 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 				this.view.requestMeasure();
 			}// forceUpdate
 
-			shouldUpdate(update: ViewUpdate) {
-				return (update.docChanged || update.viewportChanged || !this.compareSettings());
-			}// shouldUpdate
-
 			compareSettings() {
 				return (
-					this.settings.backgroundColor === this.prevBGColor &&
-					this.settings.highlightColor === this.prevHLColor &&
+					// exluded languages
+					// alternative highlights list
+					// currentThemeSettings
 					this.settings.ExcludeLangs === this.prevExcludeLangs &&
 					compareArrays(this.settings.alternateColors, this.prevAlternateColors) &&
-					this.settings.gutterTextColor === this.prevTextColor &&
-					this.settings.gutterBackgroundColor === this.prevBackgroundColor &&
 					this.settings.bGutterHighlight === this.prevHighlightGutter &&
 					this.settings.bEnableLineNumbers === this.prevLineNumbers
 				);
 			}// compareSettings
 			
 			updateSettings() {
-				this.prevBGColor = this.settings.backgroundColor;
-				this.prevHLColor = this.settings.highlightColor;
 				this.prevExcludeLangs = this.settings.ExcludeLangs;
 				this.prevAlternateColors = this.settings.alternateColors.map(({name}) => {
 					return {name};
 				});
-				this.prevTextColor = this.settings.gutterTextColor;
-				this.prevBackgroundColor = this.settings.gutterBackgroundColor;
 				this.prevHighlightGutter = this.settings.bGutterHighlight;
-				this.prevLineNumbers = this.settings.bEnableLineNumbers;
 			}// updateSettings
 
 			update(update: ViewUpdate) {
@@ -81,10 +47,6 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 					this.decorations = this.buildDecorations(update.view);
 				}
 			}// update
-
-			destroy() {
-				this.mutationObserver.disconnect();
-			}// destroy
 
 			filterVisibleCodeblocks(view: EditorView, codeblocks: Codeblock[]): Codeblock[] {
 				return codeblocks.filter((codeblock) => {
@@ -166,10 +128,11 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 								}
 							}
 
+							//if includes HyperMD-codeblock
 							if (node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" || startLine || endLine) {
 								decorations.push(Decoration.line({attributes: {class: lineClass}}).range(node.from));
 
-								decorations.push(Decoration.line({}).range(node.from));
+								decorations.push(Decoration.line({}).range(node.from)); //todo Can I remove this?
 								decorations.push(Decoration.widget({ widget: new LineNumberWidget((startLine || endLine) ? " " : lineNumber+lineNumberOffset,showNumbers),}).range(node.from));
 								lineNumber++;
 							}
@@ -183,8 +146,6 @@ export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 			decorations: (value) => value.decorations,
 		}
 	);
-
-	viewPlugin.name = 'codeblockHighlight';
 	return viewPlugin;
 }// codeblockHighlight
 
@@ -200,24 +161,6 @@ function compareArrays(array1, array2) {
 	}
 	return true;
 }// compareArrays
-
-class LineNumberWidget extends WidgetType {
-	constructor(private lineNumber: number, private showNumbers: boolean) {
-		super();
-	}
-
-	eq(other: LineNumberWidget) {
-		return this.lineNumber === other.lineNumber && this.showNumbers === other.showNumbers;
-	}
-
-	toDOM(view: EditorView): HTMLElement {
-		const container = document.createElement("span");
-		container.classList.add(`codeblock-customizer-line-number${this.showNumbers?'':'-hide'}`);
-		container.innerText = `${this.lineNumber}`;
-
-		return container;
-	}
-}// LineNumberWidget
 
 function findCodeblocks(doc: Text, from: number, to: number): SyntaxNode[] {
 	const tree = syntaxTree(doc);
@@ -237,28 +180,3 @@ function findCodeblocks(doc: Text, from: number, to: number): SyntaxNode[] {
 
 	return codeblocks;
 }// findCodeblocks
-
-function setupMutationObserver(editorView: EditorView, pluginInstance: any) { //TODO (@mayurankv) What does this do? Work out
-	const observer = new MutationObserver((mutations) => {
-		for (const mutation of mutations) {
-			if (
-				mutation.type === "attributes" &&
-				mutation.attributeName === "class" &&
-				(mutation.target.classList.contains("HyperMD-codeblock-begin") ||
-					mutation.target.classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
-					mutation.target.classList.contains("HyperMD-codeblock-end"))
-			) {
-				pluginInstance.forceUpdate(editorView);
-			}
-		}
-	});
-
-	observer.observe(editorView.dom, {
-		attributes: true,
-		childList: true,
-		subtree: true,
-		attributeFilter: ['class'], // Only observe changes to the 'class' attribute
-	});
-
-	return observer;
-} // setupMutationObserver

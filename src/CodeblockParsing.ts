@@ -18,18 +18,35 @@ export interface CodeblockParameters {
 	}
 }
 
-function parseHighlightedLines(highlightedLinesString: string): Array<number> {
-	const lineSections = highlightedLinesString.split(',');
-	return lineSections.map(lineSection => {
-		if (lineSection.includes('-')) {
-			const [start,end] = lineSection.split('-').map(num => parseInt(num));
-			if (start && end)
-				return Array.from({length:end-start+1}, (_,num) => num + start);
-		} else {
-			return parseInt(lineSection);
-		}
-		return [];
-	}).flat();
+export function parseCodeblockParameters(parameterLine: string, theme: CodeblockCustomizerTheme): CodeblockParameters {
+	let codeblockParameters: CodeblockParameters = {
+		language: '',
+		title: '',
+		fold: {
+			enabled: false,
+			placeholder: '',
+		},
+		lineNumbers: {
+			alwaysEnabled: false,
+			alwaysDisabled: false,
+			offset: 0,
+		},
+		highlights: {
+			default: [],
+			alternative: {},
+		},
+	}
+	if (parameterLine.startsWith('```')) {
+		let languageBreak = parameterLine.indexOf(' ');
+		codeblockParameters.language = parameterLine.slice('```'.length,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
+		if (languageBreak === -1)
+			return codeblockParameters;
+		const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+		if (!parameterStrings)
+			return codeblockParameters;
+		parameterStrings.forEach((parameterString) => parseParameterString(parameterString,codeblockParameters,theme))
+	}
+	return codeblockParameters;
 }
 function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockCustomizerTheme): void {
 	if (parameterString.startsWith('title:')) {
@@ -72,42 +89,25 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 		}
 	}
 }
-export function parseCodeblockParameters(parameterLine: string, theme: CodeblockCustomizerTheme): CodeblockParameters {
-	let codeblockParameters: CodeblockParameters = {
-		language: '',
-		title: '',
-		fold: {
-			enabled: false,
-			placeholder: '',
-		},
-		lineNumbers: {
-			alwaysEnabled: false,
-			alwaysDisabled: false,
-			offset: 0,
-		},
-		highlights: {
-			default: [],
-			alternative: {},
-		},
-	}
-	if (parameterLine.startsWith('```')) {
-		let languageBreak = parameterLine.indexOf(' ');
-		codeblockParameters.language = parameterLine.slice('```'.length,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
-		if (languageBreak === -1)
-			return codeblockParameters;
-		const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
-		if (!parameterStrings)
-			return codeblockParameters;
-		parameterStrings.forEach((parameterString) => parseParameterString(parameterString,codeblockParameters,theme))
-	}
-	return codeblockParameters;
-}
-function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
-	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
+function parseHighlightedLines(highlightedLinesString: string): Array<number> {
+	const lineSections = highlightedLinesString.split(',');
+	return lineSections.map(lineSection => {
+		if (lineSection.includes('-')) {
+			const [start,end] = lineSection.split('-').map(num => parseInt(num));
+			if (start && end)
+				return Array.from({length:end-start+1}, (_,num) => num + start);
+		} else {
+			return parseInt(lineSection);
+		}
+		return [];
+	}).flat();
 }
 export function isLanguageExcluded(language: string, excludedLanguagesString: string): boolean {
 	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
 		if (regexExcludedLanguage.test(language))
 			return true;
 	});
+}
+function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
+	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
 }
