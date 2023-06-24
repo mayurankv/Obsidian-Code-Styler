@@ -3,7 +3,6 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeblockCustomizerPlugin from "./main";
-import { getCurrentMode } from "./Utils";
 import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
 
 const DISPLAY_OPTIONS: Record<string,string> = {
@@ -39,6 +38,7 @@ export class SettingsTab extends PluginSettingTab {
 		'editorActiveLineHighlight': [],
 		'codeblockActiveLineHighlight': [],
 		'gradientHighlighting': [],
+		'languageBorderColor': [],
 	};
 
 	// ========== General ==========
@@ -48,12 +48,12 @@ export class SettingsTab extends PluginSettingTab {
 		.setName('Exclude Languages')
 		.setDesc('Define languages in a comma separated list on which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
 		.addText(text => text
-		.setPlaceholder('e.g. dataview, python etc.')
-		.setValue(this.plugin.settings.excludedLanguages)
-		.onChange((value) => {
-			this.plugin.settings.excludedLanguages = value;
-			(async () => {await this.plugin.saveSettings()})();
-		}));
+			.setPlaceholder('e.g. dataview, python etc.')
+			.setValue(this.plugin.settings.excludedLanguages)
+			.onChange((value) => {
+				this.plugin.settings.excludedLanguages = value;
+				(async () => {await this.plugin.saveSettings()})();
+			}));
 
 	// ========== Themes ==========
 		containerEl.createEl('h3', {text: 'Theme Settings'});
@@ -74,40 +74,40 @@ export class SettingsTab extends PluginSettingTab {
 		;
 		})
 		.addExtraButton(button => {
-		button.setTooltip("Update theme");
-		button.setIcon('arrow-up');
-		button.onClick(() => {
-			if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
-			new Notice('You cannot update the default themes'); //NOSONAR
-			else {
-			this.plugin.settings.themes[this.plugin.settings.selectedTheme] = structuredClone(this.plugin.settings.currentTheme);
-			this.updateAlternativeHighlights(alternativeHighlightsContainer);
-			new Notice(`${this.plugin.settings.selectedTheme} theme saved successfully!`); //NOSONAR
-			(async () => {await this.plugin.saveSettings()})();
-			}
-		});
+			button.setTooltip("Update theme");
+			button.setIcon('arrow-up');
+			button.onClick(() => {
+				if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
+				new Notice('You cannot update the default themes'); //NOSONAR
+				else {
+				this.plugin.settings.themes[this.plugin.settings.selectedTheme] = structuredClone(this.plugin.settings.currentTheme);
+				this.updateAlternativeHighlights(alternativeHighlightsContainer);
+				new Notice(`${this.plugin.settings.selectedTheme} theme saved successfully!`); //NOSONAR
+				(async () => {await this.plugin.saveSettings()})();
+				}
+			});
 		})
 		.addExtraButton(button => {
-		button.setTooltip("Delete theme");
-		button.setIcon('trash');
-		button.onClick(() => {
-			if (this.plugin.settings.selectedTheme.trim().length === 0) {
-			new Notice('Select a theme first to delete'); //NOSONAR
-			} else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes) {
-			new Notice('You cannot delete the default themes'); //NOSONAR
-			} else {
-			if (this.plugin.settings.defaultTheme === this.plugin.settings.selectedTheme)
-				this.plugin.settings.defaultTheme = 'Default';
-			delete this.plugin.settings.themes[this.plugin.settings.selectedTheme]
-			new Notice(`${this.plugin.settings.selectedTheme} theme deleted successfully!`); //NOSONAR
-			this.plugin.settings.selectedTheme = "Default";
-			this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
-			this.updateDropdown(themeDropdown,this.plugin.settings);
-			this.updatePickrColors();
-			this.updateAlternativeHighlights(alternativeHighlightsContainer);
-			(async () => {await this.plugin.saveSettings()})();
-			}
-		});
+			button.setTooltip("Delete theme");
+			button.setIcon('trash');
+			button.onClick(() => {
+				if (this.plugin.settings.selectedTheme.trim().length === 0) {
+					new Notice('Select a theme first to delete'); //NOSONAR
+				} else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes) {
+					new Notice('You cannot delete the default themes'); //NOSONAR
+				} else {
+					if (this.plugin.settings.defaultTheme === this.plugin.settings.selectedTheme)
+						this.plugin.settings.defaultTheme = 'Default';
+					delete this.plugin.settings.themes[this.plugin.settings.selectedTheme]
+					new Notice(`${this.plugin.settings.selectedTheme} theme deleted successfully!`); //NOSONAR
+					this.plugin.settings.selectedTheme = "Default";
+					this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
+					this.updateDropdown(themeDropdown,this.plugin.settings);
+					this.updatePickrColors();
+					this.updateAlternativeHighlights(alternativeHighlightsContainer);
+					(async () => {await this.plugin.saveSettings()})();
+				}
+			});
 		});
 	let newThemeName: TextComponent;
 	this.plugin.settings.newTheme = NEW_THEME_DEFAULT
@@ -487,7 +487,7 @@ export class SettingsTab extends PluginSettingTab {
 		button.onClick(() => {
 			if (this.plugin.settings.newHighlight.trim() === "") {
 			new Notice("Please enter a color name."); //NOSONAR
-			} else if (!COLOR_NAME_REGEX.test(this.plugin.settings.newHighlight)) {
+			} else if (!/^[^\d]\w*$/.test(this.plugin.settings.newHighlight)) {
 			new Notice(`"${this.plugin.settings.newHighlight}" is not a valid color name.`); //NOSONAR
 			} else if (this.plugin.settings.newHighlight === 'hl') {
 			new Notice("Cannot override the default highlight parameter."); //NOSONAR
@@ -518,45 +518,74 @@ export class SettingsTab extends PluginSettingTab {
 		.setName('Gradient Highlighting')
 		.setDesc('If enabled, highlights fade away to the right. The slider sets the gradient color stop as a percentage.')
 		.addToggle(toggle => toggle
-		.setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
-		.onChange((value) => {
-			this.plugin.settings.currentTheme.settings.advanced.gradientHighlights = value;
-			this.disableableComponents['gradientHighlighting'].forEach(component => {component.setDisabled(!value)});
-			(async () => {await this.plugin.saveSettings()})();
-		}))
-		.then((setting) => {
-		let resettableSlider: SliderComponent;
-		setting.addSlider((slider) => {
-			resettableSlider = slider
-			.setLimits(0,100,1)
-			.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop.slice(0,-1))
-			.setDynamicTooltip()
+			.setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
 			.onChange((value) => {
-				this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop = `${value}%`;
-				(async () => {await this.plugin.saveSettings()})();    
-			})});
-		let resetButton: ExtraButtonComponent;
-		setting.addExtraButton((button) => {resetButton = button
-			.setIcon("reset")
-			.onClick(() => {
-			this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.gradientHighlightsColorStop;
-			resettableSlider.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop.slice(0,-1));
-			(async () => {await this.plugin.saveSettings()})();
+				this.plugin.settings.currentTheme.settings.advanced.gradientHighlights = value;
+				this.disableableComponents['gradientHighlighting'].forEach(component => {component.setDisabled(!value)});
+				(async () => {await this.plugin.saveSettings()})();
+			}))
+		.then((setting) => {
+			let resettableSlider: SliderComponent;
+			setting.addSlider((slider) => {
+				resettableSlider = slider
+				.setLimits(0,100,1)
+				.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop.slice(0,-1))
+				.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
+				.setDynamicTooltip()
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop = `${value}%`;
+					(async () => {await this.plugin.saveSettings()})();    
+				})});
+			let resetButton: ExtraButtonComponent;
+			setting.addExtraButton((button) => {resetButton = button
+				.setIcon("reset")
+				.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
+				.onClick(() => {
+				this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.gradientHighlightsColorStop;
+				resettableSlider.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop.slice(0,-1));
+				(async () => {await this.plugin.saveSettings()})();
+				})
+				.setTooltip('Restore default color stop');
+			this.disableableComponents['gradientHighlighting'].push(resettableSlider);
+			this.disableableComponents['gradientHighlighting'].push(resetButton);
 			})
-			.setTooltip('Restore default color stop');
-		this.disableableComponents['gradientHighlighting'].push(resettableSlider);
-		this.disableableComponents['gradientHighlighting'].push(resetButton);
-		})
 		})
 	new Setting(containerEl)
 		.setName('Language Colored Borders')
-		.setDesc('If enabled, languages with icons display a left border with the color of the icon.')
-		.addToggle((toggle) => toggle
-		.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
-		.onChange((value) => {
-			this.plugin.settings.currentTheme.settings.advanced.languageBorderColor = value;
-			(async () => {await this.plugin.saveSettings()})();
-		}))
+		.setDesc('If enabled, languages with icons display a left border with the color of the icon. The slider sets the width of the border.')
+		.addToggle(toggle => toggle
+			.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
+			.onChange((value) => {
+				this.plugin.settings.currentTheme.settings.advanced.languageBorderColor = value;
+				this.disableableComponents['languageBorderColor'].forEach(component => {component.setDisabled(!value)});
+				(async () => {await this.plugin.saveSettings()})();
+			}))
+		.then((setting) => {
+			let resettableSlider: SliderComponent;
+			setting.addSlider((slider) => {
+				resettableSlider = slider
+				.setLimits(0,20,1)
+				.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth)
+				.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
+				.setDynamicTooltip()
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = value;
+					(async () => {await this.plugin.saveSettings()})();    
+				})});
+			let resetButton: ExtraButtonComponent;
+			setting.addExtraButton((button) => {resetButton = button
+				.setIcon("reset")
+				.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
+				.onClick(() => {
+				this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.languageBorderWidth;
+				resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth);
+				(async () => {await this.plugin.saveSettings()})();
+				})
+				.setTooltip('Restore default color stop');
+			this.disableableComponents['languageBorderColor'].push(resettableSlider);
+			this.disableableComponents['languageBorderColor'].push(resetButton);
+			})
+		})
 
 	// ========== Donation ==========
 	const donationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-donation", });    
@@ -730,7 +759,7 @@ function getRandomColor(): Color {
 	color += letters[Math.floor(Math.random() * 16)];
 	return `#${color}FF`;
 }
-function isCss(possibleCss: string): possibleCss is CSS {
+export function isCss(possibleCss: string): possibleCss is CSS {
 	return possibleCss.startsWith('--') && typeof possibleCss === 'string';
 }
 function calc(calcString: string): string {
@@ -763,5 +792,15 @@ export function getColor(themeColor: Color): Color {
 	return isCss(themeColor)?getCssVariable(themeColor):themeColor;;
 }
 
-// Regex Tests
-const COLOR_NAME_REGEX = /^[^\d]\w*$/
+function getCurrentMode() {
+	const body = document.querySelector('body');
+	if (body !== null){
+		if (body.classList.contains('theme-light')) {
+			return "light";
+		} else if (body.classList.contains('theme-dark')) {
+			return "dark";
+		}
+	}
+	console.log('Warning: Couldn\'t get current theme');
+	return "light";
+}

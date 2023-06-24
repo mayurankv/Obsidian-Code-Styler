@@ -1,12 +1,10 @@
 import { Plugin } from "obsidian";
 
-import { DEFAULT_SETTINGS, CodeblockCustomizerSettings } from './Settings';
-import { LANGUAGE_ICONS } from './LanguageDetails';
-import { codeblockHighlight } from "./CodeBlockHighlight";
-import { codeblockHeader, collapseField } from "./Header";
-import { readingViewPostProcessor } from "./ReadingView";
+import { DEFAULT_SETTINGS, LANGUAGE_ICONS, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
-import {  } from "./Utils";
+import { updateStyling } from "./ApplyStyling";
+import {  } from "./EditingView";
+import { readingViewPostProcessor } from "./ReadingView";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
@@ -14,16 +12,17 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		document.body.classList.add('codeblock-customizer');
+		updateStyling(this.settings);
 		
 		const settingsTab = new SettingsTab(this.app, this);
 		this.addSettingTab(settingsTab);
 
-		codeblockHeader.settings = this.settings;
-		collapseField.pluginSettings = this.settings;
+		// codeblockHeader.settings = this.settings;
+		// collapseField.pluginSettings = this.settings;
 		this.registerEditorExtension([
-			codeblockHeader,
-			collapseField,
-			codeblockHighlight(this.settings)
+		// 	codeblockHeader,
+		// 	collapseField,
+		// 	codeblockHighlight(this.settings)
 		]);
 		
 		
@@ -34,7 +33,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		//updateSettingStyles(this.settings);
 		// this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
 
-		console.log("loading CodeBlock Customizer plugin");
+		console.log("Loaded plugin: CodeBlock Customizer");
 	}
 	
 	// handleCssChange(settingsTab) {
@@ -42,9 +41,9 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	// }
 	
 	onunload() {
-		console.log("unloading CodeBlock Customizer plugin");
 		for (const url of Object.values(LANGUAGE_ICONS))
 			URL.revokeObjectURL(url) // Unload icons
+		console.log("Unloaded plugin: CodeBlock Customizer");
 	}
 	
 	async loadSettings() {
@@ -53,7 +52,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+		updateStyling(this.settings);
 		this.app.workspace.updateOptions();
-		// updateSettingStyles(this.settings);
 	}
 }

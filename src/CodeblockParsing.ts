@@ -33,6 +33,7 @@ function parseHighlightedLines(highlightedLinesString: string): Array<number> {
 }
 function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockCustomizerTheme): void {
 	if (parameterString.startsWith('title:')) {
+		console.log('here')
 		let titleMatch = /(["'])([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
 			codeblockParameters.title = titleMatch[2].trim();
@@ -100,6 +101,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 			return codeblockParameters;
 		parameterStrings.forEach((parameterString) => parseParameterString(parameterString,codeblockParameters,theme))
 	}
+	console.log(codeblockParameters)
 	return codeblockParameters;
 }
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {

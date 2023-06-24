@@ -20,5 +20,5 @@
 	},
 	"include": [
 		"**/*.ts"
-	]
+, "src/.CodeBlockHighlight.ts", "src/.Header.ts"	]
 }

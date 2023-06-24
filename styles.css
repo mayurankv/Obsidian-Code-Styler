@@ -1,31 +1,33 @@
 /* Define CSS variables */
-:root {
+body.codeblock-customizer {
 	--line-number-gutter-width: 32px;
 	--line-number-gutter-padding: 16px;
-	--border-radius: 10px;
 	--code-padding: 8px;
 	--header-padding: 0px;
 	--header-spacing: 15px;
-	--language-icon-size: 28px;
+	--language-border-color: var(--codeblock-customizer-codeblock-background-color);
+	/* --border-radius: 10px; */
+	/* --language-icon-size: 28px; */
+	/* --gradient-highlights-color-stop: 100%; */
 }
 
 /* Codeblock background colours */
 .codeblock-customizer .markdown-rendered pre.codeblock-customizer-pre,
 .codeblock-customizer .markdown-source-view .HyperMD-codeblock.codeblock-customizer-line {
-	background-color: var(--codeblock-customizer-codeblock-background-color);
+	background: linear-gradient(var(--codeblock-customizer-codeblock-background-color),var(--codeblock-customizer-codeblock-background-color)) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important
 }
 
 /* Highlighting */
 .codeblock-customizer-line-highlighted {
-	background-color: var(--codeblock-customizer-highlight-color) !important;
+	background: linear-gradient(to right, var(--codeblock-customizer-default-highlight-color), var(--gradient-highlights-color-stop), transparent) !important;
 }
 .codeblock-customizer-active-line-highlight .cm-active,
 .codeblock-customizer-active-line-highlight-editor .cm-active {
-	background-color: var(--codeblock-customizer-editor-active-line-color) !important;
+	background: linear-gradient(to right, var(--codeblock-customizer-active-editor-line-color), var(--gradient-highlights-color-stop), transparent) !important;
 }
 .codeblock-customizer-active-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active,
 .codeblock-customizer-active-line-highlight-codeblock .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
-	background-color: var(--codeblock-customizer-codeblock-active-line-color) !important;
+	background: linear-gradient(to right, var(--codeblock-customizer-active-codeblock-line-color), var(--gradient-highlights-color-stop), transparent) !important;
 }
 
 /* Line number gutter styling */
@@ -103,7 +105,7 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 	background-color: var(--codeblock-customizer-header-background-color);
-	border-bottom: 2px groove var(--codeblock-customizer-header-line-color);
+	border-bottom: 2px var(--codeblock-customizer-header-separator-color);
 	font-size: 14px;
 	margin-top: 16px !important;           /* originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
 	display: flex !important;
@@ -137,10 +139,10 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 	padding-bottom: 0.3em;
 	font-size: inherit;
 	border-radius: var(--border-radius) var(--border-radius) 0px 0px;
-	background-color: var(--codeblock-customizer-language-tag-background-color);
-	color: var(--codeblock-customizer-language-tag-text-color);
-	font-weight: var(--codeblock-customizer-language-tag-text-bold, normal);
-	font-style: var(--codeblock-customizer-language-tag-text-italic, normal);
+	background-color: var(--codeblock-customizer-header-language-tag-background-color);
+	color: var(--codeblock-customizer-header-language-tag-text-color);
+	font-weight: var(--codeblock-customizer-header-language-tag-text-bold, normal);
+	font-style: var(--codeblock-customizer-header-language-tag-text-italic, normal);
 }
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],

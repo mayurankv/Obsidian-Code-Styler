@@ -65,6 +65,8 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		codeblockLines = ['',''];
 	codeblockCodeElement.innerHTML = "";
 	codeblockLines.forEach((line,index) => {
+		if (index === codeblockLines.length-1)
+			return;
 		const lineNumber = index + 1;
 		const lineWrapper = document.createElement("div");
 		//TODO (@mayurankv) Future: Speed this up by setting up a reverse dictionary for line number to highlights

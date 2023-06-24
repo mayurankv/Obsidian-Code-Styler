@@ -1,6 +1,5 @@
-import { LANGUAGE_NAMES, LANGUAGE_ICONS } from "./LanguageDetails";
+import { LANGUAGE_NAMES, LANGUAGE_ICONS, CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters } from "./CodeblockParsing";
-import { CodeblockCustomizerThemeSettings } from "./Settings";
 
 export function createHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
 	const headerContainer = createDiv({cls: `codeblock-customizer-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
@@ -10,7 +9,7 @@ export function createHeader(codeblockPreElement: HTMLElement, codeblockParamete
 			const imageWrapper = createDiv();
 			const img = document.createElement("img");
 			img.classList.add("codeblock-customizer-icon");
-			img.width = themeSettings.advanced.iconSize;
+			//img.width = themeSettings.advanced.iconSize; //todo (@mayurankv) Remove
 			img.src = IconURL;
 			imageWrapper.appendChild(img);
 			headerContainer.appendChild(imageWrapper);
