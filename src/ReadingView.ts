@@ -3,7 +3,7 @@ import { TFile, MarkdownView, MarkdownPostProcessorContext, MarkdownSectionInfor
 import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
-import { createHeader } from "./CodeblockDecorating";
+import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export async function readingViewPostProcessor(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
@@ -92,13 +92,9 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 			return;
 		const lineNumber = index + 1;
 		const lineWrapper = document.createElement("div");
-		//TODO (@mayurankv) Future: Speed this up by setting up a reverse dictionary for line number to highlights
-		if (codeblockParameters.highlights.default.includes(lineNumber))
-			lineWrapper.classList.add('codeblock-customizer-line-highlighted')
-		Object.entries(codeblockParameters.highlights.alternative).forEach(([alternativeHighlight,highlightedLineNumbers]: [string,Array<number>]) => {
-			if (highlightedLineNumbers.includes(lineNumber))
-				lineWrapper.classList.add(`codeblock-customizer-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`)
-		})
+		getLineClass(codeblockParameters,lineNumber).forEach((lineClass) => {
+			lineWrapper.classList.add(lineClass);
+		});
 		codeblockCodeElement.appendChild(lineWrapper);
 		let lineNumberDisplay = '';
 		if (!codeblockParameters.lineNumbers.alwaysEnabled && codeblockParameters.lineNumbers.alwaysDisabled)
@@ -107,7 +103,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 			lineNumberDisplay = '-specific'
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: lineNumber.toString()}));
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
-	})
+	});
 }
 function PDFExport(element: HTMLElement, plugin: CodeblockCustomizerPlugin, codeBlockFirstLines: string[]) {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');

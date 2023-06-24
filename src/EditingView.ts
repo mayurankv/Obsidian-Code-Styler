@@ -1,11 +1,10 @@
-import { Editor } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
 import { StateField, StateEffect, Range, RangeSet, RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
-import { createHeader } from "./CodeblockDecorating";
+import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 
 
@@ -82,6 +81,7 @@ export function codeblockLines(settings: CodeblockCustomizerSettings) {
 					return RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
 				const codeblocks = findUnduplicatedCodeblocks(view);
+				const settings: CodeblockCustomizerSettings = this.settings;
 				for (const codeblock of codeblocks) {
 					let codeblockParameters: CodeblockParameters;
 					let excludedCodeblock: boolean = false;
@@ -90,15 +90,20 @@ export function codeblockLines(settings: CodeblockCustomizerSettings) {
 						enter(node) {
 							const line = view.state.doc.lineAt(node.from);
 							const lineText = view.state.sliceDoc(line.from,line.to);
-							if (node.type.name.includes("HyperMD-codeblock-begin")) {
-								codeblockParameters = parseCodeblockParameters(lineText,this.settings.currentTheme);
-								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,this.settings.excludedLanguages);
+							const startLine = node.type.name.includes("HyperMD-codeblock-begin");
+							const endLine = node.type.name.includes("HyperMD-codeblock-end");
+							if (startLine) {
+								codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages);
+								lineNumber = 0;
 							}
 							if (excludedCodeblock)
 								return;
-							decorations.push(Decoration.line({attributes: {class: ''}}).range(node.from))
-							decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,node.type.name.includes("HyperMD-codeblock-begin")||node.type.name.includes("HyperMD-codeblock-end"))}).range(node.from))
-							lineNumber++;
+							if (node.type.name.includes("HyperMD-codeblock")) {
+								decorations.push(Decoration.line({attributes: {class: getLineClass(codeblockParameters,lineNumber).join(' ')}}).range(node.from))
+								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
+								lineNumber++;
+							}
 						}
 					})
 				}

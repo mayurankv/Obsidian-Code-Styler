@@ -39,3 +39,15 @@ function getLanguageIcon(language: string) {
 		return LANGUAGE_ICONS[language];
 	return null;
 }
+
+export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number): Array<string> {
+	//TODO (@mayurankv) Future: Speed this up by setting up a reverse dictionary for line number to highlights
+	let classList: Array<string> = [];
+	if (codeblockParameters.highlights.default.includes(lineNumber))
+		classList.push('codeblock-customizer-line-highlighted');
+	Object.entries(codeblockParameters.highlights.alternative).forEach(([alternativeHighlight,highlightedLineNumbers]: [string,Array<number>]) => {
+		if (highlightedLineNumbers.includes(lineNumber))
+			classList.push(`codeblock-customizer-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`);
+	})
+	return classList;
+}
