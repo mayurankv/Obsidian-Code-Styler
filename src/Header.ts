@@ -96,6 +96,11 @@ function createDecorationWidget(textToDisplay: string, languageName: string, spe
 		widget: new TextAboveCodeblockWidget(textToDisplay, languageName, specificHeader), block: true});
 }// createDecorationWidget
 
+
+
+
+
+
 const Collapse = StateEffect.define(), UnCollapse = StateEffect.define()
 
 let pluginSettings: CodeblockCustomizerSettings;
@@ -152,26 +157,26 @@ class TextAboveCodeblockWidget extends WidgetType {
 		
 	toDOM(view: EditorView): HTMLElement {
 		this.view = view;
-		const container = createContainer(this.specificHeader);
+		const headerContainer = createContainer(this.specificHeader);
 		if (this.Lang){
 			const Icon = getLanguageIcon(this.Lang)
 			if (Icon) {
-				container.appendChild(createCodeblockIcon(this.Lang));
+				headerContainer.appendChild(createCodeblockIcon(this.Lang));
 			}
-			container.appendChild(createCodeblockLang(this.Lang));
+			headerContainer.appendChild(createCodeblockLang(this.Lang));
 		}
 
-		container.appendChild(createFileName(this.text));   
+		headerContainer.appendChild(createFileName(this.text));   
 		
 		this.observer.view = view;
-		this.observer.observe(container, { attributes: true });   
+		this.observer.observe(headerContainer, { attributes: true });   
 		
-		container.addEventListener("mousedown", event => {
-			container.setAttribute("data-clicked", "true");
+		headerContainer.addEventListener("mousedown", event => {
+			headerContainer.setAttribute("data-clicked", "true");
 		});
 		//EditorView.requestMeasure;
 
-		return container;
+		return headerContainer;
 	}
 			
 	destroy(dom: HTMLElement) {

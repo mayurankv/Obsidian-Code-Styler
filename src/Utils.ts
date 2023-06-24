@@ -1,194 +1,43 @@
-import { Languages, manualLang, Icons } from "./Const";
 import { CodeblockCustomizerSettings } from "./Settings";
 
-export function splitAndTrimString(str) {
-	if (!str) {
-		return [];
-	}
-	
-	// Replace * with .*
-	str = str.replace(/\*/g, '.*');
-	
-	if (!str.includes(",")) {
-		return [str];
-	}
-	
-	return str.split(",").map(s => s.trim());
-}// splitAndTrimString
-
-export function searchString(str, searchTerm) {
-	const originalStr = str;
-	str = str.toLowerCase();
-	searchTerm = searchTerm.toLowerCase();
-	if (searchTerm === "file:") {
-		if (str.includes(searchTerm)) {
-			const startIndex = str.indexOf(searchTerm) + searchTerm.length;
-			let result = "";
-			if (str[startIndex] === "\"") {
-				const endIndex = str.indexOf("\"", startIndex + 1);
-				if (endIndex !== -1) {
-					result = originalStr.substring(startIndex + 1, endIndex);
-				} else {
-					result = originalStr.substring(startIndex + 1);
-				}
-			} else {
-				const endIndex = str.indexOf(" ", startIndex);
-				if (endIndex !== -1) {
-					result = originalStr.substring(startIndex, endIndex);
-				} else {
-					result = originalStr.substring(startIndex);
-				}
-			}
-			return result.trim();
-		}
-	} else if (searchTerm === "```") {
-		if (str.startsWith(searchTerm)) {
-			const startIndex = searchTerm.length;
-			const endIndex = str.indexOf(" ", startIndex);
-			let word = "";
-			if (endIndex !==-1) {
-				word = originalStr.substring(startIndex, endIndex);
-			} else {
-				word = originalStr.substring(startIndex);
-			}
-			if (!word.includes(":")) {
-				if (word.toLowerCase() === "fold") 
-					return null;
-				else
-					return word;
-			}
-		}
-	} else if (searchTerm === 'fold') {
-		if (str.includes(" fold ")) {
-			return true;
-		}
-		const index = str.indexOf(searchTerm);
-		if (index !== -1 && index === str.length - searchTerm.length && str[index - 1] === " ") {
-			return true;
-		}
-		if (str.includes("```fold ")) {
-			return true;
-		}
-		if (str.includes("```fold") && str.indexOf("```fold") + "```fold".length === str.length) {
-			return true;
-		}
-			return false;
-		} else {
-		if (str.includes(searchTerm)) {
-			const startIndex = str.indexOf(searchTerm) + searchTerm.length;
-			const endIndex = str.indexOf(" ", startIndex);
-			if (endIndex !== -1) {
-				return originalStr.substring(startIndex, endIndex).trim();
-			} else {
-				return originalStr.substring(startIndex).trim();
-			}
+// Setting Management
+export function getCurrentMode() {
+	const body = document.querySelector('body');
+	if (body !== null){
+		if (body.classList.contains('theme-light')) {
+			return "light";
+		} else if (body.classList.contains('theme-dark')) {
+			return "dark";
 		}
 	}
-	
-	return null;
-}//searchString
+	console.log('Warning: Couldn\'t get current theme');
+	return "light";
+}
 
-export function getHighlightedLines(params: string): number[] {
-	if (!params) {
-		return [];
-	}
 
-	const trimmedParams = params.trim();
-	const lines = trimmedParams.split(",");
 
-	return lines.map(line => {
-		if (line.includes("-")) {
-			const range = line.split("-");
-			const start = parseInt(range[0], 10);
-			const end = parseInt(range[1], 10);
-			return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-		}
-		return parseInt(line, 10);
-	}).flat();
-}// getHighlightedLines
 
-export function isExcluded(lineText: string, excludeLangs: string[]) : boolean {
-	const codeBlockLang = searchString(lineText, "```");
-	const regexLangs = splitAndTrimString(excludeLangs).map(lang => new RegExp(`^${lang.replace(/\*/g, '.*')}$`, 'i'));
-	
-	for (const regexLang of regexLangs) {
-		if (codeBlockLang && regexLang.test(codeBlockLang)) {
-			return true;
-		}
-	}
-	
-	return false;
-}// isExcluded
 
-export function getLanguageIcon(DisplayName) {
-	if (!DisplayName)
-		return "";
-		
-	if (Icons.hasOwnProperty(DisplayName)) {
-		return Icons[DisplayName];
-	}
-	
-	return null;
-}// getLanguageIcon
 
-export function getLanguageName(code) {
-	if (!code)
-		return "";
-	
-	code = code.toLowerCase();
-	
-	if (Languages.hasOwnProperty(code)) {
-		return Languages[code];
-	} else if (manualLang.hasOwnProperty(code)) {
-		return manualLang[code];
-	} else if (code){
-			return code.charAt(0).toUpperCase() + code.slice(1);
-	}
-	
-	return "";
-}// getLanguageName
 
-export const BLOBS: Record<string, string> = {};
-export function loadIcons(){
-	for (const [key, value] of Object.entries(Icons)) {
-		BLOBS[key.replace(/\s/g, "_")] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${value}</svg>`], { type: "image/svg+xml" }));
-	}
-}// loadIcons
 
-// Functions for displaying header BEGIN
-export function createContainer(specific: boolean) {
-	const container = document.createElement("div");
-	container.classList.add(`codeblock-customizer-header-container${specific?'-specific':''}`);
-	return container;
-}// createContainer
 
-export function createCodeblockLang(lang: string) {
-	const codeblockLang = document.createElement("div");
-	codeblockLang.innerText = lang;
-	codeblockLang.classList.add(`codeblock-customizer-header-language-tag-${getLanguageName(lang).toLowerCase()}`);
-	return codeblockLang;
-}// createCodeblockLang
 
-export function createCodeblockIcon(displayLang: string) {
-	const div = document.createElement("div");
-	const img = document.createElement("img");
-	img.classList.add("codeblock-customizer-icon");
-	img.width = 28; //32
-	img.src = BLOBS[displayLang.replace(/\s/g, "_")];
 
-	div.appendChild(img);
-	
-	return div;
-}// createCodeblockIcon
 
-export function createFileName(text: string) {
-	const fileName = document.createElement("div");
-	fileName.innerText = text;
-	fileName.classList.add("codeblock-customizer-header-text");
-	return fileName;
-}// createFileName
 
-// Functions for displaying header END
+
+
+
+
+
+
+
+
+
+
+
+
 
 const stylesDict = {
 	activeCodeBlockLineColor: 'codeblock-active-line-color',
@@ -338,40 +187,4 @@ function accessSetting(key: string, settings: CodeblockCustomizerSettings) {
 	} else {
 		return null;
 	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Setting Management
-export function getCurrentMode() {
-	const body = document.querySelector('body');
-	if (body !== null){
-		if (body.classList.contains('theme-light')) {
-			return "light";
-		} else if (body.classList.contains('theme-dark')) {
-			return "dark";
-		}
-	}
-	console.log('Warning: Couldn\'t get current theme');
-	return "light";
 }

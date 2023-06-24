@@ -49,9 +49,9 @@ export class SettingsTab extends PluginSettingTab {
 		.setDesc('Define languages in a comma separated list on which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
 		.addText(text => text
 		.setPlaceholder('e.g. dataview, python etc.')
-		.setValue(this.plugin.settings.excludedLangs)
+		.setValue(this.plugin.settings.excludedLanguages)
 		.onChange((value) => {
-			this.plugin.settings.excludedLangs = value;
+			this.plugin.settings.excludedLanguages = value;
 			(async () => {await this.plugin.saveSettings()})();
 		}));
 
@@ -560,15 +560,12 @@ export class SettingsTab extends PluginSettingTab {
 
 	// ========== Donation ==========
 	const donationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-donation", });    
-	const donationText = createEl("p");
-	const donationButton = createEl("a", { href: "https://www.buymeacoffee.com/ThePirateKing"});
-	
-	donationText.appendText("If you like this plugin, and would like to help support continued development, use the button below!");
-	donationButton.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px">`;
-	
+	const donationText = createEl("p", {text: "If you like this plugin, and would like to help support continued development, use the button below!"});
 	donationDiv.appendChild(donationText);
+	const donationButton = createEl("a", { href: "https://www.buymeacoffee.com/ThePirateKing"});
+	donationButton.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px">`;
 	donationDiv.appendChild(donationButton);
-	}//display
+	}
 
 	// Setting Creation
 	createPickr(plugin: CodeblockCustomizerPlugin, containerEl: HTMLElement, setting: Setting, id: string, getRelevantThemeColor: (relevantThemeColors: CodeblockCustomizerThemeColors)=>Color, saveRelevantThemeColor: (relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color)=>void, disabled?: ()=>boolean) {
@@ -675,7 +672,7 @@ export class SettingsTab extends PluginSettingTab {
 		})
 	})
 	}
-}// SettingsTab
+}
 
 class PickrResettable extends Pickr {
 	saveColor: (saveColor: Color)=>void;

@@ -1,11 +1,12 @@
 import { Plugin } from "obsidian";
 
 import { DEFAULT_SETTINGS, CodeblockCustomizerSettings } from './Settings';
+import { LANGUAGE_ICONS } from './LanguageDetails';
 import { codeblockHighlight } from "./CodeBlockHighlight";
 import { codeblockHeader, collapseField } from "./Header";
-import { ReadingView } from "./ReadingViewOld";
+import { readingViewPostProcessor } from "./ReadingView";
 import { SettingsTab } from "./SettingsTab";
-import { loadIcons, BLOBS, updateSettingStyles } from "./Utils";
+import {  } from "./Utils";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
@@ -13,43 +14,37 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		document.body.classList.add('codeblock-customizer');
-
-		loadIcons();
+		
+		const settingsTab = new SettingsTab(this.app, this);
+		this.addSettingTab(settingsTab);
 
 		codeblockHeader.settings = this.settings;
 		collapseField.pluginSettings = this.settings;
-		
 		this.registerEditorExtension([
 			codeblockHeader,
 			collapseField,
 			codeblockHighlight(this.settings)
 		]);
 		
-		const settingsTab = new SettingsTab(this.app, this);
-		this.addSettingTab(settingsTab);
 		
-		//updateSettingStyles(this.settings);
-		
-		this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
-
-		// reading mode
 		this.registerMarkdownPostProcessor(async (el, ctx) => {    
-			await ReadingView(el, ctx, this)
+			await readingViewPostProcessor(el, ctx, this)
 		})
 
+		//updateSettingStyles(this.settings);
+		// this.registerEvent(this.app.workspace.on('css-change', this.handleCssChange.bind(this, settingsTab), this));
+
 		console.log("loading CodeBlock Customizer plugin");
-	}// onload
+	}
 	
-	handleCssChange(settingsTab) {
-		console.log('updating css');
-	}// handleCssChange
+	// handleCssChange(settingsTab) {
+	// 	console.log('updating css');
+	// }
 	
 	onunload() {
 		console.log("unloading CodeBlock Customizer plugin");
-		// unload icons
-		for (const url of Object.values(BLOBS)) {
-			URL.revokeObjectURL(url)
-		}
+		for (const url of Object.values(LANGUAGE_ICONS))
+			URL.revokeObjectURL(url) // Unload icons
 	}
 	
 	async loadSettings() {

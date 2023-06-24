@@ -2,7 +2,7 @@ import { ViewPlugin, Decoration, WidgetType } from "@codemirror/view";
 import { RangeSet } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 
-import { splitAndTrimString, searchString, getHighlightedLines, getLanguageIcon, getLanguageName, isExcluded } from "./Utils";
+import { searchString, getHighlightedLines, getLanguageIcon, getLanguageName, isExcluded } from "./Utils";
 
 export function codeblockHighlight(settings: CodeblockCustomizerSettings) {
 	const viewPlugin = ViewPlugin.fromClass(
