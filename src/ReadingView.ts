@@ -73,9 +73,7 @@ function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement:
 }
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
 	const headerContainer = createHeader(codeblockParameters, themeSettings);
-	const codeblockPreParent = codeblockPreElement.parentNode;
-	if (codeblockPreParent)
-		codeblockPreParent.insertBefore(headerContainer, codeblockPreElement);
+	codeblockPreElement.insertBefore(headerContainer, codeblockPreElement.childNodes[0]);
 	
 	headerContainer.addEventListener("click", ()=>{
 		codeblockPreElement.classList.toggle("codeblock-customizer-codeblock-collapsed")
