@@ -100,6 +100,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 								return;
 							if (node.type.name.includes("HyperMD-codeblock")) {
 								decorations.push(Decoration.line({attributes: {class: getLineClass(codeblockParameters,lineNumber).join(' ')}}).range(node.from))
+								decorations.push(Decoration.line({}).range(node.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
 								lineNumber++;
 							}

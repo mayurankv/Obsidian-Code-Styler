@@ -20,7 +20,7 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 	if (codeblockParameters.title !== '')
 		headerText = codeblockParameters.title;
 	else if (codeblockParameters.fold.enabled)
-		headerText = codeblockParameters.fold.placeholder!==''?codeblockParameters.fold.placeholder:themeSettings.header.collapsePlaceholder;
+		headerText = codeblockParameters.fold.placeholder!==''?codeblockParameters.fold.placeholder:themeSettings.header.collapsePlaceholder!==''?themeSettings.header.collapsePlaceholder:'Collapsed Code';
 	headerContainer.appendChild(createDiv({cls: "codeblock-customizer-header-text", text: headerText}));   
 
 	return headerContainer;

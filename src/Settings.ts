@@ -113,16 +113,16 @@ const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
 		title: {
 			textFont: '',
 			textBold: false,
-			textItalic: false,
-		},
-		languageTag: {
-			display: "always",
-			textFont: '',
-			textBold: true,
 			textItalic: true,
 		},
+		languageTag: {
+			display: "none",
+			textFont: '',
+			textBold: true,
+			textItalic: false,
+		},
 		languageIcon: {
-			display: "always",
+			display: "none",
 			displayColor: true,
 		},
 		collapsePlaceholder: '',

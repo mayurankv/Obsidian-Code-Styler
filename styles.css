@@ -124,8 +124,9 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 	border-bottom-right-radius: var(--border-radius);
 	border-bottom: none;
 }
-.markdown-source-view .codeblock-customizer-header-container,
-.markdown-source-view .codeblock-customizer-header-container-specific { /*? Fix for incorrectly displaying header when using "minimal" theme */
+.markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container,
+.markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container-specific { /*? Fix for incorrectly displaying header when using "minimal" theme */
+	max-width: calc(var(--max-width) - var(--folding-offset));
 	width: calc(var(--line-width-adaptive) - var(--folding-offset));
 	margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
 }
@@ -156,8 +157,8 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 	padding-bottom: 0.3em;
 	font-size: inherit;
 	color: var(--codeblock-customizer-header-text-color);
-	font-weight: var(--codeblock-customizer-header-text-bold, normal);
-	font-style: var(--codeblock-customizer-header-text-italic, normal);
+	font-weight: var(--codeblock-customizer-header-title-text-bold, normal);
+	font-style: var(--codeblock-customizer-header-title-text-italic, normal);
 }
 body:not([class*='codeblock-customizer-show-langicons']):not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific .codeblock-customizer-header-text,
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-container .codeblock-customizer-header-text,

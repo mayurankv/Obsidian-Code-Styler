@@ -64,7 +64,7 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			`}
 		}
 		body.codeblock-customizer .codeblock-customizer-header-text {
-			--codeblock-customizer-header-title-text-bold: ${themeSettings.header.title.textItalic?'bold':'normal'};
+			--codeblock-customizer-header-title-text-bold: ${themeSettings.header.title.textBold?'bold':'normal'};
 			--codeblock-customizer-header-title-text-italic: ${themeSettings.header.title.textItalic?'italic':'normal'};
 			${themeSettings.header.title.textFont===''?'':`
 				font-family: ${themeSettings.header.title.textFont};
