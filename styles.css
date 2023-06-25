@@ -6,9 +6,9 @@ body.codeblock-customizer {
 	--header-padding: 0px;
 	--header-spacing: 15px;
 	--language-border-color: var(--codeblock-customizer-codeblock-background-color);
-	/* --border-radius: 10px; */
-	/* --language-icon-size: 28px; */
-	/* --gradient-highlights-color-stop: 100%; */
+	--border-radius: 10px;
+	--language-icon-size: 28px;
+	--gradient-highlights-color-stop: 100%;
 }
 
 /* Codeblock background colours */

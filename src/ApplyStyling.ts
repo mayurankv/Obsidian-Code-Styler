@@ -71,10 +71,10 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			`}
 		}
 		body.codeblock-customizer {
-			--border-radius: ${themeSettings.codeblock.curvature}px;
-			--language-icon-size: ${themeSettings.advanced.iconSize}px;
-			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
-			--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
+			--border-radius: ${themeSettings.codeblock.curvature}px !important;
+			--language-icon-size: ${themeSettings.advanced.iconSize}px !important;
+			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'} !important;
+			--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px !important;
 		}
 		${themeSettings.header.languageIcon.displayColor?'':`
 			.codeblock-customizer-icon {

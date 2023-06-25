@@ -1,5 +1,5 @@
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, StateField, StateEffect, Range, RangeSet, RangeSetBuilder, Transaction } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
@@ -7,8 +7,8 @@ import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from ".
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export function codeblockLines(settings: CodeblockCustomizerSettings) {
-	return ViewPlugin.fromClass(
+export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings) {
+	const codeblockLines = ViewPlugin.fromClass(
 		class CodeblockLines {
 			settings: CodeblockCustomizerSettings;
 			currentSettings: {
@@ -109,7 +109,7 @@ export function codeblockLines(settings: CodeblockCustomizerSettings) {
 				return RangeSet.of(decorations,true);
 			}
 
-			
+
 		
 			destroy() {
 				this.mutationObserver.disconnect();
@@ -117,14 +117,11 @@ export function codeblockLines(settings: CodeblockCustomizerSettings) {
 		},
 		{decorations: (value) => value.decorations}
 	)
-}
-
-export function codeblockHeader(settings: CodeblockCustomizerSettings) {
-	return StateField.define<DecorationSet>({
-		create(state): DecorationSet {
+	const codeblockHeader = StateField.define<DecorationSet>({
+		create(state: EditorState): DecorationSet {
 			return Decoration.none;    
 		},
-		update(oldState: DecorationSet, transaction: Transaction): DecorationSet {
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
 			let startLine: boolean = true;
@@ -149,82 +146,161 @@ export function codeblockHeader(settings: CodeblockCustomizerSettings) {
 			return EditorView.decorations.from(field);
 		}
 	})
-}
+	const codeblockCollapse = StateField.define({
+		create(state: EditorState): DecorationSet {
+			const builder = new RangeSetBuilder<Decoration>();
+			let codeblockParameters: CodeblockParameters;
+			let collapseStart: Line | null = null;
+			let collapseEnd: Line | null = null;
+			let startLine: boolean = true;
+			for (let i = 1; i < state.doc.lines; i++) {
+				const line = state.doc.line(i);
+				const lineText = line.text.toString();
+				const codeblockDelimiterLine = (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1);
+				if (codeblockDelimiterLine) {
+					if (startLine) {
+						startLine = false;
+						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && codeblockParameters.fold.enabled)
+							collapseStart = line;
+					} else {
+						startLine = true;
+						if (collapseStart)
+							collapseEnd = line;
+					}
+				}
+				if (collapseStart && collapseEnd) {
+					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)]), block: true, side: -1}))
+					collapseStart = null;
+					collapseEnd = null;
+				}
+			}
+			return builder.finish();
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			value = value.map(transaction.changes);
+			for (const effect of transaction.effects) {
+				if (effect.is(collapse))
+					value = value.update({add: effect.value, sort: true});
+				else if (effect.is(uncollapse))
+					value = value.update({filter: effect.value});
+			}
+			return value;
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		}
+	})
 
-export function codeblockCollapse(settings: CodeblockCustomizerSettings) {
-
-}
-
-class LineNumberWidget extends WidgetType {
-	lineNumber: number;
-	codeblockParameters: CodeblockParameters;
-	empty: boolean;
-
-	constructor(lineNumber: number, codeblockParameters: CodeblockParameters, empty: boolean) {
-		super();
-		this.lineNumber = lineNumber;
-		this.codeblockParameters = codeblockParameters;
-		this.empty = empty;
+	class LineNumberWidget extends WidgetType {
+		lineNumber: number;
+		codeblockParameters: CodeblockParameters;
+		empty: boolean;
+	
+		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, empty: boolean) {
+			super();
+			this.lineNumber = lineNumber;
+			this.codeblockParameters = codeblockParameters;
+			this.empty = empty;
+		}
+	
+		eq(other: LineNumberWidget) {
+			return this.lineNumber === other.lineNumber && this.codeblockParameters === other.codeblockParameters;
+		}
+	
+		toDOM(view: EditorView): HTMLElement {
+			let lineNumberDisplay = '';
+			if (!this.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled)
+				lineNumberDisplay = '-hide'
+			else if (this.codeblockParameters.lineNumbers.alwaysEnabled && !this.codeblockParameters.lineNumbers.alwaysDisabled)
+				lineNumberDisplay = '-specific'
+			return createSpan({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
+		}
 	}
-
-	eq(other: LineNumberWidget) {
-		return this.lineNumber === other.lineNumber && this.codeblockParameters === other.codeblockParameters;
-	}
-
-	toDOM(view: EditorView): HTMLElement {
-		let lineNumberDisplay = '';
-		if (!this.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled)
-			lineNumberDisplay = '-hide'
-		else if (this.codeblockParameters.lineNumbers.alwaysEnabled && !this.codeblockParameters.lineNumbers.alwaysDisabled)
-			lineNumberDisplay = '-specific'
-		return createSpan({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
-	}
-}
-class HeaderWidget extends WidgetType {
-	codeblockParameters: CodeblockParameters;
-	themeSettings: CodeblockCustomizerThemeSettings;
-	view: EditorView;
-	mutationObserver: MutationObserver;
-
-	constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
-		super();
-		this.codeblockParameters = codeblockParameters;
-		this.themeSettings = themeSettings;
-		this.mutationObserver = new MutationObserver((mutations) => {
-			mutations.forEach(mutation => {
-				if ((mutation.target as HTMLElement).hasAttribute('data-clicked'))
-					console.log('func')
-					//handleClick(this.view, mutation.target);
-			})
-		});    
-	}
-		
-	eq(other: HeaderWidget) {
-		return this.codeblockParameters == other.codeblockParameters
-	}
-		
-	toDOM(view: EditorView): HTMLElement {
-		this.view = view;
-		const headerContainer = createHeader(this.codeblockParameters, this.themeSettings);
-		headerContainer.addEventListener("mousedown", event => {
-			headerContainer.setAttribute("data-clicked", "true");
-		});
-
-		this.mutationObserver.observe(headerContainer,{
-			attributes: true,
-		});
-		return headerContainer;
-	}
+	class HeaderWidget extends WidgetType {
+		codeblockParameters: CodeblockParameters;
+		themeSettings: CodeblockCustomizerThemeSettings;
+		view: EditorView;
+		mutationObserver: MutationObserver;
+	
+		constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
+			super();
+			this.codeblockParameters = codeblockParameters;
+			this.themeSettings = themeSettings;
+			this.mutationObserver = new MutationObserver((mutations) => {
+				mutations.forEach(mutation => {
+					if ((mutation.target as HTMLElement).hasAttribute('data-clicked'))
+						collapseOnClick(this.view,(mutation.target as HTMLElement))
+				})
+			});    
+		}
 			
-	destroy(dom: HTMLElement) {
-		dom.removeAttribute("data-clicked");
-		//dom.removeEventListener("mousedown",handleClick);
-		this.mutationObserver.disconnect();
+		eq(other: HeaderWidget) {
+			return this.codeblockParameters == other.codeblockParameters
+		}
+			
+		toDOM(view: EditorView): HTMLElement {
+			this.view = view;
+			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings);
+			headerContainer.addEventListener("mousedown", (event: MouseEvent) => {
+				headerContainer.setAttribute("data-clicked", "true");
+			});
+	
+			this.mutationObserver.observe(headerContainer,{
+				attributes: true,
+			});
+			return headerContainer;
+		}
+				
+		destroy(dom: HTMLElement) {
+			dom.removeAttribute("data-clicked");
+			dom.removeEventListener("mousedown",collapseOnClick);
+			this.mutationObserver.disconnect();
+		}
+	
+		ignoreEvent() {
+			return false;
+		}
+	}
+	
+	function collapseOnClick(view: EditorView, target: HTMLElement) {
+		const position = view.posAtDOM(target);
+		let folded = false;
+		view.state.field(codeblockCollapse,false)?.between(position,position,()=>{
+			folded = true;
+		})
+
+		let collapseStart: Line | null = null;
+		let collapseEnd: Line | null = null;
+		let startLine: boolean = true;
+		for (let i = 1; i < view.state.doc.lines; i++) {
+			const line = view.state.doc.line(i);
+			const lineText = line.text.toString();
+			const codeblockDelimiterLine = (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1);
+			if (codeblockDelimiterLine) {
+				if (startLine) {
+					startLine = false;
+					if (position === line.from)
+						collapseStart = line;
+				} else {
+					startLine = true;
+					if (collapseStart)
+						collapseEnd = line;
+				}
+			}
+			if (collapseStart && collapseEnd) {
+				if (folded)
+					view.dispatch({effects: uncollapse.of((from,to) => to<=collapseStart.from||from>=collapseEnd.to)});
+				else
+					view.dispatch({effects: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)])})
+				view.requestMeasure();
+				collapseStart = null;
+				collapseEnd = null;
+			}
+		}
 	}
 
-	ignoreEvent() {
-		return false;
-	}
+	return [codeblockLines,codeblockHeader,codeblockCollapse]
 }
 
 function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
@@ -242,7 +318,7 @@ function findVisibleCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 }
 function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	const codeblocks: Array<SyntaxNodeRef> = [];
-	syntaxTree(view.state).iterate({from: view.state.doc.from, to: view.state.doc.to,
+	syntaxTree(view.state).iterate({
 		enter: (node) => {
 			if (
 				node.type.name.includes("HyperMD-codeblock-begin") ||
@@ -253,9 +329,13 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 			}
 		}
 	})
+	console.log(codeblocks)
 	return codeblocks;
 }
 
 function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
 	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }
+
+const collapse: StateEffectType<Array<Range<Decoration>>> = StateEffect.define();
+const uncollapse: StateEffectType<(from: any, to: any) => boolean> = StateEffect.define();
