@@ -99,7 +99,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							if (excludedCodeblock)
 								return;
 							if (node.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {class: getLineClass(codeblockParameters,lineNumber).join(' ')}}).range(node.from))
+								decorations.push(Decoration.line({attributes: {class: codeblockParameters.language===''?'':`language-${codeblockParameters.language} `+getLineClass(codeblockParameters,lineNumber).join(' ')}}).range(node.from))
 								decorations.push(Decoration.line({}).range(node.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
 								lineNumber++;
@@ -243,6 +243,8 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 		toDOM(view: EditorView): HTMLElement {
 			this.view = view;
 			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings);
+			if (this.codeblockParameters.language!=='')
+				headerContainer.classList.add(`language-${this.codeblockParameters.language}`)
 			headerContainer.addEventListener("mousedown",handleMouseDown);
 	
 			this.mutationObserver.observe(headerContainer,{
@@ -332,7 +334,6 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 			}
 		}
 	})
-	console.log(codeblocks)
 	return codeblocks;
 }
 

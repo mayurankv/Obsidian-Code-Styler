@@ -79,7 +79,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		codeblockPreElement.classList.toggle("codeblock-customizer-codeblock-collapsed")
 	});
 	if (codeblockParameters.fold.enabled)
-		codeblockPreElement.classList.add(`codeblock-customizer-codeblock-collapsed`);
+		codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
 
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
@@ -99,7 +99,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 			lineNumberDisplay = '-hide'
 		else if (codeblockParameters.lineNumbers.alwaysEnabled && !codeblockParameters.lineNumbers.alwaysDisabled)
 			lineNumberDisplay = '-specific'
-		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: lineNumber.toString()}));
+		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
 }

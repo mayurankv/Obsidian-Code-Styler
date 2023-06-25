@@ -1,4 +1,4 @@
-import { CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, CodeblockCustomizerThemeModeColors, CodeblockCustomizerThemeSettings, Color } from "./Settings";
+import { CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, CodeblockCustomizerThemeModeColors, CodeblockCustomizerThemeSettings, Color, LANGUAGE_NAMES, LANGUAGE_COLORS } from "./Settings";
 import { isCss } from "./SettingsTab";
 
 export function updateStyling(settings: CodeblockCustomizerSettings): void {
@@ -9,7 +9,7 @@ export function updateStyling(settings: CodeblockCustomizerSettings): void {
 		styleTag.id = styleId;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
-	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)).trim().replace(/\s+/g,' ');
+	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors()).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
 
@@ -17,7 +17,7 @@ function styleThemeColors (themeColors: CodeblockCustomizerThemeColors): string 
 	return Object.keys(themeColors.light.highlights.alternativeHighlights).reduce((result: string, alternativeHighlight: string) => {
 		return result + `
 			body.codeblock-customizer .codeblock-customizer-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()} {
-				background: linear-gradient(to right, var(--codeblock-customizer-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-color), var(--gradient-highlights-color-stop), transparent) !important;
+				--gradient-background-color: var(--codeblock-customizer-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-color) !important;
 			}
 		`;
 	},`
@@ -71,10 +71,10 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			`}
 		}
 		body.codeblock-customizer {
-			--border-radius: ${themeSettings.codeblock.curvature}px !important;
-			--language-icon-size: ${themeSettings.advanced.iconSize}px !important;
-			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'} !important;
-			--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px !important;
+			--border-radius: ${themeSettings.codeblock.curvature}px;
+			--language-icon-size: ${themeSettings.advanced.iconSize}px;
+			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
+			--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
 			--header-font-size: ${themeSettings.header.fontSize}px;
 		}
 		${themeSettings.header.languageIcon.displayColor?'':`
@@ -83,6 +83,18 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			}
 		`}
 	`;
+}
+
+function styleLanguageColors (): string {
+	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
+		if (languageDisplayName in LANGUAGE_COLORS)
+			result += `
+				.language-${languageName} {
+					--language-border-color: ${LANGUAGE_COLORS[languageDisplayName]}
+				}
+			`;
+		return result;
+	},'')
 }
 
 function addThemeSettingsClasses (themeSettings: CodeblockCustomizerThemeSettings): void {
