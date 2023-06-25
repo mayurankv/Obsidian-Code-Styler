@@ -242,9 +242,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 		toDOM(view: EditorView): HTMLElement {
 			this.view = view;
 			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings);
-			headerContainer.addEventListener("mousedown", (event: MouseEvent) => {
-				headerContainer.setAttribute("data-clicked", "true");
-			});
+			headerContainer.addEventListener("mousedown",handleMouseDown);
 	
 			this.mutationObserver.observe(headerContainer,{
 				attributes: true,
@@ -254,7 +252,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 				
 		destroy(dom: HTMLElement) {
 			dom.removeAttribute("data-clicked");
-			dom.removeEventListener("mousedown",collapseOnClick);
+			dom.removeEventListener("mousedown",handleMouseDown);
 			this.mutationObserver.disconnect();
 		}
 	
@@ -290,7 +288,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 			if (collapseStart && collapseEnd) {
 				if (folded)
-					view.dispatch({effects: uncollapse.of((from,to) => to<=collapseStart.from||from>=collapseEnd.to)});
+					view.dispatch({effects: uncollapse.of((from,to) => {return (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to)})});
 				else
 					view.dispatch({effects: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)])})
 				view.requestMeasure();
@@ -298,6 +296,10 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 				collapseEnd = null;
 			}
 		}
+	}
+
+	function handleMouseDown(event: MouseEvent): void {
+		this.setAttribute("data-clicked","true")
 	}
 
 	return [codeblockLines,codeblockHeader,codeblockCollapse]
