@@ -61,6 +61,7 @@ export interface CodeblockCustomizerThemeSettings {
 			display: Display;
 			displayColor: boolean;
 		},
+		fontSize: number;
 		collapsePlaceholder: string;
 	},
 	highlights: {
@@ -125,10 +126,11 @@ const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
 			display: "none",
 			displayColor: true,
 		},
+		fontSize: 14,
 		collapsePlaceholder: '',
 	},
 	highlights: {
-		activeCodeblockLine: true,
+		activeCodeblockLine: false,
 		activeEditorLine: false,
 	},
 	advanced: {
@@ -157,7 +159,7 @@ export const THEME_FALLBACK_COLORS: CodeblockCustomizerThemeModeColors = {
 			backgroundColor: '--code-background',
 			textColor: '--code-comment',
 		},
-		lineColor: '--code-background',
+		lineColor: '--color-base-30',
 	},
 	highlights: {
 		activeCodeblockLineColor: '--color-base-30',

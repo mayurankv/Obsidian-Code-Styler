@@ -75,6 +75,7 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			--language-icon-size: ${themeSettings.advanced.iconSize}px !important;
 			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'} !important;
 			--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px !important;
+			--header-font-size: ${themeSettings.header.fontSize}px;
 		}
 		${themeSettings.header.languageIcon.displayColor?'':`
 			.codeblock-customizer-icon {

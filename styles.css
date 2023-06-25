@@ -3,7 +3,9 @@ body.codeblock-customizer {
 	--line-number-gutter-width: 32px;
 	--line-number-gutter-padding: 16px;
 	--code-padding: 8px;
+	--header-font-size: var(--code-size);
 	--header-padding: 0px;
+	--header-inner-vertical-padding: 0.3em;
 	--header-spacing: 15px;
 	--language-border-color: var(--codeblock-customizer-codeblock-background-color);
 	--border-radius: 10px;
@@ -35,17 +37,17 @@ body.codeblock-customizer {
 .codeblock-customizer-line-number-hide {
 	display: none;
 }
-.markdown-rendered .codeblock-customizer-pre > code > div:first-child > .codeblock-customizer-line-number { /*? Maintain gutter color when padded */
+.markdown-rendered .codeblock-customizer-pre > code > div:first-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
 }
-.markdown-rendered .codeblock-customizer-pre > code > div:last-child > .codeblock-customizer-line-number { /*? Maintain gutter color when padded */
+.markdown-rendered .codeblock-customizer-pre > code > div:last-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
-.markdown-rendered .codeblock-customizer-pre > code > div:only-child > .codeblock-customizer-line-number { /*? Maintain gutter color when padded */
+.markdown-rendered .codeblock-customizer-pre > code > div:only-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color),0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
-.codeblock-customizer-line-number,
-.codeblock-customizer-line-number-specific {
+[class^='codeblock-customizer-line-number'] {
+	padding-top: 2px;
 	padding-left: 4px;
 	padding-right: 8px;
 	text-align: right;
@@ -56,7 +58,8 @@ body.codeblock-customizer {
 	color: var(--codeblock-customizer-gutter-text-color);
 	user-select: none;
 }
-.markdown-source-view .codeblock-customizer-line-number {
+.markdown-source-view .codeblock-customizer-line-number,
+.markdown-source-view .codeblock-customizer-line-number-specific {
 	position: absolute;
 	display: inline-block;
 	height: 100%;
@@ -65,19 +68,20 @@ body.codeblock-customizer {
 	direction: rtl;
 	left: 0;
 }
-.markdown-source-view .codeblock-customizer-line-number::-webkit-scrollbar {
+.markdown-source-view [class^='codeblock-customizer-line-number']::-webkit-scrollbar {
 	display: none;
 }
-.markdown-rendered .codeblock-customizer-line-number {
+.markdown-rendered [class^='codeblock-customizer-line-number'] {
 	flex-shrink: 0;
 	flex-grow: 1;
 }
-.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
-.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active .codeblock-customizer-line-number,
-.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] .codeblock-customizer-line-number {
+.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
+.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
+.codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] [class^='codeblock-customizer-line-number'] {
 	background-color: rgba(0,0,0,0);
 }
-.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number){
+.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number),
+.codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number-specific) {
 	padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
 }
 
@@ -99,21 +103,22 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 }
 .codeblock-customizer-header-container,
 .codeblock-customizer-header-container-specific {
+	font-size: var(--header-font-size);
 	user-select: none;
-	height: var(--language-icon-size);
+	height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding));
+	min-height: calc(1em * var(--line-height-normal) * 1.6);
 	padding-top: var(--header-padding);
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 	background-color: var(--codeblock-customizer-header-background-color);
-	border-bottom: 2px var(--codeblock-customizer-header-separator-color);
-	font-size: 14px;
+	border-bottom: 2px solid var(--codeblock-customizer-header-separator-color);
 	margin-top: 16px !important;           /*? originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
 	display: flex !important;
 	overflow: visible;
 }
 .markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container,
 .markdown-source-view.mod-cm6 .cm-content .codeblock-customizer-header-container-specific {
-	margin-top: 16px !important;           /*? originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
+	margin-top: 0px !important;           /*? originalVal: none, set it to 16px, so the header gets the marginTop, which was removed from the first line of the codeblock */    
 }
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)),
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)),
@@ -132,18 +137,23 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 }
 .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
 .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"] {
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	flex-direction: column;
 	height: 100%;
 	padding-left: var(--header-spacing);
 	padding-right: var(--header-spacing);
 	margin-right: var(--header-spacing);
-	padding-top: 0.3em;
-	padding-bottom: 0.3em;
+	padding-top: var(--header-inner-vertical-padding);
+	padding-bottom: var(--header-inner-vertical-padding);
 	font-size: inherit;
 	border-radius: var(--border-radius) var(--border-radius) 0px 0px;
 	background-color: var(--codeblock-customizer-header-language-tag-background-color);
 	color: var(--codeblock-customizer-header-language-tag-text-color);
 	font-weight: var(--codeblock-customizer-header-language-tag-text-bold, normal);
 	font-style: var(--codeblock-customizer-header-language-tag-text-italic, normal);
+	text-align: center;
 }
 .markdown-source-view .codeblock-customizer-header-container:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
 .markdown-source-view .codeblock-customizer-header-container-specific:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
@@ -152,9 +162,13 @@ body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-i
 	border-radius: var(--border-radius);
 }
 .codeblock-customizer-header-text {
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	flex-direction: column;
 	padding-left: 0px;
-	padding-top: 0.3em;
-	padding-bottom: 0.3em;
+	padding-top: var(--header-inner-vertical-padding);
+	padding-bottom: var(--header-inner-vertical-padding);
 	font-size: inherit;
 	color: var(--codeblock-customizer-header-text-color);
 	font-weight: var(--codeblock-customizer-header-title-text-bold, normal);
@@ -167,11 +181,18 @@ body .codeblock-customizer-header-container-specific:not(:has( [class^="codebloc
 }
 div:has(> img.codeblock-customizer-icon) {
 	display: inline-flex;
+	justify-content: center;
+	align-content: center;
+	flex-direction: column;
+	padding-top: var(--header-inner-vertical-padding);
+	padding-bottom: var(--header-inner-vertical-padding);
 	padding-left: var(--header-spacing);
 	padding-right: var(--header-spacing);
 }
 .codeblock-customizer-icon {
 	border: 0px;
+	width: var(--language-icon-size);
+	height: var(--language-icon-size);
 }
 
 /** Pre element styling */
@@ -227,7 +248,7 @@ div:has(> img.codeblock-customizer-icon) {
 	border-bottom-left-radius: var(--border-radius);
 	border-bottom-right-radius: var(--border-radius);
 }
-.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end .codeblock-customizer-line-number {
+.codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end [class^='codeblock-customizer-line-number'] {
 	border-bottom-left-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
@@ -236,9 +257,9 @@ body .markdown-source-view .codeblock-customizer-header-container:not(:has( img.
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 }
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
-body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number,
-body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin .codeblock-customizer-line-number {
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] {
 	border-top-left-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
