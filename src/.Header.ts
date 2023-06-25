@@ -1,7 +1,7 @@
 import { StateField, StateEffect, RangeSetBuilder } from "@codemirror/state";
 import { EditorView, Decoration } from "@codemirror/view";
 
-import { searchString, getLanguageName, isExcluded } from "./Utils";
+import { searchString, isExcluded } from "./Utils";
 
 function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) {
 	let CollapseStart = null;
@@ -41,60 +41,6 @@ function defaultFold(state: EditorState, settings: CodeblockCustomizerSettings) 
 	return builder.finish();
 }// defaultFold
 
-export const codeblockHeader = StateField.define<DecorationSet>({
-	create(state): DecorationSet {
-		return Decoration.none;    
-	},
-	update(oldState: DecorationSet, transaction: Transaction): DecorationSet {
-		const builder = new RangeSetBuilder<Decoration>();
-		let WidgetStart = null;
-		let Fold = false;
-		let fileName = null;
-		let bExclude = false;
-		let specificHeader = true;     
-		for (let i = 1; i < transaction.state.doc.lines; i++) {
-			const lineText = transaction.state.doc.line(i).text.toString();
-			const line = transaction.state.doc.line(i);
-			const lang = searchString(lineText, "```");      
-			bExclude = isExcluded(lineText, this.settings.ExcludeLangs);
-			specificHeader = true;
-			if (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1) {
-				if (WidgetStart === null) {
-					WidgetStart = line;
-					fileName = searchString(lineText, "file:");
-					Fold = searchString(lineText, "fold");
-					if (!bExclude) {
-						if (fileName === null || fileName === "") {
-							if (Fold) {
-								fileName = 'Collapsed Code';
-							} else {
-								fileName = '';
-								specificHeader = false;
-							}
-						}
-						builder.add(WidgetStart.from, WidgetStart.from, createDecorationWidget(fileName, getLanguageName(lang), specificHeader));
-						//EditorView.requestMeasure;
-					}
-				} else {
-					WidgetStart = null;
-					Fold = false;
-					fileName = null;
-				}
-			}
-		}
-	
-		return builder.finish();
-	},
-	provide(field: StateField<DecorationSet>): Extension {
-		return EditorView.decorations.from(field);
-	},
-});// codeblockHeader
-
-function createDecorationWidget(textToDisplay: string, languageName: string, specificHeader: boolean) {
-	return Decoration.widget({ 
-		widget: new TextAboveCodeblockWidget(textToDisplay, languageName, specificHeader), block: true});
-}// createDecorationWidget
-
 
 
 
@@ -123,7 +69,7 @@ export const collapseField = StateField.define({
 const doFold = Decoration.replace({block: true});
 
 	
-export function handleClick(view: EditorView, target: HTMLElement){
+function handleClick(view: EditorView, target: HTMLElement){
 	const Pos = view.posAtDOM(target);
 
 	const effect = view.state.field(collapseField, false);
@@ -165,5 +111,5 @@ export function handleClick(view: EditorView, target: HTMLElement){
 			WidgetStart = null;
 			blockFound = false;
 		}
-	}// for
-}// handleClick
+	}
+}

@@ -104,7 +104,7 @@ export const NEW_THEME_DEFAULT: {name: string, default: boolean} = {
 const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
 	codeblock: {
 		lineNumbers: true,
-		curvature: 10,
+		curvature: 4,
 	},
 	gutter: {
 		highlight: true,

@@ -49,5 +49,7 @@ export function getLineClass(codeblockParameters: CodeblockParameters, lineNumbe
 		if (highlightedLineNumbers.includes(lineNumber))
 			classList.push(`codeblock-customizer-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`);
 	})
+	if (classList.length === 0)
+		classList = ['codeblock-customizer-line']
 	return classList;
 }

@@ -1,12 +1,11 @@
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { StateField, StateEffect, Range, RangeSet, RangeSetBuilder } from "@codemirror/state";
+import { Extension, StateField, StateEffect, Range, RangeSet, RangeSetBuilder, Transaction } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
+import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
-
-
 
 export function codeblockLines(settings: CodeblockCustomizerSettings) {
 	return ViewPlugin.fromClass(
@@ -109,6 +108,8 @@ export function codeblockLines(settings: CodeblockCustomizerSettings) {
 				}
 				return RangeSet.of(decorations,true);
 			}
+
+			
 		
 			destroy() {
 				this.mutationObserver.disconnect();
@@ -116,6 +117,42 @@ export function codeblockLines(settings: CodeblockCustomizerSettings) {
 		},
 		{decorations: (value) => value.decorations}
 	)
+}
+
+export function codeblockHeader(settings: CodeblockCustomizerSettings) {
+	return StateField.define<DecorationSet>({
+		create(state): DecorationSet {
+			return Decoration.none;    
+		},
+		update(oldState: DecorationSet, transaction: Transaction): DecorationSet {
+			const builder = new RangeSetBuilder<Decoration>();
+			let codeblockParameters: CodeblockParameters;
+			let startLine: boolean = true;
+			for (let i = 1; i < transaction.state.doc.lines; i++) {
+				const line = transaction.state.doc.line(i);
+				const lineText = line.text.toString();
+				const codeblockDelimiterLine = (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1);
+				if (codeblockDelimiterLine) {
+					if (startLine) {
+						startLine = false;
+						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages))
+							builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings),block: true}));
+					} else {
+						startLine = true;
+					}
+				}
+			}
+			return builder.finish();
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		}
+	})
+}
+
+export function codeblockCollapse(settings: CodeblockCustomizerSettings) {
+
 }
 
 class LineNumberWidget extends WidgetType {
@@ -143,7 +180,6 @@ class LineNumberWidget extends WidgetType {
 		return createSpan({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 	}
 }
-
 class HeaderWidget extends WidgetType {
 	codeblockParameters: CodeblockParameters;
 	themeSettings: CodeblockCustomizerThemeSettings;
@@ -157,7 +193,8 @@ class HeaderWidget extends WidgetType {
 		this.mutationObserver = new MutationObserver((mutations) => {
 			mutations.forEach(mutation => {
 				if ((mutation.target as HTMLElement).hasAttribute('data-clicked'))
-					handleClick(this.view, mutation.target);
+					console.log('func')
+					//handleClick(this.view, mutation.target);
 			})
 		});    
 	}
@@ -175,14 +212,13 @@ class HeaderWidget extends WidgetType {
 
 		this.mutationObserver.observe(headerContainer,{
 			attributes: true,
-		});   
-		
+		});
 		return headerContainer;
 	}
 			
 	destroy(dom: HTMLElement) {
 		dom.removeAttribute("data-clicked");
-		dom.removeEventListener("mousedown",handleClick);
+		//dom.removeEventListener("mousedown",handleClick);
 		this.mutationObserver.disconnect();
 	}
 

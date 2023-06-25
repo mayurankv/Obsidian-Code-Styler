@@ -93,7 +93,7 @@ export class SettingsTab extends PluginSettingTab {
 			button.onClick(() => {
 				if (this.plugin.settings.selectedTheme.trim().length === 0) {
 					new Notice('Select a theme first to delete'); //NOSONAR
-				} else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes) {
+				} else if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes) {
 					new Notice('You cannot delete the default themes'); //NOSONAR
 				} else {
 					if (this.plugin.settings.defaultTheme === this.plugin.settings.selectedTheme)

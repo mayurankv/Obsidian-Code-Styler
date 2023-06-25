@@ -3,7 +3,7 @@ import { Plugin } from "obsidian";
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
 import { updateStyling } from "./ApplyStyling";
-import { codeblockLines } from "./EditingView";
+import { codeblockLines, codeblockHeader } from "./EditingView";
 import { readingViewPostProcessor } from "./ReadingView";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
@@ -17,12 +17,10 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		const settingsTab = new SettingsTab(this.app, this);
 		this.addSettingTab(settingsTab);
 
-		// codeblockHeader.settings = this.settings;
-		// collapseField.pluginSettings = this.settings;
 		this.registerEditorExtension([
-			codeblockLines(this.settings)
-		// 	codeblockHeader,
-		// 	collapseField,
+			codeblockLines(this.settings),
+			codeblockHeader(this.settings),
+			// 	collapseField,
 		]);
 		
 		
@@ -40,7 +38,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	}
 	
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign({}, structuredClone(DEFAULT_SETTINGS), await this.loadData());
 	}
 
 	async saveSettings() {
