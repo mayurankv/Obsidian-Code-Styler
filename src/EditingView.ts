@@ -99,7 +99,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							if (excludedCodeblock)
 								return;
 							if (node.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {class: codeblockParameters.language===''?'':`language-${codeblockParameters.language} `+getLineClass(codeblockParameters,lineNumber).join(' ')}}).range(node.from))
+								decorations.push(Decoration.line({attributes: {class: getLineClass(codeblockParameters,lineNumber).join(' ')+(codeblockParameters.language===''?'':` language-${codeblockParameters.language}`)}}).range(node.from))
 								decorations.push(Decoration.line({}).range(node.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
 								lineNumber++;
@@ -301,6 +301,9 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 		}
 	}
 
+	const collapse: StateEffectType<Array<Range<Decoration>>> = StateEffect.define();
+	const uncollapse: StateEffectType<(from: any, to: any) => boolean> = StateEffect.define();
+
 	function handleMouseDown(event: MouseEvent): void {
 		this.setAttribute("data-clicked","true")
 	}
@@ -340,6 +343,3 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
 	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }
-
-const collapse: StateEffectType<Array<Range<Decoration>>> = StateEffect.define();
-const uncollapse: StateEffectType<(from: any, to: any) => boolean> = StateEffect.define();
