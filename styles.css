@@ -201,7 +201,7 @@ body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) .
 }
 body:not([class*='codeblock-customizer-show-langicons']):not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific .codeblock-customizer-header-text,
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-container .codeblock-customizer-header-text,
-body .codeblock-customizer-header-container-specific:not(:has( [class^="codeblock-customizer-header-language-tag-"])) .codeblock-customizer-header-text {
+body .codeblock-customizer-header-container-specific:not(:has( [class^="codeblock-customizer-header-language-tag-"])) .codeblock-customizer-header-text { /*? Depending on header visibility */
 	padding-left: var(--header-spacing);
 }
 div:has(> img.codeblock-customizer-icon) {
@@ -281,15 +281,17 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 		clip-path: polygon(0 0, 16px 0, 16px 36px, 0 36px);
 	}
 }
-body:not([class*='codeblock-customizer-show-langicons']) .markdown-rendered pre.codeblock-customizer-pre:has(.codeblock-customizer-header-container-specific div > img.codeblock-customizer-icon) button.copy-code-button,
-body:not(.codeblock-customizer-show-langicons-always) .markdown-rendered pre.codeblock-customizer-pre:has(.codeblock-customizer-header-container div > img.codeblock-customizer-icon) button.copy-code-button,
-body:not([class*='codeblock-customizer-show-langnames']) .markdown-rendered pre.codeblock-customizer-pre:has( .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"]) button.copy-code-button,
-body:not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:has( .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"]) button.copy-code-button,
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:has( .codeblock-customizer-header-container) button.copy-code-button,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:not(:has( .codeblock-customizer-header-container img.codeblock-customizer-icon)) button.copy-code-button,
-body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) button.copy-code-button {
-	top: calc(var(--code-padding) + 0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
-	--copy-code-header-right-margin: 8px;
+body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) button.copy-code-button { /*? Depending on header visibility */
+	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
+	--copy-code-header-right-margin: 12px;
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin span.code-block-flair,
+body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin span.code-block-flair,
+body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']) + .HyperMD-codeblock-begin span.code-block-flair { /*? Depending on header visibility */
+	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
+	--copy-code-header-right-margin: 12px;
 }
 .markdown-rendered pre.codeblock-customizer-pre button.copy-code-button {
 	transform: translateY(-50%);
@@ -335,8 +337,9 @@ body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) b
 	vertical-align: 1px;
 }
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair {
+	transform: translateY(-50%);
 	font-size: 0;
-	top: 0;
+	top: min(calc(-0.5 * var(--container-height) * 1.1),calc(-0.5 * var(--container-min-height) * 1.1));
 	right: 0;
 }
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair > * {
@@ -410,20 +413,14 @@ pre.codeblock-customizer-pre::after {
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
-body .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin {
+body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']) + .HyperMD-codeblock-begin { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] {
+body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
-}
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .codeblock-customizer-pre,
-body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre,
-body .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .codeblock-customizer-pre {
-	border-top-left-radius: var(--border-radius);
-	border-top-right-radius: var(--border-radius);
 }
 
 /** Settings */
