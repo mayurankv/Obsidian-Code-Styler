@@ -242,6 +242,7 @@ export class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Indicate Current Line Number')
 			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate color.')
+			.setClass('codeblock-customizer-spaced')
 			.addToggle(toggle => {let indicateCurrentLineNumberToggle = toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.activeLine)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
