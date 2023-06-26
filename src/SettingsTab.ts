@@ -239,6 +239,25 @@ export class SettingsTab extends PluginSettingTab {
 				})
 				this.disableableComponents['lineNumbers'].push(highlightLineNumbersToggle);
 			});
+		new Setting(containerEl)
+			.setName('Indicate Current Line Number')
+			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate color.')
+			.addToggle(toggle => {let indicateCurrentLineNumberToggle = toggle
+				.setValue(this.plugin.settings.currentTheme.settings.gutter.activeLine)
+				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.gutter.activeLine = value;
+					(async () => {await this.plugin.saveSettings()})();
+				})
+				this.disableableComponents['lineNumbers'].push(indicateCurrentLineNumberToggle);
+			})
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'active_line_number',
+				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].gutter.activeTextColor,
+				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].gutter.activeTextColor = saveColor},
+				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
+			)});
 		
 		containerEl.createEl('h4', {text: 'Header Appearance'});
 		new Setting(containerEl)
@@ -671,9 +690,8 @@ export class SettingsTab extends PluginSettingTab {
 					this.createPickr(
 						this.plugin,alternativeHighlightsContainer,setting,
 						`alternative_highlight_${alternativeHighlightName}`,
-						(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName],
+						(relevantThemeColors: CodeblockCustomizerThemeColors) => alternativeHighlightName in relevantThemeColors.light.highlights.alternativeHighlights?relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName]:this.plugin.settings.currentTheme.colors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName],
 						(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName] = saveColor},
-						() => !(alternativeHighlightName in this.plugin.settings.themes[this.plugin.settings.selectedTheme].colors.light.highlights.alternativeHighlights),
 					);
 					setting.addExtraButton((button) => {button
 						.setIcon("trash")

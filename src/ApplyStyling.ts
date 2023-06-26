@@ -36,6 +36,7 @@ function getThemeColors (themeModeColors: CodeblockCustomizerThemeModeColors): s
 		'codeblock-text-color': themeModeColors.codeblock.textColor,
 		'gutter-background-color': themeModeColors.gutter.backgroundColor,
 		'gutter-text-color': themeModeColors.gutter.textColor,
+		'gutter-active-text-color': themeModeColors.gutter.activeTextColor,
 		'header-background-color': themeModeColors.header.backgroundColor,
 		'header-title-text-color': themeModeColors.header.title.textColor,
 		'header-language-tag-background-color': themeModeColors.header.languageTag.backgroundColor,
@@ -107,6 +108,11 @@ function addThemeSettingsClasses (themeSettings: CodeblockCustomizerThemeSetting
 		document.body.classList.add('codeblock-customizer-gutter-highlight');
 	else
 		document.body.classList.remove('codeblock-customizer-gutter-highlight');
+
+	if (themeSettings.gutter.activeLine)
+		document.body.classList.add('codeblock-customizer-gutter-active-line');
+	else
+		document.body.classList.remove('codeblock-customizer-gutter-active-line');
 	
 	document.body.classList.remove("codeblock-customizer-active-line-highlight","codeblock-customizer-active-line-highlight-codeblock","codeblock-customizer-active-line-highlight-editor")
 	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colors

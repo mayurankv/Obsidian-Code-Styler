@@ -97,6 +97,9 @@ body {
 .codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] [class^='codeblock-customizer-line-number'] {
 	background-color: rgba(0,0,0,0);
 }
+.codeblock-customizer-gutter-active-line .cm-active [class^='codeblock-customizer-line-number']{
+	color: var(--codeblock-customizer-gutter-active-text-color);
+}
 .codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number),
 .codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number-specific) {
 	padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
