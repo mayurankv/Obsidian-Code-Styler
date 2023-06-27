@@ -19,6 +19,9 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 		return;
 		
 	const codeblockSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(codeblockCodeElement);
+	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
+	if (cache?.frontmatter?.['codeblock-customizer-ignore'] === true)
+		return;
 	if (codeblockSectionInfo) {
 		const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || typeof view?.editor === 'undefined')
@@ -36,7 +39,6 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 			return '';
 		});
 
-		const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
 		const fileContentLines = fileContent.split(/\n/g);
 		const codeblocks: Array<Array<string>> = [];
 
