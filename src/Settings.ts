@@ -33,6 +33,10 @@ export interface CodeblockCustomizerThemeModeColors {
 		defaultColor: Color;
 		alternativeHighlights: Record<string,Color>;
 	},
+	advanced: {
+		buttonColor: Color;
+		buttonActiveColor: Color;
+	}
 }
 export interface CodeblockCustomizerThemeSettings {
 	codeblock: {
@@ -167,6 +171,10 @@ export const THEME_FALLBACK_COLORS: CodeblockCustomizerThemeModeColors = {
 		defaultColor: '--text-highlight-bg',
 		alternativeHighlights: {},
 	},
+	advanced: {
+		buttonColor: '--text-muted',
+		buttonActiveColor: '--text-normal',
+	}
 }
 
 // Theme Creation
@@ -207,6 +215,10 @@ const SOLARIZED_THEME: CodeblockCustomizerTheme = {
 				defaultColor: '#E9DFBA',
 				alternativeHighlights: {},
 			},
+			advanced: {
+				buttonColor: '--text-muted',
+				buttonActiveColor: '--text-normal',
+			}
 		},
 		dark: {
 			codeblock: {
@@ -235,6 +247,10 @@ const SOLARIZED_THEME: CodeblockCustomizerTheme = {
 				defaultColor: '#054b5c',
 				alternativeHighlights: {},
 			},
+			advanced: {
+				buttonColor: '--text-muted',
+				buttonActiveColor: '--text-normal',
+			}
 		},
 	},
 }

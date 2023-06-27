@@ -9,7 +9,7 @@ export function updateStyling(settings: CodeblockCustomizerSettings): void {
 		styleTag.id = styleId;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
-	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors()).trim().replace(/\s+/g,' ');
+	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors(settings.currentTheme.settings)).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
 
@@ -45,6 +45,8 @@ function getThemeColors (themeModeColors: CodeblockCustomizerThemeModeColors): s
 		'active-codeblock-line-color': themeModeColors.highlights.activeCodeblockLineColor,
 		'active-editor-line-color': themeModeColors.highlights.activeEditorLineColor,
 		'default-highlight-color': themeModeColors.highlights.defaultColor,
+		'button-color': themeModeColors.advanced.buttonColor,
+		'button-active-color': themeModeColors.advanced.buttonActiveColor,
 		...Object.entries(themeModeColors.highlights.alternativeHighlights).reduce((result: Record<string,Color>,[alternativeHighlight,color]: [string,Color]): Record<string,Color> => {
 			result[`${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-color`] = color;
 			return result;
@@ -60,22 +62,17 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 		body.codeblock-customizer [class^="codeblock-customizer-header-language-tag"] {
 			--codeblock-customizer-header-language-tag-text-bold: ${themeSettings.header.languageTag.textBold?'bold':'normal'};
 			--codeblock-customizer-header-language-tag-text-italic: ${themeSettings.header.languageTag.textItalic?'italic':'normal'};
-			${themeSettings.header.languageTag.textFont===''?'':`
-				font-family: ${themeSettings.header.languageTag.textFont};
-			`}
+			font-family: ${themeSettings.header.languageTag.textFont!==''?themeSettings.header.languageTag.textFont:'var(--font-text)'};
 		}
 		body.codeblock-customizer .codeblock-customizer-header-text {
 			--codeblock-customizer-header-title-text-bold: ${themeSettings.header.title.textBold?'bold':'normal'};
 			--codeblock-customizer-header-title-text-italic: ${themeSettings.header.title.textItalic?'italic':'normal'};
-			${themeSettings.header.title.textFont===''?'':`
-				font-family: ${themeSettings.header.title.textFont};
-			`}
+			font-family: ${themeSettings.header.languageTag.textFont!==''?themeSettings.header.languageTag.textFont:'var(--font-text)'};
 		}
 		body.codeblock-customizer {
 			--border-radius: ${themeSettings.codeblock.curvature}px;
 			--language-icon-size: ${themeSettings.advanced.iconSize}px;
 			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
-			--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
 			--header-font-size: ${themeSettings.header.fontSize}px;
 		}
 		${themeSettings.header.languageIcon.displayColor?'':`
@@ -86,12 +83,13 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 	`;
 }
 
-function styleLanguageColors (): string {
+function styleLanguageColors (themeSettings: CodeblockCustomizerThemeSettings): string {
 	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
 		if (languageDisplayName in LANGUAGE_COLORS)
 			result += `
 				.language-${languageName} {
-					--language-border-color: ${LANGUAGE_COLORS[languageDisplayName]}
+					--language-border-color: ${LANGUAGE_COLORS[languageDisplayName]};
+					--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
 				}
 			`;
 		return result;

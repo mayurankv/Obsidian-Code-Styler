@@ -2,13 +2,14 @@
 body {
 	--line-number-gutter-width: 32px;
 	--line-number-gutter-padding: 16px;
+	--header-separator-width: 2px;
 	--code-padding: 8px;
 	--header-font-size: var(--code-size);
 	--header-padding: 0px;
 	--header-inner-vertical-padding: 0.3;
 	--header-spacing: 15px;
 	--language-border-color: var(--codeblock-customizer-codeblock-background-color);
-	--language-border-width: 5px;
+	--language-border-width: 0px;
 	--gradient-background-color: transparent;
 	--border-radius: 10px;
 	--language-icon-size: 28px;
@@ -18,8 +19,11 @@ body {
 	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
 	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
 	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
-	--button-color: var(--text-muted);
-	--button-active-color: white;
+	--codeblock-customizer-button-color: var(--text-muted);
+	--codeblock-customizer-button-active-color: white;
+	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	--dent-difference: 30px;
 }
 
 /** Codeblock background colours */
@@ -126,7 +130,7 @@ body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-head
 	display: none !important;
 }
 body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']),
-body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) .codeblock-customizer-header-container {
+body .markdown-rendered pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) .codeblock-customizer-header-container {
 	display: none !important;
 }
 [class^='codeblock-customizer-header-container'] {
@@ -135,9 +139,7 @@ body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) .
 	height: var(--container-height);
 	min-height: var(--container-min-height);
 	padding-top: var(--header-padding);
-	border-top-left-radius: var(--border-radius);
-	border-top-right-radius: var(--border-radius);
-	border-bottom: 2px solid var(--codeblock-customizer-header-separator-color);
+	border-bottom: var(--header-separator-width) solid var(--codeblock-customizer-header-separator-color);
 	margin-top: 0px !important;  
 	display: flex !important;
 	overflow: visible;
@@ -145,6 +147,12 @@ body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) .
 .markdown-source-view [class^='codeblock-customizer-header-container'] {
 	background: linear-gradient(var(--codeblock-customizer-header-background-color),var(--codeblock-customizer-header-background-color)) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
 	border-left: var(--language-border-width) solid transparent;
+	border-top-left-radius: var(--border-radius);
+	border-top-right-radius: var(--border-radius);
+}
+.markdown-rendered [class^='codeblock-customizer-header-container'] {
+	background-color:var(--codeblock-customizer-header-background-color);
+	border-left: none;
 }
 .markdown-source-view [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
 	padding-bottom: var(--header-padding);
@@ -199,8 +207,14 @@ body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) .
 	font-weight: var(--codeblock-customizer-header-title-text-bold, normal);
 	font-style: var(--codeblock-customizer-header-title-text-italic, normal);
 }
+body:not([class*='codeblock-customizer-show-langicons']) .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"],
+body:not(.codeblock-customizer-show-langicons-always) .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
+body .codeblock-customizer-header-container-specific:not(:has( div > img.codeblock-customizer-icon)) [class^="codeblock-customizer-header-language-tag"] { /*? Depending on header visibility */
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+}
 body:not([class*='codeblock-customizer-show-langicons']):not([class*='codeblock-customizer-show-langnames']) .codeblock-customizer-header-container-specific .codeblock-customizer-header-text,
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-header-container) .codeblock-customizer-header-container .codeblock-customizer-header-text,
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames) .codeblock-customizer-header-container .codeblock-customizer-header-text,
 body .codeblock-customizer-header-container-specific:not(:has( [class^="codeblock-customizer-header-language-tag-"])) .codeblock-customizer-header-text { /*? Depending on header visibility */
 	padding-left: var(--header-spacing);
 }
@@ -226,6 +240,13 @@ div:has(> img.codeblock-customizer-icon) {
 	visibility: visible;
 	opacity: 1;
 	display: unset !important;
+	color: var(--codeblock-customizer-button-color);
+	background: transparent;
+	box-shadow: none;
+	font-family: var(--font-interface);
+	font-size: var(--font-ui-smaller);
+	margin: 0;
+	padding: 0;
 }
 .markdown-rendered pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(:hover) button,
 .markdown-rendered .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed button,
@@ -244,7 +265,7 @@ pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(
 	content: "\200b";
 	width: 20px;
 	height: 20px;
-	background-color: var(--text-muted);
+	background-color: var(--codeblock-customizer-button-color);
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' xml:space='preserve'%3E%3Cpath d='M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z'/%3E%3C/svg%3E");
 	-webkit-mask-repeat: no-repeat;
 	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' %3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
@@ -261,35 +282,55 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 [class^='codeblock-customizer-header-container']:hover::after {
 	scale: 1;
 }
-@keyframes copy-outdent {
+@keyframes outdent {
 	from {
-		margin-right: calc(var(--copy-code-header-right-margin) - 30px);
-		clip-path: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+		clip-path: var(--polygon-in);
 	}
 	to {
 		margin-right: var(--copy-code-header-right-margin);
-		clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+		clip-path: var(--polygon-out);
 	}
 }
-@keyframes copy-indent {
+@keyframes indent {
 	from {
 		margin-right: var(--copy-code-header-right-margin);
-		clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+		clip-path: var(--polygon-out);
 	}
 	to {
-		margin-right: calc(var(--copy-code-header-right-margin) - 30px);
-		clip-path: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+		clip-path: var(--polygon-in);
+	}
+}
+@keyframes reverse-outdent {
+	from {
+		/* margin-left: calc(var(--copy-code-header-right-margin) - var(--dent-difference)); */
+		clip-path: var(--polygon-in);
+	}
+	to {
+		/* margin-left: var(--copy-code-header-right-margin); */
+		clip-path: var(--polygon-out);
+	}
+}
+@keyframes reverse-indent {
+	from {
+		/* margin-left: var(--copy-code-header-right-margin); */
+		clip-path: var(--polygon-out);
+	}
+	to {
+		/* margin-left: calc(var(--copy-code-header-right-margin) - var(--dent-difference)); */
+		clip-path: var(--polygon-in);
 	}
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:has( .codeblock-customizer-header-container) button.copy-code-button,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:not(:has( .codeblock-customizer-header-container img.codeblock-customizer-icon)) button.copy-code-button,
-body .markdown-rendered pre.codeblock-customizer-pre:not([class*='language-']) button.copy-code-button { /*? Depending on header visibility */
+body .markdown-rendered pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 	--copy-code-header-right-margin: 12px;
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin span.code-block-flair,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin span.code-block-flair,
-body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']) + .HyperMD-codeblock-begin span.code-block-flair { /*? Depending on header visibility */
+body .markdown-source-view .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin span.code-block-flair { /*? Depending on header visibility */
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 	--copy-code-header-right-margin: 12px;
 }
@@ -298,26 +339,27 @@ body .markdown-source-view .codeblock-customizer-header-container:not([class*='l
 	top: max(calc(0.5 * var(--container-height) * 0.9),calc(0.5 * var(--container-min-height) * 0.9));
 }
 .markdown-rendered pre.codeblock-customizer-pre button.copy-code-button,
+.markdown-rendered pre.codeblock-customizer-pre button.run-code-button, /*? Execute Code Plugin Compatibility */
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair {
-	color: var(--button-color);
-	margin: 0;
-	padding: 0;
-	margin-right: calc(var(--copy-code-header-right-margin) - 30px);
+	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
 	will-change: margin-right, clip-path;
-	clip-path: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+	clip-path: var(--polygon-in);
 }
 .markdown-rendered pre.codeblock-customizer-pre button.copy-code-button:not(:active),
+.markdown-rendered pre.codeblock-customizer-pre button.run-code-button:not(:active), /*? Execute Code Plugin Compatibility */
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair:not(:active) {
-	animation: copy-indent var(--duration-button);
+	animation: indent var(--duration-button);
 }
 .markdown-rendered pre.codeblock-customizer-pre button.copy-code-button:hover,
+.markdown-rendered pre.codeblock-customizer-pre button.run-code-button:hover, /*? Execute Code Plugin Compatibility */
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair:hover{
 	background-color: transparent;
-	animation: copy-outdent var(--duration-button);
+	animation: outdent var(--duration-button);
 	margin-right: var(--copy-code-header-right-margin);
-	clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	clip-path: var(--polygon-out);
 }
 .markdown-rendered pre.codeblock-customizer-pre button.copy-code-button:active,
+.markdown-rendered pre.codeblock-customizer-pre button.run-code-button:active, /*? Execute Code Plugin Compatibility */
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair:active {
 	scale: 0.95;
 	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
@@ -329,7 +371,7 @@ body .markdown-source-view .codeblock-customizer-header-container:not([class*='l
 	width: 14px;
 	height: 14px;
 	padding-right: 4px;
-	background-color: var(--button-color);
+	background-color: var(--codeblock-customizer-button-color);
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z'/%3E%3Cpath d='M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
 	-webkit-mask-repeat: no-repeat;
 	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z'/%3E%3Cpath d='M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
@@ -341,23 +383,26 @@ body .markdown-source-view .codeblock-customizer-header-container:not([class*='l
 	font-size: 0;
 	top: min(calc(-0.5 * var(--container-height) * 1.1),calc(-0.5 * var(--container-min-height) * 1.1));
 	right: 0;
+	visibility: hidden;
 }
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair > * {
 	width: 0px;
 }
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair::before {
+	visibility: visible;
 	vertical-align: -1px;
 	font-size: var(--font-ui-smaller);
 }
 .markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair::after {
+	visibility: visible;
 	font-size: var(--font-ui-smaller);
 	content: 'Copy';
-	color: var(--button-color);
+	color: var(--codeblock-customizer-button-color);
 }
 
 /** Pre element styling */
 .markdown-rendered .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
-	display: none;
+	display: none !important;
 }
 .codeblock-customizer-pre-parent{
 	margin-bottom: 16px;
@@ -413,14 +458,87 @@ pre.codeblock-customizer-pre::after {
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
-body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']) + .HyperMD-codeblock-begin { /*? Depending on header visibility */
+body .markdown-source-view .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] { /*? Depending on header visibility */
+body .markdown-source-view .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
+}
+
+/** Execute Code Plugin Compatibility */
+pre.codeblock-customizer-pre code.language-output hr {
+	border-color: var(--codeblock-customizer-header-separator-color);
+	border-top-width: var(--header-separator-width);
+	margin-bottom: var(--code-padding);
+}
+pre.codeblock-customizer-pre code.language-output {
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: calc(2.5 * var(--code-padding));
+}
+pre.codeblock-customizer-pre:hover code.language-output {
+	margin-bottom: 0;
+}
+.markdown-rendered pre.codeblock-customizer-pre button.run-code-button {
+	--copy-code-header-right-margin: 12px;
+	--dent-difference: 24px;
+	height: 14px;
+	margin-bottom: 6px;
+}
+.markdown-rendered pre.codeblock-customizer-pre button.run-code-button::before {
+	content: "\200b";
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	padding-right: 4px;
+	background-color: var(--codeblock-customizer-button-color);
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 28a1 1 0 0 1-1-1V5a1 1 0 0 1 1.482-.876l20 11a1 1 0 0 1 0 1.752l-20 11A1 1 0 0 1 7 28Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 28a1 1 0 0 1-1-1V5a1 1 0 0 1 1.482-.876l20 11a1 1 0 0 1 0 1.752l-20 11A1 1 0 0 1 7 28Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	mask-repeat: no-repeat;
+	vertical-align: 0px;
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button-disabled {
+	display: none !important;
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button {
+	height: 14px;
+	margin-bottom: 6px;
+	margin-left: calc(var(--language-border-width) + 12px);
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button::before {
+	content: "\200b";
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	padding-right: 4px;
+	background-color: var(--codeblock-customizer-button-color);
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4 6 14l1.41 1.41L15 7.83V28h2V7.83l7.59 7.58L26 14 16 4z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4 6 14l1.41 1.41L15 7.83V28h2V7.83l7.59 7.58L26 14 16 4z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	mask-repeat: no-repeat;
+	vertical-align: 0px;
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button {
+	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+	will-change: margin-right, clip-path;
+	clip-path: var(--polygon-in);
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button:not(:active) {
+	animation: reverse-indent var(--duration-button);
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button:hover{
+	background-color: transparent;
+	animation: reverse-outdent var(--duration-button);
+	margin-right: var(--copy-code-header-right-margin);
+	clip-path: var(--polygon-out);
+}
+.markdown-rendered pre.codeblock-customizer-pre button.clear-button:active {
+	scale: 0.95;
+	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 }
 
 /** Settings */

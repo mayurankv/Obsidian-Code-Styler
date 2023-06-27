@@ -108,6 +108,7 @@ export class SettingsTab extends PluginSettingTab {
 				});
 			});
 		let newThemeName: TextComponent;
+		let newThemeDefault: ToggleComponent;
 		this.plugin.settings.newTheme = structuredClone(NEW_THEME_DEFAULT);
 		new Setting(containerEl)
 			.setName('Add New Theme')
@@ -119,7 +120,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.newTheme.name = value;
 				});
 			})
-			.addToggle(toggle => {return toggle
+			.addToggle(toggle => {newThemeDefault = toggle
 				.setTooltip("Save as the default theme")
 				.setValue(false)
 				.onChange((value) => {
@@ -149,6 +150,7 @@ export class SettingsTab extends PluginSettingTab {
 						this.updateAlternativeHighlights(alternativeHighlightsContainer);
 						this.plugin.settings.newTheme = structuredClone(NEW_THEME_DEFAULT);
 						newThemeName.setValue("");
+						newThemeDefault.setValue(false);
 						(async () => {await this.plugin.saveSettings()})();
 					}
 				});
@@ -563,6 +565,23 @@ export class SettingsTab extends PluginSettingTab {
 		// ========== Advanced ==========
 		containerEl.createEl('h3', {text: 'Advanced Settings'});
 		
+		new Setting(containerEl)
+			.setName('Button Color')
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'default_highlight',
+				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].advanced.buttonColor,
+				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].advanced.buttonColor = saveColor},
+			)});
+		new Setting(containerEl)
+			.setName('Button Active Color')
+			.setDesc('Color buttons use when activated.')
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'default_highlight',
+				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].advanced.buttonActiveColor,
+				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].advanced.buttonActiveColor = saveColor},
+			)});
 		new Setting(containerEl)
 			.setName('Gradient Highlighting')
 			.setDesc('If enabled, highlights fade away to the right. The slider sets the gradient color stop as a percentage.')
