@@ -15,7 +15,8 @@ export interface CodeblockParameters {
 	highlights: {
 		default: Array<number>;
 		alternative: Record<string,Array<number>>
-	}
+	},
+	ignore: boolean;
 }
 
 export function parseCodeblockParameters(parameterLine: string, theme: CodeblockCustomizerTheme): CodeblockParameters {
@@ -35,6 +36,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 			default: [],
 			alternative: {},
 		},
+		ignore: false,
 	}
 	if (parameterLine.startsWith('```')) {
 		let languageBreak = parameterLine.indexOf(' ');
@@ -62,6 +64,8 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 	} else if (parameterString === 'fold') {
 		codeblockParameters.fold.enabled = true;
 		codeblockParameters.fold.placeholder = '';
+	} else if (parameterString === 'ignore') {
+		codeblockParameters.ignore = true;
 	} else if (parameterString.startsWith('ln:')) {
 		parameterString = parameterString.slice('ln:'.length)
 		if (/^\d+$/.test(parameterString)) {

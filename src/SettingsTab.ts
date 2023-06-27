@@ -540,7 +540,7 @@ export class SettingsTab extends PluginSettingTab {
 						new Notice(`"${this.plugin.settings.newHighlight}" is not a valid color name.`); //NOSONAR
 					else if (this.plugin.settings.newHighlight.trim().toLowerCase() === 'hl')
 						new Notice("Cannot override the default highlight parameter."); //NOSONAR
-					else if (['title','fold','ln'].includes(this.plugin.settings.newHighlight.trim().toLowerCase()))
+					else if (['title','fold','ln','ignore'].includes(this.plugin.settings.newHighlight.trim().toLowerCase()))
 						new Notice("Cannot use other default parameters."); //NOSONAR
 					else {
 						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights)

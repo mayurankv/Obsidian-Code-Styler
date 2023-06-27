@@ -36,16 +36,16 @@ body {
 .codeblock-customizer .markdown-source-view .HyperMD-codeblock[class*='codeblock-customizer-line'][class*='language-'] [class^='codeblock-customizer-line-number'] {
 	margin-left: var(--language-border-width);
 }
-.codeblock-customizer .markdown-rendered pre.codeblock-customizer-pre {
+.codeblock-customizer pre.codeblock-customizer-pre {
 	background: var(--codeblock-customizer-codeblock-background-color) !important;
 }
-.codeblock-customizer .markdown-rendered pre.codeblock-customizer-pre[class*='language-'] {
+.codeblock-customizer pre.codeblock-customizer-pre[class*='language-'] {
 	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), transparent var(--language-border-width), transparent 100%), var(--codeblock-customizer-codeblock-background-color) !important;
 	padding-left: var(--language-border-width);
 }
 
 /** Highlighting */
-.markdown-rendered [class^='codeblock-customizer-line-highlighted'] {
+pre.codeblock-customizer-pre [class^='codeblock-customizer-line-highlighted'] {
 	background-image: linear-gradient(90deg, var(--gradient-background-color) 0% var(--gradient-highlights-color-stop), transparent 100%);
 }
 .codeblock-customizer-line-highlighted {
@@ -55,8 +55,8 @@ body {
 .codeblock-customizer-active-line-highlight-editor .cm-active {
 	background: linear-gradient(to right, var(--codeblock-customizer-active-editor-line-color), var(--gradient-highlights-color-stop), transparent) !important;
 }
-.codeblock-customizer-active-line-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active,
-.codeblock-customizer-active-line-highlight-codeblock .markdown-source-view [class*="codeblock-customizer-line"].cm-active {
+.codeblock-customizer-active-line-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active,
+.codeblock-customizer-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active {
 	background: linear-gradient(to right, var(--codeblock-customizer-active-codeblock-line-color), var(--gradient-highlights-color-stop), transparent) !important;
 }
 
@@ -65,13 +65,13 @@ body {
 .codeblock-customizer-line-number-hide {
 	display: none;
 }
-.markdown-rendered .codeblock-customizer-pre > code > div:first-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
+pre.codeblock-customizer-pre > code > div:first-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
 }
-.markdown-rendered .codeblock-customizer-pre > code > div:last-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
+pre.codeblock-customizer-pre > code > div:last-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
-.markdown-rendered .codeblock-customizer-pre > code > div:only-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
+pre.codeblock-customizer-pre > code > div:only-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color),0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
 }
 [class^='codeblock-customizer-line-number'] {
@@ -86,8 +86,8 @@ body {
 	color: var(--codeblock-customizer-gutter-text-color);
 	user-select: none;
 }
-.markdown-source-view .codeblock-customizer-line-number,
-.markdown-source-view .codeblock-customizer-line-number-specific {
+.markdown-source-view .HyperMD-codeblock .codeblock-customizer-line-number,
+.markdown-source-view .HyperMD-codeblock .codeblock-customizer-line-number-specific {
 	position: absolute;
 	display: inline-block;
 	height: 100%;
@@ -96,15 +96,15 @@ body {
 	direction: rtl;
 	left: 0;
 }
-.markdown-source-view [class^='codeblock-customizer-line-number']::-webkit-scrollbar {
+.markdown-source-view .HyperMD-codeblock[class^='codeblock-customizer-line-number']::-webkit-scrollbar {
 	display: none;
 }
-.markdown-rendered [class^='codeblock-customizer-line-number'] {
+pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
 	flex-shrink: 0;
 	flex-grow: 1;
 }
-.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
-.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view [class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
+.codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
+.codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
 .codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] [class^='codeblock-customizer-line-number'] {
 	background-color: rgba(0,0,0,0);
 }
@@ -129,8 +129,8 @@ body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-
 body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) {
 	display: none !important;
 }
-body .markdown-source-view .codeblock-customizer-header-container:not([class*='language-']),
-body .markdown-rendered pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) .codeblock-customizer-header-container {
+body .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not([class*='language-']),
+body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) .codeblock-customizer-header-container {
 	display: none !important;
 }
 [class^='codeblock-customizer-header-container'] {
@@ -144,26 +144,26 @@ body .markdown-rendered pre.codeblock-customizer-pre:not(:has([class*='codeblock
 	display: flex !important;
 	overflow: visible;
 }
-.markdown-source-view [class^='codeblock-customizer-header-container'] {
+.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] {
 	background: linear-gradient(var(--codeblock-customizer-header-background-color),var(--codeblock-customizer-header-background-color)) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
 	border-left: var(--language-border-width) solid transparent;
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 }
-.markdown-rendered [class^='codeblock-customizer-header-container'] {
+pre.codeblock-customizer-pre [class^='codeblock-customizer-header-container'] {
 	background-color:var(--codeblock-customizer-header-background-color);
 	border-left: none;
 }
-.markdown-source-view [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
+.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
 	padding-bottom: var(--header-padding);
 	border-bottom-left-radius: var(--border-radius);
 	border-bottom-right-radius: var(--border-radius);
 	border-bottom-color: transparent;
 }
-.markdown-rendered .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] {
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] {
 	border-bottom-color: transparent;
 }
-.markdown-source-view.mod-cm6 .cm-content [class^='codeblock-customizer-header-container'] { /*? Fix for incorrectly displaying header when using "minimal" theme */
+.markdown-source-view.mod-cm6 .cm-content :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] { /*? Fix for incorrectly displaying header when using "minimal" theme */
 	/*! Breaks 'Things' theme */
 	/* max-width: calc(var(--max-width) - var(--folding-offset));
 	width: calc(var(--line-width-adaptive) - var(--folding-offset));
@@ -188,8 +188,8 @@ body .markdown-rendered pre.codeblock-customizer-pre:not(:has([class*='codeblock
 	font-style: var(--codeblock-customizer-header-language-tag-text-italic, normal);
 	text-align: center;
 }
-.markdown-source-view [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
-.markdown-rendered .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] [class^="codeblock-customizer-header-language-tag"] {
+.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] [class^="codeblock-customizer-header-language-tag"] {
 	border-radius: var(--border-radius);
 	/*! Space under language tag when folded - cover with shadow */
 	/* box-shadow: 0px 2px var(--codeblock-customizer-header-language-tag-background-color); */
@@ -235,13 +235,13 @@ div:has(> img.codeblock-customizer-icon) {
 }
 
 /** Pre element styling */
-.markdown-rendered .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
 	display: none !important;
 }
 .codeblock-customizer-pre-parent{
 	margin-bottom: 16px;
 }
-.markdown-rendered pre.codeblock-customizer-pre {
+pre.codeblock-customizer-pre {
 	border-radius: var(--border-radius);
 	min-height: unset;
 	padding-top: 0px;    /*? padding-top and bottom must be set at the pre code element*/
@@ -249,7 +249,7 @@ div:has(> img.codeblock-customizer-icon) {
 	padding-right: 0px;  /*? originalVal: 16px, disable it, so the lines are fully highlighted */
 	padding-left: 0px;   /*? originalVal: 16px, disable it, so the lines are fully highlighted */
 }
-.markdown-rendered pre.codeblock-customizer-pre code {
+pre.codeblock-customizer-pre code {
 	display: block;
 	padding-top: var(--code-padding);
 	padding-bottom: var(--code-padding);
@@ -270,10 +270,10 @@ pre.codeblock-customizer-pre::after {
 }
 
 /** Reading mode text styling */
-.markdown-rendered div:has(> .codeblock-customizer-line-text) {
+pre.codeblock-customizer-pre div:has(> .codeblock-customizer-line-text) {
 	display: flex;
 }
-.markdown-rendered .codeblock-customizer-line-text {
+pre.codeblock-customizer-pre .codeblock-customizer-line-text {
 	flex-basis: 100%;
 	padding-left: var(--line-number-gutter-padding); /*? originalVal:0px, add padding between the line numbers and the text */
 }
@@ -290,15 +290,19 @@ pre.codeblock-customizer-pre::after {
 .codeblock-customizer .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-end [class^='codeblock-customizer-line-number'] {
 	border-bottom-left-radius: var(--border-radius);
 }
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
-body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
-body .markdown-source-view .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin { /*? Depending on header visibility */
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
+body .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin,
+body .markdown-source-view :not([class^='codeblock-customizer-header-container']) + [class*="codeblock-customizer-line"].HyperMD-codeblock-begin,
+body .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin:nth-of-type(1) { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
 }
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not(.codeblock-customizer-show-langnames-always) .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body .markdown-source-view .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'] { /*? Depending on header visibility */
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body:not(.codeblock-customizer-show-langnames-always) :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body .markdown-source-view :not([class^='codeblock-customizer-header-container']) + [class*="codeblock-customizer-line"].HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
+body .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin:nth-of-type(1) [class^='codeblock-customizer-line-number'] { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
 }
 
@@ -316,8 +320,8 @@ body .markdown-source-view .codeblock-customizer-header-container:not(:has([clas
 	margin: 0;
 	padding: 0;
 }
-.markdown-rendered pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(:hover) button,
-.markdown-rendered .codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed button,
+pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(:hover) button,
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed button,
 pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(:hover) [class^='codeblock-customizer-header-container']::after {
 	visibility: hidden;
 	opacity: 0
@@ -344,7 +348,7 @@ pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(
     transition: transform var(--duration-button) ease-out, visibility var(--duration-button), opacity var(--duration-button), scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 }
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container']::after,
-.markdown-source-view [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin))::after {
+.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin))::after {
 	transform: rotate(-90deg);
 }
 [class^='codeblock-customizer-header-container']:hover::after {
@@ -390,50 +394,50 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 		clip-path: var(--polygon-in);
 	}
 }
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:has( .codeblock-customizer-header-container) button.copy-code-button,
-body:not(.codeblock-customizer-show-langnames-always) .markdown-rendered pre.codeblock-customizer-pre:not(:has( .codeblock-customizer-header-container-specific)):not(:has( .codeblock-customizer-header-container img.codeblock-customizer-icon)) button.copy-code-button,
-body .markdown-rendered pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) pre.codeblock-customizer-pre:has( .codeblock-customizer-header-container) button.copy-code-button,
+body:not(.codeblock-customizer-show-langnames-always) pre.codeblock-customizer-pre:not(:has( .codeblock-customizer-header-container-specific)):not(:has( .codeblock-customizer-header-container img.codeblock-customizer-icon)) button.copy-code-button,
+body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 	--copy-code-header-right-margin: 12px;
 }
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container + .HyperMD-codeblock-begin span.code-block-flair,
-body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin span.code-block-flair,
-body .markdown-source-view .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin span.code-block-flair { /*? Depending on header visibility */
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container + .HyperMD-codeblock-begin span.code-block-flair,
+body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin span.code-block-flair,
+body .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin span.code-block-flair { /*? Depending on header visibility */
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 	--copy-code-header-right-margin: 12px;
 }
-.markdown-rendered pre.codeblock-customizer-pre button.copy-code-button {
+pre.codeblock-customizer-pre button.copy-code-button {
 	transform: translateY(-50%);
 	top: max(calc(0.5 * var(--container-height) * 0.9),calc(0.5 * var(--container-min-height) * 0.9));
 }
-.markdown-rendered pre.codeblock-customizer-pre button.copy-code-button,
-.markdown-rendered pre.codeblock-customizer-pre button.run-code-button, /*? Execute Code Plugin Compatibility */
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair {
+pre.codeblock-customizer-pre button.copy-code-button,
+pre.codeblock-customizer-pre button.run-code-button, /*? Execute Code Plugin Compatibility */
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair {
 	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
 	will-change: margin-right, clip-path;
 	clip-path: var(--polygon-in);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.copy-code-button:not(:active),
-.markdown-rendered pre.codeblock-customizer-pre button.run-code-button:not(:active), /*? Execute Code Plugin Compatibility */
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair:not(:active) {
+pre.codeblock-customizer-pre button.copy-code-button:not(:active),
+pre.codeblock-customizer-pre button.run-code-button:not(:active), /*? Execute Code Plugin Compatibility */
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair:not(:active) {
 	animation: indent var(--duration-button);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.copy-code-button:hover,
-.markdown-rendered pre.codeblock-customizer-pre button.run-code-button:hover, /*? Execute Code Plugin Compatibility */
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair:hover{
+pre.codeblock-customizer-pre button.copy-code-button:hover,
+pre.codeblock-customizer-pre button.run-code-button:hover, /*? Execute Code Plugin Compatibility */
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair:hover{
 	background-color: transparent;
 	animation: outdent var(--duration-button);
 	margin-right: var(--copy-code-header-right-margin);
 	clip-path: var(--polygon-out);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.copy-code-button:active,
-.markdown-rendered pre.codeblock-customizer-pre button.run-code-button:active, /*? Execute Code Plugin Compatibility */
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair:active {
+pre.codeblock-customizer-pre button.copy-code-button:active,
+pre.codeblock-customizer-pre button.run-code-button:active, /*? Execute Code Plugin Compatibility */
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair:active {
 	scale: 0.95;
 	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.copy-code-button::before,
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair::before {
+pre.codeblock-customizer-pre button.copy-code-button::before,
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair::before {
 	content: "\200b";
 	display: inline-block;
 	width: 14px;
@@ -446,22 +450,22 @@ body .markdown-source-view .codeblock-customizer-header-container:not(:has([clas
 	mask-repeat: no-repeat;
 	vertical-align: 1px;
 }
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair {
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair {
 	transform: translateY(-50%);
 	font-size: 0;
 	top: min(calc(-0.5 * var(--container-height) * 1.1),calc(-0.5 * var(--container-min-height) * 1.1));
 	right: 0;
 	visibility: hidden;
 }
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair > * {
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair > * {
 	width: 0px;
 }
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair::before {
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair::before {
 	visibility: visible;
 	vertical-align: -1px;
 	font-size: var(--font-ui-smaller);
 }
-.markdown-source-view.mod-cm6 .codeblock-customizer-line span.code-block-flair::after {
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair::after {
 	visibility: visible;
 	font-size: var(--font-ui-smaller);
 	content: 'Copy';
@@ -501,6 +505,7 @@ pre.codeblock-customizer-pre:hover code.language-output {
 }
 pre.codeblock-customizer-pre code.language-output span.stdout,
 pre.codeblock-customizer-pre code.language-output span.stdin,
+pre.codeblock-customizer-pre code.language-output span.stderr,
 pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
 	position: relative;
 	left: var(--line-number-gutter-padding);
@@ -510,17 +515,17 @@ pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
     background-color: var(--codeblock-customizer-codeblock-background-color);
     padding: 2px 8px;
     border-color: var(--code-comment); /*todo*/
-	border-style: solidgit;
+	border-style: solid;
 	border-radius: 5px;
 	border-width: 1px;
 }
-.markdown-rendered pre.codeblock-customizer-pre button.run-code-button {
+pre.codeblock-customizer-pre button.run-code-button {
 	--copy-code-header-right-margin: 12px;
 	--dent-difference: 24px;
 	height: 14px;
 	margin-bottom: 6px;
 }
-.markdown-rendered pre.codeblock-customizer-pre button.run-code-button::before {
+pre.codeblock-customizer-pre button.run-code-button::before {
 	content: "\200b";
 	display: inline-block;
 	width: 14px;
@@ -533,16 +538,16 @@ pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
 	mask-repeat: no-repeat;
 	vertical-align: 0px;
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button-disabled,
-.markdown-rendered pre.codeblock-customizer-pre button.run-button-disabled {
+pre.codeblock-customizer-pre button.clear-button-disabled,
+pre.codeblock-customizer-pre button.run-button-disabled {
 	display: none !important;
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button {
+pre.codeblock-customizer-pre button.clear-button {
 	height: 14px;
 	margin-bottom: 6px;
 	margin-left: calc(var(--language-border-width) + 12px);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button::before {
+pre.codeblock-customizer-pre button.clear-button::before {
 	content: "\200b";
 	display: inline-block;
 	width: 14px;
@@ -555,21 +560,21 @@ pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
 	mask-repeat: no-repeat;
 	vertical-align: 0px;
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button {
+pre.codeblock-customizer-pre button.clear-button {
 	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
 	will-change: margin-right, clip-path;
 	clip-path: var(--polygon-in);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button:not(:active) {
+pre.codeblock-customizer-pre button.clear-button:not(:active) {
 	animation: reverse-indent var(--duration-button);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button:hover{
+pre.codeblock-customizer-pre button.clear-button:hover{
 	background-color: transparent;
 	animation: reverse-outdent var(--duration-button);
 	margin-right: var(--copy-code-header-right-margin);
 	clip-path: var(--polygon-out);
 }
-.markdown-rendered pre.codeblock-customizer-pre button.clear-button:active {
+pre.codeblock-customizer-pre button.clear-button:active {
 	scale: 0.95;
 	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 }
@@ -589,4 +594,51 @@ pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
 }
 .codeblock-customizer-pre-parent.has-run-code-button .load-state-indicator.visible {
 	transform: translateX(0);
+}
+
+/** Embed Code Plugin */
+pre.codeblock-customizer-pre span.code-block-line_num-wrap,
+pre.codeblock-customizer-pre div span.code-block-highlight {
+	display: none;
+}
+.markdown-source-view.mod-cm6 .cm-embed-block .codeblock-customizer-pre-parent + .edit-block-button::after {
+	content: 'Edit Block';
+	font-size: var(--font-ui-smaller);
+	padding-left: 4px;
+}
+.markdown-source-view.mod-cm6 .cm-embed-block:not(:hover) .codeblock-customizer-pre-parent + .edit-block-button {
+	visibility: hidden;
+	opacity: 0
+}
+.markdown-source-view.mod-cm6 .cm-embed-block .codeblock-customizer-pre-parent + .edit-block-button {
+    transition: visibility var(--duration-button), opacity var(--duration-button);
+	visibility: visible;
+	opacity: 1;
+	--copy-code-header-right-margin: calc(2.2 * var(--header-button-spacing));
+	--dent-difference: 0px;
+	--polygon-in: polygon(0 0, 18px 0, 18px 36px, 0 36px);
+	z-index: 10;
+	transform: translateY(-50%);
+	top: max(calc(0.5 * var(--container-height) * 0.9),calc(0.5 * var(--container-min-height) * 0.9));
+	margin: 0;
+	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+	will-change: margin-right, clip-path;
+	clip-path: var(--polygon-in);
+	padding: 0;
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .cm-embed-block .codeblock-customizer-pre-parent:has( pre.codeblock-customizer-pre .codeblock-customizer-header-container) + .edit-block-button,
+body:not(.codeblock-customizer-show-langnames-always) .cm-embed-block .codeblock-customizer-pre-parent:not(:has( pre.codeblock-customizer-pre .codeblock-customizer-header-container-specific)):not(:has( pre.codeblock-customizer-pre .codeblock-customizer-header-container img.codeblock-customizer-icon)) + .edit-block-button,
+body .cm-embed-block .codeblock-customizer-pre-parent:not(:has( pre.codeblock-customizer-pre [class*='codeblock-customizer-header-language-tag-'])) + .edit-block-button { /*? Depending on header visibility */
+	--copy-code-header-right-margin: 4px;
+	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
+}
+.markdown-source-view.mod-cm6 .cm-embed-block:hover .codeblock-customizer-pre-parent + .edit-block-button:hover {
+	background: transparent;
+	animation: reverse-outdent var(--duration-button);
+	margin-right: var(--copy-code-header-right-margin);
+	clip-path: var(--polygon-out);
+}
+.markdown-source-view.mod-cm6 .cm-embed-block:hover .codeblock-customizer-pre-parent + .edit-block-button:active {
+	scale: 0.95;
+	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 }

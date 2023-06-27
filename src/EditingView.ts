@@ -99,7 +99,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							if (excludedCodeblock)
 								return;
 							if (node.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {class: getLineClass(codeblockParameters,lineNumber).join(' ')+(codeblockParameters.language===''?'':` language-${codeblockParameters.language}`)}}).range(node.from))
+								decorations.push(Decoration.line({attributes: {class: (settings.specialLanguages.includes(codeblockParameters.language)?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber).join(' '))+([''].concat(settings.specialLanguages).includes(codeblockParameters.language)?'':` language-${codeblockParameters.language}`)}}).range(node.from))
 								decorations.push(Decoration.line({}).range(node.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
 								lineNumber++;
@@ -135,7 +135,10 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						startLine = false;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages))
-							builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings),block: true}));
+							if (!settings.specialLanguages.includes(codeblockParameters.language))
+								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings),block: true}));
+							else if (codeblockParameters.language === 'preview')
+								continue;
 					} else {
 						startLine = true;
 					}
@@ -163,7 +166,10 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						startLine = false;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && codeblockParameters.fold.enabled)
-							collapseStart = line;
+							if (!settings.specialLanguages.includes(codeblockParameters.language))
+								collapseStart = line;
+							else if (codeblockParameters.language === 'preview')
+								continue;
 					} else {
 						startLine = true;
 						if (collapseStart)
