@@ -93,7 +93,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							const endLine = node.type.name.includes("HyperMD-codeblock-end");
 							if (startLine) {
 								codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
-								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages);
+								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
 								lineNumber = 0;
 							}
 							if (excludedCodeblock)
@@ -134,7 +134,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					if (startLine) {
 						startLine = false;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
-						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages))
+						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.includes(codeblockParameters.language))
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings),block: true}));
 							else if (codeblockParameters.language === 'preview')
@@ -165,7 +165,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					if (startLine) {
 						startLine = false;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
-						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && codeblockParameters.fold.enabled)
+						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
 							if (!settings.specialLanguages.includes(codeblockParameters.language))
 								collapseStart = line;
 							else if (codeblockParameters.language === 'preview')

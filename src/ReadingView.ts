@@ -60,7 +60,7 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
 	const codeblockParameters = parseCodeblockParameters(codeblockLines[0],plugin.settings.currentTheme);
 		
-	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages))
+	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 		return;
 	if (codeblockParameters.language === 'preview') {
 		if ('obsidian-code-preview' in plugin.app.plugins.plugins) { //NOTE: (@mayurankv) Unpublished part of Obsidian API
