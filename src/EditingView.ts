@@ -353,6 +353,8 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 
 function parseIgnoreFrontmatter(doc: Text): boolean {
 	//TODO (@mayurankv) Improve this function to use plugin.app.metadataCache.getCache(filePath)?.frontmatter?.['codeblock-customizer-ignore'] - need filePath
+	if (typeof doc?.text === 'undefined')
+		return false
 	const start = doc.text.indexOf('---');
 	if (start === -1 || doc.text.slice(0,start).some((line: string) => line.trim()!==''))
 		return false;
