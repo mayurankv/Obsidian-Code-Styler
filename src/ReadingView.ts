@@ -118,11 +118,11 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 }
 async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
-	codeblockPreElements.forEach(async (codeblockPreElement: HTMLElement, key: number) => {
+	for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
 		const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
 		if (!codeblockCodeElement)
 			return;
 		const codeblockLines = codeblocks[key];
-		await remakeCodeblock(codeblockCodeElement, codeblockPreElement, codeblockLines, context, plugin)
-	})
+		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, context, plugin);
+	}
 }
