@@ -1153,7 +1153,7 @@ export const LANGUAGE_COLORS : {[key: string]: string} = {
 	"COBOL": '#005ca5',
 	"CoffeeScript": '#6f4e37',
 	"Crystal": '#c8c8c8',
-	"CSS": `#1572b6 #33a9dc #ebebeb`, //todo (@mayurankv) Decide color
+	"CSS": `#1572b6`, //todo (@mayurankv) Decide color
 	"CSV": `#c2c2c2 #829ec2`, //todo (@mayurankv) Decide color
 	"D": '#b03931',
 	"Dart": `#66c3fa #215896 #235997 #58b6f0`, //todo (@mayurankv) Decide color
