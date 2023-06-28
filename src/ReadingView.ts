@@ -64,8 +64,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		
 	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 		return;
-	if (codeblockParameters.language === 'preview') {
-		if ('obsidian-code-preview' in plugin.app.plugins.plugins) { //NOTE: (@mayurankv) Unpublished part of Obsidian API
+	if (codeblockParameters.language === 'preview') { //NOTE: (@mayurankv) app.plugins.plugins Unpublished part of Obsidian API
+		if ('obsidian-code-preview' in plugin.app.plugins.plugins) {
 			let codePreviewParams = await plugin.app.plugins.plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),context.sourcePath);
 			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
 				if (typeof codePreviewParams.start === 'number')
@@ -75,6 +75,11 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 			codeblockParameters.highlights.default = [...new Set(codeblockParameters.highlights.default.concat(Array.from(plugin.app.plugins.plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
 			if (codeblockParameters.title === '')
 				codeblockParameters.title = codePreviewParams.filePath;
+			codeblockParameters.language = codePreviewParams.language;
+		}
+	} else if (codeblockParameters.language === 'include') {
+		if ('file-include' in plugin.app.plugins.plugins) {
+			codeblockParameters.language = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
 		}
 	}
 

@@ -3,7 +3,7 @@ export type HEX = `#${string}`;
 export type CSS = `--${string}`;
 export type Color = HEX | CSS;
 export type Percentage = `${number}%`;
-export type Display = "none" | "title_only" | "always";
+export type Display = "none" | "if_header_shown" | "always";
 
 // Interface Creation
 export interface CodeblockCustomizerThemeModeColors {
@@ -268,7 +268,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
 	newTheme: NEW_THEME_DEFAULT,
 	newHighlight: '',
 	excludedLanguages: "dataview, dataviewjs, ad-*",
-	specialLanguages: ["preview"],
+	specialLanguages: ["preview","include"],
 }
 
 // Language Settings

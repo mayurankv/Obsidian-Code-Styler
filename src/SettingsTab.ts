@@ -7,7 +7,7 @@ import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomi
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
-	"title_only": "If Header Shown",
+	"if_header_shown": "If Header Shown",
 	"always": "Always",
 }
 
@@ -120,13 +120,14 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.newTheme.name = value;
 				});
 			})
-			.addToggle(toggle => {newThemeDefault = toggle
-				.setTooltip("Save as the default theme")
-				.setValue(false)
-				.onChange((value) => {
-					this.plugin.settings.newTheme.default = value;
-				});
-			})  
+			// NOTE: Setting to set new theme as default but this is unnecessary currently
+			// .addToggle(toggle => {newThemeDefault = toggle
+			// 	.setTooltip("Save as the default theme")
+			// 	.setValue(false)
+			// 	.onChange((value) => {
+			// 		this.plugin.settings.newTheme.default = value;
+			// 	});
+			// })  
 			.addExtraButton(button => {
 				button.setTooltip("Save theme");
 				button.setIcon('plus');

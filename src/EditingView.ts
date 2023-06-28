@@ -142,6 +142,8 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings),block: true}));
 							else if (codeblockParameters.language === 'preview')
 								continue;
+							else if (codeblockParameters.language === 'include')
+								continue;
 					} else {
 						startLine = true;
 					}
@@ -174,6 +176,8 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							if (!settings.specialLanguages.includes(codeblockParameters.language))
 								collapseStart = line;
 							else if (codeblockParameters.language === 'preview')
+								continue;
+							else if (codeblockParameters.language === 'include')
 								continue;
 					} else {
 						startLine = true;

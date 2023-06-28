@@ -123,12 +123,12 @@ function addThemeSettingsClasses (themeSettings: CodeblockCustomizerThemeSetting
 	document.body.classList.remove("codeblock-customizer-show-langnames","codeblock-customizer-show-langnames-always");
 	if (themeSettings.header.languageTag.display === 'always')
 		document.body.classList.add("codeblock-customizer-show-langnames-always");
-	else if (themeSettings.header.languageTag.display === 'title_only')
+	else if (themeSettings.header.languageTag.display === 'if_header_shown')
 		document.body.classList.add("codeblock-customizer-show-langnames");
 
 	document.body.classList.remove("codeblock-customizer-show-langicons","codeblock-customizer-show-langicons-always");
 	if (themeSettings.header.languageIcon.display === 'always')
 		document.body.classList.add("codeblock-customizer-show-langicons-always");
-	else if (themeSettings.header.languageIcon.display === 'title_only')
+	else if (themeSettings.header.languageIcon.display === 'if_header_shown')
 		document.body.classList.add("codeblock-customizer-show-langicons");
 }
