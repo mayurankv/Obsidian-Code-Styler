@@ -417,7 +417,7 @@ export class SettingsTab extends PluginSettingTab {
 		
 		containerEl.createEl('h5', {text: 'Header Language Icon Appearance'});
 		new Setting(containerEl)
-			.setName('Display Language Icons')
+			.setName('Display Header Language Icons')
 			.setDesc('Determine when to show language icons where available. "Title Only" will only show language tags when the title parameter is set. If set to "None", the below settings are disabled too.')
 			.addDropdown((dropdown) => dropdown
 				.addOptions(DISPLAY_OPTIONS)
