@@ -192,9 +192,8 @@ It is possible from now on, to display an icon for the codeblocks. There are cur
 
 This plugin is also compatible with the following obsidian plugins out of the box:
 
-[![Execute Code Plugin](https://github-readme-stats.vercel.app/api/pin/?username=twibiral&repo=obsidian-execute-code&show_owner=true&bg_color=00000000&border_color=00000000)](https://github.com/twibiral/obsidian-execute-code)
-
-[![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=zjhcn&repo=obsidian-code-preview&show_owner=true&bg_color=00000000&border_color=00000000)](https://github.com/zjhcn/obsidian-code-preview)
+[![Execute Code Plugin](https://github-readme-stats.vercel.app/api/pin/?username=twibiral&repo=obsidian-execute-code&show_owner=true&bg_color=00000000&border_color=e3e7ef)](https://github.com/twibiral/obsidian-execute-code)
+[![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=zjhcn&repo=obsidian-code-preview&show_owner=true&bg_color=00000000&border_color=e3e7ef)](https://github.com/zjhcn/obsidian-code-preview)
 
 ## Roadmap
 
