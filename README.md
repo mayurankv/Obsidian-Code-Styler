@@ -9,6 +9,9 @@ I couldn't find any plugin, where I could customize codeblocks which works relia
 
 This plugin lets you customize the codeblocks in the following way in both editing mode and reading mode:
 
+> **Warning**  
+If you used version 1.0.1, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 1.1.0 or above. After that, everything should work fine.
+
 TODO Section
 
 - Default dark and light theme. You can create your own themes as well.
@@ -76,6 +79,10 @@ The different component colors that can be set within a theme are:
 
 TODO Add image
 
+'Solarized' theme in dark mode with Default Obsidian theme:
+
+TODO Add image
+
 I am not a designer, so if you have created a cool theme, send me the color codes, and I might include it as a default theme in the next release :-\)
 
 ## Parameters
@@ -90,9 +97,9 @@ Example:
 
 ### Line Numbers
 
-TODO Section
-
 Line numbers can be enabled/disabled within a specific theme in the settings of that theme. In addition to this, whether line numbering is applied can be additionally specified in a codeblock itself using the `ln` parameter.
+
+Setting `ln:true` will always show line numbering, `ln:false` will never show line numbering, and `ln:NUMBER` (e.g.`ln:27`) will always show line numbering starting at the specified number (so an offset of this number minus one).
 
 ### Title
 
@@ -279,10 +286,6 @@ This plugin is also compatible with the following obsidian plugins out of the bo
   - Highlights appear slightly different
   - Language border colors are not correctly set
 
-## Note
-
-If you used version 1.0.0, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/` Only one time. This is necessary as the file does not contain a few entries which are required by version 1.0.1 or above. After that, everything should work fine.
-
 ## How to install the plugin
 
 - Simply install directly from Obsidian
@@ -319,4 +322,4 @@ If you like this plugin, and would like to help support continued development, u
 
 ## License
 
-TODO Section
+Distributed under the MIT License. See `LICENSE` for more information.
