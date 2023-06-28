@@ -79,7 +79,9 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		}
 	} else if (codeblockParameters.language === 'include') {
 		if ('file-include' in plugin.app.plugins.plugins) {
-			codeblockParameters.language = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
+			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
+			if (typeof fileIncludeLanguage !== 'undefined')
+				codeblockParameters.language = fileIncludeLanguage;
 		}
 	}
 

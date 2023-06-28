@@ -52,11 +52,11 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 }
 function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockCustomizerTheme): void {
 	if (parameterString.startsWith('title:')) {
-		let titleMatch = /(["']?)([^\1 ]+)\1/.exec(parameterString.slice('title:'.length));
+		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
 			codeblockParameters.title = titleMatch[2].trim();
 	} else if (parameterString.startsWith('fold:')) {
-		let foldPlaceholderMatch = /(["']?)([^\1 ]+)\1/.exec(parameterString.slice('fold:'.length));
+		let foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('fold:'.length));
 		if (foldPlaceholderMatch) {
 			codeblockParameters.fold.enabled = true;
 			codeblockParameters.fold.placeholder = foldPlaceholderMatch[2].trim();

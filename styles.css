@@ -549,6 +549,9 @@ pre.codeblock-customizer-pre button.clear-button {
 	height: 14px;
 	margin-bottom: 6px;
 	margin-left: calc(var(--language-border-width) + 12px);
+	/* margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference)); */
+	will-change: margin-right, clip-path;
+	clip-path: var(--polygon-in);
 }
 pre.codeblock-customizer-pre button.clear-button::before {
 	content: "\200b";
@@ -562,11 +565,6 @@ pre.codeblock-customizer-pre button.clear-button::before {
 	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4 6 14l1.41 1.41L15 7.83V28h2V7.83l7.59 7.58L26 14 16 4z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
 	mask-repeat: no-repeat;
 	vertical-align: 0px;
-}
-pre.codeblock-customizer-pre button.clear-button {
-	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
-	will-change: margin-right, clip-path;
-	clip-path: var(--polygon-in);
 }
 pre.codeblock-customizer-pre button.clear-button:not(:active) {
 	animation: reverse-indent var(--duration-button);
