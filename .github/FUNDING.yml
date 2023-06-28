@@ -12,4 +12,4 @@ otechie: # Replace with a single Otechie username
 lfx_crowdfunding: # Replace with a single LFX Crowdfunding project-name e.g., cloud-foundry
 custom: [
     "https://www.buymeacoffee.com/ThePirateKing",
-  ]
+]
