@@ -5,9 +5,9 @@ import { ColorTranslator } from "colortranslator";
 import CodeblockCustomizerPlugin from "./main";
 import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
 
-const DISPLAY_OPTIONS: Record<string,string> = {
+const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
-	"title_only": "Title Only",
+	"title_only": "If Header Shown",
 	"always": "Always",
 }
 
@@ -272,6 +272,30 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.backgroundColor = saveColor},
 			)});
 		new Setting(containerEl)
+			.setName('Header Font Size')
+			.setDesc('Set the font size for header language tags and titles.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(6,32,1)
+					.setValue(this.plugin.settings.currentTheme.settings.header.fontSize)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.header.fontSize = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					})
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default font size')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.header.fontSize = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.header.fontSize;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.header.fontSize);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				})
+			})
+		new Setting(containerEl)
 			.setName('Header Title Text Styling')
 			.setDesc('Style the header title text using bold and italic toggles, by setting a font or by setting a text color.')
 			.addToggle(toggle => {toggle
@@ -314,30 +338,6 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.currentTheme.settings.header.collapsePlaceholder = value;
 					(async () => {await this.plugin.saveSettings()})();
 				}));
-		new Setting(containerEl)
-			.setName('Header Font Size')
-			.setDesc('Set the font size for header language tags and titles.')
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(6,32,1)
-					.setValue(this.plugin.settings.currentTheme.settings.header.fontSize)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.header.fontSize = value;
-						(async () => {await this.plugin.saveSettings()})();    
-					})
-				});
-				setting.addExtraButton((button) => {button
-					.setIcon("reset")
-					.setTooltip('Restore default font size')
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.header.fontSize = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.header.fontSize;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.header.fontSize);
-						(async () => {await this.plugin.saveSettings()})();
-					});
-				})
-			})
 		new Setting(containerEl)
 			.setName('Header Separator Color')
 			.setDesc('Color of the line separating the codeblock header and the codeblock.')
@@ -567,6 +567,7 @@ export class SettingsTab extends PluginSettingTab {
 		
 		new Setting(containerEl)
 			.setName('Button Color')
+			.setDesc('Used for UI buttons like the copy code button.')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'default_highlight',

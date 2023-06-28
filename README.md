@@ -45,6 +45,25 @@ All themes have customizable colors for both light and dark mode (to make change
 
 When a setting or color is changed within a theme, that change is not saved to the theme; you must then click the update button next to the theme name to update that theme to the current settings. Note that changes to the built-in themes cannot be saved.
 
+The different component colors that can be set within a theme are:
+
+- Codeblock background color
+- Codeblock text color
+- Line number gutter background color
+- Line number text color
+- Codeblock line number current line indicator
+- Codeblock header background color
+- Codeblock header title text color
+- Codeblock header separator color
+- Codeblock header language tag background color
+- Codeblock header language tag text color
+- Editor active line highlight color
+- Codeblock active line highlight color
+- Default highlight color
+- Alternative highlight colors
+- Button color
+- Button active color
+
 'Default' theme in dark mode with Default Obsidian theme:
 
 ![Pasted_image_20230125231644.png](attachments/Pasted_image_20230125231644.png) TODO Update image
@@ -110,8 +129,6 @@ TODO Add folding gif
 
 ### Highlighting
 
-#### Default highlights
-
 To highlight lines, specify `hl:` followed by line numbers in the first line of the codeblock.
 
 - You can specify either single line numbers separated with a comma e.g.: `hl:1,3,5,7`.
@@ -123,7 +140,17 @@ Example:
 
 ![Pasted_image_20230125230046.png](attachments/Pasted_image_20230125230046.png) TODO Update image
 
-#### Alternative highlights
+Highlights can be set to also highlight line numbers as well as the code in settings.
+
+Example:
+TODO Add image
+
+Highlights created by the default highlight parameter or alternative highlight parameters can be set to appear as gradient highlights which fade out to the right in the settings. A color stop percentage for this gradient can also be set.
+
+Example:
+TODO Add image
+
+#### Alternative Highlights
 
 You can also define multiple highlight colors by defining an alternative highlight color with a name. This name will be used as a parameter, and you can use it just like with the `hl` parameter.
 
@@ -155,15 +182,25 @@ TODO Add image
 
 ## Appearance
 
+### Codeblock
+
+Codeblocks can have their curvature changed in settings to make them appear more or less rounded.
+
+They can also have colored left borders based on the language (colors match the language icon) if enabled in settings. The width of this border can also be changed.
+
 ### Header
 
 The header is displayed in the following cases:
 
 - You specified a `title:`
 - You specified `fold` If you specified `fold` but did not specify `title:` or `fold:` a default text from settings will be displayed on the header (the default is 'Collapsed Code')
-- You defined a codeblock language via ` ```language` and set the `Display Header Language Tags` setting to `always` or the `Display Header Language Icons` setting to `always` in the theme settings
+- You defined a codeblock language via ` ```language` and set the `Display Header Language Tags` setting to `Always` or the `Display Header Language Icons` setting to `Always` in the theme settings
 
-If the header is displayed, folding works as well. If the `Display Header Language Tags` setting is set to `always`, then the header will display the codeblock language as well.
+If the header is displayed, folding works as well. If the `Display Header Language Tags` setting is set to `Always`, then the header will display the codeblock language always and if it is set to `If Header Shown`, it will only display when the header is displayed (i.e. the `title` parameter is set).
+
+You can enable the option in the settings page to display icons in the header. When this option is set to `If Header Shown`, if the language specified in the codeblock has an icon and the codeblock header is displayed (i.e. the `title` parameter is set), then the icon will be displayed. When this option is set to `Always`, the header with icon will always be shown if the language specified in the codeblock has an icon. Icons can also be set to grayscale or resized in settings. There are currently around 170 icons available for different languages.
+
+The language tag text and title text can also be styled to be bold and/or italic as well as a specific font. Furthermore, the font-size of the header text can be changed.
 
 Example:
 
@@ -182,11 +219,18 @@ TODO Add image
 - Header with codeblock language, title and icon as well
 ![[Pasted_image_20230314212111.png]](attachments/Pasted_image_20230314212111.png) TODO Update image
 
-### Icon
+### Active Line Indicators
 
-TODO Section
+The active line inside codeblocks can be highlighted with a custom color if enabled in settings. It can also be indicated by a different color line number if this setting is also enabled in settings.
 
-It is possible from now on, to display an icon for the codeblocks. There are currently around 170 icons available for different languages. You can enable the option in the settings page to display icons in the header. If you enable this option, and if the language specified in the codeblock has an icon, and the header is displayed, then the icon will be displayed. You can also force to always display the icon (which also means that the header will be also displayed) even if the header is not displayed, because the `title` parameter is not defined.
+The active line outside codeblocks can also be highlighted with a custom color if enabled in settings.
+
+Example:
+TODO Add image codeblock highlight
+
+TODO Add image codeblock line number indicator
+
+TODO Add image editor highlight
 
 ## Plugin Compatibility
 
@@ -197,7 +241,43 @@ This plugin is also compatible with the following obsidian plugins out of the bo
 
 ## Roadmap
 
-TODO Section
+### Future Work
+
+- Implementation
+  - Prevent codemirror extensions applying in source view in editing mode
+  - Make plugin destroy itself properly in reading mode
+  - Sort colors by language based on icon in `setting.ts`
+  - Get Obsidian to parse postMarkdown changes following the codeblock language (see this [issue](https://forum.obsidian.md/t/postprocessor-does-not-process-changes-after-codeblock-language/61010) and this [issue](https://forum.obsidian.md/t/pass-parameters-to-codeblock/37990))
+- Features
+  - Implement code wrapping options
+    - In reading mode, if wrapped, keep line numbers to the left when scrolling
+  - Add commands to fold all, unfold all and reset default fold for codeblocks
+  - Context Menu on right click
+    - Copy codeblock
+    - Copy line
+    - Collapse
+    - Implement execute code buttons
+  - Aesthetic animation when folding codeblocks (see how callouts fold)
+  - Let users redirect certain languages to alternative icons and colors
+- Appearance
+  - Fix large line numbers margin padding in editing mode
+- Plugin Compatibility
+  - Support [File Include Plugin](https://github.com/tillahoffmann/obsidian-file-include)
+    - Waiting on response to [issue](https://github.com/tillahoffmann/obsidian-file-include/issues/3)
+
+### Existing Issues
+
+- First pickr change does not change color correctly
+- Editing Mode
+  - Weird scroll in live preview when click (due to `codeblockHeader` codemirror extension) when first line is a codeblock.
+  - If a language is excluded, it currently needs to be unfolded before it can be removed or it disappears
+  - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear
+- Reading Mode
+  - Codeblocks flash when changed if editing side by side in editing mode
+  - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)
+- PDF Exporting
+  - Highlights appear slightly different
+  - Language border colors are not correctly set
 
 ## Note
 
@@ -235,7 +315,7 @@ The bullet points in [roadmap](#roadmap) are a good place to start!
 
 If you like this plugin, and would like to help support continued development, use the button below!
 
-[![Buy me a coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000)](https://www.buymeacoffee.com/ThePirateKing)
+[![Buy me a coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee%20&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000)](https://www.buymeacoffee.com/ThePirateKing)
 
 ## License
 

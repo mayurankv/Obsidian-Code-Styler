@@ -525,6 +525,9 @@ pre.codeblock-customizer-pre button.run-code-button {
 	height: 14px;
 	margin-bottom: 6px;
 }
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed button.run-code-button {
+	top: 500px;
+}
 pre.codeblock-customizer-pre button.run-code-button::before {
 	content: "\200b";
 	display: inline-block;
