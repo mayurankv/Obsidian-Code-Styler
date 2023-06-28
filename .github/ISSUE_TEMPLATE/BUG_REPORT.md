@@ -25,8 +25,10 @@ assignees: []
 <!-- A clear and concise description of what currently happens.  -->
 
 ### Environment
+<!-- Details of your environment -->
 - Plugin Version: <!-- Plugin Version -->
 - Obsidian Version:  <!-- Obsidian Version -->
+- Platform:  <!-- Desktop or Mobile -->
 - OS:  <!-- OS -->
 <!-- Other details that you think may affect this issue -->
 
