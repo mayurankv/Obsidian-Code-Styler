@@ -8,6 +8,7 @@ import { readingViewPostProcessor } from "./ReadingView";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
+	readingMutationObserver: MutationObserver;
 	
 	async onload() {
 		await this.loadSettings();
@@ -26,6 +27,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	onunload() {
 		for (const url of Object.values(LANGUAGE_ICONS))
 			URL.revokeObjectURL(url) // Unload icons
+		this.readingMutationObserver.disconnect();
 		console.log("Unloaded plugin: CodeBlock Customizer");
 	}
 	

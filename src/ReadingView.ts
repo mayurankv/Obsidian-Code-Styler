@@ -4,7 +4,6 @@ import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
-import { exec } from "child_process";
 
 export async function readingViewPostProcessor(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
@@ -23,7 +22,7 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
 	if (cache?.frontmatter?.['codeblock-customizer-ignore'] === true)
 		return;
-	const mutationObserver = new MutationObserver((mutations) => {
+	plugin.readingMutationObserver = new MutationObserver((mutations) => {
 		mutations.forEach(mutation => {
 			if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) {
 				const executeCodeOutput = mutation.target as HTMLElement;
@@ -44,7 +43,7 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 		if (!view || typeof view?.editor === 'undefined')
 			return;
 		const codeblockLines = Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber))
-		mutationObserver.observe(codeblockPreElement,{
+		plugin.readingMutationObserver.observe(codeblockPreElement,{
 			childList: true,
 			subtree: true,
 			attributes: true,
@@ -169,6 +168,12 @@ async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorCon
 		if (!codeblockCodeElement)
 			return;
 		const codeblockLines = codeblocks[key];
+		plugin.readingMutationObserver.observe(codeblockPreElement,{
+			childList: true,
+			subtree: true,
+			attributes: true,
+			characterData: true,
+		});
 		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, context, plugin);
 	}
 }
