@@ -77,7 +77,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			buildDecorations(view: EditorView): DecorationSet {
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || parseIgnoreFrontmatter(view.state.doc))
+				if (!view.visibleRanges || view.visibleRanges.length === 0 || fileIgnored())
 					return RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
 				const codeblocks = findUnduplicatedCodeblocks(view);
@@ -124,7 +124,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			return Decoration.none;    
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (parseIgnoreFrontmatter(transaction.state.doc))
+			if (fileIgnored())
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -157,7 +157,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 	})
 	const codeblockCollapse = StateField.define({
 		create(state: EditorState): DecorationSet {
-			if (parseIgnoreFrontmatter(state.doc))
+			if (fileIgnored())
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -355,24 +355,11 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
-function parseIgnoreFrontmatter(doc: Text): boolean {
-	//TODO (@mayurankv) Improve this function to use plugin.app.metadataCache.getCache(filePath)?.frontmatter?.['codeblock-customizer-ignore'] - need filePath
-	if (typeof doc?.text === 'undefined')
-		return false
-	const start = doc.text.indexOf('---');
-	if (start === -1 || doc.text.slice(0,start).some((line: string) => line.trim()!==''))
-		return false;
-	const end = doc.text.indexOf('---',start+1);
-	if (end === -1)
-		return false;
-	try {
-		const parsedYaml = parseYaml(doc.text.slice(start+1,end).join('\n'));
-		if ('codeblock-customizer-ignore' in parsedYaml)
-			return parsedYaml['codeblock-customizer-ignore'] === true;
-		return false;
-	} catch(error) {
-		return false;
-	}
+function fileIgnored(): boolean {
+	const file = this.app.workspace.getActiveFile()?.path;
+	if (typeof file !== 'undefined')
+		return this.app.metadataCache.getCache(file)?.frontmatter?.['codeblock-customizer-ignore'] === true;
+	return false;
 }
 
 function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
