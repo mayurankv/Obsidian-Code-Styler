@@ -14,54 +14,19 @@ Please note we have a [code of conduct](CODE_OF_CONDUCT.md), please follow it in
 
 ## Setting Up the project locally
 
-To install the project you need to have `node` and `npm`
-
-1.  [Fork](https://help.github.com/articles/fork-a-repo/) the project, clone
-    your fork:
-
-    ```sh
-    # Clone your fork
-    git clone https://github.com/<your-username>/readme-md-generator.git
-
-    # Navigate to the newly cloned directory
-    cd readme-md-generator
-    ```
-
-2.  Your environment needs to be running `node` version >= 9.3.0 and `npm` version >= 5.5.0.
-
-3.  from the root of the project: `npm` to install all dependencies
-
-    - make sure you have latest `npm` version
-
-4.  from the root of the project: `npm start` to run the cli.
-
-> Tip: Keep your `master` branch pointing at the original repository and make
-> pull requests from branches on your fork. To do this, run:
->
-> ```sh
-> git remote add upstream https://github.com/kefranabg/readme-md-generator.git
-> git fetch upstream
-> git branch --set-upstream-to=upstream/master master
-> ```
->
-> This will add the original repository as a "remote" called "upstream," then
-> fetch the git information from that remote, then set your local `master`
-> branch to use the upstream master branch whenever you run `git pull`. Then you
-> can make all of your pull request branches based on this `master` branch.
-> Whenever you want to update your version of `master`, do a regular `git pull`.
-
-### Recommended IDE
-
-TODO VSCode and []
+See the steps outlined in the [Unofficial Developer Documentation](https://marcus.se.net/obsidian-plugin-docs/getting-started/create-your-first-plugin#step-2--build-the-plugin) for building a plugin and the format of plugins as outlined in the [sample plugin](https://github.com/obsidianmd/obsidian-sample-plugin).
+Using an IDE such as [VSCode](https://code.visualstudio.com/) as it helps ensure that variable typing is respected.
 
 ## Submitting a Pull Request
 
-Please go through existing issues and pull requests to check if somebody else is already working on it.
+Please go through existing [issues](/../../../issues) and [pull requests](/../../../pulls) to check if somebody else is already working on it.
+Make sure that the [README](/README.md) and [CHANGELOG](/CHANGELOG.md) are updated appropriately using [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Also, make sure to run the tests and lint the code before you commit your
-changes.
+<!--
+Also, make sure to run the tests and lint the code before you commit your changes.
 
 ```sh
 npm run test
 npm run lint
 ```
+-->
