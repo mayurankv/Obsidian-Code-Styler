@@ -8,13 +8,13 @@ This is a plugin for [Obsidian.md](https://obsidian.md) which lets you customize
 I couldn't find any plugin, where I could customize codeblocks which works reliably and in both editing and reading mode so I created my own!
 
 > **Warning** :warning:  
-> If you used version 1.0.1, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 1.1.0 or above. After that, everything should work fine.
+> If you used version 1.1.9, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 2.0.0 or above. After that, everything should work fine.
 
 ## Settings
 
 ### Excluded Languages
 
-The plugin can be set to ignore certain languages (for example if another plugin uses this codeblock language). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions.
+The plugin can be set to ignore certain languages (for example if another plugin uses this codeblock language). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions. This wildcard can be either at the beginning or the end of the language.
 
 ### Themes
 
