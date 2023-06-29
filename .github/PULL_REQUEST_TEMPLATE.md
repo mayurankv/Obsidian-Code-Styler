@@ -30,4 +30,4 @@
 - [ ] I have updated the documentation accordingly
 
 linting??
-Please search among the [Pull request](/../../issues) before creating one.
+Please search among the [Pull request](/../issues) before creating one.
