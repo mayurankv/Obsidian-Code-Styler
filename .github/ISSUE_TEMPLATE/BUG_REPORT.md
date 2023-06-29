@@ -9,6 +9,7 @@ assignees: []
 ## Describe the bug
 <!--- A clear and concise description of what the bug is. -->
 <!-- Is it a CSS bug or incorrect application or something else? -->
+<!--- Please create a separate bug report for each identified bug -->
 
 ### Steps to reproduce
 <!-- Steps to reproduce the behaviour. -->
