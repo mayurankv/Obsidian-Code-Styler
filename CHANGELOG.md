@@ -65,19 +65,19 @@ See this project's [releases](/../../../releases).
 
 ## [1.0.0] - 2023-01-25
 
-[Unreleased]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.9...HEAD
-[1.1.9]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.8...mugiwara85/CodeblockCustomizer:v1.1.9
-[1.1.8]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.7...mugiwara85/CodeblockCustomizer:v1.1.8
-[1.1.7]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.6...mugiwara85/CodeblockCustomizer:v1.1.7
-[1.1.6]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.5...mugiwara85/CodeblockCustomizer:v1.1.6
-[1.1.5]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.4...mugiwara85/CodeblockCustomizer:v1.1.5
-[1.1.4]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.3...mugiwara85/CodeblockCustomizer:v1.1.4
-[1.1.3]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.2...mugiwara85/CodeblockCustomizer:v1.1.3
-[1.1.2]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.1...mugiwara85/CodeblockCustomizer:v1.1.2
-[1.1.1]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.1.0...mugiwara85/CodeblockCustomizer:v1.1.1
-[1.1.0]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.0.2...mugiwara85/CodeblockCustomizer:v1.1.0
-[1.0.2]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.0.1...mugiwara85/CodeblockCustomizer:v1.0.2
-[1.0.1]: /../../../compare/mugiwara85/CodeblockCustomizer:v1.0.0...mugiwara85/CodeblockCustomizer:v1.0.1
+[Unreleased]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.9...HEAD
+[1.1.9]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.8...mugiwara85:CodeblockCustomizer:v1.1.9
+[1.1.8]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.7...mugiwara85:CodeblockCustomizer:v1.1.8
+[1.1.7]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.6...mugiwara85:CodeblockCustomizer:v1.1.7
+[1.1.6]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.5...mugiwara85:CodeblockCustomizer:v1.1.6
+[1.1.5]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.4...mugiwara85:CodeblockCustomizer:v1.1.5
+[1.1.4]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.3...mugiwara85:CodeblockCustomizer:v1.1.4
+[1.1.3]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.2...mugiwara85:CodeblockCustomizer:v1.1.3
+[1.1.2]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.1...mugiwara85:CodeblockCustomizer:v1.1.2
+[1.1.1]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.1.0...mugiwara85:CodeblockCustomizer:v1.1.1
+[1.1.0]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.0.2...mugiwara85:CodeblockCustomizer:v1.1.0
+[1.0.2]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.0.1...mugiwara85:CodeblockCustomizer:v1.0.2
+[1.0.1]: /../../../compare/mugiwara85:CodeblockCustomizer:v1.0.0...mugiwara85:CodeblockCustomizer:v1.0.1
 [1.0.0]: /../../../releases/tag/v1.0.0
 
 ---
