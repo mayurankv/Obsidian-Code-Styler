@@ -268,7 +268,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
 	newTheme: NEW_THEME_DEFAULT,
 	newHighlight: '',
 	excludedLanguages: "dataview, dataviewjs, ad-*",
-	specialLanguages: ["preview","include"],
+	specialLanguages: ["preview","include","output"],
 }
 
 // Language Settings

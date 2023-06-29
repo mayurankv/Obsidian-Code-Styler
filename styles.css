@@ -143,6 +143,7 @@ body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-
 	margin-top: 0px !important;  
 	display: flex !important;
 	overflow: visible;
+	transition: border-bottom var(--duration-button);
 }
 .markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] {
 	background: linear-gradient(var(--codeblock-customizer-header-background-color),var(--codeblock-customizer-header-background-color)) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
@@ -152,7 +153,7 @@ body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-
 }
 pre.codeblock-customizer-pre [class^='codeblock-customizer-header-container'] {
 	background-color:var(--codeblock-customizer-header-background-color);
-	border-left: none;
+	/* border-left: none; */
 }
 .markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
 	padding-bottom: var(--header-padding);
@@ -235,9 +236,6 @@ div:has(> img.codeblock-customizer-icon) {
 }
 
 /** Pre element styling */
-pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
-	display: none !important;
-}
 .codeblock-customizer-pre-parent{
 	margin-bottom: 16px;
 }
@@ -256,6 +254,12 @@ pre.codeblock-customizer-pre code {
 	padding-left: 0px;
 	padding-right: 0px;
 	border-radius: 0px;
+	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out;
+	max-height: 0;
+}
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
+	padding: 0 !important;
+	/* display: none !important; */
 }
 pre.codeblock-customizer-pre::after {
 	content: none !important;

@@ -4,6 +4,7 @@ import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
+import { exec } from "child_process";
 
 export async function readingViewPostProcessor(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
@@ -22,11 +23,33 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
 	if (cache?.frontmatter?.['codeblock-customizer-ignore'] === true)
 		return;
+	const mutationObserver = new MutationObserver((mutations) => {
+		mutations.forEach(mutation => {
+			if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) {
+				const executeCodeOutput = mutation.target as HTMLElement;
+				if (executeCodeOutput.parentElement?.classList.contains('codeblock-customizer-codeblock-collapsed'))
+					executeCodeOutput.style.maxHeight = '';
+			} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') {
+				const executeCodeOutput = (mutation.target as HTMLElement).querySelector('pre > code ~ code.language-output') as HTMLElement;
+				if (executeCodeOutput) {
+					executeCodeOutput.classList.add('execute-code-output');
+					if (!executeCodeOutput.style.maxHeight)
+						executeCodeOutput.style.maxHeight = `calc(${executeCodeOutput.scrollHeight}px + 2.5 * var(--code-padding)`;
+				}
+			}
+		})
+	}); 
 	if (codeblockSectionInfo) {
 		const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || typeof view?.editor === 'undefined')
 			return;
 		const codeblockLines = Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber))
+		mutationObserver.observe(codeblockPreElement,{
+			childList: true,
+			subtree: true,
+			attributes: true,
+			characterData: true,
+		});
 		await remakeCodeblock(codeblockCodeElement, codeblockPreElement, codeblockLines, context, plugin);
 	} else {
 		const file = plugin.app.vault.getAbstractFileByPath(context.sourcePath);
@@ -99,9 +122,23 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	
 	headerContainer.addEventListener("click", ()=>{
 		codeblockPreElement.classList.toggle("codeblock-customizer-codeblock-collapsed")
+		if (codeblockCodeElement.style.maxHeight)
+			codeblockCodeElement.style.maxHeight = '';
+		else
+			codeblockCodeElement.style.maxHeight = `calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`;
+		const executeCodeOutput = (codeblockPreElement.querySelector('pre > code ~ code.language-output') as HTMLElement);
+		if (executeCodeOutput && executeCodeOutput.style.display !== 'none') {
+			if (executeCodeOutput.style.maxHeight)
+				executeCodeOutput.style.maxHeight = '';
+			else
+				executeCodeOutput.style.maxHeight = `calc(${executeCodeOutput.scrollHeight}px + 2.5 * var(--code-padding)`;
+		}
 	});
-	if (codeblockParameters.fold.enabled)
+	codeblockCodeElement.style.maxHeight = `calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`;
+	if (codeblockParameters.fold.enabled) {
 		codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
+		codeblockCodeElement.style.maxHeight = '';
+	}
 
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
