@@ -250,6 +250,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Let users redirect certain languages to alternative icons and colors
 - Appearance
   - Fix large line numbers margin padding in editing mode
+<!-- Compatibility with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin -->
 
 ### Existing Issues
 
