@@ -245,7 +245,6 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Implement code wrapping options
     - In reading mode, if wrapped, keep line numbers to the left when scrolling
   - Add commands to fold all, unfold all and reset default fold for codeblocks
-  - Aesthetic animation when folding codeblocks (see how callouts fold)
   - Let users redirect certain languages to alternative icons and colors
 - Appearance
   - Fix large line numbers margin padding in editing mode
