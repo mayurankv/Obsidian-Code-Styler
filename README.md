@@ -232,7 +232,6 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 ### Future Work
 
 - Implementation
-  - Prevent codemirror extensions applying in source view in editing mode
   - Make plugin destroy itself properly in reading mode
   - Sort colors by language based on icon in `setting.ts`
   - Get Obsidian to parse postMarkdown changes following the codeblock language (see this [issue](https://forum.obsidian.md/t/postprocessor-does-not-process-changes-after-codeblock-language/61010) and this [issue](https://forum.obsidian.md/t/pass-parameters-to-codeblock/37990))

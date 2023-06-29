@@ -64,21 +64,23 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		
 	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 		return;
-	if (codeblockParameters.language === 'preview') { //NOTE: (@mayurankv) app.plugins.plugins Unpublished part of Obsidian API
-		if ('obsidian-code-preview' in plugin.app.plugins.plugins) {
-			let codePreviewParams = await plugin.app.plugins.plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),context.sourcePath);
+	//@ts-expect-error Undocumented Obsidian API
+	const plugins: Record<string,any> = plugin.app.plugins.plugins
+	if (codeblockParameters.language === 'preview') {
+		if ('obsidian-code-preview' in plugins) {
+			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),context.sourcePath);
 			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
 				if (typeof codePreviewParams.start === 'number')
 					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
 				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
 			}
-			codeblockParameters.highlights.default = [...new Set(codeblockParameters.highlights.default.concat(Array.from(plugin.app.plugins.plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
+			codeblockParameters.highlights.default = [...new Set(codeblockParameters.highlights.default.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
 			if (codeblockParameters.title === '')
 				codeblockParameters.title = codePreviewParams.filePath;
 			codeblockParameters.language = codePreviewParams.language;
 		}
 	} else if (codeblockParameters.language === 'include') {
-		if ('file-include' in plugin.app.plugins.plugins) {
+		if ('file-include' in plugins) {
 			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
 			if (typeof fileIncludeLanguage !== 'undefined')
 				codeblockParameters.language = fileIncludeLanguage;

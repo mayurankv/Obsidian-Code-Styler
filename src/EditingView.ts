@@ -1,6 +1,6 @@
-import { parseYaml } from "obsidian";
+import { editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line, Text } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
@@ -77,7 +77,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			buildDecorations(view: EditorView): DecorationSet {
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore())
+				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore(view.state))
 					return RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
 				const codeblocks = findUnduplicatedCodeblocks(view);
@@ -124,7 +124,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			return Decoration.none;    
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (ignore())
+			if (ignore(transaction.state))
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -157,7 +157,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 	})
 	const codeblockCollapse = StateField.define({
 		create(state: EditorState): DecorationSet {
-			if (ignore())
+			if (ignore(state))
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -355,12 +355,12 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
-function ignore(): boolean {
-	if (this.app.workspace.getActiveFileView().editMode.sourceMode === true)
+function ignore(state: EditorState): boolean {
+	if (!state.field(editorLivePreviewField))
 		return true;
-	const file = this.app.workspace.getActiveFile()?.path;
-	if (typeof file !== 'undefined')
-		return this.app.metadataCache.getCache(file)?.frontmatter?.['codeblock-customizer-ignore'] === true;
+	const filePath = state.field(editorInfoField)?.file?.path;
+	if (typeof filePath !== 'undefined')
+		return this.app.metadataCache.getCache(filePath)?.frontmatter?.['codeblock-customizer-ignore'] === true;
 	return false;
 }
 
