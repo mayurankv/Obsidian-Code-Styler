@@ -77,7 +77,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			buildDecorations(view: EditorView): DecorationSet {
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || fileIgnored())
+				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore())
 					return RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
 				const codeblocks = findUnduplicatedCodeblocks(view);
@@ -124,7 +124,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			return Decoration.none;    
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (fileIgnored())
+			if (ignore())
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -157,7 +157,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 	})
 	const codeblockCollapse = StateField.define({
 		create(state: EditorState): DecorationSet {
-			if (fileIgnored())
+			if (ignore())
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -355,7 +355,9 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
-function fileIgnored(): boolean {
+function ignore(): boolean {
+	if (this.app.workspace.getActiveFileView().editMode.sourceMode === true)
+		return true;
 	const file = this.app.workspace.getActiveFile()?.path;
 	if (typeof file !== 'undefined')
 		return this.app.metadataCache.getCache(file)?.frontmatter?.['codeblock-customizer-ignore'] === true;
