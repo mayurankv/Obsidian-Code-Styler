@@ -13,10 +13,16 @@ export interface CodeblockParameters {
 		offset: number;
 	}
 	highlights: {
-		default: Array<number>;
-		alternative: Record<string,Array<number>>
+		default: Highlights;
+		alternative: Record<string,Highlights>
 	},
 	ignore: boolean;
+}
+
+export interface Highlights {
+	lineNumbers: Array<number>;
+	plainText: Array<string>;
+	regularExpressions: Array<RegExp>;
 }
 
 export function parseCodeblockParameters(parameterLine: string, theme: CodeblockCustomizerTheme): CodeblockParameters {
@@ -33,7 +39,11 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 			offset: 0,
 		},
 		highlights: {
-			default: [],
+			default: {
+				lineNumbers: [],
+				plainText: [],
+				regularExpressions: [],
+			},
 			alternative: {},
 		},
 		ignore: false,
@@ -82,7 +92,7 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 			codeblockParameters.lineNumbers.offset = 0;
 		}
 	} else {
-		let highlightMatch = /^(\w+):((?:\d+-\d+|\d+)(?:,\d+-\d+|,\d+)*)$/.exec(parameterString);
+		let highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
 		if (highlightMatch) {
 			let highlights = parseHighlightedLines(highlightMatch[2]);
 			if (highlightMatch[1] === 'hl')
@@ -93,18 +103,35 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 		}
 	}
 }
-function parseHighlightedLines(highlightedLinesString: string): Array<number> {
-	const lineSections = highlightedLinesString.split(',');
-	return lineSections.map(lineSection => {
-		if (lineSection.includes('-')) {
-			const [start,end] = lineSection.split('-').map(num => parseInt(num));
-			if (start && end)
-				return Array.from({length:end-start+1}, (_,num) => num + start);
-		} else {
-			return parseInt(lineSection);
+function parseHighlightedLines(highlightedLinesString: string): Highlights {
+	const highlightRules = highlightedLinesString.split(',');
+	let lineNumbers: Set<number> = new Set();
+	let plainText: Set<string> = new Set();
+	let regularExpressions: Set<RegExp> = new Set();
+	highlightRules.forEach(highlightRule => {
+		if (/\d+-\d+/.test(highlightRule)) { // Number Range
+			const [start,end] = highlightRule.split('-').map(num => parseInt(num));
+			if (start && end && start <= end)
+				Array.from({length:end-start+1}, (_,num) => num + start).forEach(lineNumber => lineNumbers.add(lineNumber));
+		} else if (/^\/(.*)\/$/.test(highlightRule)) { // Regex
+			try {
+				regularExpressions.add(new RegExp(highlightRule.replace(/^\/(.*)\/$/,"$1")));
+			} catch { }
+		} else if (/".*"/.test(highlightRule)) { // Plain Text
+			plainText.add(highlightRule.substring(1,highlightRule.length-1));
+		} else if (/'.*'/.test(highlightRule)) { // Plain Text
+			plainText.add(highlightRule.substring(1,highlightRule.length-1));
+		} else if (/\D/.test(highlightRule)) { // Plain Text
+			plainText.add(highlightRule);
+		} else if (/\d+/.test(highlightRule)) { // Plain Number
+			lineNumbers.add(parseInt(highlightRule));
 		}
-		return [];
-	}).flat();
+	});
+	return {
+		lineNumbers: [...lineNumbers],
+		plainText: [...plainText],
+		regularExpressions: [...regularExpressions],
+	};
 }
 export function isLanguageExcluded(language: string, excludedLanguagesString: string): boolean {
 	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {

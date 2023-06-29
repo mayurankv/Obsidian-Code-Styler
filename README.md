@@ -114,14 +114,20 @@ Clicking on header
 
 ### Highlighting
 
-To highlight lines, specify `hl:` followed by line numbers in the first line of the codeblock.
+To highlight lines, specify `hl:` followed by line numbers, plain text or regular expressions in the first line of the codeblock.
 
-- You can specify either single line numbers separated with a comma e.g.: `hl:1,3,5,7`.
-- You can specify ranges e.g.: `hl:2-5` This would highlight lines from 2 to 5.
-- You can also combine the methods e.g.: `hl:1,3,4-6` This would highlight lines 1, 3 and lines from 4 to 6.
+You can specify any of the following highlight types separated with commas (**without spaces**) e.g.: `hl:1,3-4,foo,'bar baz',"bar and baz",/#\w{6}/`.
+
+- Single numbers: `hl:1` would highlight the first line
+- Number ranges: `hl:1-3` would highlight lines 1 through to 3
+- Plain text: `hl:foo` would highlight lines with the word `foo` inside them
+- Plain text in speech marks or quotation marks: `hl:'bar baz'` or `hl:"bar baz"` would highlight lines with the word `bar baz` inside them
+- Regular Expressions: `hl:/#\w{6}/` would highlight lines which match this regular expression (tested by `regex.test(line)`) - for this example any lines with hexadecimal colors are highlighted
+
+Combinations of these will highlight all relevant lines.
 
 Example:
-` ```cpp hl:1,3,4-6`
+` ```cpp hl:1,3-4,foo,'bar baz',"bar and baz",/#\w{6}/`
 
 ![Default Highlight](images/DefaultHighlight.png)
 
@@ -239,7 +245,6 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Implement code wrapping options
     - In reading mode, if wrapped, keep line numbers to the left when scrolling
   - Add commands to fold all, unfold all and reset default fold for codeblocks
-  - Regex highlighting parameter
   - Context Menu on right click
     - Copy codeblock
     - Copy line

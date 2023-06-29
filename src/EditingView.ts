@@ -100,7 +100,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							if (excludedCodeblock)
 								return;
 							if (node.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {class: (settings.specialLanguages.includes(codeblockParameters.language)||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber).join(' '))+([''].concat(settings.specialLanguages).includes(codeblockParameters.language)?'':` language-${codeblockParameters.language}`)}}).range(node.from))
+								decorations.push(Decoration.line({attributes: {class: (settings.specialLanguages.includes(codeblockParameters.language)||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+([''].concat(settings.specialLanguages).includes(codeblockParameters.language)?'':` language-${codeblockParameters.language}`)}}).range(node.from))
 								decorations.push(Decoration.line({}).range(node.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
 								lineNumber++;

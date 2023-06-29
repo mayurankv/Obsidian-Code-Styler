@@ -1,5 +1,5 @@
 import { LANGUAGE_NAMES, LANGUAGE_ICONS, CodeblockCustomizerThemeSettings } from "./Settings";
-import { CodeblockParameters } from "./CodeblockParsing";
+import { CodeblockParameters, Highlights } from "./CodeblockParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings): HTMLElement {
 	const headerContainer = createDiv({cls: `codeblock-customizer-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
@@ -20,7 +20,10 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 	if (codeblockParameters.title !== '')
 		headerText = codeblockParameters.title;
 	else if (codeblockParameters.fold.enabled)
-		headerText = codeblockParameters.fold.placeholder!==''?codeblockParameters.fold.placeholder:themeSettings.header.collapsePlaceholder!==''?themeSettings.header.collapsePlaceholder:'Collapsed Code';
+		if (codeblockParameters.fold.placeholder!=='')
+			headerText = codeblockParameters.fold.placeholder;
+		else
+			headerText = themeSettings.header.collapsePlaceholder!==''?themeSettings.header.collapsePlaceholder:'Collapsed Code';
 	headerContainer.appendChild(createDiv({cls: "codeblock-customizer-header-text", text: headerText}));   
 
 	return headerContainer;
@@ -40,13 +43,12 @@ function getLanguageIcon(language: string) {
 	return null;
 }
 
-export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number): Array<string> {
-	//TODO (@mayurankv) Future: Speed this up by setting up a reverse dictionary for line number to highlights
+export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {
 	let classList: Array<string> = [];
-	if (codeblockParameters.highlights.default.includes(lineNumber))
+	if (codeblockParameters.highlights.default.lineNumbers.includes(lineNumber) || codeblockParameters.highlights.default.plainText.some(text => line.indexOf(text) > -1) || codeblockParameters.highlights.default.regularExpressions.some(regExp => regExp.test(line)))
 		classList.push('codeblock-customizer-line-highlighted');
-	Object.entries(codeblockParameters.highlights.alternative).forEach(([alternativeHighlight,highlightedLineNumbers]: [string,Array<number>]) => {
-		if (highlightedLineNumbers.includes(lineNumber))
+	Object.entries(codeblockParameters.highlights.alternative).forEach(([alternativeHighlight,highlightedLines]: [string,Highlights]) => {
+		if (highlightedLines.lineNumbers.includes(lineNumber) || highlightedLines.plainText.some(text => line.indexOf(text) > -1) || highlightedLines.regularExpressions.some(regExp => regExp.test(line)))
 			classList.push(`codeblock-customizer-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`);
 	})
 	if (classList.length === 0)

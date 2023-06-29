@@ -74,7 +74,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
 				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
 			}
-			codeblockParameters.highlights.default = [...new Set(codeblockParameters.highlights.default.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
+			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
 			if (codeblockParameters.title === '')
 				codeblockParameters.title = codePreviewParams.filePath;
 			codeblockParameters.language = codePreviewParams.language;
@@ -112,7 +112,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 			return;
 		const lineNumber = index + 1;
 		const lineWrapper = document.createElement("div");
-		getLineClass(codeblockParameters,lineNumber).forEach((lineClass) => {
+		getLineClass(codeblockParameters,lineNumber,line).forEach((lineClass) => {
 			lineWrapper.classList.add(lineClass);
 		});
 		codeblockCodeElement.appendChild(lineWrapper);
