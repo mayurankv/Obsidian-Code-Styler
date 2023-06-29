@@ -50,6 +50,10 @@ To install the project you need to have `node` and `npm`
 > can make all of your pull request branches based on this `master` branch.
 > Whenever you want to update your version of `master`, do a regular `git pull`.
 
+### Recommended IDE
+
+TODO VSCode and []
+
 ## Submitting a Pull Request
 
 Please go through existing issues and pull requests to check if somebody else is already working on it.
