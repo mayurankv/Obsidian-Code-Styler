@@ -8,7 +8,7 @@ import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from ".
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings) {
+export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings, languageIcons: Record<string,string>) {
 	const codeblockLines = ViewPlugin.fromClass(
 		class CodeblockLines {
 			settings: CodeblockCustomizerSettings;
@@ -139,7 +139,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.includes(codeblockParameters.language))
-								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings),block: true}));
+								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons),block: true}));
 							else if (codeblockParameters.language === 'preview')
 								continue;
 							else if (codeblockParameters.language === 'include')
@@ -236,13 +236,15 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 	class HeaderWidget extends WidgetType {
 		codeblockParameters: CodeblockParameters;
 		themeSettings: CodeblockCustomizerThemeSettings;
+		languageIcons: Record<string,string>;
 		view: EditorView;
 		mutationObserver: MutationObserver;
 	
-		constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
+		constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings, languageIcons: Record<string,string>) {
 			super();
 			this.codeblockParameters = codeblockParameters;
 			this.themeSettings = themeSettings;
+			this.languageIcons = languageIcons;
 			this.mutationObserver = new MutationObserver((mutations) => {
 				mutations.forEach(mutation => {
 					if ((mutation.target as HTMLElement).hasAttribute('data-clicked'))
@@ -257,7 +259,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			
 		toDOM(view: EditorView): HTMLElement {
 			this.view = view;
-			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings);
+			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings, this.languageIcons);
 			if (this.codeblockParameters.language!=='')
 				headerContainer.classList.add(`language-${this.codeblockParameters.language}`)
 			headerContainer.addEventListener("mousedown",handleMouseDown);

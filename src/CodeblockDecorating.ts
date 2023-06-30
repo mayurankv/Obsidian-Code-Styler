@@ -1,10 +1,10 @@
-import { LANGUAGE_NAMES, LANGUAGE_ICONS, CodeblockCustomizerThemeSettings } from "./Settings";
+import { LANGUAGE_NAMES, CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, Highlights } from "./CodeblockParsing";
 
-export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings): HTMLElement {
+export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
 	const headerContainer = createDiv({cls: `codeblock-customizer-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
 	if (codeblockParameters.language !== ''){
-		const IconURL = getLanguageIcon(codeblockParameters.language)
+		const IconURL = getLanguageIcon(codeblockParameters.language,languageIcons)
 		if (IconURL !== null) {
 			const imageWrapper = createDiv();
 			const img = document.createElement("img");
@@ -16,7 +16,7 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 		headerContainer.appendChild(createDiv({cls: `codeblock-customizer-header-language-tag-${codeblockParameters.language}`, text: getLanguageTag(codeblockParameters.language)}));
 	}
 	
-	let headerText = ''
+	let headerText = '';
 	if (codeblockParameters.title !== '')
 		headerText = codeblockParameters.title;
 	else if (codeblockParameters.fold.enabled)
@@ -36,10 +36,10 @@ function getLanguageTag(language: string) {
 		return language.charAt(0).toUpperCase() + language.slice(1);
 	return "";
 }
-function getLanguageIcon(language: string) {
+function getLanguageIcon(language: string, languageIcons: Record<string,string>) {
 	language = getLanguageTag(language);
-	if (language in LANGUAGE_ICONS)
-		return LANGUAGE_ICONS[language];
+	if (language in languageIcons)
+		return languageIcons[language];
 	return null;
 }
 

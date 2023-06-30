@@ -96,13 +96,13 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	if (codeblockPreElement.parentElement)
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
-	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings);
+	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings,plugin.languageIcons);
 	setTimeout(()=>{
 		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
 	},100)
 }
-function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
-	const headerContainer = createHeader(codeblockParameters, themeSettings);
+function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings, languageIcons: Record<string,string>) {
+	const headerContainer = createHeader(codeblockParameters, themeSettings,languageIcons);
 	codeblockPreElement.insertBefore(headerContainer, codeblockPreElement.childNodes[0]);
 	
 	headerContainer.addEventListener("click", ()=>{
@@ -169,6 +169,39 @@ async function PDFExport(element: HTMLElement, sourcePath: string, plugin: Codeb
 	}
 }
 
+export function destroyReadingModeElements(): void {
+	document.querySelectorAll(".codeblock-customizer-pre-parent").forEach(codeblockPreParent => {
+		codeblockPreParent.classList.remove('codeblock-customizer-pre-parent');
+	});
+	[
+		...Array.from(document.querySelectorAll("pre.codeblock-customizer-pre div[class^='codeblock-customizer-header-container']")),
+		...Array.from(document.querySelectorAll("pre.codeblock-customizer-pre div[class^='codeblock-customizer-line-number']")),
+	].forEach(element => element.remove());
+	document.querySelectorAll("pre.codeblock-customizer-pre").forEach(codeblockPreElement => {
+		codeblockPreElement.classList.remove('codeblock-customizer-pre');
+		codeblockPreElement.classList.remove('codeblock-customizer-codeblock-collapsed');
+		(codeblockPreElement as HTMLElement).style.removeProperty('--true-height');
+		(codeblockPreElement as HTMLElement).style.removeProperty('--line-number-margin');
+		(codeblockPreElement as HTMLElement).style.removeProperty('maxHeight');
+		(codeblockPreElement as HTMLElement).style.removeProperty('whiteSpace');
+	});
+	document.querySelectorAll('pre > code ~ code.language-output').forEach(executeCodeOutput => {
+		executeCodeOutput.classList.remove('execute-code-output');
+		(executeCodeOutput as HTMLElement).style.removeProperty('--true-height');
+		(executeCodeOutput as HTMLElement).style.removeProperty('maxHeight');
+	})
+	document.querySelectorAll('pre > code:first-child').forEach(codeblockCodeElement => {
+		(codeblockCodeElement as HTMLElement).style.removeProperty('--true-height');
+		(codeblockCodeElement as HTMLElement).style.removeProperty('maxHeight');
+		(codeblockCodeElement as HTMLElement).style.removeProperty('whiteSpace');
+		(codeblockCodeElement as HTMLElement).innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="codeblock-customizer-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
+			const codeblockLineText = (codeblockLine.firstChild as HTMLElement);
+			if (codeblockLineText)
+				reconstructedCodeblockLines.push(codeblockLineText.innerHTML);
+			return reconstructedCodeblockLines
+		},[]).join('\n')+'\n';
+	})
+}
 
 export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach(mutation => {

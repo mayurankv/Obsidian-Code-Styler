@@ -1,14 +1,15 @@
 import { Plugin, FileView } from "obsidian";
 
-import { DEFAULT_SETTINGS, LANGUAGE_ICONS, CodeblockCustomizerSettings } from './Settings';
+import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
-import { updateStyling } from "./ApplyStyling";
+import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeMirrorExtensions } from "./EditingView";
-import { executeCodeMutationObserver, readingViewPostProcessor } from "./ReadingView";
+import { destroyReadingModeElements, executeCodeMutationObserver, readingViewPostProcessor } from "./ReadingView";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
 	executeCodeMutationObserver: MutationObserver;
+	languageIcons: Record<string,string>;
 	
 	async onload() {
 		await this.loadSettings();
@@ -18,7 +19,12 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		const settingsTab = new SettingsTab(this.app,this);
 		this.addSettingTab(settingsTab);
 
-		this.registerEditorExtension(createCodeMirrorExtensions(this.settings)); // Add codemirror extensions
+		this.languageIcons = Object.keys(LANGUAGE_ICONS_DATA).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
+			result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGE_ICONS_DATA[key]}</svg>`], { type: "image/svg+xml" }));
+			return result
+		},{})
+
+		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		this.app.workspace.iterateRootLeaves(leaf => { // Add decoration on enabling of plugin
@@ -31,9 +37,11 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	}
 	
 	onunload() {
-		for (const url of Object.values(LANGUAGE_ICONS))
-			URL.revokeObjectURL(url) // Unload icons
 		this.executeCodeMutationObserver.disconnect();
+		removeStylesAndClasses();
+		destroyReadingModeElements();
+		for (const url of Object.values(this.languageIcons)) // Unload icons
+			URL.revokeObjectURL(url);
 		console.log("Unloaded plugin: CodeBlock Customizer");
 	}
 	

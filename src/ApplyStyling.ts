@@ -1,12 +1,13 @@
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, CodeblockCustomizerThemeModeColors, CodeblockCustomizerThemeSettings, Color, LANGUAGE_NAMES, LANGUAGE_COLORS } from "./Settings";
 import { isCss } from "./SettingsTab";
 
+const STYLE_ID = 'codeblock-customizer-styles';
+
 export function updateStyling(settings: CodeblockCustomizerSettings): void {
-	let styleId = 'codeblock-customizer-styles';
-	let styleTag = document.getElementById(styleId);
+	let styleTag = document.getElementById(STYLE_ID);
 	if (!styleTag) {
 		styleTag = document.createElement('style');
-		styleTag.id = styleId;
+		styleTag.id = STYLE_ID;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
 	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors(settings.currentTheme.settings)).trim().replace(/\s+/g,' ');
@@ -137,4 +138,18 @@ function addThemeSettingsClasses (themeSettings: CodeblockCustomizerThemeSetting
 		document.body.classList.add("codeblock-customizer-show-langicons-always");
 	else if (themeSettings.header.languageIcon.display === 'if_header_shown')
 		document.body.classList.add("codeblock-customizer-show-langicons");
+}
+
+export function removeStylesAndClasses(): void {
+	document.getElementById(STYLE_ID)?.remove();
+	document.body.classList.remove(
+		'codeblock-customizer',
+		"codeblock-customizer-show-line-numbers",
+		'codeblock-customizer-gutter-highlight',
+		'codeblock-customizer-gutter-active-line',
+		"codeblock-customizer-show-langnames",
+		"codeblock-customizer-show-langnames-always",
+		"codeblock-customizer-show-langicons",
+		"codeblock-customizer-show-langicons-always",
+	);
 }
