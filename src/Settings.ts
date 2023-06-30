@@ -711,10 +711,6 @@ const MANUAL_LANGUAGES: {[key: string]: string} = { // Manually generated list f
 	"icu-message-format":"ICU Message Format",
 	"idris":"Idris",
 	"idr":"Idris",
-	"ignore":".ignore",
-	"gitignore":".ignore",
-	"hgignore":".ignore",
-	"npmignore":".ignore",
 	"inform7":"Inform 7",
 	"ini":"Ini",
 	"io":"Io",
@@ -800,7 +796,6 @@ const MANUAL_LANGUAGES: {[key: string]: string} = { // Manually generated list f
 	"parigp":"PARI/GP",
 	"parser":"Parser",
 	"pascal":"Pascal",
-	"objectpascal":"Pascal",
 	"pascaligo":"Pascaligo",
 	"psl":"PATROL Scripting Language",
 	"pcaxis":"PC-Axis",
@@ -908,7 +903,7 @@ const MANUAL_LANGUAGES: {[key: string]: string} = { // Manually generated list f
 	"typescript":"TypeScript",
 	"ts":"TypeScript",
 	"typoscript":"TypoScript",
-	"tsconfig":"TypoScript",
+	"tsconfig":"TSConfig",
 	"unrealscript":"UnrealScript",
 	"uscript":"UnrealScript",
 	"uc":"UnrealScript",
@@ -924,7 +919,6 @@ const MANUAL_LANGUAGES: {[key: string]: string} = { // Manually generated list f
 	"vim":"vim",
 	"visual-basic":"Visual Basic",
 	"vb":"Visual Basic",
-	"vba":"Visual Basic",
 	"warpscript":"WarpScript",
 	"wasm":"WebAssembly",
 	"web-idl":"Web IDL",
@@ -1132,127 +1126,127 @@ export const LANGUAGE_COLORS : {[key: string]: string} = {
 	".properties": '#99b8c4',
 	"6502 Assembly": '#0000bf',
 	"ActionScript": '#c41718',
-	"Ada": `#0f23c3 #1a1978`, //todo (@mayurankv) Decide color
+	"Ada": '#0f23c3',
 	"AL": '#2ea98e',
 	"ANTLR4": '#e44a32',
-	"Apache Configuration": `#f69923 #f79a23 #e97826 #9e2064 #c92037 #cd2335 #e97826 #282662 #662e8d #9f2064 #cd2032 #be202e`, //todo (@mayurankv) Decide color
-	"Apex": `#0f9bd7 #0072a0`, //todo (@mayurankv) Decide color
+	"Apache Configuration": '#c92037',
+	"Apex": '#0f9bd7',
 	"APL": '#d2d2d2',
 	"AppleScript": '#a8c2ab',
-	"Arduino": `#36bac0 #2d9094 #02797e`, //todo (@mayurankv) Decide color
+	"Arduino": '2d9094',
 	"ARM Assembly": '#0000bf',
 	"AsciiDoc": '#e40046',
-	"ASP.NET (C#)": `#c5c5c5 #f5f5f5 #33a9dc`, //todo (@mayurankv) Decide color
-	"AutoHotkey": `#d8d8d8 #a3a3a3 #d7d7d7 #e7e7e7 #d7d7d7 #8d8d8d #f8f8f8`, //todo (@mayurankv) Decide color
-	"AutoIt": `#5d83ac #f0f0f0`, //todo (@mayurankv) Decide color
+	"ASP.NET (C#)": '#33a9dc',
+	"AutoHotkey": '#d8d8d8',
+	"AutoIt": '#5d83ac',
 	"Avro IDL": '#0040ff',
 	"AWK": '#d2d2d2',
 	"Batch": '#d9b400',
 	"C#": '#368832',
 	"C": '#005f91',
 	"C++": '#984c93',
-	"Clojure": `#91dc47 #63b132 #90b4fe #5881d8`, //todo (@mayurankv) Decide color
-	"CMake": `#1011a1 #6969e1 #b40e0e #ff5959 #01a300 #01df00 #848484 #d2d2d2`, //todo (@mayurankv) Decide color
+	"Clojure": '#91dc47',
+	"CMake": '#01a300',
 	"COBOL": '#005ca5',
 	"CoffeeScript": '#6f4e37',
 	"Crystal": '#c8c8c8',
-	"CSS": `#1572b6`, //todo (@mayurankv) Decide color
-	"CSV": `#c2c2c2 #829ec2`, //todo (@mayurankv) Decide color
+	"CSS": '#1572b6',
+	"CSV": '#c2c2c2',
 	"D": '#b03931',
-	"Dart": `#66c3fa #215896 #235997 #58b6f0`, //todo (@mayurankv) Decide color
+	"Dart": '#58b6f0',
 	"Dhall": '#b7b7b7',
 	"Diff": '#c00000',
-	"Django/Jinja2": `#575757 #2f2f2f`, //todo (@mayurankv) Decide color
+	"Django/Jinja2": '#ff0000',
 	"Docker": '#0096e6',
-	"DOT (Graphviz)": `#e6e6e6 #4ed1f8 #656565 #2c2928 #282828 #00ff80`, //todo (@mayurankv) Decide color
-	"EditorConfig": `#e3e3f8 #fdfdfd #020202 #fdf2f2 #fef3f3 #efefef #faf1f1`, //todo (@mayurankv) Decide color
+	"DOT (Graphviz)": '#4ed1f8',
+	"EditorConfig": '#e3e3f8',
 	"EJS": '#90a93a',
-	"Elixir": `#f7f6f8 #aa9cb3 #6f567e #452459 #2d0843 #26003d #7c648f`, //todo (@mayurankv) Decide color
-	"Elm": `#5fb4cb #eea400 #596277 #5fb4cb #8cd636 #eea400`, //todo (@mayurankv) Decide color
+	"Elixir": '#452459',
+	"Elm": '#8cd636',
 	"ERB": '#921a1e',
 	"Erlang": '#a2003e',
-	"F#": `#378bba #30b9db`, //todo (@mayurankv) Decide color
-	"Firestore security rules": `#ffc24a #ffa712 #f4bd62 #ffa50e #f6820c #fde068 #fcca3f #eeab37 #252525`, //todo (@mayurankv) Decide color
-	"Flow": `#ffd441 #ffb047 #ffd754 #ffb532 #ffd642 #ffd441 #ffb532 #ffd441 #ffa829 #ffdf51 #ff8900 #ffdf4f #ffb700 #ffcd25 #ff8900`, //todo (@mayurankv) Decide color
+	"F#": '#378bba',
+	"Firestore security rules": '#f6820c',
+	"Flow": '#ffb047',
 	"Fortran": '#734f96',
 	"FreeMarker Template Language": '#0050b2',
 	"GameMaker Language": '#8bc34a',
-	"G-code": `#8e0000 #ba0000`, //todo (@mayurankv) Decide color
-	"GDScript": `#478cbf #414042`, //todo (@mayurankv) Decide color
+	"G-code": '#ba0000',
+	"GDScript": '#478cbf',
 	"Git": '#dd4c35',
 	"GLSL": '#4386b5',
-	"Go module": `#f2e6c9 #efc75e #e7bf55 #dbb551 #f2f2f2 #ce3262`, //todo (@mayurankv) Decide color
+	"Go module": '#ce3262',
 	"Go": '#00acd7',
-	"Gradle": `#006533 #82b816 #006532`, //todo (@mayurankv) Decide color
+	"Gradle": '#006533',
 	"GraphQL": '#e10098',
 	"Groovy": '#6398aa',
-	"Haml": `#ecdfa7 #3f3e29`, //todo (@mayurankv) Decide color
+	"Haml": '#ecdfa7',
 	"Handlebars": '#c19770',
-	"Haskell": `#faba09 #b42c01`, //todo (@mayurankv) Decide color
-	"Haxe": `#f68712 #fab20b #f47216 #f25c19 #f89c0e #fbc707 #f68712 #f25c19 #f1471d`, //todo (@mayurankv) Decide color
+	"Haskell": '#C04504',
+	"Haxe": '#f68712',
 	"HLSL": '#0000ff',
-	"HTML": `#e44f26 #f1662a #ebebeb`, //todo (@mayurankv) Decide color
-	"HTTP": `#d3e9ff #4074ae #36486c #729fcf #3b61a6 #729fcf #509e2f #39396c #204a87 #183868`, //todo (@mayurankv) Decide color
+	"HTML": '#e44f26',
+	"HTTP": '#3b61a6',
 	"Idris": '#8a0819',
 	"Ini": '#99b8c4',
 	"Io": '#c2c2c2',
 	"Java": '#5382a1',
 	"JavaScript": '#f5de19',
 	"JSON": '#f5de19',
-	"JSON5": `#909090`, //todo (@mayurankv) Decide color
-	"Julia": `#252525 #6682df #4063d8 #d5635c #cb3c33 #60ad51 #389826 #aa79c1 #9558b2`, //todo (@mayurankv) Decide color
-	"Kotlin": `#e44857 #9d4b9d #6d5faa`, //todo (@mayurankv) Decide color
-	"Kusto": `#b8d432 #0078d4 #59b4d9`, //todo (@mayurankv) Decide color
+	"JSON5": '#909090',
+	"Julia": '#4063d8',
+	"Kotlin": '#9d4b9d',
+	"Kusto": '#59b4d9',
 	"LaTeX": '#cfcfcf',
-	"Less": `#2a4f84 #294e82 #172e4e #404040 #f6f6f6`, //todo (@mayurankv) Decide color
+	"Less": '#2a4f84',
 	"Liquid": '#004999',
-	"Lisp": `#8381c5 #7e55b3 #a52ecb #411f5d #5b2a85`, //todo (@mayurankv) Decide color
+	"Lisp": '#8381c5',
 	"LiveScript": '#317eac',
 	"Log file": '#00bd02',
-	"LOLCODE": `#ededed #8d2701`, //todo (@mayurankv) Decide color
-	"Lua": '', //todo (@mayurankv) Decide color
+	"LOLCODE": '#8d2701',
+	"Lua": '#050080',
 	"Markdown": '#755838',
-	"MATLAB": `#de5239 #f06e3e #fa8042 #fe8643 #fa7f42 #ef6c3e #dc4c37 #cf3633 #4090d0`, //todo (@mayurankv) Decide color
-	"MAXScript": `#1d1d1b #181b17 #1a1d1a #005f5e #004242 #005152 #00696b #1b2725 #1c2624 #006466 #00767a #1e3938 #20302e`, //todo (@mayurankv) Decide color
-	"MEL": `#0f6067 #05abac #58bec4 #117c83 #21b5b5 #7ed4d4 #9accd3 #72aeb3 #317d7f #21626e #157c84 #03a3a5 #0b7c81 #068d90 #16b1b1 #0a8a8f #0f7c82 #1a5964 #256a77 #0d9499 #06a0a2`, //todo (@mayurankv) Decide color
-	"MongoDB": `#999875 #9b9977 #a09f7e #a9a889 #b7b69a #c9c7b0 #deddcb #f8f6eb #fbf9ef #48a547 #3f9143 #41a247 #4ba74b #67b554 #69b655`, //todo (@mayurankv) Decide color
+	"MATLAB": '#ef6c3e',
+	"MAXScript": '#00696b',
+	"MEL": '#06a0a2',
+	"MongoDB": '#41a247',
 	"nginx": '#019639',
-	"Nim": `#f3d400 #ffe953`, //todo (@mayurankv) Decide color
-	"Nix": `#7ebae4 #5277c3`, //todo (@mayurankv) Decide color
-	"NSIS": `#00577b #0079aa #0096d3 #01b0f0 #27bcf3 #4fc9f5 #79201b #a42d26 #cc382f #f0453f #f2625d #f47f7d #464049`, //todo (@mayurankv) Decide color
-	"Object Pascal": `#ff0c15 #9a0c0f #ff6443 #fae7e3 #eee #ee4b2e #f04e31 #eee #ee4b2e #dd0c13 #ff6e4f #eee #ee4b2e #eae0df`, //todo (@mayurankv) Decide color
+	"Nim": '#ffe953',
+	"Nix": '#5277c3',
+	"NSIS": '#a42d26',
+	"Object Pascal": '#FF6344',
 	"Objective-C": '#c2c2c2',
-	"OCaml": `#f29104 #ec6813`, //todo (@mayurankv) Decide color
-	"OpenCL": `#ff6a6a #cfa40c #edd480 #646464 #cbcbcb #646464`, //todo (@mayurankv) Decide color
-	"Pascal": `#ff0c15 #9a0c0f #ff6443 #fae7e3 #eee #ee4b2e #f04e31 #eee #ee4b2e #dd0c13 #ff6e4f #eee #ee4b2e #eae0df`, //todo (@mayurankv) Decide color
-	"Perl": `#ededed #3a3c5b`, //todo (@mayurankv) Decide color
-	"PHP": `#4c6b96 #231f20 #6280b6 #000004`, //todo (@mayurankv) Decide color
+	"OCaml": '#f29104',
+	"OpenCL": '#FF1C1A',
+	"Pascal": '#FF6344',
+	"Perl": '#3a3c5b',
+	"PHP": '#4c6b96',
 	"PL/SQL": '#ff0000',
-	"Plain text": `#c2c2c2 #829ec2`, //todo (@mayurankv) Decide color
-	"PlantUML": `#767676 #0079b9 #595959 #6e6e6e #8c8c8c #a4a4a4 #b5b5b5 #bfbfbf #c2c2c2 #1c0a42 #ffbd3f #a11f40 #ea2d2e`, //todo (@mayurankv) Decide color
+	"Plain text": '#c2c2c2',
+	"PlantUML": '#A11F41',
 	"PowerQuery": '#cfcfcf',
-	"PowerShell": `#5391fe #3e6dbf #2c5591`, //todo (@mayurankv) Decide color
-	"Processing": `#1c4c70 #0c2b42`, //todo (@mayurankv) Decide color
-	"Prolog": `#fbfbfb #efeff0 #dadbdc #bebfc2 #aeb0b3 #fafdff #eef5fa #cfdfec #9dbbd5 #588ab5 #326fa4 #2b6698 #174e78 #003152 #ffd540 #ec1c24 #760000 #dddfe0 #d9dbdc #cdcfd0 #b8babb #9c9e9f #78797b #5e5f61 #231f20 #bdbfc1 #231f20 #bdbfc1 #231f20`, //todo (@mayurankv) Decide color
-	"Protocol Buffers": `#171c1e #1ea8ff #50bfff #97ff27 #c2ff72 #ff274b #ff5c77`, //todo (@mayurankv) Decide color
-	"Pug": `#efcca3 #ccac8d #efcca3 #ccac8d #56332b #442823 #56332b #7f4a41 #442823 #ccac8d #331712 #7f4a41 #efcca3 #ccac8d #56332b #442823 #56332b #442823 #ccac8d #442823`, //todo (@mayurankv) Decide color
+	"PowerShell": '#5391fe',
+	"Processing": '#1c4c70',
+	"Prolog": '#ec1c24',
+	"Protocol Buffers": '#97ff27',
+	"Pug": '#442823',
 	"Puppet": '#ffae1a',
 	"PureScript": '#16171b',
-	"Python": '#387eb8',
+	"Python": '#3671A1',
 	"Q (kdb+ database)": '#1e78b3',
-	"Q#": `#33c`,
+	"Q#": `#3333cc`,
 	"QML": '#41cd52',
-	"R": `#cbced0 #84838b #276dc3 #165caa`, //todo (@mayurankv) Decide color
-	"Racket": `#3e5ba9 #9f1d20`, //todo (@mayurankv) Decide color
+	"R": '#276dc3',
+	"Racket": '#9f1d20',
 	"Razor C#": '#368832',
 	"React JSX": '#00d8ff',
 	"React TSX": '#007acc',
 	"Reason": '#dd4b39',
-	"Rego": `#bfbfbf #536367 #78929a`, //todo (@mayurankv) Decide color
-	"ReScript": `#e84f4f #db4646 #cb3939`, //todo (@mayurankv) Decide color
+	"Rego": '#78929a',
+	"ReScript": '#e84f4f',
 	"reST (reStructuredText)": '#ce3f31',
 	"Robot Framework": ``,
-	"Ruby": `#fb7655 #e42b1e #900 #871101 #911209 #e57252 #de3b20 #a60003 #e4714e #be1a0d #a80d00 #e46342 #c82410 #a80d00 #c81f11 #bf0905 #de4024 #bf190b #bd0012 #c82f1c #820c01 #a31601 #b31301 #e82609 #8c0c01 #990c00 #a80d0e #7e110b #9e0c00 #79130d #9e120b #a80d00 #7e0e08 #a30c00 #800e08 #8b2114 #9e100a #b3100c #b31000 #910f08 #791c12 #9e1209`, //todo (@mayurankv) Decide color
+	"Ruby": '#b31301',
 	"Rust": '#a04f12',
 	"SAS": '#002bb5',
 	"Sass (Sass)": '#cd6799',
@@ -1260,45 +1254,45 @@ export const LANGUAGE_COLORS : {[key: string]: string} = {
 	"Scala": `#e62d2a `,
 	"Shell session": '#d9b400',
 	"Shell": '#d9b400',
-	"Smarty": `#636361 #6c6d70 #6f7175 #616366 #3c3d3f #010101 #636a6e #9b9b98 #a4a5a7 #aeb1b8 #9fa4ab #788188 #657076 #8b949a #70706e #616261 #46474a #48494c #4e5053 #5a5c5f #6a6e71 #7f8588 #979ea1 #3d4447 #656c70 #9b9b98 #a5a6a7 #babcc4 #abaeb5 #84898f #485054 #8b949a #545453 #616262 #848589 #aeb1b8 #9fa4ab #788188 #657076 #505659 #e5e1df #dddad6 #ceccc9 #a7a9a8 #697072 #465054 #636c6f #a5aaac #d5d7d9 #f3f4f5 #fefeff #f4f5f6 #dadcdf #b0b4b9 #8b9298 #d1d3d4 #a7a9ac #e5e1df #dde8d0 #d2f3ba #c5e4b1 #a4bd98 #6e7f71 #465054 #636c6f #a5aaac #d5d7d9 #f3f4f5 #fefeff #f4f5f6 #dadcdf #b0b4b9 #8b9298 #d1d3d4 #a7a9ac #ff0 #fdf700 #f6e200 #ebbf00 #de9200 #da9819`, //todo (@mayurankv) Decide color
+	"Smarty": '#f6e200',
 	"Solidity (Ethereum)": '#c1c1c1',
-	"Solution file": `#52218a #6c33af #854cc7 #b179f1`, //todo (@mayurankv) Decide color
+	"Solution file": '#854cc7',
 	"SPARQL": '#0c479c',
 	"SQF": '#c2c2c2',
 	"SQF: Status Quo Function (Arma 3)": '#c2c2c2',
 	"SQL": '#ffda44',
-	"Squirrel": `#a05a2c #502d16`, //todo (@mayurankv) Decide color
-	"Stan": `#b2001d #590815`, //todo (@mayurankv) Decide color
-	"Stata Ado": `#8aa7c0 #3c6e8f`, //todo (@mayurankv) Decide color
+	"Squirrel": '#a05a2c',
+	"Stan": '#b2001d',
+	"Stata Ado": '#3c6e8f',
 	"Stylus": '#c2c2c2',
 	"SVG": '#ffb13b',
-	"Swift": `#f88535 #fd2221`, //todo (@mayurankv) Decide color
-	"Systemd configuration file": `#d2d2d2 #30d475`, //todo (@mayurankv) Decide color
+	"Swift": '#FA5D2D',
+	"Systemd configuration file": '#30d475',
 	"T4 templating": '#1e88e5',
 	"T4 Text Templates (C#)": '#1e88e5',
 	"T4 Text Templates (VB)": '#1e88e5',
-	"Tcl": `#c3b15f #eff1cb`, //todo (@mayurankv) Decide color
-	"Template Toolkit 2": `#015d9a #3bcefc #015d9a #3bcefc`, //todo (@mayurankv) Decide color
+	"Tcl": '#eff1cb',
+	"Template Toolkit 2": '#3bcefc',
 	"TeX": '#cfcfcf',
 	"Textile": '#ffe7ac',
-	"TOML": `#7f7f7f #bfbfbf`, //todo (@mayurankv) Decide color
-	"TSConfig": `#007acc #99b8c4`, //todo (@mayurankv) Decide color
-	"Twig": `#63bf6a #74d74d #78dc50`, //todo (@mayurankv) Decide color
+	"TOML": '#bfbfbf',
+	"TSConfig": '#007acc',
+	"Twig": '#78dc50',
 	"TypeScript": '#3178c6',
 	"TypoScript": '#ff8700',
-	"V": `#536b8a #5d87bf`, //todo (@mayurankv) Decide color
-	"Vala": `#403757 #c8c8c8`, //todo (@mayurankv) Decide color
+	"V": '#5d87bf',
+	"Vala": '#403757',
 	"VB.Net": '#00519a',
-	"VBA": `#6483c0 #952781 #d87b30 #e0d400`, //todo (@mayurankv) Decide color
-	"Velocity": `#262692 #262693 #262692`, //todo (@mayurankv) Decide color
-	"Verilog": `#c5c5c5 #1a348f #c5c2ff`, //todo (@mayurankv) Decide color
+	"VBA": '#d87b30',
+	"Velocity": '#262692',
+	"Verilog": '#1a348f',
 	"VHDL": '#0d9b35',
 	"vim": '#43b54a',
 	"Visual Basic": '#00519a',
 	"WebAssembly": '#654ff0',
 	"Wolfram language": '#d01000',
 	"XML": '#f1662a',
-	"XQuery": `#f1662a #fcba00`, //todo (@mayurankv) Decide color
+	"XQuery": '#f1662a',
 	"YAML": '#ffe885',
 	"YANG": '#231f20',
 	"Zig": '#f7a41d'
