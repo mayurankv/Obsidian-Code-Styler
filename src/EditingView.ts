@@ -100,7 +100,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							if (excludedCodeblock)
 								return;
 							if (node.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {class: (settings.specialLanguages.includes(codeblockParameters.language)||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+([''].concat(settings.specialLanguages).includes(codeblockParameters.language)?'':` language-${codeblockParameters.language}`)}}).range(node.from))
+								decorations.push(Decoration.line({attributes: {class: (settings.specialLanguages.some(regExp => regExp.test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+([/^$/].concat(settings.specialLanguages).some(regExp => regExp.test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(node.from))
 								decorations.push(Decoration.line({}).range(node.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
 								lineNumber++;
@@ -138,7 +138,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						startLine = false;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore)
-							if (!settings.specialLanguages.includes(codeblockParameters.language))
+							if (!settings.specialLanguages.some(regExp => regExp.test(codeblockParameters.language)))
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons),block: true}));
 							else if (codeblockParameters.language === 'preview')
 								continue;
@@ -173,7 +173,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						startLine = false;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
-							if (!settings.specialLanguages.includes(codeblockParameters.language))
+							if (!settings.specialLanguages.some(regExp => regExp.test(codeblockParameters.language)))
 								collapseStart = line;
 							else if (codeblockParameters.language === 'preview')
 								continue;

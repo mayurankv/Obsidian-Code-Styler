@@ -1,4 +1,4 @@
-import { TFile, MarkdownView, MarkdownPostProcessorContext, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom } from "obsidian";
+import { TFile, MarkdownView, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom } from "obsidian";
 
 import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerThemeSettings } from "./Settings";
