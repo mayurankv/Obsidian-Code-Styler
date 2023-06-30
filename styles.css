@@ -476,6 +476,7 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 	top: min(calc(-0.5 * var(--container-height) * 1.1),calc(-0.5 * var(--container-min-height) * 1.1));
 	right: 0;
 	visibility: hidden;
+	padding: 0;
 }
 .markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair > * {
 	width: 0px;
