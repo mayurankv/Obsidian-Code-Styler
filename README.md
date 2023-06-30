@@ -292,6 +292,8 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 
 - Instant reading mode updating when parameters are changed
   - Requires Obsidian to parse postMarkdown changes following the codeblock language (see this [issue](https://forum.obsidian.md/t/postprocessor-does-not-process-changes-after-codeblock-language/61010) and this [issue](https://forum.obsidian.md/t/pass-parameters-to-codeblock/37990)).
+- `run-*` codeblocks from the [Execute Code Plugin](https://github.com/twibiral/obsidian-execute-code) in editing mode do not get changed
+  - Requires the correct context source path to be returned. See this [pull request](https://github.com/twibiral/obsidian-execute-code/pull/272).
 
 ## How to install the plugin
 
