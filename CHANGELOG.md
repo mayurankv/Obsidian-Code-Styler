@@ -55,6 +55,7 @@ See this project's [releases](/../../../releases).
 - Disabled markup in source mode.
 - Changed how line numbers are spaced in reading mode.
 - Updated [README](README.md).
+- Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
 ### Fixed
 
