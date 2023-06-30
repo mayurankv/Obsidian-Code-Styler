@@ -114,6 +114,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
 	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings);
+	console.log(codeblockLines.length-2)
+	codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
 }
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
 	const headerContainer = createHeader(codeblockParameters, themeSettings);
@@ -133,11 +135,6 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 				executeCodeOutput.style.maxHeight = `calc(${executeCodeOutput.scrollHeight}px + 2.5 * var(--code-padding)`;
 		}
 	});
-	codeblockCodeElement.style.maxHeight = `calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`;
-	if (codeblockParameters.fold.enabled) {
-		codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
-		codeblockCodeElement.style.maxHeight = '';
-	}
 
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
@@ -160,6 +157,14 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
+
+	setTimeout(()=>{ // Delay to return correct height
+		codeblockCodeElement.style.maxHeight = `calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`;
+		if (codeblockParameters.fold.enabled) {
+			codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
+			codeblockCodeElement.style.maxHeight = '';
+		}
+	},10);
 }
 async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');

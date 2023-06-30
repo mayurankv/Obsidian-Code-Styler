@@ -41,6 +41,8 @@ export interface CodeblockCustomizerThemeModeColors {
 export interface CodeblockCustomizerThemeSettings {
 	codeblock: {
 		lineNumbers: boolean;
+		wrapLines: boolean;
+		wrapLinesActive: boolean;
 		curvature: number;
 	},
 	gutter: {
@@ -108,6 +110,8 @@ export const NEW_THEME_DEFAULT: {name: string, default: boolean} = {
 const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
 	codeblock: {
 		lineNumbers: true,
+		wrapLines: false,
+		wrapLinesActive: false,
 		curvature: 4,
 	},
 	gutter: {

@@ -24,6 +24,7 @@ body {
 	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
 	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 	--dent-difference: 30px;
+	--line-wrapping: pre-wrap;
 }
 
 /** Codeblock background colours */
@@ -100,6 +101,9 @@ pre.codeblock-customizer-pre > code > div:only-child > [class^='codeblock-custom
 	display: none;
 }
 pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
+	position: absolute;
+	white-space: nowrap;
+	width: var(--line-number-margin);
 	flex-shrink: 0;
 	flex-grow: 1;
 }
@@ -256,6 +260,7 @@ pre.codeblock-customizer-pre code {
 	border-radius: 0px;
 	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out;
 	max-height: 0;
+	white-space: var(--line-wrapping);
 }
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
 	padding: 0 !important;
@@ -279,7 +284,8 @@ pre.codeblock-customizer-pre div:has(> .codeblock-customizer-line-text) {
 }
 pre.codeblock-customizer-pre .codeblock-customizer-line-text {
 	flex-basis: 100%;
-	padding-left: var(--line-number-gutter-padding); /*? originalVal:0px, add padding between the line numbers and the text */
+	margin-left: var(--line-number-margin);
+	padding-left: var(--line-number-gutter-padding);
 }
 
 /** Border radius styling */
