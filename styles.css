@@ -612,8 +612,11 @@ pre.codeblock-customizer-pre button.clear-button:active {
 }
 
 /** Embed Code Plugin */
+.block-language-preview pre.codeblock-customizer-pre code {
+	white-space: unset;
+}
 pre.codeblock-customizer-pre span.code-block-line_num-wrap,
-pre.codeblock-customizer-pre div span.code-block-highlight {
+pre.codeblock-customizer-pre div.code-block-highlight-wrap {
 	display: none;
 }
 .markdown-source-view.mod-cm6 .cm-embed-block .codeblock-customizer-pre-parent + .edit-block-button::after {

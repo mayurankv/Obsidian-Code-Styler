@@ -5,6 +5,9 @@ import { CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
+const PRIMARY_DELAY = 10;
+const SECONDARY_DELAY = 100;
+
 export async function readingViewPostProcessor(element: HTMLElement, {sourcePath, getSectionInfo}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null} , plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
 	if (!codeblockCodeElement) 
@@ -65,32 +68,11 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 }
 
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin) {
-	const codeblockParameters = parseCodeblockParameters(codeblockLines[0],plugin.settings.currentTheme);
+	let codeblockParameters = parseCodeblockParameters(codeblockLines[0],plugin.settings.currentTheme);
 		
 	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 		return;
-	//@ts-expect-error Undocumented Obsidian API
-	const plugins: Record<string,any> = plugin.app.plugins.plugins
-	if (codeblockParameters.language === 'preview') {
-		if ('obsidian-code-preview' in plugins) {
-			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
-			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
-				if (typeof codePreviewParams.start === 'number')
-					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
-				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
-			}
-			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
-			if (codeblockParameters.title === '')
-				codeblockParameters.title = codePreviewParams.filePath;
-			codeblockParameters.language = codePreviewParams.language;
-		}
-	} else if (codeblockParameters.language === 'include') {
-		if ('file-include' in plugins) {
-			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
-			if (typeof fileIncludeLanguage !== 'undefined')
-				codeblockParameters.language = fileIncludeLanguage;
-		}
-	}
+	codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugin,codeblockLines,sourcePath);
 
 	codeblockPreElement.classList.add(`codeblock-customizer-pre`);
 	if (codeblockPreElement.parentElement)
@@ -99,7 +81,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings,plugin.languageIcons);
 	setTimeout(()=>{
 		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
-	},100)
+	},SECONDARY_DELAY)
 }
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings, languageIcons: Record<string,string>) {
 	const headerContainer = createHeader(codeblockParameters, themeSettings,languageIcons);
@@ -152,6 +134,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	});
 
 	setTimeout(()=>{ // Delay to return correct height
+		console.log(codeblockCodeElement.scrollHeight)
 		codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
 		codeblockCodeElement.style.maxHeight = 'var(--true-height)';
 		codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
@@ -159,7 +142,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 			codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
 			codeblockCodeElement.style.maxHeight = '';
 		}
-	},10);
+	},PRIMARY_DELAY);
 }
 async function PDFExport(element: HTMLElement, sourcePath: string, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
@@ -176,6 +159,32 @@ async function PDFExport(element: HTMLElement, sourcePath: string, plugin: Codeb
 		});
 		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, sourcePath, plugin);
 	}
+}
+
+async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+	//@ts-expect-error Undocumented Obsidian API
+	const plugins: Record<string,any> = plugin.app.plugins.plugins
+	if (codeblockParameters.language === 'preview') {
+		if ('obsidian-code-preview' in plugins) {
+			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
+			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
+				if (typeof codePreviewParams.start === 'number')
+					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
+				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
+			}
+			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
+			if (codeblockParameters.title === '')
+				codeblockParameters.title = codePreviewParams.filePath.split('\\').pop().split('/').pop();
+			codeblockParameters.language = codePreviewParams.language;
+		}
+	} else if (codeblockParameters.language === 'include') {
+		if ('file-include' in plugins) {
+			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
+			if (typeof fileIncludeLanguage !== 'undefined')
+				codeblockParameters.language = fileIncludeLanguage;
+		}
+	}
+	return codeblockParameters
 }
 
 export function destroyReadingModeElements(): void {
@@ -224,13 +233,13 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 			const executeCodeOutput = mutation.target as HTMLElement;
 			setTimeout(()=>{
 				executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
-			},10)
+			},PRIMARY_DELAY)
 		} else if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'INPUT' && (mutation.target as HTMLElement).parentElement?.tagName === 'CODE') { // Change style of execute code output input box
 			const executeCodeOutput = mutation.target.parentElement as HTMLElement;
 			if (executeCodeOutput) {
 				setTimeout(()=>{
 					executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
-				},100)
+				},SECONDARY_DELAY)
 			}
 		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') { // Add execute code output
 			const executeCodeOutput = (mutation.target as HTMLElement).querySelector('pre > code ~ code.language-output') as HTMLElement;
@@ -241,7 +250,7 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 						executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
 						executeCodeOutput.style.maxHeight = 'var(--true-height)';
 						executeCodeOutput.style.whiteSpace = 'var(--line-wrapping)';
-					},10)
+					},PRIMARY_DELAY)
 				}
 			}
 		}
