@@ -81,7 +81,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings,plugin.languageIcons);
 	setTimeout(()=>{
 		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
-	},SECONDARY_DELAY)
+	},SECONDARY_DELAY);
 }
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings, languageIcons: Record<string,string>) {
 	const headerContainer = createHeader(codeblockParameters, themeSettings,languageIcons);
@@ -107,7 +107,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		if (codeblockParameters.lineUnwrap.activeWrap)
 			codeblockCodeElement.style.setProperty('--line-active-wrapping','pre-wrap');
 		else
-			codeblockCodeElement.style.setProperty('--line-active-wrapping','var(--line-wrapping)');
+			codeblockCodeElement.style.setProperty('--line-active-wrapping','pre');
 	} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
 		codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
 
@@ -134,7 +134,6 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	});
 
 	setTimeout(()=>{ // Delay to return correct height
-		console.log(codeblockCodeElement.scrollHeight)
 		codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
 		codeblockCodeElement.style.maxHeight = 'var(--true-height)';
 		codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';

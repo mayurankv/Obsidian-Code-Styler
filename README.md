@@ -157,6 +157,23 @@ Corresponding settings:
 
 ![Alternative Highlights](images/AlternativeHighlightsSettings.png)
 
+### Unwrap
+
+Whether lines wrap or note can be set in the settings. There is an advanced option called "Wrap Lines on Click" where holding the mouse down on a codeblock's content will cause the content to be wrapped (if line unwrapping is already set in the settings).
+
+These settings can also be set on a per codeblock basis using the `unwrap` parameter which overrides the settings. Setting `unwrap:true` will unwrap lines in the codeblock, setting `unwrap:false` will wrap lines in the codeblock, and setting `unwrap:inactive` will unwrap lines in the codeblock but will wrap them when the mouse is held down on the codeblock.
+
+Example:
+
+` ```python unwrap:true`
+![Unwrap True](images/UnwrapTrue.gif)
+
+` ```python unwrap:false`
+![Unwrap False](images/UnwrapFalse.png)
+
+` ```python unwrap:inactive`
+![Unwrap Inactive](images/UnwrapInactive.gif)
+
 ### Ignore
 
 In addition to excluding the language, the plugin can be told to not apply to a specific codeblock by including the `ignore` parameter.
@@ -178,6 +195,10 @@ Example:
 Codeblocks can have their curvature changed in settings to make them appear more or less rounded.
 
 They can also have colored left borders based on the language (colors match the language icon) if enabled in settings. The width of this border can also be changed.
+
+Example:
+
+![Language Border](images/LanguageBorder.png)
 
 ### Header
 
@@ -262,6 +283,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
 - Reading Mode
   - Codeblocks flash when changed if editing side by side in editing mode.
+  - Scrollbar does not show behind line gutter
   - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
   - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17).
 - PDF Exporting

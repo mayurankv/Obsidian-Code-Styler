@@ -255,6 +255,7 @@ pre.codeblock-customizer-pre {
 	border-radius: var(--border-radius);
 	min-height: unset;
 	padding: 0px;
+	overflow: hidden;
 }
 pre.codeblock-customizer-pre code {
 	display: block;
@@ -265,6 +266,7 @@ pre.codeblock-customizer-pre code {
 	border-radius: 0px;
 	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out, border-top ease-in-out var(--duration-button);
 	max-height: 0;
+	overflow-x: scroll;
 }
 pre.codeblock-customizer-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
@@ -659,4 +661,13 @@ body .cm-embed-block .codeblock-customizer-pre-parent:not(:has( pre.codeblock-cu
 .markdown-source-view.mod-cm6 .cm-embed-block:hover .codeblock-customizer-pre-parent + .edit-block-button:active {
 	scale: 0.95;
 	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
+}
+
+/** File Include Plugin */
+div.block-language-include pre.codeblock-customizer-pre button.copy-code-button {
+	margin: 0;
+	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+}
+div.block-language-include pre.codeblock-customizer-pre button.copy-code-button:hover {
+	margin-right: var(--copy-code-header-right-margin);
 }
