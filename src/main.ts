@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin, FileView } from "obsidian";
 
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
@@ -15,12 +15,17 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		document.body.classList.add('codeblock-customizer');
 		updateStyling(this.settings);
 		
-		const settingsTab = new SettingsTab(this.app, this);
+		const settingsTab = new SettingsTab(this.app,this);
 		this.addSettingTab(settingsTab);
 
-		this.executeCodeMutationObserver = executeCodeMutationObserver;
-		this.registerEditorExtension(createCodeMirrorExtensions(this.settings));
-		this.registerMarkdownPostProcessor(async (el, ctx) => {await readingViewPostProcessor(el, ctx, this)})
+		this.registerEditorExtension(createCodeMirrorExtensions(this.settings)); // Add codemirror extensions
+
+		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
+		this.app.workspace.iterateRootLeaves(leaf => { // Add decoration on enabling of plugin
+			if (leaf.view instanceof FileView)
+				readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null},this);
+		})
+		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
 
 		console.log("Loaded plugin: CodeBlock Customizer");
 	}
@@ -38,7 +43,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		updateStyling(this.settings);
 		this.app.workspace.updateOptions();
+		updateStyling(this.settings);
 	}
 }

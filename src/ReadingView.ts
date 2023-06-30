@@ -5,7 +5,7 @@ import { CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export async function readingViewPostProcessor(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
+export async function readingViewPostProcessor(element: HTMLElement, {sourcePath, getSectionInfo}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null} , plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
 	if (!codeblockCodeElement) 
 		return;
@@ -17,9 +17,8 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 	const codeblockPreElement: HTMLPreElement | null = element.querySelector("pre:not(.frontmatter)");
 	if (!codeblockPreElement)
 		return;
-		
-	const codeblockSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(codeblockCodeElement);
-	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
+	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockCodeElement);
+	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
 	if (cache?.frontmatter?.['codeblock-customizer-ignore'] === true)
 		return;
 	if (codeblockSectionInfo) {
@@ -33,11 +32,11 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 			attributes: true,
 			characterData: true,
 		});
-		await remakeCodeblock(codeblockCodeElement, codeblockPreElement, codeblockLines, context, plugin);
+		await remakeCodeblock(codeblockCodeElement, codeblockPreElement, codeblockLines, sourcePath, plugin);
 	} else {
-		const file = plugin.app.vault.getAbstractFileByPath(context.sourcePath);
+		const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
 		if (!file) {
-			console.error(`File not found: ${context.sourcePath}`);
+			console.error(`File not found: ${sourcePath}`);
 			return;
 		}
 		const fileContent = await plugin.app.vault.cachedRead(<TFile> file).catch((error) => {
@@ -53,11 +52,11 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 				if (element.type === 'code')
 					codeblocks.push(fileContentLines.slice(element.position.start.line,element.position.end.line+1));
 		} else {
-			console.error(`Metadata cache not found for file: ${context.sourcePath}`);
+			console.error(`Metadata cache not found for file: ${sourcePath}`);
 			return;
 		}
 		try {
-			await PDFExport(element, context, plugin, codeblocks);
+			await PDFExport(element, sourcePath, plugin, codeblocks);
 		} catch (error) {
 			console.error(`Error exporting to PDF: ${error.message}`);
 			return;
@@ -65,7 +64,7 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 	}
 }
 
-async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin) {
+async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin) {
 	const codeblockParameters = parseCodeblockParameters(codeblockLines[0],plugin.settings.currentTheme);
 		
 	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
@@ -74,7 +73,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	const plugins: Record<string,any> = plugin.app.plugins.plugins
 	if (codeblockParameters.language === 'preview') {
 		if ('obsidian-code-preview' in plugins) {
-			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),context.sourcePath);
+			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
 			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
 				if (typeof codePreviewParams.start === 'number')
 					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
@@ -98,7 +97,9 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
 	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings);
-	codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
+	setTimeout(()=>{
+		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
+	},100)
 }
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
 	const headerContainer = createHeader(codeblockParameters, themeSettings);
@@ -151,7 +152,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		}
 	},10);
 }
-async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
+async function PDFExport(element: HTMLElement, sourcePath: string, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
 	for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
 		const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
@@ -164,7 +165,7 @@ async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorCon
 			attributes: true,
 			characterData: true,
 		});
-		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, context, plugin);
+		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, sourcePath, plugin);
 	}
 }
 
@@ -177,16 +178,13 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 				executeCodeOutput.style.maxHeight = '';
 		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change children of execute code output
 			const executeCodeOutput = mutation.target as HTMLElement;
-			console.log('here')
 			setTimeout(()=>{
 				executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
 			},10)
 		} else if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'INPUT' && (mutation.target as HTMLElement).parentElement?.tagName === 'CODE') { // Change style of execute code output input box
 			const executeCodeOutput = mutation.target.parentElement as HTMLElement;
-			console.log(executeCodeOutput)
 			if (executeCodeOutput) {
 				setTimeout(()=>{
-					console.log(executeCodeOutput.scrollHeight)
 					executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
 				},100)
 			}
@@ -202,6 +200,6 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 					},10)
 				}
 			}
-		} else console.log(mutation)
+		}
 	})
 });
