@@ -99,7 +99,7 @@ export interface CodeblockCustomizerSettings {
 	},
 	newHighlight: string;
 	excludedLanguages: string;
-	specialLanguages: Array<RegExp>;
+	specialLanguages: Array<string>;
 }
 
 // Theme Defaults
@@ -272,7 +272,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
 	newTheme: NEW_THEME_DEFAULT,
 	newHighlight: '',
 	excludedLanguages: "dataview, dataviewjs, ad-*",
-	specialLanguages: [/^preview$/,/^include$/,/^output$/,/^run-.+$/],
+	specialLanguages: ["^preview$","^include$","^output$","^run-.+$"],
 }
 
 // Constants
