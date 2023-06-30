@@ -25,6 +25,8 @@ body {
 	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 	--dent-difference: 30px;
 	--line-wrapping: pre-wrap;
+	--line-active-wrapping: var(--line-wrapping);
+	--icon-filter: none;
 }
 
 /** Codeblock background colours */
@@ -68,6 +70,10 @@ pre.codeblock-customizer-pre [class^='codeblock-customizer-line-highlighted'] {
 }
 pre.codeblock-customizer-pre > code > div:first-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-customizer-gutter-background-color);
+	transition: box-shadow ease-in-out var(--duration-button);
+}
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed > code > div:first-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
+	box-shadow: 0px 0px var(--codeblock-customizer-gutter-background-color);
 }
 pre.codeblock-customizer-pre > code > div:last-child > [class^='codeblock-customizer-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px var(--code-padding) var(--codeblock-customizer-gutter-background-color);
@@ -106,6 +112,7 @@ pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
 	width: var(--line-number-margin);
 	flex-shrink: 0;
 	flex-grow: 1;
+	height: 100%;
 }
 .codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
 .codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
@@ -237,6 +244,7 @@ div:has(> img.codeblock-customizer-icon) {
 	border: 0px;
 	width: var(--language-icon-size);
 	height: var(--language-icon-size);
+	filter: var(--icon-filter);
 }
 
 /** Pre element styling */
@@ -257,6 +265,9 @@ pre.codeblock-customizer-pre code {
 	border-radius: 0px;
 	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out, border-top ease-in-out var(--duration-button);
 	max-height: 0;
+}
+pre.codeblock-customizer-pre code:not(:has( > input[style*="display: inline;"])):active {
+	--line-wrapping: var(--line-active-wrapping) !important;
 }
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
 	padding-top: 0 !important;

@@ -120,6 +120,15 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		}
 	});
 
+	if (codeblockParameters.lineUnwrap.alwaysEnabled) {
+		codeblockCodeElement.style.setProperty('--line-wrapping','pre');
+		if (codeblockParameters.lineUnwrap.activeWrap)
+			codeblockCodeElement.style.setProperty('--line-active-wrapping','pre-wrap');
+		else
+			codeblockCodeElement.style.setProperty('--line-active-wrapping','var(--line-wrapping)');
+	} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
+		codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
+
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
 		codeblockLines = ['',''];

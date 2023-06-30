@@ -76,17 +76,9 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
 			--header-font-size: ${themeSettings.header.fontSize}px;
 			--line-wrapping: ${themeSettings.codeblock.unwrapLines?'pre':'pre-wrap'};
+			${!themeSettings.codeblock.wrapLinesActive?'':'--line-active-wrapping: pre-wrap;'}
+			${themeSettings.header.languageIcon.displayColor?'':'--icon-filter: grayscale(1);'}
 		}
-		${themeSettings.header.languageIcon.displayColor?'':`
-			.codeblock-customizer-icon {
-				filter: grayscale(1);
-			}
-		`}
-		${!themeSettings.codeblock.wrapLinesActive?'':`
-			pre.codeblock-customizer-pre code:not(:has( > input[style*="display: inline;"])):active {
-				--line-wrapping: pre-wrap;
-			}
-		`}
 	`;
 }
 

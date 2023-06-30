@@ -11,7 +11,12 @@ export interface CodeblockParameters {
 		alwaysEnabled: boolean;
 		alwaysDisabled: boolean;
 		offset: number;
-	}
+	},
+	lineUnwrap: {
+		alwaysEnabled: boolean;
+		alwaysDisabled: boolean;
+		activeWrap: boolean;
+	},
 	highlights: {
 		default: Highlights;
 		alternative: Record<string,Highlights>
@@ -37,6 +42,11 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 			alwaysEnabled: false,
 			alwaysDisabled: false,
 			offset: 0,
+		},
+		lineUnwrap: {
+			alwaysEnabled: false,
+			alwaysDisabled: false,
+			activeWrap: false,
 		},
 		highlights: {
 			default: {
@@ -93,18 +103,18 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 		}
 	} else if (parameterString.startsWith('unwrap:')) {
 		parameterString = parameterString.slice('unwrap:'.length)
-		if (/^\d+$/.test(parameterString)) {
-			codeblockParameters.lineNumbers.alwaysEnabled = true;
-			codeblockParameters.lineNumbers.alwaysDisabled = false;
-			codeblockParameters.lineNumbers.offset = parseInt(parameterString)-1;
+		if (parameterString.toLowerCase() === 'inactive') {
+			codeblockParameters.lineUnwrap.alwaysEnabled = true;
+			codeblockParameters.lineUnwrap.alwaysDisabled = false;
+			codeblockParameters.lineUnwrap.activeWrap = true;
 		} else if (parameterString.toLowerCase() === 'true') {
-			codeblockParameters.lineNumbers.alwaysEnabled = true;
-			codeblockParameters.lineNumbers.alwaysDisabled = false;
-			codeblockParameters.lineNumbers.offset = 0;
+			codeblockParameters.lineUnwrap.alwaysEnabled = true;
+			codeblockParameters.lineUnwrap.alwaysDisabled = false;
+			codeblockParameters.lineUnwrap.activeWrap = false;
 		} else if (parameterString.toLowerCase() === 'false') {
-			codeblockParameters.lineNumbers.alwaysEnabled = false;
-			codeblockParameters.lineNumbers.alwaysDisabled = true;
-			codeblockParameters.lineNumbers.offset = 0;
+			codeblockParameters.lineUnwrap.alwaysEnabled = false;
+			codeblockParameters.lineUnwrap.alwaysDisabled = true;
+			codeblockParameters.lineUnwrap.activeWrap = false;
 		}
 	} else {
 		let highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
