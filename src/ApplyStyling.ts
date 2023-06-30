@@ -74,10 +74,16 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			--language-icon-size: ${themeSettings.advanced.iconSize}px;
 			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
 			--header-font-size: ${themeSettings.header.fontSize}px;
+			--line-wrapping: ${themeSettings.codeblock.unwrapLines?'pre':'pre-wrap'};
 		}
 		${themeSettings.header.languageIcon.displayColor?'':`
 			.codeblock-customizer-icon {
 				filter: grayscale(1);
+			}
+		`}
+		${!themeSettings.codeblock.wrapLinesActive?'':`
+			pre.codeblock-customizer-pre code:not(:has( > input[style*="display: inline;"])):active {
+				--line-wrapping: pre-wrap;
 			}
 		`}
 	`;

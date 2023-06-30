@@ -22,28 +22,12 @@ export async function readingViewPostProcessor(element: HTMLElement, context: Ma
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
 	if (cache?.frontmatter?.['codeblock-customizer-ignore'] === true)
 		return;
-	plugin.readingMutationObserver = new MutationObserver((mutations) => {
-		mutations.forEach(mutation => {
-			if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) {
-				const executeCodeOutput = mutation.target as HTMLElement;
-				if (executeCodeOutput.parentElement?.classList.contains('codeblock-customizer-codeblock-collapsed'))
-					executeCodeOutput.style.maxHeight = '';
-			} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') {
-				const executeCodeOutput = (mutation.target as HTMLElement).querySelector('pre > code ~ code.language-output') as HTMLElement;
-				if (executeCodeOutput) {
-					executeCodeOutput.classList.add('execute-code-output');
-					if (!executeCodeOutput.style.maxHeight)
-						executeCodeOutput.style.maxHeight = `calc(${executeCodeOutput.scrollHeight}px + 2.5 * var(--code-padding)`;
-				}
-			}
-		})
-	}); 
 	if (codeblockSectionInfo) {
 		const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || typeof view?.editor === 'undefined')
 			return;
 		const codeblockLines = Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber))
-		plugin.readingMutationObserver.observe(codeblockPreElement,{
+		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
 			childList: true,
 			subtree: true,
 			attributes: true,
@@ -114,7 +98,6 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
 	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin.settings.currentTheme.settings);
-	console.log(codeblockLines.length-2)
 	codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
 }
 function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, themeSettings: CodeblockCustomizerThemeSettings) {
@@ -126,13 +109,13 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		if (codeblockCodeElement.style.maxHeight)
 			codeblockCodeElement.style.maxHeight = '';
 		else
-			codeblockCodeElement.style.maxHeight = `calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`;
+			codeblockCodeElement.style.maxHeight = 'var(--true-height)';
 		const executeCodeOutput = (codeblockPreElement.querySelector('pre > code ~ code.language-output') as HTMLElement);
 		if (executeCodeOutput && executeCodeOutput.style.display !== 'none') {
 			if (executeCodeOutput.style.maxHeight)
 				executeCodeOutput.style.maxHeight = '';
 			else
-				executeCodeOutput.style.maxHeight = `calc(${executeCodeOutput.scrollHeight}px + 2.5 * var(--code-padding)`;
+				executeCodeOutput.style.maxHeight = 'var(--true-height)';
 		}
 	});
 
@@ -159,7 +142,9 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	});
 
 	setTimeout(()=>{ // Delay to return correct height
-		codeblockCodeElement.style.maxHeight = `calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`;
+		codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
+		codeblockCodeElement.style.maxHeight = 'var(--true-height)';
+		codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
 		if (codeblockParameters.fold.enabled) {
 			codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
 			codeblockCodeElement.style.maxHeight = '';
@@ -173,7 +158,7 @@ async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorCon
 		if (!codeblockCodeElement)
 			return;
 		const codeblockLines = codeblocks[key];
-		plugin.readingMutationObserver.observe(codeblockPreElement,{
+		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
 			childList: true,
 			subtree: true,
 			attributes: true,
@@ -182,3 +167,41 @@ async function PDFExport(element: HTMLElement, context: MarkdownPostProcessorCon
 		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, context, plugin);
 	}
 }
+
+
+export const executeCodeMutationObserver = new MutationObserver((mutations) => {
+	mutations.forEach(mutation => {
+		if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change style of execute code output
+			const executeCodeOutput = mutation.target as HTMLElement;
+			if (executeCodeOutput.parentElement?.classList.contains('codeblock-customizer-codeblock-collapsed'))
+				executeCodeOutput.style.maxHeight = '';
+		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change children of execute code output
+			const executeCodeOutput = mutation.target as HTMLElement;
+			console.log('here')
+			setTimeout(()=>{
+				executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
+			},10)
+		} else if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'INPUT' && (mutation.target as HTMLElement).parentElement?.tagName === 'CODE') { // Change style of execute code output input box
+			const executeCodeOutput = mutation.target.parentElement as HTMLElement;
+			console.log(executeCodeOutput)
+			if (executeCodeOutput) {
+				setTimeout(()=>{
+					console.log(executeCodeOutput.scrollHeight)
+					executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
+				},100)
+			}
+		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') { // Add execute code output
+			const executeCodeOutput = (mutation.target as HTMLElement).querySelector('pre > code ~ code.language-output') as HTMLElement;
+			if (executeCodeOutput) {
+				executeCodeOutput.classList.add('execute-code-output');
+				if (!executeCodeOutput.style.maxHeight) {
+					setTimeout(()=>{
+						executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
+						executeCodeOutput.style.maxHeight = 'var(--true-height)';
+						executeCodeOutput.style.whiteSpace = 'var(--line-wrapping)';
+					},10)
+				}
+			}
+		} else console.log(mutation)
+	})
+});

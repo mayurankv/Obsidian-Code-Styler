@@ -147,7 +147,7 @@ body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-
 	margin-top: 0px !important;  
 	display: flex !important;
 	overflow: visible;
-	transition: border-bottom var(--duration-button);
+	transition: border-bottom ease-in-out var(--duration-button);
 }
 .markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] {
 	background: linear-gradient(var(--codeblock-customizer-header-background-color),var(--codeblock-customizer-header-background-color)) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
@@ -246,10 +246,7 @@ div:has(> img.codeblock-customizer-icon) {
 pre.codeblock-customizer-pre {
 	border-radius: var(--border-radius);
 	min-height: unset;
-	padding-top: 0px;    /*? padding-top and bottom must be set at the pre code element*/
-	padding-bottom: 0px;
-	padding-right: 0px;  /*? originalVal: 16px, disable it, so the lines are fully highlighted */
-	padding-left: 0px;   /*? originalVal: 16px, disable it, so the lines are fully highlighted */
+	padding: 0px;
 }
 pre.codeblock-customizer-pre code {
 	display: block;
@@ -258,12 +255,12 @@ pre.codeblock-customizer-pre code {
 	padding-left: 0px;
 	padding-right: 0px;
 	border-radius: 0px;
-	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out;
+	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out, border-top ease-in-out var(--duration-button);
 	max-height: 0;
-	white-space: var(--line-wrapping);
 }
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
-	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 	/* display: none !important; */
 }
 pre.codeblock-customizer-pre::after {
@@ -500,27 +497,20 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 
 /*! Plugin Compatibility */
 /** Execute Code Plugin */
-pre.codeblock-customizer-pre code.language-output hr {
-	border-color: var(--codeblock-customizer-header-separator-color);
-	border-top-width: var(--header-separator-width);
-	margin-bottom: var(--code-padding);
-}
-pre.codeblock-customizer-pre code.language-output {
+pre.codeblock-customizer-pre code ~ code.language-output {
 	margin-bottom: 0;
-	padding-top: 0;
+	padding-top: var(--code-padding);
 	padding-bottom: calc(2.5 * var(--code-padding));
+	padding-left: calc(var(--line-number-gutter-padding) + var(--line-number-margin));
+	border-top: var(--header-separator-width) solid var(--codeblock-customizer-header-separator-color);
 }
-pre.codeblock-customizer-pre:hover code.language-output {
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code ~ code.language-output {
+	border-top-color: transparent
+}
+pre.codeblock-customizer-pre:hover code ~ code.language-output {
 	margin-bottom: 0;
 }
-pre.codeblock-customizer-pre code.language-output span.stdout,
-pre.codeblock-customizer-pre code.language-output span.stdin,
-pre.codeblock-customizer-pre code.language-output span.stderr,
-pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
-	position: relative;
-	left: var(--line-number-gutter-padding);
-}
-pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
+pre.codeblock-customizer-pre code ~ code.language-output input.interactive-stdin {
     color: var(--text-normal);
     background-color: var(--codeblock-customizer-codeblock-background-color);
     padding: 2px 8px;
@@ -528,6 +518,9 @@ pre.codeblock-customizer-pre code.language-output input.interactive-stdin {
 	border-style: solid;
 	border-radius: 5px;
 	border-width: 1px;
+}
+pre.codeblock-customizer-pre code ~ code.language-output hr {
+	display: none;
 }
 pre.codeblock-customizer-pre button.run-code-button {
 	--copy-code-header-right-margin: 12px;

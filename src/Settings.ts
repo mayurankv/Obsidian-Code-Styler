@@ -41,7 +41,7 @@ export interface CodeblockCustomizerThemeModeColors {
 export interface CodeblockCustomizerThemeSettings {
 	codeblock: {
 		lineNumbers: boolean;
-		wrapLines: boolean;
+		unwrapLines: boolean;
 		wrapLinesActive: boolean;
 		curvature: number;
 	},
@@ -110,7 +110,7 @@ export const NEW_THEME_DEFAULT: {name: string, default: boolean} = {
 const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
 	codeblock: {
 		lineNumbers: true,
-		wrapLines: false,
+		unwrapLines: true,
 		wrapLinesActive: false,
 		curvature: 4,
 	},
@@ -275,7 +275,8 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
 	specialLanguages: ["preview","include","output"],
 }
 
-// Language Settings
+// Constants
+export const PARAMETERS = ['title','fold','ln','wrap','ignore'];
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text",
 	"plain": "Plain text",

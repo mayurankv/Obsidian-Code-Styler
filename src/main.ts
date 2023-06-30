@@ -4,11 +4,11 @@ import { DEFAULT_SETTINGS, LANGUAGE_ICONS, CodeblockCustomizerSettings } from '.
 import { SettingsTab } from "./SettingsTab";
 import { updateStyling } from "./ApplyStyling";
 import { createCodeMirrorExtensions } from "./EditingView";
-import { readingViewPostProcessor } from "./ReadingView";
+import { executeCodeMutationObserver, readingViewPostProcessor } from "./ReadingView";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
-	readingMutationObserver: MutationObserver;
+	executeCodeMutationObserver: MutationObserver;
 	
 	async onload() {
 		await this.loadSettings();
@@ -18,6 +18,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		const settingsTab = new SettingsTab(this.app, this);
 		this.addSettingTab(settingsTab);
 
+		this.executeCodeMutationObserver = executeCodeMutationObserver;
 		this.registerEditorExtension(createCodeMirrorExtensions(this.settings));
 		this.registerMarkdownPostProcessor(async (el, ctx) => {await readingViewPostProcessor(el, ctx, this)})
 
@@ -27,7 +28,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	onunload() {
 		for (const url of Object.values(LANGUAGE_ICONS))
 			URL.revokeObjectURL(url) // Unload icons
-		this.readingMutationObserver.disconnect();
+		this.executeCodeMutationObserver.disconnect();
 		console.log("Unloaded plugin: CodeBlock Customizer");
 	}
 	

@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeblockCustomizerPlugin from "./main";
-import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
+import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, PARAMETERS, DEFAULT_SETTINGS, NEW_THEME_DEFAULT } from './Settings';
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -33,6 +33,7 @@ export class SettingsTab extends PluginSettingTab {
 
 		this.disableableComponents = {
 			'lineNumbers': [],
+			'wrapLines': [],
 			'headerLanguageTags': [],
 			'headerLanguageIcons': [],
 			'editorActiveLineHighlight': [],
@@ -174,6 +175,16 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].codeblock.textColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].codeblock.textColor = saveColor},
 			)});
+		new Setting(containerEl)
+			.setName('Unwrap codeblock lines')
+			.setDesc('Choose whether to unwrap lines in reading mode')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.codeblock.unwrapLines = value;
+					this.disableableComponents['wrapLines'].forEach(component => {component.setDisabled(!value)});
+					(async () => {await this.plugin.saveSettings()})();    
+				}));
 		new Setting(containerEl)
 			.setName('Codeblock Curvature')
 			.setDesc('Determines how rounded the codeblocks appear in pixels.')
@@ -541,7 +552,7 @@ export class SettingsTab extends PluginSettingTab {
 						new Notice(`"${this.plugin.settings.newHighlight}" is not a valid color name.`); //NOSONAR
 					else if (this.plugin.settings.newHighlight.trim().toLowerCase() === 'hl')
 						new Notice("Cannot override the default highlight parameter."); //NOSONAR
-					else if (['title','fold','ln','ignore'].includes(this.plugin.settings.newHighlight.trim().toLowerCase()))
+					else if (PARAMETERS.includes(this.plugin.settings.newHighlight.trim().toLowerCase()))
 						new Notice("Cannot use other default parameters."); //NOSONAR
 					else {
 						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights)
@@ -566,6 +577,20 @@ export class SettingsTab extends PluginSettingTab {
 		// ========== Advanced ==========
 		containerEl.createEl('h3', {text: 'Advanced Settings'});
 		
+
+		let wrapLinesActiveToggle: ToggleComponent;
+		new Setting(containerEl)
+			.setName('Wrap Lines on Click')
+			.setDesc('If enabled, in reading mode, holding click on a codeblock will wrap the lines for better visibility. This can only be used if the "Unwrap Lines" setting is enabled.')
+			.addToggle(toggle => {wrapLinesActiveToggle = toggle
+				.setValue(this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive)
+				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
+					(async () => {await this.plugin.saveSettings()})();    
+				})
+				this.disableableComponents['wrapLines'].push(wrapLinesActiveToggle);
+			});
 		new Setting(containerEl)
 			.setName('Button Color')
 			.setDesc('Used for UI buttons like the copy code button.')
