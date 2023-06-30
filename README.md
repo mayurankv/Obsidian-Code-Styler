@@ -7,7 +7,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) which lets you customize
 
 I couldn't find any plugin, where I could customize codeblocks which works reliably and in both editing and reading mode so I created my own!
 
-> **Warning** :warning:  
+> **Warning**  
 > If you used version 1.1.9, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 2.0.0 or above. After that, everything should work fine.
 
 ## Settings
