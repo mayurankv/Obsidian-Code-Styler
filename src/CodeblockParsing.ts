@@ -91,6 +91,21 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 			codeblockParameters.lineNumbers.alwaysDisabled = true;
 			codeblockParameters.lineNumbers.offset = 0;
 		}
+	} else if (parameterString.startsWith('unwrap:')) {
+		parameterString = parameterString.slice('unwrap:'.length)
+		if (/^\d+$/.test(parameterString)) {
+			codeblockParameters.lineNumbers.alwaysEnabled = true;
+			codeblockParameters.lineNumbers.alwaysDisabled = false;
+			codeblockParameters.lineNumbers.offset = parseInt(parameterString)-1;
+		} else if (parameterString.toLowerCase() === 'true') {
+			codeblockParameters.lineNumbers.alwaysEnabled = true;
+			codeblockParameters.lineNumbers.alwaysDisabled = false;
+			codeblockParameters.lineNumbers.offset = 0;
+		} else if (parameterString.toLowerCase() === 'false') {
+			codeblockParameters.lineNumbers.alwaysEnabled = false;
+			codeblockParameters.lineNumbers.alwaysDisabled = true;
+			codeblockParameters.lineNumbers.offset = 0;
+		}
 	} else {
 		let highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
 		if (highlightMatch) {

@@ -227,9 +227,9 @@ Example:
 
 This plugin is also compatible with the following obsidian plugins out of the box:
 
-[![Execute Code Plugin](https://github-readme-stats.vercel.app/api/pin/?username=twibiral&repo=obsidian-execute-code&show_owner=true&bg_color=00000000&border_color=e3e7ef)](https://github.com/twibiral/obsidian-execute-code)
-[![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=zjhcn&repo=obsidian-code-preview&show_owner=true&bg_color=00000000&border_color=e3e7ef)](https://github.com/zjhcn/obsidian-code-preview)
-[![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=tillahoffmann&repo=obsidian-file-include&show_owner=true&bg_color=00000000&border_color=e3e7ef)](https://github.com/tillahoffmann/obsidian-file-include)
+[![Execute Code Plugin](https://github-readme-stats.vercel.app/api/pin/?username=twibiral&repo=obsidian-execute-code&show_owner=true&bg_color=30303020&border_color=e3e7ef)](https://github.com/twibiral/obsidian-execute-code)
+[![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=zjhcn&repo=obsidian-code-preview&show_owner=true&bg_color=30303020&border_color=e3e7ef)](https://github.com/zjhcn/obsidian-code-preview)
+[![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=tillahoffmann&repo=obsidian-file-include&show_owner=true&bg_color=30303020&border_color=e3e7ef)](https://github.com/tillahoffmann/obsidian-file-include)
 
 ## Roadmap
 
@@ -239,15 +239,18 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 
 - Implementation
   - Sort colors by language based on icon in `setting.ts`
-  - Get Obsidian to parse postMarkdown changes following the codeblock language (see this [issue](https://forum.obsidian.md/t/postprocessor-does-not-process-changes-after-codeblock-language/61010) and this [issue](https://forum.obsidian.md/t/pass-parameters-to-codeblock/37990))
 - Features
-  - Implement code wrapping options
-    - In reading mode, if wrapped, keep line numbers to the left when scrolling
   - Add commands to fold all, unfold all and reset default fold for codeblocks
   - Let users redirect certain languages to alternative icons and colors
 - Appearance
+  - Live Preview appearances
+    - Copy button location
+    - Language border
   - Fix large line numbers margin padding in editing mode
   - Work with all themes and readable line length setting
+- Check the feasibility of
+  - Implementing code wrapping for editing mode
+  - Implementing folding animations for editing mode
 <!-- Compatibility with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin -->
 
 ### Existing Issues
@@ -255,15 +258,20 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 - First pickr change does not change color correctly
 - Editing Mode
   - Weird scroll in live preview when click (due to `codeblockHeader` codemirror extension) when first line is a codeblock.
-  - If a language is excluded, it currently needs to be unfolded before it can be removed or it disappears
-  - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear
+  - If a language is excluded, it currently needs to be unfolded before it can be removed or it disappears.
+  - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
 - Reading Mode
-  - Codeblocks flash when changed if editing side by side in editing mode
-  - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles
-  - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)
+  - Codeblocks flash when changed if editing side by side in editing mode.
+  - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
+  - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17).
 - PDF Exporting
-  - Highlights appear slightly different
-  - Language border colors are not correctly set
+  - Highlights appear slightly different.
+  - Language border colors are not correctly set.
+
+### Upstream Issues
+
+- Instant reading mode updating when parameters are changed
+  - Requires Obsidian to parse postMarkdown changes following the codeblock language (see this [issue](https://forum.obsidian.md/t/postprocessor-does-not-process-changes-after-codeblock-language/61010) and this [issue](https://forum.obsidian.md/t/pass-parameters-to-codeblock/37990)).
 
 ## How to install the plugin
 
