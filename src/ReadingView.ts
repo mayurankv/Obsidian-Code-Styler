@@ -201,6 +201,8 @@ export function destroyReadingModeElements(): void {
 	})
 	document.querySelectorAll('pre > code:first-child').forEach(codeblockCodeElement => {
 		(codeblockCodeElement as HTMLElement).style.removeProperty('--true-height');
+		(codeblockCodeElement as HTMLElement).style.removeProperty('--line-wrapping');
+		(codeblockCodeElement as HTMLElement).style.removeProperty('--line-active-wrapping');
 		(codeblockCodeElement as HTMLElement).style.removeProperty('maxHeight');
 		(codeblockCodeElement as HTMLElement).style.removeProperty('whiteSpace');
 		(codeblockCodeElement as HTMLElement).innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="codeblock-customizer-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
