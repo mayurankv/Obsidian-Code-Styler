@@ -278,7 +278,7 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
 // Constants
 export const PARAMETERS = ['title','fold','ln','wrap','ignore'];
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
-	// "none": "Plain text",
+	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names
 	"plain": "Plain text",
 	"plaintext": "Plain text",
 	"text": "Plain text",
