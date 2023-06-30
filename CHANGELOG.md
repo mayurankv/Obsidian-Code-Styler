@@ -17,9 +17,50 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
-Will become version 2.0.0.
+### Notes
 
-TODO
+- Will become version 2.0.0.
+- Requires delete of existing `data.json` file.
+- Reintroduced error with certain themes and 'readable line length' setting since the current fix did not accurately address it.
+
+### Added
+
+- Added smooth folding transition in reading mode.
+- Added button animations.
+- Added ignore parameter and YAML setting.
+- Added line wrapping settings and parameters.
+- Added line numbering parameters.
+- Added regex line highlighting.
+- Added optional fold placeholder parameter and settings.
+- Added default theme which uses existing css variables.
+- Added current line indicator via line number color.
+- Added color styling for buttons.
+- Added gradient highlighting with color stop settings.
+- Added header font size and family customization.
+- Added icon customizability.
+- Added codeblock curvature setting.
+- Added optional language border setting.
+- Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview) and the [file include plugin](https://github.com/tillahoffmann/obsidian-file-include).
+- Added issue and pull request templates.
+- Added other supporting documents such as [CONTRIBUTING](.github/CONTRIBUTING.md).
+
+### Changed
+
+- Refactored large portions of code.
+  - Changed settings structure.
+    - Combined light and dark themes to single theme.
+  - Restructured codemirror extensions.
+  - Restructured markdown post-processor.
+  - Refactored how runtime styles are applied.
+- Disabled markup in source mode.
+- Changed how line numbers are spaced in reading mode.
+- Updated [README](README.md).
+
+### Fixed
+
+- Plugin reading mode destroys properly.
+- Plugin automatically applies to open pages when loaded now.
+- Plugin uses proper typing.
 
 ## [1.1.9] - 2023-05-20
 
