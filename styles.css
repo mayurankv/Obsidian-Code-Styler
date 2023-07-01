@@ -172,9 +172,11 @@ pre.codeblock-customizer-pre [class^='codeblock-customizer-header-container'] {
 	padding-bottom: var(--header-padding);
 	border-bottom-left-radius: var(--border-radius);
 	border-bottom-right-radius: var(--border-radius);
+	border-bottom-width: 0;
 	border-bottom-color: transparent;
 }
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] {
+	border-bottom-width: 0;
 	border-bottom-color: transparent;
 }
 .markdown-source-view.mod-cm6 .cm-content :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] { /*? Fix for incorrectly displaying header when using "minimal" theme */
@@ -201,13 +203,12 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 	font-weight: var(--codeblock-customizer-header-language-tag-text-bold, normal);
 	font-style: var(--codeblock-customizer-header-language-tag-text-italic, normal);
 	text-align: center;
-	transition: border-radius ease-in-out var(--duration-button);
+	transition: border-radius ease-in-out var(--duration-button), padding ease-in-out var(--duration-button);
 }
 .markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-customizer-header-language-tag"],
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] [class^="codeblock-customizer-header-language-tag"] {
 	border-radius: var(--border-radius);
-	/*! Space under language tag when folded - cover with shadow */
-	/* box-shadow: 0px 2px var(--codeblock-customizer-header-language-tag-background-color); */
+	padding-bottom: calc(1em * var(--header-inner-vertical-padding) + var(--header-separator-width))
 }
 .codeblock-customizer-header-text {
 	display: flex;
@@ -221,6 +222,7 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 	color: var(--codeblock-customizer-header-text-color);
 	font-weight: var(--codeblock-customizer-header-title-text-bold, normal);
 	font-style: var(--codeblock-customizer-header-title-text-italic, normal);
+	transition: padding ease-in-out var(--duration-button);
 }
 body:not([class*='codeblock-customizer-show-langicons']) .codeblock-customizer-header-container-specific [class^="codeblock-customizer-header-language-tag"],
 body:not(.codeblock-customizer-show-langicons-always) .codeblock-customizer-header-container [class^="codeblock-customizer-header-language-tag"],
@@ -242,6 +244,13 @@ div:has(> img.codeblock-customizer-icon) {
 	padding-bottom: calc(1em * var(--header-inner-vertical-padding));
 	padding-left: var(--header-spacing);
 	padding-right: var(--header-spacing);
+	transition: padding ease-in-out var(--duration-button);
+}
+.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) div:has(> img.codeblock-customizer-icon),
+.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) .codeblock-customizer-header-text,
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] div:has(> img.codeblock-customizer-icon),
+pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='codeblock-customizer-header-container'] .codeblock-customizer-header-text {
+	padding-bottom: calc(1em * var(--header-inner-vertical-padding) + var(--header-separator-width))
 }
 .codeblock-customizer-icon {
 	border: 0px;
