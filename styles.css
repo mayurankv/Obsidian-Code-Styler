@@ -153,22 +153,24 @@ body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-
 	height: var(--container-height);
 	min-height: var(--container-min-height);
 	padding-top: var(--header-padding);
-	border-bottom: var(--header-separator-width) solid var(--codeblock-customizer-header-separator-color);
 	margin-top: 0px !important;  
 	display: flex !important;
 	overflow: visible;
 	transition: border-bottom ease-in-out var(--duration-button);
 }
 .markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] {
-	background: linear-gradient(var(--codeblock-customizer-header-background-color),var(--codeblock-customizer-header-background-color)) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
+	background: linear-gradient(var(--codeblock-customizer-header-background-color) 0%,var(--codeblock-customizer-header-background-color) calc(100% - var(--header-separator-width)), var(--codeblock-customizer-header-separator-color) calc(100% - var(--header-separator-width)), var(--codeblock-customizer-header-separator-color) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
 	padding-left: var(--language-border-width);
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
+	padding-bottom: var(--header-separator-width);
 }
 pre.codeblock-customizer-pre [class^='codeblock-customizer-header-container'] {
 	background-color: var(--codeblock-customizer-header-background-color);
+	border-bottom: var(--header-separator-width) solid var(--codeblock-customizer-header-separator-color);
 }
 .markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
+	background: linear-gradient(var(--codeblock-customizer-header-background-color) 0%,var(--codeblock-customizer-header-background-color) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
 	padding-bottom: var(--header-padding);
 	border-bottom-left-radius: var(--border-radius);
 	border-bottom-right-radius: var(--border-radius);
