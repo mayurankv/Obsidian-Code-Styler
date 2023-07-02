@@ -1,12 +1,9 @@
 import { TFile, MarkdownView, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom } from "obsidian";
 
 import CodeblockCustomizerPlugin from "./main";
-import { CodeblockCustomizerThemeSettings } from "./Settings";
+import { CodeblockCustomizerThemeSettings, PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
-
-const PRIMARY_DELAY = 10;
-const SECONDARY_DELAY = 100;
 
 export async function readingViewPostProcessor(element: HTMLElement, {sourcePath, getSectionInfo}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null} , plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
@@ -223,7 +220,7 @@ export function destroyReadingModeElements(): void {
 }
 
 export const executeCodeMutationObserver = new MutationObserver((mutations) => {
-	mutations.forEach(mutation => {
+	mutations.forEach((mutation: MutationRecord) => {
 		if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change style of execute code output
 			const executeCodeOutput = mutation.target as HTMLElement;
 			if (executeCodeOutput.parentElement?.classList.contains('codeblock-customizer-codeblock-collapsed'))

@@ -1,10 +1,10 @@
-import { editorInfoField, editorLivePreviewField } from "obsidian";
+import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
 import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
-import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
+import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings, PRIMARY_DELAY } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
@@ -22,30 +22,27 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			mutationObserver: MutationObserver;
 		
 			constructor(view: EditorView) {
+				console.log('construct')
 				this.settings = settings;
 				this.currentSettings = {
-					excludedLanguages: '',
+					excludedLanguages: settings.excludedLanguages,
 					collapsePlaceholder: '',
 					alternativeHighlights: [],
 				}
 				this.view = view;
-				this.decorations = this.buildDecorations(this.view);
-				this.mutationObserver = new MutationObserver((mutations) => {
-					for (const mutation of mutations) {
-						if (
-							mutation.type === "attributes" &&
-							mutation.attributeName === "class" &&
-							(
-								(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-begin") ||
-								(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
-								(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-end")
-							)
-						) {
+				this.decorations = RangeSet.empty;
+				this.buildDecorations(this.view);
+				this.mutationObserver = new MutationObserver((mutations) => {mutations.forEach((mutation: MutationRecord) => {
+						if (mutation.type === "attributes" && mutation.attributeName === "class" && (
+							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-begin") ||
+							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
+							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-end")
+						)) {
 							this.forceUpdate(this.view);
 						}
-					}
+					});
 				});
-				this.mutationObserver.observe(this.view.dom, {
+				this.mutationObserver.observe(this.view.contentDOM,  {
 					attributes: true,
 					childList: true,
 					subtree: true,
@@ -54,8 +51,9 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			forceUpdate(view: EditorView) {
+				console.log('force update')
 				this.view = view;
-				this.decorations = this.buildDecorations(this.view);
+				this.buildDecorations(this.view);
 				this.view.requestMeasure();
 			}
 		
@@ -65,60 +63,102 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					update.viewportChanged || 
 					this.settings.excludedLanguages !== this.currentSettings.excludedLanguages ||
 					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
-					arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
+					!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
 				) {
-					this.currentSettings = {
+					console.log('update')
+					console.log(update.docChanged,update.viewportChanged,this.settings.excludedLanguages !== this.currentSettings.excludedLanguages,this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder,!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights))
+					this.currentSettings = structuredClone({
 						excludedLanguages: this.settings.excludedLanguages,
 						collapsePlaceholder: this.settings.currentTheme.settings.header.collapsePlaceholder,
 						alternativeHighlights: Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),
-					};
-					this.decorations = this.buildDecorations(update.view);
+					});
+					this.buildDecorations(update.view);
+					// update.view.requestMeasure();
 				}
 			}
 		
-			buildDecorations(view: EditorView): DecorationSet {
+			buildDecorations(view: EditorView) {
 				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore(view.state))
-					return RangeSet.empty;
+					this.decorations = RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
-				const codeblocks = findUnduplicatedCodeblocks(view);
-				const settings: CodeblockCustomizerSettings = this.settings;
-				for (const codeblock of codeblocks) {
-					let codeblockParameters: CodeblockParameters;
-					let excludedCodeblock: boolean = false;
-					let lineNumber: number = 0;
-					syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
-						enter(node) {
-							const line = view.state.doc.lineAt(node.from);
-							const lineText = view.state.sliceDoc(line.from,line.to);
-							const startLine = node.type.name.includes("HyperMD-codeblock-begin");
-							const endLine = node.type.name.includes("HyperMD-codeblock-end");
-							if (startLine) {
-								codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
-								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
-								lineNumber = 0;
+				// setTimeout(()=>{
+					const codeblocks = findUnduplicatedCodeblocks(view);
+					const lineNumberMargins = findCodeblockLineNumberMargins(view);
+					console.log('lNM',lineNumberMargins)
+					const settings: CodeblockCustomizerSettings = this.settings;
+					for (const codeblock of codeblocks) {
+						let codeblockParameters: CodeblockParameters;
+						let excludedCodeblock: boolean = false;
+						let lineNumber: number = 0;
+						let lineNumberMargin: number | undefined = 0;
+						syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
+							enter(syntaxNode) {
+								const line = view.state.doc.lineAt(syntaxNode.from);
+								const lineText = view.state.sliceDoc(line.from,line.to);
+								const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
+								const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
+								if (startLine) {
+									codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+									excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
+									lineNumber = 0;
+									// console.log(lineNumberMargins)
+									console.log(lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1))
+									// console.log(syntaxNode.from)
+									lineNumberMargin = lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1)?.lineNumberMargin;
+									// console.log(lineNumberMargin)
+									if (typeof lineNumberMargin === 'undefined') {
+										// excludedCodeblock = true;
+									} else if (lineNumberMargin === 0) {
+										// excludedCodeblock = true;
+									}
+								}
+								if (excludedCodeblock)
+									return;
+								if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
+									console.log(lineNumberMargin)
+									console.log(!lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`)
+									decorations.push(Decoration.line({attributes: {style: !lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
+									decorations.push(Decoration.line({}).range(syntaxNode.from));
+									decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(syntaxNode.from))
+									lineNumber++;
+								}
 							}
-							if (excludedCodeblock)
-								return;
-							if (node.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(node.from))
-								decorations.push(Decoration.line({}).range(node.from));
-								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(node.from))
-								lineNumber++;
-							}
-						}
-					})
-				}
-				return RangeSet.of(decorations,true);
+						})
+					}
+					this.decorations = RangeSet.of(decorations,true)
+					console.log(this.decorations)
+				// },3000)
 			}
 
-
+			resizeGutter(view: EditorView) {
+				setTimeout(()=>{
+					view.contentDOM.querySelectorAll(".markdown-source-view .HyperMD-codeblock[class^='codeblock-customizer-line']:has( .codeblock-customizer-line-number-specific)").forEach(element => {
+						const lineNumberElement = element.querySelector("[class^='codeblock-customizer-line-number']") as HTMLElement | null;
+						let numberWidth: number;
+						if (!lineNumberElement)
+							return;
+						if (lineNumberElement.innerText === '') {
+							if (element.classList.contains('HyperMD-codeblock-begin'))
+								numberWidth = 0;
+							else if (element.classList.contains('HyperMD-codeblock-end'))
+								numberWidth = 0;
+							else
+								numberWidth = 0
+						} else
+							numberWidth = lineNumberElement.scrollWidth;
+						(element as HTMLElement).style.setProperty('--line-number-gutter-width',`${numberWidth}px`)
+					});
+				},PRIMARY_DELAY);
+			}
 		
 			destroy() {
 				this.mutationObserver.disconnect();
 			}
 		},
-		{decorations: (value) => value.decorations}
-	)
+		{
+			decorations: (value) => value.decorations,
+		}
+	);
 	const codeblockHeader = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			return Decoration.none;    
@@ -226,7 +266,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 				lineNumberDisplay = '-hide'
 			else if (this.codeblockParameters.lineNumbers.alwaysEnabled && !this.codeblockParameters.lineNumbers.alwaysDisabled)
 				lineNumberDisplay = '-specific'
-			return createSpan({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
+			return createSpan({attr: {style: ''}, cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
 	class HeaderWidget extends WidgetType {
@@ -324,6 +364,48 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 	return [codeblockLines,codeblockHeader,codeblockCollapse]
 }
 
+function findCodeblockLineNumberMargins(view: EditorView): Array<{start: number, lineNumberMargin: number}> {
+	let lineNumberMargins: Array<{start: number, lineNumberMargin: number}> = [];
+	// console.log(view.contentDOM.querySelectorAll(".HyperMD-codeblock-begin"),'what?')
+	for (let codeblockLineElement of Array.from(view.contentDOM.querySelectorAll(".HyperMD-codeblock-begin"))) {
+		// console.log(codeblockLineElement)
+		const startElement = codeblockLineElement as HTMLElement;
+		let start: number = view.posAtDOM(startElement);
+		// start = await returnStartPos(view,startElement);
+		// setTimeout(()=>{
+		// 	console.log(view.posAtDOM(startElement))
+		// },50)
+		// console.log(start,'first?')
+		let breakLoop = false;
+		let lineNumberMargin = 0;
+		let currentLineNumberWidth: number;
+		if (!codeblockLineElement.nextElementSibling)
+			continue;
+		codeblockLineElement = codeblockLineElement.nextElementSibling as HTMLElement;
+		while (!breakLoop && !codeblockLineElement.classList.contains('HyperMD-codeblock-end')) {
+			if (!codeblockLineElement.firstElementChild || !codeblockLineElement.nextElementSibling) {
+				breakLoop = true;
+				break
+			}
+			currentLineNumberWidth = (codeblockLineElement.firstElementChild as HTMLElement).offsetWidth;
+			// console.log(currentLineNumberWidth)
+			if (currentLineNumberWidth > lineNumberMargin)
+				lineNumberMargin = currentLineNumberWidth;
+			codeblockLineElement = codeblockLineElement.nextElementSibling as HTMLElement;
+		}
+		if (!breakLoop)
+			lineNumberMargins.push({start: start, lineNumberMargin: lineNumberMargin});
+	}
+	return lineNumberMargins;
+}
+async function returnStartPos(view: EditorView, startElement: HTMLElement): Promise<number> {
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			resolve(view.posAtDOM(startElement));
+		});
+	});
+}
+
 function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	const codeblocks = findVisibleCodeblocks(view);
 	const unduplicatedCodeblocks: Array<SyntaxNodeRef> = [];
@@ -340,14 +422,9 @@ function findVisibleCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	const codeblocks: Array<SyntaxNodeRef> = [];
 	syntaxTree(view.state).iterate({
-		enter: (node) => {
-			if (
-				node.type.name.includes("HyperMD-codeblock-begin") ||
-				node.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" ||
-				node.type.name.includes("HyperMD-codeblock-end")
-			) {
-				codeblocks.push(node);
-			}
+		enter: (syntaxNode) => {
+			if (syntaxNode.type.name.includes("HyperMD-codeblock-begin") || syntaxNode.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" || syntaxNode.type.name.includes("HyperMD-codeblock-end"))
+				codeblocks.push(syntaxNode);
 		}
 	})
 	return codeblocks;

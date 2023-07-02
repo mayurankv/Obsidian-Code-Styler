@@ -1,6 +1,7 @@
 /** Define CSS variables */
 body {
-	--line-number-gutter-width: 32px;
+	--line-number-gutter-min-width: 32px;
+	/* --line-number-gutter-width: 32px; */
 	--line-number-gutter-padding: 16px;
 	--header-separator-width: 2px;
 	--code-padding: 8px;
@@ -89,7 +90,7 @@ pre.codeblock-customizer-pre > code > div:only-child > [class^='codeblock-custom
 	padding-left: calc(4px + var(--language-border-width));
 	padding-right: 8px;
 	text-align: right;
-	min-width: var(--line-number-gutter-width);
+	min-width: var(--line-number-gutter-min-width);
 	background-color: var(--codeblock-customizer-gutter-background-color);
 	font-size: var(--code-size);
 	font-family: var(--font-monospace);
@@ -101,13 +102,16 @@ pre.codeblock-customizer-pre > code > div:only-child > [class^='codeblock-custom
 	position: absolute;
 	display: inline-block;
 	height: 100%;
-	width: var(--line-number-gutter-width);
+	min-width: var(--line-number-gutter-min-width);
 	overflow-x: auto;
 	direction: rtl;
 	left: 0;
 }
-.markdown-source-view .HyperMD-codeblock[class^='codeblock-customizer-line-number']::-webkit-scrollbar {
-	display: none;
+.markdown-source-view .HyperMD-codeblock-begin .codeblock-customizer-line-number,
+.markdown-source-view .HyperMD-codeblock-begin .codeblock-customizer-line-number-specific,
+.markdown-source-view .HyperMD-codeblock-end .codeblock-customizer-line-number,
+.markdown-source-view .HyperMD-codeblock-end .codeblock-customizer-line-number-specific {
+	width: var(--line-number-gutter-width);
 }
 pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
 	position: absolute;
@@ -288,7 +292,6 @@ pre.codeblock-customizer-pre code:not(:has( > input[style*="display: inline;"]))
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
 	padding-top: 0 !important;
 	padding-bottom: 0 !important;
-	/* display: none !important; */
 }
 pre.codeblock-customizer-pre::after {
 	content: none !important;
@@ -328,13 +331,6 @@ body .markdown-source-view :not([class^='codeblock-customizer-header-container']
 body .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin:nth-of-type(1) { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius);
 	border-top-right-radius: var(--border-radius);
-}
-body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body:not(.codeblock-customizer-show-langnames-always) :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body .markdown-source-view :not([class^='codeblock-customizer-header-container']) + [class*="codeblock-customizer-line"].HyperMD-codeblock-begin [class^='codeblock-customizer-line-number'],
-body .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codeblock-begin:nth-of-type(1) [class^='codeblock-customizer-line-number'] { /*? Depending on header visibility */
-	border-top-left-radius: var(--border-radius);
 }
 
 /** Button styling */
@@ -407,21 +403,17 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 }
 @keyframes reverse-outdent {
 	from {
-		/* margin-left: calc(var(--copy-code-header-right-margin) - var(--dent-difference)); */
 		clip-path: var(--polygon-in);
 	}
 	to {
-		/* margin-left: var(--copy-code-header-right-margin); */
 		clip-path: var(--polygon-out);
 	}
 }
 @keyframes reverse-indent {
 	from {
-		/* margin-left: var(--copy-code-header-right-margin); */
 		clip-path: var(--polygon-out);
 	}
 	to {
-		/* margin-left: calc(var(--copy-code-header-right-margin) - var(--dent-difference)); */
 		clip-path: var(--polygon-in);
 	}
 }
@@ -430,6 +422,11 @@ body:not(.codeblock-customizer-show-langnames-always) pre.codeblock-customizer-p
 body pre.codeblock-customizer-pre:not(:has([class*='codeblock-customizer-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 	--copy-code-header-right-margin: 12px;
+}
+body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin,
+body .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has([class*='codeblock-customizer-header-language-tag-'])) + .HyperMD-codeblock-begin { /*? Depending on header visibility */
+	overflow: hidden;
 }
 body:not(.codeblock-customizer-show-langicons-always):not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container + .HyperMD-codeblock-begin span.code-block-flair,
 body:not(.codeblock-customizer-show-langnames-always) .markdown-source-view :not(pre.codeblock-customizer-pre) > .codeblock-customizer-header-container:not(:has( img.codeblock-customizer-icon)) + .HyperMD-codeblock-begin span.code-block-flair,
@@ -488,6 +485,7 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 	right: 0;
 	visibility: hidden;
 	padding: 0;
+	position: absolute;
 }
 .markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair > * {
 	width: 0px;
@@ -502,6 +500,9 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 	font-size: var(--font-ui-smaller);
 	content: 'Copy';
 	color: var(--codeblock-customizer-button-color);
+}
+.markdown-source-view.mod-cm6 .HyperMD-codeblock-begin.codeblock-customizer-line {
+	overflow: visible;
 }
 
 /** Settings */
@@ -577,7 +578,6 @@ pre.codeblock-customizer-pre button.clear-button {
 	height: 14px;
 	margin-bottom: 6px;
 	margin-left: calc(var(--language-border-width) + 12px);
-	/* margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference)); */
 	will-change: margin-right, clip-path;
 	clip-path: var(--polygon-in);
 }
@@ -643,12 +643,12 @@ pre.codeblock-customizer-pre div.code-block-highlight-wrap {
 	opacity: 0
 }
 .markdown-source-view.mod-cm6 .cm-embed-block .codeblock-customizer-pre-parent + .edit-block-button {
-    transition: visibility var(--duration-button), opacity var(--duration-button);
-	visibility: visible;
-	opacity: 1;
 	--copy-code-header-right-margin: calc(2.2 * var(--header-button-spacing));
 	--dent-difference: 0px;
 	--polygon-in: polygon(0 0, 18px 0, 18px 36px, 0 36px);
+    transition: visibility var(--duration-button), opacity var(--duration-button);
+	visibility: visible;
+	opacity: 1;
 	z-index: 10;
 	transform: translateY(-50%);
 	top: max(calc(0.5 * var(--container-height) * 0.9),calc(0.5 * var(--container-min-height) * 0.9));
