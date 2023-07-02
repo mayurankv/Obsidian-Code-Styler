@@ -66,7 +66,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
 				) {
 					console.log('update')
-					console.log(update.docChanged,update.viewportChanged,this.settings.excludedLanguages !== this.currentSettings.excludedLanguages,this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder,!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights))
+					// console.log(update.docChanged,update.viewportChanged,this.settings.excludedLanguages !== this.currentSettings.excludedLanguages,this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder,!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights))
 					this.currentSettings = structuredClone({
 						excludedLanguages: this.settings.excludedLanguages,
 						collapsePlaceholder: this.settings.currentTheme.settings.header.collapsePlaceholder,
@@ -84,7 +84,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 				// setTimeout(()=>{
 				const codeblocks = findUnduplicatedCodeblocks(view);
 				const lineNumberMargins = findCodeblockLineNumberMargins(view);
-				console.log('lNM',lineNumberMargins)
+				// console.log('lNM',lineNumberMargins)
 				const settings: CodeblockCustomizerSettings = this.settings;
 				for (const codeblock of codeblocks) {
 					let codeblockParameters: CodeblockParameters;
@@ -105,13 +105,14 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 								// console.log(lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1))
 								// console.log(syntaxNode.from)
 								lineNumberMargin = lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1)?.lineNumberMargin;
-								const a = view.requestMeasure({
+								let a: HTMLElement;
+								view.requestMeasure({
 									read() {
-										return view.domAtPos(syntaxNode.from)
+										a = view.domAtPos(syntaxNode.from).node as HTMLElement
 									}
 
 								})
-								console.log(view.defaultCharacterWidth)
+								console.log(a,'boo')
 								// console.log(lineNumberMargin)
 								if (typeof lineNumberMargin === 'undefined') {
 									// excludedCodeblock = true;
