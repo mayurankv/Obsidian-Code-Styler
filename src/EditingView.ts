@@ -82,51 +82,56 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					this.decorations = RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
 				// setTimeout(()=>{
-					const codeblocks = findUnduplicatedCodeblocks(view);
-					const lineNumberMargins = findCodeblockLineNumberMargins(view);
-					console.log('lNM',lineNumberMargins)
-					const settings: CodeblockCustomizerSettings = this.settings;
-					for (const codeblock of codeblocks) {
-						let codeblockParameters: CodeblockParameters;
-						let excludedCodeblock: boolean = false;
-						let lineNumber: number = 0;
-						let lineNumberMargin: number | undefined = 0;
-						syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
-							enter(syntaxNode) {
-								const line = view.state.doc.lineAt(syntaxNode.from);
-								const lineText = view.state.sliceDoc(line.from,line.to);
-								const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
-								const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
-								if (startLine) {
-									codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
-									excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
-									lineNumber = 0;
-									// console.log(lineNumberMargins)
-									console.log(lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1))
-									// console.log(syntaxNode.from)
-									lineNumberMargin = lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1)?.lineNumberMargin;
-									// console.log(lineNumberMargin)
-									if (typeof lineNumberMargin === 'undefined') {
-										// excludedCodeblock = true;
-									} else if (lineNumberMargin === 0) {
-										// excludedCodeblock = true;
+				const codeblocks = findUnduplicatedCodeblocks(view);
+				const lineNumberMargins = findCodeblockLineNumberMargins(view);
+				console.log('lNM',lineNumberMargins)
+				const settings: CodeblockCustomizerSettings = this.settings;
+				for (const codeblock of codeblocks) {
+					let codeblockParameters: CodeblockParameters;
+					let excludedCodeblock: boolean = false;
+					let lineNumber: number = 0;
+					let lineNumberMargin: number | undefined = 0;
+					syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
+						enter(syntaxNode) {
+							const line = view.state.doc.lineAt(syntaxNode.from);
+							const lineText = view.state.sliceDoc(line.from,line.to);
+							const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
+							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
+							if (startLine) {
+								codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
+								lineNumber = 0;
+								// console.log(lineNumberMargins)
+								// console.log(lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1))
+								// console.log(syntaxNode.from)
+								lineNumberMargin = lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1)?.lineNumberMargin;
+								const a = view.requestMeasure({
+									read() {
+										return view.domAtPos(syntaxNode.from)
 									}
-								}
-								if (excludedCodeblock)
-									return;
-								if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-									console.log(lineNumberMargin)
-									console.log(!lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`)
-									decorations.push(Decoration.line({attributes: {style: !lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
-									decorations.push(Decoration.line({}).range(syntaxNode.from));
-									decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(syntaxNode.from))
-									lineNumber++;
+
+								})
+								console.log(view.defaultCharacterWidth)
+								// console.log(lineNumberMargin)
+								if (typeof lineNumberMargin === 'undefined') {
+									// excludedCodeblock = true;
 								}
 							}
-						})
-					}
-					this.decorations = RangeSet.of(decorations,true)
-					console.log(this.decorations)
+							if (excludedCodeblock)
+								return;
+							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
+								// console.log(lineNumberMargin)
+								// console.log(!lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`)
+								decorations.push(Decoration.line({attributes: {style: !lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
+								decorations.push(Decoration.line({}).range(syntaxNode.from));
+								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(syntaxNode.from))
+								lineNumber++;
+							}
+						}
+					})
+				}
+				this.decorations = RangeSet.of(decorations,true)
+				console.log(this.decorations)
 				// },3000)
 			}
 
