@@ -387,6 +387,9 @@ function ignore(state: EditorState): boolean {
 	return false;
 }
 
+function isCodeblockDelimiter(line: string): boolean {
+	return true;
+}
 function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
 	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }

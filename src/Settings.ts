@@ -91,12 +91,8 @@ export interface CodeblockCustomizerTheme {
 export interface CodeblockCustomizerSettings {
 	themes: Record<string,CodeblockCustomizerTheme>;
 	selectedTheme: string;
-	defaultTheme: string;
 	currentTheme: CodeblockCustomizerTheme;
-	newTheme: {
-		name: string;
-		default: boolean;
-	},
+	newTheme: string;
 	newHighlight: string;
 	excludedLanguages: string;
 	specialLanguages: Array<string>;
@@ -104,10 +100,6 @@ export interface CodeblockCustomizerSettings {
 }
 
 // Theme Defaults
-export const NEW_THEME_DEFAULT: {name: string, default: boolean} = {
-	name: '',
-	default: false,
-}
 const THEME_DEFAULT_SETTINGS: CodeblockCustomizerThemeSettings = {
 	codeblock: {
 		lineNumbers: true,
@@ -268,9 +260,8 @@ export const DEFAULT_SETTINGS: CodeblockCustomizerSettings = {
 		'Solarized': SOLARIZED_THEME,
 	},
 	selectedTheme: 'Default',
-	defaultTheme: 'Default',
 	currentTheme: structuredClone(DEFAULT_THEME),
-	newTheme: NEW_THEME_DEFAULT,
+	newTheme: '',
 	newHighlight: '',
 	excludedLanguages: "dataview, dataviewjs, ad-*",
 	specialLanguages: ["^preview$","^include$","^output$","^run-.+$"],

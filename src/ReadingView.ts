@@ -159,7 +159,7 @@ async function PDFExport(element: HTMLElement, sourcePath: string, plugin: Codeb
 
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
 	//@ts-expect-error Undocumented Obsidian API
-	const plugins: Record<string,any> = plugin.app.plugins.plugins
+	const plugins: Record<string,any> = plugin.app.plugins.plugins;
 	if (codeblockParameters.language === 'preview') {
 		if ('obsidian-code-preview' in plugins) {
 			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);

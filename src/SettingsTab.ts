@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeblockCustomizerPlugin from "./main";
-import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, PARAMETERS, DEFAULT_SETTINGS, NEW_THEME_DEFAULT, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
+import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -67,8 +67,7 @@ export class SettingsTab extends PluginSettingTab {
 				themeDropdown.onChange((value) => {
 					this.plugin.settings.selectedTheme = value;
 					this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
-					this.updateAlternativeHighlights(alternativeHighlightsContainer);
-					this.updatePickrColors();
+					this.display();
 					(async () => {await this.plugin.saveSettings()})();
 				});
 			})
@@ -95,62 +94,49 @@ export class SettingsTab extends PluginSettingTab {
 					else if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
 						new Notice('You cannot delete the default themes'); //NOSONAR
 					else {
-						if (this.plugin.settings.defaultTheme === this.plugin.settings.selectedTheme)
-							this.plugin.settings.defaultTheme = 'Default';
 						delete this.plugin.settings.themes[this.plugin.settings.selectedTheme]
 						new Notice(`${this.plugin.settings.selectedTheme} theme deleted successfully!`); //NOSONAR
 						this.plugin.settings.selectedTheme = "Default";
 						this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme])
 						this.updateDropdown(themeDropdown,this.plugin.settings);
-						this.updatePickrColors();
-						this.updateAlternativeHighlights(alternativeHighlightsContainer);
+						this.display();
 						(async () => {await this.plugin.saveSettings()})();
 					}
 				});
 			});
 		let newThemeName: TextComponent;
 		let newThemeDefault: ToggleComponent;
-		this.plugin.settings.newTheme = structuredClone(NEW_THEME_DEFAULT);
+		this.plugin.settings.newTheme = '';
 		new Setting(containerEl)
 			.setName('Add New Theme')
 			.setDesc('Create a new theme from the current settings.')
 			.addText(text => {newThemeName = text
 				.setPlaceholder('New theme name')
-				.setValue(this.plugin.settings.newTheme.name)
+				.setValue(this.plugin.settings.newTheme)
 				.onChange((value) => {
-					this.plugin.settings.newTheme.name = value;
+					this.plugin.settings.newTheme = value;
 				});
 			})
-			// NOTE: Setting to set new theme as default but this is unnecessary currently
-			// .addToggle(toggle => {newThemeDefault = toggle
-			// 	.setTooltip("Save as the default theme")
-			// 	.setValue(false)
-			// 	.onChange((value) => {
-			// 		this.plugin.settings.newTheme.default = value;
-			// 	});
-			// })  
 			.addExtraButton(button => {
 				button.setTooltip("Save theme");
 				button.setIcon('plus');
 				button.onClick(() => {
-					if (this.plugin.settings.newTheme.name.trim().length === 0)
+					if (this.plugin.settings.newTheme.trim().length === 0)
 						new Notice('Set a name for your theme'); //NOSONAR
-					else if (this.plugin.settings.newTheme.name in DEFAULT_SETTINGS.themes)
+					else if (this.plugin.settings.newTheme in DEFAULT_SETTINGS.themes)
 						new Notice('You can\'t overwrite the default themes'); //NOSONAR
 					else {
-						if (this.plugin.settings.newTheme.name in this.plugin.settings.themes) {
-							this.plugin.settings.themes[this.plugin.settings.newTheme.name] = structuredClone(this.plugin.settings.currentTheme);
-							new Notice(`${this.plugin.settings.newTheme.name} theme updated successfully!`); //NOSONAR
+						if (this.plugin.settings.newTheme in this.plugin.settings.themes) {
+							this.plugin.settings.themes[this.plugin.settings.newTheme] = structuredClone(this.plugin.settings.currentTheme);
+							new Notice(`${this.plugin.settings.newTheme} theme updated successfully!`); //NOSONAR
 						} else {
-							this.plugin.settings.themes[this.plugin.settings.newTheme.name] = structuredClone(this.plugin.settings.currentTheme);
-							new Notice(`${this.plugin.settings.newTheme.name} theme saved successfully!`); //NOSONAR
+							this.plugin.settings.themes[this.plugin.settings.newTheme] = structuredClone(this.plugin.settings.currentTheme);
+							new Notice(`${this.plugin.settings.newTheme} theme saved successfully!`); //NOSONAR
 						}
-						this.plugin.settings.selectedTheme = this.plugin.settings.newTheme.name;
-						if (this.plugin.settings.newTheme.default)
-							this.plugin.settings.defaultTheme = this.plugin.settings.selectedTheme;
+						this.plugin.settings.selectedTheme = this.plugin.settings.newTheme;
 						this.updateDropdown(themeDropdown,this.plugin.settings);
 						this.updateAlternativeHighlights(alternativeHighlightsContainer);
-						this.plugin.settings.newTheme = structuredClone(NEW_THEME_DEFAULT);
+						this.plugin.settings.newTheme = '';
 						newThemeName.setValue("");
 						newThemeDefault.setValue(false);
 						(async () => {await this.plugin.saveSettings()})();
@@ -175,7 +161,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].codeblock.textColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].codeblock.textColor = saveColor},
 			)});
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Unwrap codeblock lines')
 			.setDesc('Choose whether to unwrap lines in reading mode')
 			.addToggle(toggle => toggle
@@ -185,7 +171,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.disableableComponents['wrapLines'].forEach(component => {component.setDisabled(!value)});
 					(async () => {await this.plugin.saveSettings()})();    
 				}));
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Codeblock Curvature')
 			.setDesc('Determines how rounded the codeblocks appear in pixels.')
 			.then((setting) => {
@@ -211,7 +197,7 @@ export class SettingsTab extends PluginSettingTab {
 			});
 			
 		containerEl.createEl('h4', {text: 'Gutter Appearance'});
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Enable Line Numbers')
 			.setDesc('If disabled, the below settings are disabled too.')
 			.addToggle(toggle => toggle
@@ -241,7 +227,7 @@ export class SettingsTab extends PluginSettingTab {
 				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			)});
 		this.disableableComponents['lineNumbers'].push(this.pickrs['line_number'].resetButton);
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Highlight Line Numbers')
 			.setDesc('If enabled, highlights will also highlight the line numbers.')
 			.addToggle(toggle => {let highlightLineNumbersToggle = toggle
@@ -253,7 +239,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 				this.disableableComponents['lineNumbers'].push(highlightLineNumbersToggle);
 			});
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Indicate Current Line Number')
 			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate color.')
 			.setClass('codeblock-customizer-spaced')
@@ -283,7 +269,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].header.backgroundColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.backgroundColor = saveColor},
 			)});
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Header Font Size')
 			.setDesc('Set the font size for header language tags and titles.')
 			.then((setting) => {
@@ -307,7 +293,7 @@ export class SettingsTab extends PluginSettingTab {
 					});
 				})
 			})
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Header Title Text Styling')
 			.setDesc('Style the header title text using bold and italic toggles, by setting a font or by setting a text color.')
 			.addToggle(toggle => {toggle
@@ -340,7 +326,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].header.title.textColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.title.textColor = saveColor},
 			)});
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Collapse Placeholder Text')
 			.setDesc('Title placeholder text for collapsed code when no title parameter is set.')
 			.addText(text => text
@@ -361,7 +347,7 @@ export class SettingsTab extends PluginSettingTab {
 			)});
 			
 		containerEl.createEl('h5', {text: 'Header Language Tag Appearance'});
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Display Header Language Tags')
 			.setDesc('Determine when to show language tags in the header. "Title Only" will only show language tags when the title parameter is set. If set to "None", the below settings are disabled too.')
 			.addDropdown((dropdown) => dropdown
@@ -385,7 +371,7 @@ export class SettingsTab extends PluginSettingTab {
 		let languageTagsBoldToggle: ToggleComponent;
 		let languageTagsItalicToggle: ToggleComponent;
 		let languageIconsFontText: TextComponent;
-		new Setting(containerEl)
+		new Setting(containerEl) //todo
 			.setName('Header Language Tag Text Styling')
 			.setDesc('Style the header language tag text using bold and italic toggles, by setting a font or by setting a text color.')
 			.addToggle(toggle => {languageTagsBoldToggle = toggle
@@ -703,7 +689,6 @@ export class SettingsTab extends PluginSettingTab {
 								}
 							});
 							(async () => {await this.plugin.saveSettings()})();
-							console.log('success')
 						} catch {
 							new Notice('Invalid JSON'); //NOSONAR
 						}
@@ -752,9 +737,6 @@ export class SettingsTab extends PluginSettingTab {
 			dropdown.addOption(theme_name, theme_name);            
 		})
 		dropdown.setValue(settings.selectedTheme);
-	}
-	updatePickrColors() {
-		Object.entries(this.pickrs).forEach(([id,pickr]) => {pickr.resetColor()})
 	}
 	updateAlternativeHighlights(alternativeHighlightsContainer: HTMLDivElement) {
 		alternativeHighlightsContainer.empty();
