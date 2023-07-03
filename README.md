@@ -266,7 +266,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 - Check the feasibility of
   - Implementing code wrapping for editing mode
   - Implementing folding animations for editing mode
-<!-- Compatibility with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin -->
+<!-- Check there is no conflict with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin (parameters after language) -->
 
 ### Existing Issues
 

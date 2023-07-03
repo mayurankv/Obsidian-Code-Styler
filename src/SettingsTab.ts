@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeblockCustomizerPlugin from "./main";
-import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, PARAMETERS, DEFAULT_SETTINGS, NEW_THEME_DEFAULT, LANGUAGE_NAMES } from './Settings';
+import { Color, CSS, HEX, Display, CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, PARAMETERS, DEFAULT_SETTINGS, NEW_THEME_DEFAULT, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -683,15 +683,16 @@ export class SettingsTab extends PluginSettingTab {
 			})
 		new Setting(containerEl)
 			.setName('Redirect Language Settings')
-			.setDesc('Use this textbox to redirect specific language colors and icons as a JSON with language names as keys and either a color key, an icon key or both as the value for a given language. Colours should be passed as CSS colors and icons should be passed as a string of the inside of an svg element.')
+			.setDesc('Use this textbox to redirect specific language colors and icons as a JSON with language names as keys and either a color key, an icon key or both as the value for a given language. Colours should be passed as CSS colors and icons should be passed as a string of the inside of an svg element. This setting is theme independent.')
 			.setClass('codeblock-customizer-setting-text-area')
 			.addTextArea(textArea => textArea
 				.setValue(JSON.stringify(this.plugin.settings.redirectLanguages)==='{}'?'':JSON.stringify(this.plugin.settings.redirectLanguages,null,4))
-				.setPlaceholder(JSON.stringify({toml: {color: '#012345', icon: '<g id="SVGRepo_iconCarrier"><path d="M22.76,6.83v3.25h-5V25.17H14.26V10.08h-5V6.83Z" style="fill:#7f7f7f"></path><path d="M2,2H8.2V5.09H5.34v21.8H8.2V30H2Z" style="fill:#bfbfbf"></path><path d="M30,30H23.8V26.91h2.86V5.11H23.8V2H30Z" style="fill:#bfbfbf"></path></g>'}},null,4))
+				.setPlaceholder(JSON.stringify({toml: {color: '#012345', icon: LANGUAGE_ICONS_DATA['APL']}},null,4))
 				.onChange((value)=>{
-					if (value === '')
+					if (value === '') {
 						this.plugin.settings.redirectLanguages = {};
-					else {
+						(async () => {await this.plugin.saveSettings()})();
+					} else {
 						try {
 							this.plugin.settings.redirectLanguages = JSON.parse(value);
 							Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {color?: Color, icon?: string}])=>{
@@ -700,7 +701,9 @@ export class SettingsTab extends PluginSettingTab {
 										URL.revokeObjectURL(this.plugin.languageIcons[LANGUAGE_NAMES[languageName]]);
 									this.plugin.languageIcons[LANGUAGE_NAMES[languageName]] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${languageSettings.icon}</svg>`], { type: "image/svg+xml" }));
 								}
-							})
+							});
+							(async () => {await this.plugin.saveSettings()})();
+							console.log('success')
 						} catch {
 							new Notice('Invalid JSON'); //NOSONAR
 						}
