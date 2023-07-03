@@ -6,36 +6,44 @@ import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } fro
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined} , plugin: CodeblockCustomizerPlugin) {
-	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
-	if (!codeblockCodeElement) 
+	let codeblockPreElements: Array<HTMLElement>;
+	if (element.querySelector(".markdown-reading-view"))
+		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-reading-view pre:not(.frontmatter)'));
+	else if (element.querySelector(".markdown-source-view"))
+		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-source-view pre:not(.frontmatter)'));
+	else
+		codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
+	if (codeblockPreElements.length === 0)
 		return;
-	
-	if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
-		while(!codeblockCodeElement.classList.contains("is-loaded"))
-			await sleep(2);
-	
-	const codeblockPreElement: HTMLPreElement | null = element.querySelector("pre:not(.frontmatter)");
-	if (!codeblockPreElement)
-		return;
-	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockCodeElement);
+	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0] as HTMLElement);
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
 	if (!frontmatter)
 		frontmatter = cache?.frontmatter;
 	if (frontmatter?.['codeblock-customizer-ignore'] === true)
 		return;
 	if (codeblockSectionInfo) {
+		console.log('info')
 		const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view || typeof view?.editor === 'undefined')
 			return;
-		const codeblockLines = Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber))
-		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
-			childList: true,
-			subtree: true,
-			attributes: true,
-			characterData: true,
-		});
-		await remakeCodeblock(codeblockCodeElement, codeblockPreElement, codeblockLines, sourcePath, plugin);
+		const codeblockLines = parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber)));
+		for (let [key,codeblockPreElement] of codeblockPreElements.entries()) {
+			let codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
+			if (!codeblockCodeElement)
+				return;
+			if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
+				while(!codeblockCodeElement.classList.contains("is-loaded"))
+					await sleep(2);
+			plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
+				childList: true,
+				subtree: true,
+				attributes: true,
+				characterData: true,
+			});
+			await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement as HTMLElement,codeblockLines[key],sourcePath,plugin);
+		}
 	} else {
+		console.log('hi')
 		const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
 		if (!file) {
 			console.error(`File not found: ${sourcePath}`);
@@ -47,26 +55,27 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		});
 
 		const fileContentLines = fileContent.split(/\n/g);
-		const codeblocks: Array<Array<string>> = [];
+		let codeblocks: Array<Array<string>> = [];
 
 		if (typeof cache?.sections !== 'undefined') {
+			console.log(cache.sections)
 			for (const element of cache.sections)
-				if (element.type === 'code')
-					codeblocks.push(fileContentLines.slice(element.position.start.line,element.position.end.line+1));
+				codeblocks = codeblocks.concat(parseCodeblockSource(fileContentLines.slice(element.position.start.line,element.position.end.line+1)));
 		} else {
 			console.error(`Metadata cache not found for file: ${sourcePath}`);
 			return;
 		}
 		try {
-			await PDFExport(element, sourcePath, plugin, codeblocks);
+			console.log(codeblockPreElements)
+			console.log(codeblocks)
+			await PDFExport(codeblockPreElements as Array<HTMLElement>,sourcePath,plugin,codeblocks);
 		} catch (error) {
 			console.error(`Error exporting to PDF: ${error.message}`);
 			return;
 		}
 	}
 }
-async function PDFExport(element: HTMLElement, sourcePath: string, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
-	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
+async function PDFExport(codeblockPreElements: Array<HTMLElement>, sourcePath: string, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
 	for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
 		const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
 		if (!codeblockCodeElement)
@@ -80,12 +89,12 @@ async function PDFExport(element: HTMLElement, sourcePath: string, plugin: Codeb
 			attributes: true,
 			characterData: true,
 		});
-		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, sourcePath, plugin);
+		await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockLines,sourcePath,plugin);
 	}
 }
 
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin) {
-	let parameterLine = codeblockLines[0].indexOf('```')!==-1?codeblockLines[0]:codeblockLines.find((line: string)=>line.indexOf('```')!==-1)?.trim()
+	let parameterLine = codeblockLines[0].indexOf('```')!==-1?codeblockLines[0]:codeblockLines.find((line: string)=>line.indexOf('```')!==-1)?.trim().replace(/^(?:>\s*)*```/,'```')
 	if (!parameterLine)
 		return;
 	let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
@@ -95,6 +104,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugin,codeblockLines,sourcePath);
 
 	codeblockPreElement.classList.add(`codeblock-customizer-pre`);
+	codeblockPreElement.classList.add(`language-${codeblockParameters.language}`);
 	if (codeblockPreElement.parentElement)
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
@@ -131,6 +141,9 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
 		codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
 
+	if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
+		return;
+	
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
 		codeblockLines = ['',''];
@@ -164,6 +177,30 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	},PRIMARY_DELAY);
 }
 
+function parseCodeblockSource(codeSection: Array<string>): Array<Array<string>> {
+	let codeblocks: Array<Array<string>> = [];
+	function parseCodeblockSection(codeSection: Array<string>): void {
+        if (codeSection.length === 0)
+            return;
+        let firstCodeblockLine = codeSection[0].indexOf('```')!==-1?codeSection[0]:codeSection.find((line: string)=>line.indexOf('```')!==-1);
+		if (!firstCodeblockLine) {
+            return;
+        }
+        let openDelimiter = /^\s*(?:>\s*)*(```+).*$/.exec(firstCodeblockLine)?.[1];
+		if (!openDelimiter)
+            return;
+		let openDelimiterIndex = codeSection.indexOf(firstCodeblockLine);
+		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
+		if (!/^\s*(?:>\s*)*```+ad-.*$/.test(firstCodeblockLine))
+            codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
+        else
+            parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
+        
+		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
+	}
+	parseCodeblockSection(codeSection);
+	return codeblocks
+}
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
 	//@ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,any> = plugin.app.plugins.plugins;

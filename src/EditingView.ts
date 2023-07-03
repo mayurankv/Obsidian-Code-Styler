@@ -94,8 +94,10 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			buildDecorations(view: EditorView) {
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore(view.state))
+				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore(view.state)) {
 					this.decorations = RangeSet.empty;
+					return true;
+				}
 				const decorations: Array<Range<Decoration>> = [];
 				const codeblocks = findUnduplicatedCodeblocks(view);
 				const settings: CodeblockCustomizerSettings = this.settings;
