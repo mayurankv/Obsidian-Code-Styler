@@ -161,7 +161,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].codeblock.textColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].codeblock.textColor = saveColor},
 			)});
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Unwrap codeblock lines')
 			.setDesc('Choose whether to unwrap lines in reading mode')
 			.addToggle(toggle => toggle
@@ -171,7 +171,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.disableableComponents['wrapLines'].forEach(component => {component.setDisabled(!value)});
 					(async () => {await this.plugin.saveSettings()})();    
 				}));
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Codeblock Curvature')
 			.setDesc('Determines how rounded the codeblocks appear in pixels.')
 			.then((setting) => {
@@ -197,7 +197,7 @@ export class SettingsTab extends PluginSettingTab {
 			});
 			
 		containerEl.createEl('h4', {text: 'Gutter Appearance'});
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Enable Line Numbers')
 			.setDesc('If disabled, the below settings are disabled too.')
 			.addToggle(toggle => toggle
@@ -227,7 +227,7 @@ export class SettingsTab extends PluginSettingTab {
 				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			)});
 		this.disableableComponents['lineNumbers'].push(this.pickrs['line_number'].resetButton);
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Highlight Line Numbers')
 			.setDesc('If enabled, highlights will also highlight the line numbers.')
 			.addToggle(toggle => {let highlightLineNumbersToggle = toggle
@@ -239,7 +239,7 @@ export class SettingsTab extends PluginSettingTab {
 				})
 				this.disableableComponents['lineNumbers'].push(highlightLineNumbersToggle);
 			});
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Indicate Current Line Number')
 			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate color.')
 			.setClass('codeblock-customizer-spaced')
@@ -269,7 +269,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].header.backgroundColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.backgroundColor = saveColor},
 			)});
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Header Font Size')
 			.setDesc('Set the font size for header language tags and titles.')
 			.then((setting) => {
@@ -293,7 +293,7 @@ export class SettingsTab extends PluginSettingTab {
 					});
 				})
 			})
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Header Title Text Styling')
 			.setDesc('Style the header title text using bold and italic toggles, by setting a font or by setting a text color.')
 			.addToggle(toggle => {toggle
@@ -326,7 +326,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColors: CodeblockCustomizerThemeColors) => relevantThemeColors[getCurrentMode()].header.title.textColor,
 				(relevantThemeColors: CodeblockCustomizerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.title.textColor = saveColor},
 			)});
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Collapse Placeholder Text')
 			.setDesc('Title placeholder text for collapsed code when no title parameter is set.')
 			.addText(text => text
@@ -347,7 +347,7 @@ export class SettingsTab extends PluginSettingTab {
 			)});
 			
 		containerEl.createEl('h5', {text: 'Header Language Tag Appearance'});
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Display Header Language Tags')
 			.setDesc('Determine when to show language tags in the header. "Title Only" will only show language tags when the title parameter is set. If set to "None", the below settings are disabled too.')
 			.addDropdown((dropdown) => dropdown
@@ -371,7 +371,7 @@ export class SettingsTab extends PluginSettingTab {
 		let languageTagsBoldToggle: ToggleComponent;
 		let languageTagsItalicToggle: ToggleComponent;
 		let languageIconsFontText: TextComponent;
-		new Setting(containerEl) //todo
+		new Setting(containerEl)
 			.setName('Header Language Tag Text Styling')
 			.setDesc('Style the header language tag text using bold and italic toggles, by setting a font or by setting a text color.')
 			.addToggle(toggle => {languageTagsBoldToggle = toggle
