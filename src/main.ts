@@ -29,7 +29,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		this.app.workspace.iterateRootLeaves(leaf => { // Add decoration on enabling of plugin
 			if (leaf.view instanceof FileView)
-				readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null},this);
+				readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null, frontmatter: undefined},this);
 		})
 		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
 

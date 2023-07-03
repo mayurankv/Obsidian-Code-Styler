@@ -59,8 +59,9 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 		ignore: false,
 	}
 	if (parameterLine.startsWith('```')) {
+		parameterLine = parameterLine.replace(/^```+(?=[^`])/,'');
 		let languageBreak = parameterLine.indexOf(' ');
-		codeblockParameters.language = parameterLine.slice('```'.length,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
+		codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
 		if (languageBreak === -1)
 			return codeblockParameters;
 		const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
