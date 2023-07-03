@@ -261,9 +261,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 - Features
   - Add commands to fold all, unfold all and reset default fold for codeblocks ([Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33))
     - Hook into existing fold commands as well
-  - Let users redirect certain languages to alternative icons and colors
 - Appearance
-  - Fix large line numbers margin padding in editing mode
   - Work with all themes and readable line length setting
 - Check the feasibility of
   - Implementing code wrapping for editing mode

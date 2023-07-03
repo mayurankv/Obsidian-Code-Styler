@@ -10,7 +10,7 @@ export function updateStyling(settings: CodeblockCustomizerSettings): void {
 		styleTag.id = STYLE_ID;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
-	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors(settings.currentTheme.settings)).trim().replace(/\s+/g,' ');
+	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors(settings.currentTheme.settings,settings.redirectLanguages)).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
 
@@ -82,12 +82,12 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 	`;
 }
 
-function styleLanguageColors (themeSettings: CodeblockCustomizerThemeSettings): string {
+function styleLanguageColors (themeSettings: CodeblockCustomizerThemeSettings, redirectLanguages: Record<string,{color?: Color, icon?: string}>): string {
 	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
-		if (languageDisplayName in LANGUAGE_COLORS)
+		if (languageDisplayName in LANGUAGE_COLORS || (languageName in redirectLanguages && 'color' in redirectLanguages[languageName]))
 			result += `
 				.language-${languageName} {
-					--language-border-color: ${LANGUAGE_COLORS[languageDisplayName]};
+					--language-border-color: ${redirectLanguages?.[languageName]?.['color'] ?? LANGUAGE_COLORS[languageDisplayName]};
 					--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
 				}
 			`;

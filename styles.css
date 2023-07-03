@@ -492,11 +492,13 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 }
 .markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair::before {
 	visibility: visible;
+	opacity: 1;
 	vertical-align: -1px;
 	font-size: var(--font-ui-smaller);
 }
 .markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair::after {
 	visibility: visible;
+	opacity: 1;
 	font-size: var(--font-ui-smaller);
 	content: 'Copy';
 	color: var(--codeblock-customizer-button-color);
@@ -513,6 +515,10 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 	width: 70%;
 	margin: 0 auto;
 	text-align: center;
+}
+.codeblock-customizer-setting-text-area textarea {
+	width: 400px;
+	height: 220px;
 }
 
 /** Pickr 1.8.2 MIT | https://github.com/Simonwep/pickr */

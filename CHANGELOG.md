@@ -30,6 +30,7 @@ See this project's [releases](/../../../releases).
 - Added ignore parameter and YAML setting.
 - Added line wrapping settings and parameters.
 - Added line numbering parameters.
+- Added dynamic line number margin sizing in reading mode and editing mode.
 - Added regex line highlighting.
 - Added optional fold placeholder parameter and settings.
 - Added default theme which uses existing css variables.
@@ -40,6 +41,7 @@ See this project's [releases](/../../../releases).
 - Added icon customizability.
 - Added codeblock curvature setting.
 - Added optional language border setting.
+- Added optional redirecting of language colors and icons
 - Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview) and the [file include plugin](https://github.com/tillahoffmann/obsidian-file-include).
 - Added issue and pull request templates.
 - Added other supporting documents such as [CONTRIBUTING](.github/CONTRIBUTING.md).
