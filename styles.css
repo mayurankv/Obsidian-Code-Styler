@@ -1,7 +1,6 @@
 /** Define CSS variables */
 body {
-	--line-number-gutter-min-width: 32px;
-	/* --line-number-gutter-width: 32px; */
+	--line-number-gutter-min-width: 32.67px;
 	--line-number-gutter-padding: 16px;
 	--header-separator-width: 2px;
 	--code-padding: 8px;
@@ -100,9 +99,10 @@ pre.codeblock-customizer-pre > code > div:only-child > [class^='codeblock-custom
 .markdown-source-view .HyperMD-codeblock .codeblock-customizer-line-number,
 .markdown-source-view .HyperMD-codeblock .codeblock-customizer-line-number-specific {
 	position: absolute;
+	box-sizing: content-box;
 	display: inline-block;
 	height: 100%;
-	min-width: var(--line-number-gutter-min-width);
+	min-width: calc(var(--line-number-gutter-min-width) - 12px);
 	overflow-x: auto;
 	direction: rtl;
 	left: 0;
@@ -131,7 +131,7 @@ pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
 }
 .codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number),
 .codeblock-customizer.codeblock-customizer-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-customizer-line-number-specific) {
-	padding-left: calc(var(--line-number-gutter-width) + var(--line-number-gutter-padding));
+	padding-left: calc(12px + var(--language-border-width) + var(--line-number-gutter-width) + var(--line-number-gutter-padding));
 }
 
 /** Header styling */

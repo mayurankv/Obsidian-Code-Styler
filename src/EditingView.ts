@@ -4,11 +4,32 @@ import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
-import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings, PRIMARY_DELAY } from "./Settings";
+import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings, languageIcons: Record<string,string>) {
+	const codeblockLineNumberCharWidth = StateField.define<number>({
+		create(state: EditorState): number {
+			return state.field(editorEditorField).defaultCharacterWidth;
+		},
+		update(value: number, transaction: Transaction): number {
+			let charWidths = Array.from(transaction.state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
+				let nextElement = beginningElement.previousElementSibling as HTMLElement;
+				if (!nextElement)
+					return result;
+				let lineNumberElement = nextElement.querySelector("[class^='codeblock-customizer-line-number']") as HTMLElement;
+				if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
+					return result;
+				let computedStyles = window.getComputedStyle(lineNumberElement, null);
+				result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
+				return result;
+			},[])
+			if (charWidths.length === 0)
+				return value;
+			return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
+		}
+	})
 	const codeblockLines = ViewPlugin.fromClass(
 		class CodeblockLines {
 			settings: CodeblockCustomizerSettings;
@@ -22,7 +43,6 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			mutationObserver: MutationObserver;
 		
 			constructor(view: EditorView) {
-				console.log('construct')
 				this.settings = settings;
 				this.currentSettings = {
 					excludedLanguages: settings.excludedLanguages,
@@ -51,7 +71,6 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			forceUpdate(view: EditorView) {
-				console.log('force update')
 				this.view = view;
 				this.buildDecorations(this.view);
 				this.view.requestMeasure();
@@ -65,15 +84,12 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
 					!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
 				) {
-					console.log('update')
-					// console.log(update.docChanged,update.viewportChanged,this.settings.excludedLanguages !== this.currentSettings.excludedLanguages,this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder,!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights))
 					this.currentSettings = structuredClone({
 						excludedLanguages: this.settings.excludedLanguages,
 						collapsePlaceholder: this.settings.currentTheme.settings.header.collapsePlaceholder,
 						alternativeHighlights: Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),
 					});
 					this.buildDecorations(update.view);
-					// update.view.requestMeasure();
 				}
 			}
 		
@@ -81,15 +97,13 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore(view.state))
 					this.decorations = RangeSet.empty;
 				const decorations: Array<Range<Decoration>> = [];
-				// setTimeout(()=>{
 				const codeblocks = findUnduplicatedCodeblocks(view);
-				const lineNumberMargins = findCodeblockLineNumberMargins(view);
-				// console.log('lNM',lineNumberMargins)
 				const settings: CodeblockCustomizerSettings = this.settings;
 				for (const codeblock of codeblocks) {
 					let codeblockParameters: CodeblockParameters;
 					let excludedCodeblock: boolean = false;
 					let lineNumber: number = 0;
+					let maxLineNum: number = 0;
 					let lineNumberMargin: number | undefined = 0;
 					syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
 						enter(syntaxNode) {
@@ -101,60 +115,28 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 								codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
 								lineNumber = 0;
-								// console.log(lineNumberMargins)
-								// console.log(lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1))
-								// console.log(syntaxNode.from)
-								lineNumberMargin = lineNumberMargins.find(({start,lineNumberMargin}) => start === syntaxNode.from || start === syntaxNode.from - 1 || start === syntaxNode.from + 1)?.lineNumberMargin;
-								let a: HTMLElement;
-								view.requestMeasure({
-									read() {
-										a = view.domAtPos(syntaxNode.from).node as HTMLElement
-									}
-
-								})
-								console.log(a,'boo')
-								// console.log(lineNumberMargin)
-								if (typeof lineNumberMargin === 'undefined') {
-									// excludedCodeblock = true;
+								let lineNumberCount = line.number + 1;
+								while (!view.state.doc.line(lineNumberCount).text.startsWith('```') || view.state.doc.line(lineNumberCount).text.indexOf('```', 3) !== -1) {
+									lineNumberCount += 1;
 								}
+								maxLineNum = lineNumberCount - line.number - 1 + codeblockParameters.lineNumbers.offset;
+								if (maxLineNum.toString().length > 2)
+									lineNumberMargin = maxLineNum.toString().length * view.state.field(codeblockLineNumberCharWidth);
+								else
+									lineNumberMargin = undefined;
 							}
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								// console.log(lineNumberMargin)
-								// console.log(!lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`)
-								decorations.push(Decoration.line({attributes: {style: !lineNumberMargin?'':`--line-number-gutter-width: ${lineNumberMargin}px`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
+								decorations.push(Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+'px':'calc(var(--line-number-gutter-min-width) - 12px)'}`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-customizer-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
 								decorations.push(Decoration.line({}).range(syntaxNode.from));
-								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,startLine||endLine)}).range(syntaxNode.from))
+								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}).range(syntaxNode.from))
 								lineNumber++;
 							}
 						}
 					})
 				}
 				this.decorations = RangeSet.of(decorations,true)
-				console.log(this.decorations)
-				// },3000)
-			}
-
-			resizeGutter(view: EditorView) {
-				setTimeout(()=>{
-					view.contentDOM.querySelectorAll(".markdown-source-view .HyperMD-codeblock[class^='codeblock-customizer-line']:has( .codeblock-customizer-line-number-specific)").forEach(element => {
-						const lineNumberElement = element.querySelector("[class^='codeblock-customizer-line-number']") as HTMLElement | null;
-						let numberWidth: number;
-						if (!lineNumberElement)
-							return;
-						if (lineNumberElement.innerText === '') {
-							if (element.classList.contains('HyperMD-codeblock-begin'))
-								numberWidth = 0;
-							else if (element.classList.contains('HyperMD-codeblock-end'))
-								numberWidth = 0;
-							else
-								numberWidth = 0
-						} else
-							numberWidth = lineNumberElement.scrollWidth;
-						(element as HTMLElement).style.setProperty('--line-number-gutter-width',`${numberWidth}px`)
-					});
-				},PRIMARY_DELAY);
 			}
 		
 			destroy() {
@@ -253,17 +235,19 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 	class LineNumberWidget extends WidgetType {
 		lineNumber: number;
 		codeblockParameters: CodeblockParameters;
+		maxLineNum: number
 		empty: boolean;
 	
-		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, empty: boolean) {
+		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, maxLineNum: number, empty: boolean) {
 			super();
 			this.lineNumber = lineNumber;
 			this.codeblockParameters = codeblockParameters;
+			this.maxLineNum = maxLineNum
 			this.empty = empty;
 		}
 	
 		eq(other: LineNumberWidget) {
-			return this.lineNumber === other.lineNumber && this.codeblockParameters === other.codeblockParameters;
+			return this.lineNumber === other.lineNumber && this.codeblockParameters === other.codeblockParameters && this.maxLineNum === other.maxLineNum;
 		}
 	
 		toDOM(view: EditorView): HTMLElement {
@@ -272,7 +256,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 				lineNumberDisplay = '-hide'
 			else if (this.codeblockParameters.lineNumbers.alwaysEnabled && !this.codeblockParameters.lineNumbers.alwaysDisabled)
 				lineNumberDisplay = '-specific'
-			return createSpan({attr: {style: ''}, cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
+			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?'width: var(--line-number-gutter-width);':''}, cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
 	class HeaderWidget extends WidgetType {
@@ -367,49 +351,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 		this.setAttribute("data-clicked","true")
 	}
 
-	return [codeblockLines,codeblockHeader,codeblockCollapse]
-}
-
-function findCodeblockLineNumberMargins(view: EditorView): Array<{start: number, lineNumberMargin: number}> {
-	let lineNumberMargins: Array<{start: number, lineNumberMargin: number}> = [];
-	// console.log(view.contentDOM.querySelectorAll(".HyperMD-codeblock-begin"),'what?')
-	for (let codeblockLineElement of Array.from(view.contentDOM.querySelectorAll(".HyperMD-codeblock-begin"))) {
-		// console.log(codeblockLineElement)
-		const startElement = codeblockLineElement as HTMLElement;
-		let start: number = view.posAtDOM(startElement);
-		// start = await returnStartPos(view,startElement);
-		// setTimeout(()=>{
-		// 	console.log(view.posAtDOM(startElement))
-		// },50)
-		// console.log(start,'first?')
-		let breakLoop = false;
-		let lineNumberMargin = 0;
-		let currentLineNumberWidth: number;
-		if (!codeblockLineElement.nextElementSibling)
-			continue;
-		codeblockLineElement = codeblockLineElement.nextElementSibling as HTMLElement;
-		while (!breakLoop && !codeblockLineElement.classList.contains('HyperMD-codeblock-end')) {
-			if (!codeblockLineElement.firstElementChild || !codeblockLineElement.nextElementSibling) {
-				breakLoop = true;
-				break
-			}
-			currentLineNumberWidth = (codeblockLineElement.firstElementChild as HTMLElement).offsetWidth;
-			// console.log(currentLineNumberWidth)
-			if (currentLineNumberWidth > lineNumberMargin)
-				lineNumberMargin = currentLineNumberWidth;
-			codeblockLineElement = codeblockLineElement.nextElementSibling as HTMLElement;
-		}
-		if (!breakLoop)
-			lineNumberMargins.push({start: start, lineNumberMargin: lineNumberMargin});
-	}
-	return lineNumberMargins;
-}
-async function returnStartPos(view: EditorView, startElement: HTMLElement): Promise<number> {
-	return new Promise((resolve, reject) => {
-		setTimeout(() => {
-			resolve(view.posAtDOM(startElement));
-		});
-	});
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse]
 }
 
 function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
