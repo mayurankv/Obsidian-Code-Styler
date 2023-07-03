@@ -1,11 +1,11 @@
-import { TFile, MarkdownView, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom } from "obsidian";
+import { TFile, MarkdownView, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache } from "obsidian";
 
 import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerThemeSettings, PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export async function readingViewPostProcessor(element: HTMLElement, {sourcePath, getSectionInfo}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null} , plugin: CodeblockCustomizerPlugin) {
+export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined} , plugin: CodeblockCustomizerPlugin) {
 	const codeblockCodeElement: HTMLElement | null = element.querySelector('pre > code');
 	if (!codeblockCodeElement) 
 		return;
@@ -19,7 +19,9 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		return;
 	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockCodeElement);
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
-	if (cache?.frontmatter?.['codeblock-customizer-ignore'] === true)
+	if (!frontmatter)
+		frontmatter = cache?.frontmatter;
+	if (frontmatter?.['codeblock-customizer-ignore'] === true)
 		return;
 	if (codeblockSectionInfo) {
 		const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
