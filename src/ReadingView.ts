@@ -65,9 +65,30 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		}
 	}
 }
+async function PDFExport(element: HTMLElement, sourcePath: string, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
+	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
+	for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
+		const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
+		if (!codeblockCodeElement)
+			return;
+		const codeblockLines = codeblocks?.[key];
+		if (!codeblockLines)
+			return;
+		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
+			childList: true,
+			subtree: true,
+			attributes: true,
+			characterData: true,
+		});
+		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, sourcePath, plugin);
+	}
+}
 
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin) {
-	let codeblockParameters = parseCodeblockParameters(codeblockLines[0],plugin.settings.currentTheme);
+	let parameterLine = codeblockLines[0].indexOf('```')!==-1?codeblockLines[0]:codeblockLines.find((line: string)=>line.indexOf('```')!==-1)?.trim()
+	if (!parameterLine)
+		return;
+	let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
 		
 	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 		return;
@@ -141,22 +162,6 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 			codeblockCodeElement.style.maxHeight = '';
 		}
 	},PRIMARY_DELAY);
-}
-async function PDFExport(element: HTMLElement, sourcePath: string, plugin: CodeblockCustomizerPlugin, codeblocks: Array<Array<string>>) {
-	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
-	for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
-		const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
-		if (!codeblockCodeElement)
-			return;
-		const codeblockLines = codeblocks[key];
-		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
-			childList: true,
-			subtree: true,
-			attributes: true,
-			characterData: true,
-		});
-		await remakeCodeblock(codeblockCodeElement, (codeblockPreElement as HTMLElement), codeblockLines, sourcePath, plugin);
-	}
 }
 
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {

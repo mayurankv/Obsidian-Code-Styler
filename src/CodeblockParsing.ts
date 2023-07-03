@@ -59,7 +59,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 		ignore: false,
 	}
 	if (parameterLine.startsWith('```')) {
-		parameterLine = parameterLine.replace(/^```+(?=[^`])/,'');
+		parameterLine = parameterLine.replace(/^```+(?=[^`]|$)/,'');
 		let languageBreak = parameterLine.indexOf(' ');
 		codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
 		if (languageBreak === -1)

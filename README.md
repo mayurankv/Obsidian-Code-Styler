@@ -277,10 +277,12 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - If a language is excluded, it currently needs to be unfolded before it can be removed or it disappears.
   - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
 - Reading Mode
-  - Codeblocks flash when changed if editing side by side in editing mode.
+  - Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
   - Scrollbar does not show behind line gutter
   - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
   - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17).
+- Plugins
+  - Does not work using nested codeblocks within admonition from the [Admonitions Plugin](https://github.com/javalent/admonitions).
 - PDF Exporting
   - Highlights appear slightly different.
   - Language border colors are not correctly set.
