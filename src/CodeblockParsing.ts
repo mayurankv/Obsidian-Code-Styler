@@ -1,3 +1,4 @@
+import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerTheme } from "./Settings";
 
 export interface CodeblockParameters {
@@ -159,6 +160,75 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 		regularExpressions: [...regularExpressions],
 	};
 }
+export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+	//@ts-expect-error Undocumented Obsidian API
+	const plugins: Record<string,any> = plugin.app.plugins.plugins;
+	if (codeblockParameters.language === 'preview') {
+		if ('obsidian-code-preview' in plugins) {
+			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
+			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
+				if (typeof codePreviewParams.start === 'number')
+					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
+				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
+			}
+			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
+			if (codeblockParameters.title === '')
+				codeblockParameters.title = codePreviewParams.filePath.split('\\').pop().split('/').pop();
+			codeblockParameters.language = codePreviewParams.language;
+		}
+	} else if (codeblockParameters.language === 'include') {
+		if ('file-include' in plugins) {
+			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
+			if (typeof fileIncludeLanguage !== 'undefined')
+				codeblockParameters.language = fileIncludeLanguage;
+		}
+	}
+	return codeblockParameters
+}
+export function parseCodeblockSource(codeSection: Array<string>): {codeblocks: Array<Array<string>>, nested: boolean} {
+	let codeblocks: Array<Array<string>> = [];
+	function parseCodeblockSection(codeSection: Array<string>): void {
+        if (codeSection.length === 0)
+            return;
+        let openingCodeblockLine = getOpeningLine(codeSection);
+		if (!openingCodeblockLine)
+            return;
+        let openDelimiter = /^\s*(?:>\s*)*(```+).*$/.exec(openingCodeblockLine)?.[1];
+		if (!openDelimiter)
+            return;
+		let openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
+		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
+		if (!/^\s*(?:>\s*)*```+ad-.*$/.test(openingCodeblockLine))
+            codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
+        else
+            parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
+        
+		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
+	}
+	parseCodeblockSection(codeSection);
+	return {codeblocks: codeblocks, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
+}
+export function getParameterLine(codeblockLines: Array<string>): string | undefined {
+	let openingCodeblockLine = getOpeningLine(codeblockLines);
+	if (openingCodeblockLine && openingCodeblockLine !== codeblockLines[0])
+		openingCodeblockLine = cleanParameterLine(openingCodeblockLine);
+	return openingCodeblockLine
+}
+function getOpeningLine(codeblockLines: Array<string>): string | undefined {
+	console.log(codeblockLines)
+	return codeblockLines.find((line: string)=>Boolean(testOpeningLine(line)));
+}
+export function testOpeningLine(codeblockLine: string): number {
+	let lineMatch = /^(\s*(?:>\s*)*)(```+)/.exec(codeblockLine);
+	if (!lineMatch)
+		return 0;
+	if (codeblockLine.indexOf('`'.repeat(lineMatch[2].length),lineMatch[1].length+lineMatch[2].length+1)===-1)
+		return lineMatch[2].length;
+	return 0;
+}
+export function cleanParameterLine(parameterLine: string): string {
+	return parameterLine.trim().replace(/^(?:>\s*)*```/,'```');
+}
 export function isLanguageExcluded(language: string, excludedLanguagesString: string): boolean {
 	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
 		if (regexExcludedLanguage.test(language))
@@ -167,4 +237,8 @@ export function isLanguageExcluded(language: string, excludedLanguagesString: st
 }
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
+}
+
+export function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
+	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }

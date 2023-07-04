@@ -296,6 +296,9 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed code {
 pre.codeblock-customizer-pre::after {
 	content: none !important;
 }
+.markdown-source-view.mod-cm6 .cm-embed-block pre.codeblock-customizer-pre {
+	margin: 1em 0px;
+}
 
 /** Source mode text styling */
 .HyperMD-codeblock:has(> .cm-widgetBuffer) { /*? Prevent Line Wraps */

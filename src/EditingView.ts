@@ -5,7 +5,7 @@ import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded } from "./CodeblockParsing";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isLanguageExcluded, arraysEqual, cleanParameterLine } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings, languageIcons: Record<string,string>) {
@@ -77,8 +77,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			}
 		
 			update(update: ViewUpdate) {
-				if (
-					update.docChanged || 
+				if (update.docChanged || 
 					update.viewportChanged || 
 					this.settings.excludedLanguages !== this.currentSettings.excludedLanguages ||
 					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
@@ -114,7 +113,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
 							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
 							if (startLine) {
-								codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+								codeblockParameters = parseCodeblockParameters(cleanParameterLine(lineText),settings.currentTheme);
 								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
@@ -159,21 +158,24 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
 			let startLine: boolean = true;
+			let startDelimiterLength: number = 3;
 			for (let i = 1; i < transaction.state.doc.lines; i++) {
 				const line = transaction.state.doc.line(i);
 				const lineText = line.text.toString();
-				const codeblockDelimiterLine = (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1);
-				if (codeblockDelimiterLine) {
+				let currentDelimiterLength = testOpeningLine(lineText);
+				if (currentDelimiterLength) {
 					if (startLine) {
 						startLine = false;
-						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+						startDelimiterLength = currentDelimiterLength;
+						codeblockParameters = parseCodeblockParameters(cleanParameterLine(lineText),settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons),block: true}));
 							else
 								continue;
 					} else {
-						startLine = true;
+						if (currentDelimiterLength === startDelimiterLength)
+							startLine = true;
 					}
 				}
 			}
@@ -192,13 +194,15 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			let collapseStart: Line | null = null;
 			let collapseEnd: Line | null = null;
 			let startLine: boolean = true;
+			let startDelimiterLength: number = 3;
 			for (let i = 1; i < state.doc.lines; i++) {
 				const line = state.doc.line(i);
 				const lineText = line.text.toString();
-				const codeblockDelimiterLine = (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1);
-				if (codeblockDelimiterLine) {
+				let currentDelimiterLength = testOpeningLine(lineText);
+				if (currentDelimiterLength) {
 					if (startLine) {
 						startLine = false;
+						startDelimiterLength = currentDelimiterLength;
 						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
@@ -206,9 +210,11 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							else
 								continue;
 					} else {
-						startLine = true;
-						if (collapseStart)
-							collapseEnd = line;
+						if (currentDelimiterLength === startDelimiterLength) {
+							startLine = true;
+							if (collapseStart)
+								collapseEnd = line;
+						}
 					}
 				}
 				if (collapseStart && collapseEnd) {
@@ -319,19 +325,23 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 		let collapseStart: Line | null = null;
 		let collapseEnd: Line | null = null;
 		let startLine: boolean = true;
+		let startDelimiterLength: number = 3;
 		for (let i = 1; i < view.state.doc.lines; i++) {
 			const line = view.state.doc.line(i);
 			const lineText = line.text.toString();
-			const codeblockDelimiterLine = (lineText.startsWith('```') && lineText.indexOf('```', 3) === -1);
-			if (codeblockDelimiterLine) {
+			let currentDelimiterLength = testOpeningLine(lineText);
+			if (currentDelimiterLength) {
 				if (startLine) {
+					startDelimiterLength = currentDelimiterLength;
 					startLine = false;
 					if (position === line.from)
 						collapseStart = line;
 				} else {
-					startLine = true;
-					if (collapseStart)
-						collapseEnd = line;
+					if (currentDelimiterLength === startDelimiterLength) {
+						startLine = true;
+						if (collapseStart)
+							collapseEnd = line;
+					}
 				}
 			}
 			if (collapseStart && collapseEnd) {
@@ -391,7 +401,4 @@ function ignore(state: EditorState): boolean {
 
 function isCodeblockDelimiter(line: string): boolean {
 	return true;
-}
-function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
-	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }
