@@ -362,6 +362,8 @@ body .markdown-source-view [class*="codeblock-customizer-line"].HyperMD-codebloc
 	margin: 0;
 	padding: 0 !important;
 	border: none !important;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
 }
 pre.codeblock-customizer-pre:not(.codeblock-customizer-codeblock-collapsed):not(:hover) button,
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed button,
@@ -504,6 +506,8 @@ pre.codeblock-customizer-pre button.copy-code-button::before,
 	padding: 0;
 	position: absolute;
 	line-height: initial !important;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
 }
 .markdown-source-view.mod-cm6 .HyperMD-codeblock.codeblock-customizer-line span.code-block-flair > * {
 	width: 0px;

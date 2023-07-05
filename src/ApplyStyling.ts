@@ -27,9 +27,9 @@ const THEME_STYLES: Record<string,ThemeStyle> = {
 	},
 	'Minimal': {
 		'extra': `
-			.markdown-source-view.mod-cm6 .cm-content :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] { /*? Fix for incorrectly displaying header when using "minimal" theme */
-				max-width: calc(var(--max-width) - var(--folding-offset));
-				width: calc(var(--line-width-adaptive) - var(--folding-offset));
+			.markdown-source-view.mod-cm6.is-readable-line-width :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] {
+				max-width: calc(var(--max-width) - var(--folding-offset)) !important;
+				width: calc(var(--line-width-adaptive) - var(--folding-offset)) !important;
 				margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
 			}
 		`,
