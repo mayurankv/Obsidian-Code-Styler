@@ -5,7 +5,7 @@ import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isLanguageExcluded, arraysEqual, cleanParameterLine } from "./CodeblockParsing";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isLanguageExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings, languageIcons: Record<string,string>) {
@@ -113,7 +113,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
 							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
 							if (startLine) {
-								codeblockParameters = parseCodeblockParameters(cleanParameterLine(lineText),settings.currentTheme);
+								codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
@@ -167,7 +167,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					if (startLine) {
 						startLine = false;
 						startDelimiterLength = currentDelimiterLength;
-						codeblockParameters = parseCodeblockParameters(cleanParameterLine(lineText),settings.currentTheme);
+						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons),block: true}));
@@ -203,7 +203,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 					if (startLine) {
 						startLine = false;
 						startDelimiterLength = currentDelimiterLength;
-						codeblockParameters = parseCodeblockParameters(lineText,settings.currentTheme);
+						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								collapseStart = line;

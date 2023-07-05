@@ -1,8 +1,8 @@
 import { TFile, MarkdownView, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache } from "obsidian";
 
 import CodeblockCustomizerPlugin from "./main";
-import { CodeblockCustomizerThemeSettings, PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, isLanguageExcluded, arraysEqual, parseCodeblockSource, pluginAdjustParameters, getParameterLine } from "./CodeblockParsing";
+import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
+import { CodeblockParameters, parseCodeblockSource } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeblockCustomizerPlugin, editingEmbeds: boolean = false) {
@@ -48,7 +48,8 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 	const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 	if (!view || typeof view?.editor === 'undefined')
 		return;
-	const codeblockLines = parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber))).codeblocks;
+	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber)),sourcePath,plugin)).codeblocksParameters;
+	console.log('specific',codeblockPreElements,codeblocksParameters)
 	for (let [key,codeblockPreElement] of codeblockPreElements.entries()) {
 		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
 		if (!codeblockCodeElement)
@@ -58,7 +59,7 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 				await sleep(2);
 		// if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
 		// 	continue;
-		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblockLines[key],sourcePath,false,plugin);
+		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblocksParameters[key],plugin);
 	}
 }
 async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, plugin: CodeblockCustomizerPlugin) {
@@ -73,22 +74,22 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	});
 
 	const fileContentLines = fileContent.split(/\n/g);
-	let codeblocks: Array<Array<string>> = [];
+	let codeblocksParameters: Array<CodeblockParameters> = [];
 
 	if (typeof cache?.sections !== 'undefined') {
 		for (const section of cache.sections) {
 			if (!editingEmbeds || section.type === 'code' || section.type === 'callout') {
-				const parsedCodeblock = parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1));
-				if (!editingEmbeds || parsedCodeblock.nested)
-					codeblocks = codeblocks.concat(parsedCodeblock.codeblocks);
+				const parsedCodeblocksParameters = await parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1),sourcePath,plugin);
+				if (!editingEmbeds || parsedCodeblocksParameters.nested)
+					codeblocksParameters = codeblocksParameters.concat(parsedCodeblocksParameters.codeblocksParameters);
 			}
 		}
 	} else {
 		console.error(`Metadata cache not found for file: ${sourcePath}`);
 		return;
 	}
-	console.log(codeblockPreElements,codeblocks)
-	if (codeblockPreElements.length !== codeblocks.length)
+	console.log('document',codeblockPreElements,codeblocksParameters)
+	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
 	try {
 		for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
@@ -100,27 +101,19 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 					await sleep(2);
 			if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
 				continue;
-			const codeblockLines = codeblocks?.[key];
-			if (!codeblockLines)
+			const codeblockParameters = codeblocksParameters[key];
+			if (!codeblockParameters)
 				return;
-			await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockLines,sourcePath,editingEmbeds,plugin);
+			await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin);
 		}
 	} catch (error) {
-		console.error(`Error exporting to PDF: ${error.message}`);
+		console.error(`Error rendering document: ${error.message}`);
 		return;
 	}
 }
 
-async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockLines: Array<string>, sourcePath: string, editingEmbeds: boolean, plugin: CodeblockCustomizerPlugin) {
-	let parameterLine = getParameterLine(codeblockLines);
-	if (!parameterLine)
-		return;
-	let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
-		
-	if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
-		return;
-	codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugin,codeblockLines,sourcePath);
-
+async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin) {
+	// Add Execute Code Observer
 	plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
 		childList: true,
 		subtree: true,
@@ -128,20 +121,17 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		characterData: true,
 	});
 
+	// Add Parent Classes
 	codeblockPreElement.classList.add(`codeblock-customizer-pre`);
 	codeblockPreElement.classList.add(`language-${codeblockParameters.language}`);
 	if (codeblockPreElement.parentElement)
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
-	decorateCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,editingEmbeds,plugin.settings.currentTheme.settings,plugin.languageIcons);
-	setTimeout(()=>{
-		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
-	},SECONDARY_DELAY);
-}
-function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, editingEmbeds: boolean, themeSettings: CodeblockCustomizerThemeSettings, languageIcons: Record<string,string>) {
-	const headerContainer = createHeader(codeblockParameters, themeSettings,languageIcons);
+	// Create Header
+	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
 	codeblockPreElement.insertBefore(headerContainer, codeblockPreElement.childNodes[0]);
 	
+	// Add listener for header collapsing on click
 	headerContainer.addEventListener("click", ()=>{
 		codeblockPreElement.classList.toggle("codeblock-customizer-codeblock-collapsed")
 		if (codeblockCodeElement.style.maxHeight)
@@ -157,6 +147,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		}
 	});
 
+	// Line Wrapping Classes
 	if (codeblockParameters.lineUnwrap.alwaysEnabled) {
 		codeblockCodeElement.style.setProperty('--line-wrapping','pre');
 		if (codeblockParameters.lineUnwrap.activeWrap)
@@ -166,6 +157,7 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 	} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
 		codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
 
+	// Height Setting (for collapse animation)
 	setTimeout(()=>{ // Delay to return correct height
 		codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
 		codeblockCodeElement.style.maxHeight = 'var(--true-height)';
@@ -176,9 +168,11 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		}
 	},PRIMARY_DELAY);
 
+	//todo
 	if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
 		return;
 
+	//todo
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
 		codeblockLines = ['',''];
@@ -200,6 +194,11 @@ function decorateCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElemen
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
+
+	// Set line number margin
+	setTimeout(()=>{
+		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
+	},SECONDARY_DELAY);
 }
 
 export function destroyReadingModeElements(): void {

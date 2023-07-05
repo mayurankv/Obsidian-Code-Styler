@@ -31,6 +31,44 @@ export interface Highlights {
 	regularExpressions: Array<RegExp>;
 }
 
+export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
+	let codeblocks: Array<Array<string>> = [];
+	function parseCodeblockSection(codeSection: Array<string>): void {
+        if (codeSection.length === 0)
+            return;
+        let openingCodeblockLine = getOpeningLine(codeSection);
+		if (!openingCodeblockLine)
+            return;
+        let openDelimiter = /^\s*(?:>\s*)*(```+).*$/.exec(openingCodeblockLine)?.[1];
+		if (!openDelimiter)
+            return;
+		let openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
+		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
+		if (!/^\s*(?:>\s*)*```+ad-.*$/.test(openingCodeblockLine))
+            codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
+        else
+            parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
+        
+		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
+	}
+	parseCodeblockSection(codeSection);
+	let codeblocksParameters = [];
+	for (let codeblockLines of codeblocks) {
+		let parameterLine = getParameterLine(codeblockLines);
+		if (!parameterLine)
+			continue;
+		console.log(parameterLine)
+		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
+			
+		if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
+			continue;
+		
+		codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugin,codeblockLines,sourcePath);
+		codeblocksParameters.push(codeblockParameters);
+	}
+	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
+}
+
 export function parseCodeblockParameters(parameterLine: string, theme: CodeblockCustomizerTheme): CodeblockParameters {
 	let codeblockParameters: CodeblockParameters = {
 		language: '',
@@ -160,6 +198,7 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 		regularExpressions: [...regularExpressions],
 	};
 }
+
 export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
 	//@ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,any> = plugin.app.plugins.plugins;
@@ -185,37 +224,14 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 	}
 	return codeblockParameters
 }
-export function parseCodeblockSource(codeSection: Array<string>): {codeblocks: Array<Array<string>>, nested: boolean} {
-	let codeblocks: Array<Array<string>> = [];
-	function parseCodeblockSection(codeSection: Array<string>): void {
-        if (codeSection.length === 0)
-            return;
-        let openingCodeblockLine = getOpeningLine(codeSection);
-		if (!openingCodeblockLine)
-            return;
-        let openDelimiter = /^\s*(?:>\s*)*(```+).*$/.exec(openingCodeblockLine)?.[1];
-		if (!openDelimiter)
-            return;
-		let openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
-		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
-		if (!/^\s*(?:>\s*)*```+ad-.*$/.test(openingCodeblockLine))
-            codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
-        else
-            parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
-        
-		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
-	}
-	parseCodeblockSection(codeSection);
-	return {codeblocks: codeblocks, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
-}
+
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {
 	let openingCodeblockLine = getOpeningLine(codeblockLines);
-	if (openingCodeblockLine && openingCodeblockLine !== codeblockLines[0])
+	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*`/.test(openingCodeblockLine)))
 		openingCodeblockLine = cleanParameterLine(openingCodeblockLine);
 	return openingCodeblockLine
 }
 function getOpeningLine(codeblockLines: Array<string>): string | undefined {
-	console.log(codeblockLines)
 	return codeblockLines.find((line: string)=>Boolean(testOpeningLine(line)));
 }
 export function testOpeningLine(codeblockLine: string): number {
@@ -226,9 +242,13 @@ export function testOpeningLine(codeblockLine: string): number {
 		return lineMatch[2].length;
 	return 0;
 }
-export function cleanParameterLine(parameterLine: string): string {
-	return parameterLine.trim().replace(/^(?:>\s*)*```/,'```');
+function cleanParameterLine(parameterLine: string): string {
+	return trimParameterLine(parameterLine).replace(/^(?:>\s*)*```/,'```');
 }
+export function trimParameterLine(parameterLine: string): string {
+	return parameterLine.trim();
+}
+
 export function isLanguageExcluded(language: string, excludedLanguagesString: string): boolean {
 	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
 		if (regexExcludedLanguage.test(language))

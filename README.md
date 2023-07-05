@@ -16,6 +16,9 @@ I couldn't find any plugin, where I could customize codeblocks which works relia
 
 The plugin can be set to ignore certain languages (for example if another plugin uses this codeblock language). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions. This wildcard can be either at the beginning or the end of the language.
 
+> **Note**  
+> Setting excluded languages for codeblocks used by other plugins you use is important as otherwise, the plugin does not know which codeblocks to ignore in certain cases.
+
 ### Themes
 
 The plugin comes with a 'Default' theme and a few themes based on popular color schemes. The default theme uses colors as defined by the existing Obsidian theme to minimise changes in appearance on install (it uses the CSS variables defined by the current theme).
@@ -251,6 +254,7 @@ This plugin is also compatible with the following obsidian plugins out of the bo
 [![Execute Code Plugin](https://github-readme-stats.vercel.app/api/pin/?username=twibiral&repo=obsidian-execute-code&show_owner=true&bg_color=00000010&border_color=e3e7ef)](https://github.com/twibiral/obsidian-execute-code)
 [![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=zjhcn&repo=obsidian-code-preview&show_owner=true&bg_color=00000010&border_color=e3e7ef)](https://github.com/zjhcn/obsidian-code-preview)
 [![Code Preview Plugin](https://github-readme-stats.vercel.app/api/pin/?username=tillahoffmann&repo=obsidian-file-include&show_owner=true&bg_color=00000010&border_color=e3e7ef)](https://github.com/tillahoffmann/obsidian-file-include)
+[![Admonitions Plugin](https://github-readme-stats.vercel.app/api/pin/?username=javalent&repo=admonitions&show_owner=true&bg_color=00000010&border_color=e3e7ef)](https://github.com/javalent/admonitions)
 
 ## Roadmap
 
@@ -281,8 +285,6 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Scrollbar does not show behind line gutter
   - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
   - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17).
-- Plugins
-  - Does not work using nested codeblocks within admonition from the [Admonitions Plugin](https://github.com/javalent/admonitions).
 - PDF Exporting
   - Highlights appear slightly different.
   - Language border colors are not correctly set.

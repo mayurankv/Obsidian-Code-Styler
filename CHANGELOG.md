@@ -42,7 +42,7 @@ See this project's [releases](/../../../releases).
 - Added codeblock curvature setting.
 - Added optional language border setting.
 - Added optional redirecting of language colors and icons
-- Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview) and the [file include plugin](https://github.com/tillahoffmann/obsidian-file-include).
+- Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview), [file include plugin](https://github.com/tillahoffmann/obsidian-file-include) and [admonitions plugin](https://github.com/javalent/admonitions).
 - Added issue and pull request templates.
 - Added other supporting documents such as [CONTRIBUTING](.github/CONTRIBUTING.md).
 
@@ -64,6 +64,8 @@ See this project's [releases](/../../../releases).
 - Plugin reading mode destroys properly.
 - Plugin automatically applies to open pages when loaded now.
 - Plugin uses proper typing.
+- Plugin works within callouts
+- Plugin works within lists
 
 ## [1.1.9] - 2023-05-20
 
