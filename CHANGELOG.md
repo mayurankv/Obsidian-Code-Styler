@@ -21,7 +21,6 @@ See this project's [releases](/../../../releases).
 
 - Will become version 2.0.0.
 - Requires delete of existing `data.json` file.
-- Reintroduced error with certain themes and 'readable line length' setting since the current fix did not accurately address it.
 
 ### Added
 
@@ -41,7 +40,8 @@ See this project's [releases](/../../../releases).
 - Added icon customizability.
 - Added codeblock curvature setting.
 - Added optional language border setting.
-- Added optional redirecting of language colors and icons
+- Added optional redirecting of language colors and icons.
+- Added compatibility with many popular themes and ability for theme specific corrections.
 - Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview), [file include plugin](https://github.com/tillahoffmann/obsidian-file-include) and [admonitions plugin](https://github.com/javalent/admonitions).
 - Added issue and pull request templates.
 - Added other supporting documents such as [CONTRIBUTING](.github/CONTRIBUTING.md).
