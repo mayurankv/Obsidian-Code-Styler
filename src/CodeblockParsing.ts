@@ -57,7 +57,6 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 		let parameterLine = getParameterLine(codeblockLines);
 		if (!parameterLine)
 			continue;
-		console.log(parameterLine)
 		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
 			
 		if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)

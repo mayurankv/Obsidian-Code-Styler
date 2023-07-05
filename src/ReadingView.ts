@@ -14,7 +14,7 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	// const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 	// if (!element && view)
 	if (!element)
-		console.log('oh no!')
+		console.log('oh no!',element)
 		// element = view.contentEl;
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
@@ -31,9 +31,6 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
 		return;
 
-	if (editingEmbeds)
-		console.log(editingEmbeds,specific,element,sourcePath)
-
 	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
 		renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
@@ -49,7 +46,6 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 	if (!view || typeof view?.editor === 'undefined')
 		return;
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber)),sourcePath,plugin)).codeblocksParameters;
-	console.log('specific',codeblockPreElements,codeblocksParameters)
 	for (let [key,codeblockPreElement] of codeblockPreElements.entries()) {
 		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
 		if (!codeblockCodeElement)
@@ -88,7 +84,6 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 		console.error(`Metadata cache not found for file: ${sourcePath}`);
 		return;
 	}
-	console.log('document',codeblockPreElements,codeblocksParameters)
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
 	try {
