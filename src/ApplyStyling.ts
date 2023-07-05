@@ -1,16 +1,50 @@
+import { App } from "obsidian";
+
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeColors, CodeblockCustomizerThemeModeColors, CodeblockCustomizerThemeSettings, Color, LANGUAGE_NAMES, LANGUAGE_COLORS } from "./Settings";
 import { isCss } from "./SettingsTab";
 
-const STYLE_ID = 'codeblock-customizer-styles';
+interface ThemeStyle {
+	'border'?: {
+		'size': number;
+		'style': string;
+	},
+	'extra'?: string;
+}
 
-export function updateStyling(settings: CodeblockCustomizerSettings): void {
+const STYLE_ID = 'codeblock-customizer-styles';
+const THEME_STYLES: Record<string,ThemeStyle> = {
+	'Prism': {
+		'border': {
+			'size': 1,
+			'style': '1px solid var(--window-border-color)',
+		},
+	},
+	'Shimmering Focus': {
+		'border': {
+			'size': 1,
+			'style': 'var(--thin-muted-border)',
+		},
+	},
+	'Minimal': {
+		'extra': `
+			.markdown-source-view.mod-cm6 .cm-content :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] { /*? Fix for incorrectly displaying header when using "minimal" theme */
+				max-width: calc(var(--max-width) - var(--folding-offset));
+				width: calc(var(--line-width-adaptive) - var(--folding-offset));
+				margin-left: max(calc(50% + var(--folding-offset) - var(--line-width-adaptive)/2), calc(50% + var(--folding-offset) - var(--max-width)/2)) !important;
+			}
+		`,
+	},
+}
+
+export function updateStyling(settings: CodeblockCustomizerSettings, app: App): void {
+	let currentTheme = getCurrentTheme(app);
 	let styleTag = document.getElementById(STYLE_ID);
 	if (!styleTag) {
 		styleTag = document.createElement('style');
 		styleTag.id = STYLE_ID;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
-	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings)+styleLanguageColors(settings.currentTheme.settings,settings.redirectLanguages)).trim().replace(/\s+/g,' ');
+	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings,currentTheme)+styleLanguageColors(settings.currentTheme.settings,settings.redirectLanguages,currentTheme)).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
 
@@ -58,7 +92,7 @@ function getThemeColors (themeModeColors: CodeblockCustomizerThemeModeColors): s
 	},``)
 }
 
-function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): string {
+function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings, currentTheme: string): string {
 	return `
 		body.codeblock-customizer [class^="codeblock-customizer-header-language-tag"] {
 			--codeblock-customizer-header-language-tag-text-bold: ${themeSettings.header.languageTag.textBold?'bold':'normal'};
@@ -79,18 +113,37 @@ function styleThemeSettings (themeSettings: CodeblockCustomizerThemeSettings): s
 			${!themeSettings.codeblock.wrapLinesActive?'':'--line-active-wrapping: pre-wrap;'}
 			${themeSettings.header.languageIcon.displayColor?'':'--icon-filter: grayscale(1);'}
 		}
+		${THEME_STYLES?.[currentTheme]?.border?`
+			.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'] {
+				--codeblock-customizer-header-border:`+ //@ts-expect-error Does Exist
+					THEME_STYLES[currentTheme].border.style+`;
+				--header-separator-width-padding: calc(var(--header-separator-width) - `+ //@ts-expect-error Does Exist
+					THEME_STYLES[currentTheme].border.size+`px);
+				--collapsed-bottom-border: var(--codeblock-customizer-header-border);
+			}
+		`:''}
+		${THEME_STYLES?.[currentTheme]?.extra?THEME_STYLES[currentTheme].extra:''}
 	`;
 }
 
-function styleLanguageColors (themeSettings: CodeblockCustomizerThemeSettings, redirectLanguages: Record<string,{color?: Color, icon?: string}>): string {
+function styleLanguageColors (themeSettings: CodeblockCustomizerThemeSettings, redirectLanguages: Record<string,{color?: Color, icon?: string}>, currentTheme: string): string {
 	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
-		if (languageDisplayName in LANGUAGE_COLORS || (languageName in redirectLanguages && 'color' in redirectLanguages[languageName]))
+		if (languageDisplayName in LANGUAGE_COLORS || (languageName in redirectLanguages && 'color' in redirectLanguages[languageName])) {
 			result += `
 				.language-${languageName} {
 					--language-border-color: ${redirectLanguages?.[languageName]?.['color'] ?? LANGUAGE_COLORS[languageDisplayName]};
 					--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
 				}
 			`;
+			if (THEME_STYLES?.[currentTheme]?.border) {
+				result += `
+					.markdown-source-view :not(pre.codeblock-customizer-pre) > [class^='codeblock-customizer-header-container'].language-${languageName}  {
+						--language-border-width: ${ //@ts-expect-error Does exist
+							themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth+THEME_STYLES[currentTheme].border.size:0
+						}px;
+					}`
+			}
+		}
 		return result;
 	},'')
 }
@@ -144,4 +197,9 @@ export function removeStylesAndClasses(): void {
 		"codeblock-customizer-show-langicons",
 		"codeblock-customizer-show-langicons-always",
 	);
+}
+
+function getCurrentTheme(app: App): string {
+	//@ts-expect-error Undocumented Obsidian API
+	return app.vault.getConfig("cssTheme");
 }

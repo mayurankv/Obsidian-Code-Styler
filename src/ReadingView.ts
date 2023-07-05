@@ -163,11 +163,11 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		}
 	},PRIMARY_DELAY);
 
-	//todo
+	//todo (@mayurankv) Name section
 	if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
 		return;
 
-	//todo
+	//todo (@mayurankv) Name section
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
 		codeblockLines = ['',''];

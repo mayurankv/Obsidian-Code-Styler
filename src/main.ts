@@ -1,4 +1,4 @@
-import { Plugin, FileView } from "obsidian";
+import { Plugin, FileView, Notice } from "obsidian";
 
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
@@ -14,7 +14,8 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		document.body.classList.add('codeblock-customizer');
-		updateStyling(this.settings);
+		updateStyling(this.settings,this.app);
+		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this));
 		
 		const settingsTab = new SettingsTab(this.app,this);
 		this.addSettingTab(settingsTab);
@@ -44,7 +45,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 			URL.revokeObjectURL(url);
 		console.log("Unloaded plugin: CodeBlock Customizer");
 	}
-	
+
 	async loadSettings() {
 		this.settings = Object.assign({}, structuredClone(DEFAULT_SETTINGS), await this.loadData());
 	}
@@ -52,6 +53,6 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 		this.app.workspace.updateOptions();
-		updateStyling(this.settings);
+		updateStyling(this.settings,this.app);
 	}
 }
