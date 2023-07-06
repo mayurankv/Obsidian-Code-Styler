@@ -84,7 +84,7 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 			}
 		
 			buildDecorations(view: EditorView) {
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || ignore(view.state)) {
+				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
 					this.decorations = RangeSet.empty;
 					return true;
 				}
@@ -144,7 +144,7 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 			return Decoration.none;    
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (ignore(transaction.state))
+			if (editingViewIgnore(transaction.state))
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -178,7 +178,7 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 	})
 	const codeblockCollapse = StateField.define({
 		create(state: EditorState): DecorationSet {
-			if (ignore(state))
+			if (editingViewIgnore(state))
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
@@ -357,6 +357,24 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse]
 }
 
+function getCharWidth(state: EditorState, default_value: number): number {
+	let charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
+		let nextElement = beginningElement.previousElementSibling as HTMLElement;
+		if (!nextElement)
+			return result;
+		let lineNumberElement = nextElement.querySelector("[class^='codeblock-styler-line-number']") as HTMLElement;
+		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
+			return result;
+		let computedStyles = window.getComputedStyle(lineNumberElement, null);
+		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
+		return result;
+	},[])
+	if (charWidths.length === 0)
+		return default_value;
+	console.log('result')
+	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
+}
+
 function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	const codeblocks = findVisibleCodeblocks(view);
 	const unduplicatedCodeblocks: Array<SyntaxNodeRef> = [];
@@ -381,25 +399,7 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
-function getCharWidth(state: EditorState, default_value: number): number {
-	let charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
-		let nextElement = beginningElement.previousElementSibling as HTMLElement;
-		if (!nextElement)
-			return result;
-		let lineNumberElement = nextElement.querySelector("[class^='codeblock-styler-line-number']") as HTMLElement;
-		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
-			return result;
-		let computedStyles = window.getComputedStyle(lineNumberElement, null);
-		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
-		return result;
-	},[])
-	if (charWidths.length === 0)
-		return default_value;
-	console.log('result')
-	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
-}
-
-function ignore(state: EditorState): boolean {
+function editingViewIgnore(state: EditorState): boolean {
 	if (!state.field(editorLivePreviewField))
 		return true;
 	const filePath = state.field(editorInfoField)?.file?.path;

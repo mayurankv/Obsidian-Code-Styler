@@ -114,6 +114,30 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 	}
 	return codeblockParameters;
 }
+export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,any>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+	if (codeblockParameters.language === 'preview') {
+		if ('obsidian-code-preview' in plugins) {
+			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
+			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
+				if (typeof codePreviewParams.start === 'number')
+					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
+				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
+			}
+			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
+			if (codeblockParameters.title === '')
+				codeblockParameters.title = codePreviewParams.filePath.split('\\').pop().split('/').pop();
+			codeblockParameters.language = codePreviewParams.language;
+		}
+	} else if (codeblockParameters.language === 'include') {
+		if ('file-include' in plugins) {
+			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
+			if (typeof fileIncludeLanguage !== 'undefined')
+				codeblockParameters.language = fileIncludeLanguage;
+		}
+	}
+	return codeblockParameters
+}
+
 function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockStylerTheme): void {
 	if (parameterString.startsWith('title:')) {
 		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
@@ -202,29 +226,14 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 		regularExpressions: [...regularExpressions],
 	};
 }
-
-export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,any>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
-	if (codeblockParameters.language === 'preview') {
-		if ('obsidian-code-preview' in plugins) {
-			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
-			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
-				if (typeof codePreviewParams.start === 'number')
-					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
-				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
-			}
-			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
-			if (codeblockParameters.title === '')
-				codeblockParameters.title = codePreviewParams.filePath.split('\\').pop().split('/').pop();
-			codeblockParameters.language = codePreviewParams.language;
-		}
-	} else if (codeblockParameters.language === 'include') {
-		if ('file-include' in plugins) {
-			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
-			if (typeof fileIncludeLanguage !== 'undefined')
-				codeblockParameters.language = fileIncludeLanguage;
-		}
-	}
-	return codeblockParameters
+export function isExcluded(language: string, excludedLanguagesString: string): boolean {
+	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
+		if (regexExcludedLanguage.test(language))
+			return true;
+	});
+}
+function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
+	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
 }
 
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {
@@ -249,16 +258,6 @@ function cleanParameterLine(parameterLine: string): string {
 }
 export function trimParameterLine(parameterLine: string): string {
 	return parameterLine.trim();
-}
-
-export function isExcluded(language: string, excludedLanguagesString: string): boolean {
-	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
-		if (regexExcludedLanguage.test(language))
-			return true;
-	});
-}
-function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
-	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
 }
 
 export async function getFileContentLines(sourcePath: string, plugin: CodeblockStylerPlugin): Promise<Array<string> | undefined> {
