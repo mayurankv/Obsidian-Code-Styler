@@ -45,10 +45,20 @@ export class SettingsTab extends PluginSettingTab {
 		// ========== General ==========
 
 		new Setting(containerEl)
-			.setName('Exclude Languages')
-			.setDesc('Define languages in a comma separated list on which the plugin should not apply. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
+			.setName('Ignore Codeblocks')
+			.setDesc('Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
 			.addText(text => text
-				.setPlaceholder('e.g. dataview, python etc.')
+				.setPlaceholder('e.g. dataview, dataviewjs etc.')
+				.setValue(this.plugin.settings.excludedCodeblocks)
+				.onChange((value) => {
+					this.plugin.settings.excludedCodeblocks = value;
+					(async () => {await this.plugin.saveSettings()})();
+				}));
+		new Setting(containerEl)
+			.setName('Exclude Languages')
+			.setDesc('Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
+			.addText(text => text
+				.setPlaceholder('e.g. ad-*, python etc.')
 				.setValue(this.plugin.settings.excludedLanguages)
 				.onChange((value) => {
 					this.plugin.settings.excludedLanguages = value;

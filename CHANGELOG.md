@@ -55,6 +55,7 @@ See this project's [releases](/../../../releases).
   - Restructured markdown post-processor.
   - Refactored how runtime styles are applied.
 - Disabled markup in source mode.
+- Separated ignored languages from ignored codeblocks to allow for better parsing.
 - Changed how line numbers are spaced in reading mode.
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language

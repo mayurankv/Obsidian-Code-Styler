@@ -5,7 +5,7 @@ import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeblockCustomizerSettings, CodeblockCustomizerThemeSettings } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isLanguageExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings, languageIcons: Record<string,string>) {
@@ -34,6 +34,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 		class CodeblockLines {
 			settings: CodeblockCustomizerSettings;
 			currentSettings: {
+				excludedCodeblocks: string;
 				excludedLanguages: string;
 				collapsePlaceholder: string;
 				alternativeHighlights: Array<string>;
@@ -45,6 +46,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			constructor(view: EditorView) {
 				this.settings = settings;
 				this.currentSettings = {
+					excludedCodeblocks: settings.excludedCodeblocks,
 					excludedLanguages: settings.excludedLanguages,
 					collapsePlaceholder: '',
 					alternativeHighlights: [],
@@ -79,11 +81,13 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 			update(update: ViewUpdate) {
 				if (update.docChanged || 
 					update.viewportChanged || 
+					this.settings.excludedCodeblocks !== this.currentSettings.excludedCodeblocks ||
 					this.settings.excludedLanguages !== this.currentSettings.excludedLanguages ||
 					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
 					!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
 				) {
 					this.currentSettings = structuredClone({
+						excludedCodeblocks: this.settings.excludedCodeblocks,
 						excludedLanguages: this.settings.excludedLanguages,
 						collapsePlaceholder: this.settings.currentTheme.settings.header.collapsePlaceholder,
 						alternativeHighlights: Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),
@@ -114,7 +118,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
 							if (startLine) {
 								codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-								excludedCodeblock = isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) || codeblockParameters.ignore;
+								excludedCodeblock = isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
 								while (!view.state.doc.line(lineNumberCount).text.startsWith('```') || view.state.doc.line(lineNumberCount).text.indexOf('```', 3) !== -1) {
@@ -168,7 +172,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						startLine = false;
 						startDelimiterLength = currentDelimiterLength;
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore)
+						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons),block: true}));
 							else
@@ -204,7 +208,7 @@ export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings
 						startLine = false;
 						startDelimiterLength = currentDelimiterLength;
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isLanguageExcluded(codeblockParameters.language,settings.excludedLanguages) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
+						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								collapseStart = line;
 							else

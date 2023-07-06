@@ -1,4 +1,4 @@
-import { Plugin, FileView, Notice } from "obsidian";
+import { Plugin, FileView } from "obsidian";
 
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";

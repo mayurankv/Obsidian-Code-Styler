@@ -12,12 +12,20 @@ I couldn't find any plugin, where I could customize codeblocks which works relia
 
 ## Settings
 
-### Excluded Languages
+### Excluded Codeblocks
 
-The plugin can be set to ignore certain languages (for example if another plugin uses this codeblock language). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions. This wildcard can be either at the beginning or the end of the language.
+The plugin can be set to ignore certain codeblocks completely (for example if another plugin uses them like the `dataview` codeblocks). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions.
+
+This setting is used to tell the plugin which codeblocks it can ignore completely as opposed to just not decorating the codeblock. To not decorate a codeblock, use the [excluded languages setting](#excluded-languages).
 
 > **Note**  
-> Setting excluded languages for codeblocks used by other plugins you use is important as otherwise, the plugin does not know which codeblocks to ignore in certain cases.
+> Setting excluded codeblocks for codeblocks used by other plugins you use is important as otherwise, the plugin does not know which codeblocks to ignore in certain cases.
+
+### Excluded Languages
+
+The plugin can be set to ignore certain languages (for example if you want `python` codeblocks to not be decorated). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions.
+
+This setting is used to tell the plugin to not decorate certain languages. To completely ignore a codeblock (i.e. a codeblock which doesn't generate a rendered codeblock in reading mode as a result of a plugin), use the [excluded codeblocks setting](#excluded-codeblocks).
 
 ### Themes
 
@@ -275,7 +283,8 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 
 ### Existing Issues
 
-- First pickr change does not change color correctly
+- First pickr change does not change color correctly.
+- Indented codeblocks are not dealt with properly.
 - Editing Mode
   - Weird scroll in live preview when click (due to `codeblockHeader` codemirror extension) when first line is a codeblock.
   - If a language is excluded, it currently needs to be unfolded before it can be removed or it disappears.

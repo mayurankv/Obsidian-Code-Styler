@@ -1,3 +1,5 @@
+import { TFile } from "obsidian";
+
 import CodeblockCustomizerPlugin from "./main";
 import { CodeblockCustomizerTheme } from "./Settings";
 
@@ -32,7 +34,11 @@ export interface Highlights {
 }
 
 export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
+	//@ts-expect-error Undocumented Obsidian API
+	const plugins: Record<string,any> = plugin.app.plugins.plugins;
+	const admonitions: boolean = 'obsidian-admonition' in plugins;
 	let codeblocks: Array<Array<string>> = [];
+	let codeblocksParameters: Array<CodeblockParameters> = [];
 	function parseCodeblockSection(codeSection: Array<string>): void {
         if (codeSection.length === 0)
             return;
@@ -44,7 +50,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
             return;
 		let openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
 		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
-		if (!/^\s*(?:>\s*)*```+ad-.*$/.test(openingCodeblockLine))
+		if (!admonitions || !/^\s*(?:>\s*)*```+ad-.*$/.test(openingCodeblockLine))
             codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
         else
             parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
@@ -52,17 +58,16 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
 	}
 	parseCodeblockSection(codeSection);
-	let codeblocksParameters = [];
 	for (let codeblockLines of codeblocks) {
 		let parameterLine = getParameterLine(codeblockLines);
 		if (!parameterLine)
 			continue;
 		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
 			
-		if (isLanguageExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
+		if (isExcluded(codeblockParameters.language,plugin.settings.excludedCodeblocks))
 			continue;
 		
-		codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugin,codeblockLines,sourcePath);
+		codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugins,codeblockLines,sourcePath);
 		codeblocksParameters.push(codeblockParameters);
 	}
 	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
@@ -198,9 +203,7 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 	};
 }
 
-export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeblockCustomizerPlugin, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
-	//@ts-expect-error Undocumented Obsidian API
-	const plugins: Record<string,any> = plugin.app.plugins.plugins;
+export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,any>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === 'preview') {
 		if ('obsidian-code-preview' in plugins) {
 			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
@@ -248,7 +251,7 @@ export function trimParameterLine(parameterLine: string): string {
 	return parameterLine.trim();
 }
 
-export function isLanguageExcluded(language: string, excludedLanguagesString: string): boolean {
+export function isExcluded(language: string, excludedLanguagesString: string): boolean {
 	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
 		if (regexExcludedLanguage.test(language))
 			return true;
@@ -256,6 +259,21 @@ export function isLanguageExcluded(language: string, excludedLanguagesString: st
 }
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
+}
+
+export async function getFileContentLines(sourcePath: string, plugin: CodeblockCustomizerPlugin): Promise<Array<string> | undefined> {
+	const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
+	if (!file) {
+		console.error(`File not found: ${sourcePath}`);
+		return;
+	}
+	const fileContent = await plugin.app.vault.cachedRead(<TFile> file).catch((error) => {
+		console.error(`Error reading file: ${error.message}`);
+		return '';
+	});
+	if (!fileContent)
+		return;
+	return fileContent.split(/\n/g);
 }
 
 export function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {

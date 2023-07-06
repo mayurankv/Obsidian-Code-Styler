@@ -1,8 +1,8 @@
-import { TFile, MarkdownView, MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache } from "obsidian";
+import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache } from "obsidian";
 
 import CodeblockCustomizerPlugin from "./main";
 import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
-import { CodeblockParameters, parseCodeblockSource } from "./CodeblockParsing";
+import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeblockCustomizerPlugin, editingEmbeds: boolean = false) {
@@ -11,11 +11,11 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		return;
 	
 	await sleep(50);
-	// const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-	// if (!element && view)
+	// const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView); //todo
+	// if (!element && view) //todo
 	if (!element)
 		console.log('oh no!',element)
-		// element = view.contentEl;
+		// element = view.contentEl; //todo
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	const specific = !element.querySelector(".view-content > *");
@@ -42,34 +42,27 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,plugin);
 }
 async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeblockCustomizerPlugin): Promise<void> {
-	const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-	if (!view || typeof view?.editor === 'undefined')
+	const fileContentLines = await getFileContentLines(sourcePath,plugin);
+	if (!fileContentLines)
 		return;
-	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>view.editor.getLine(lineNumber)),sourcePath,plugin)).codeblocksParameters;
+	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>fileContentLines[lineNumber]),sourcePath,plugin)).codeblocksParameters;
 	for (let [key,codeblockPreElement] of codeblockPreElements.entries()) {
+		let codeblockParameters = codeblocksParameters[key];
 		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
 		if (!codeblockCodeElement)
 			return;
 		if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
 			while(!codeblockCodeElement.classList.contains("is-loaded"))
 				await sleep(2);
-		// if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
-		// 	continue;
-		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblocksParameters[key],plugin);
+		if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
+			continue;
+		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblockParameters,plugin);
 	}
 }
 async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, plugin: CodeblockCustomizerPlugin) {
-	const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
-	if (!file) {
-		console.error(`File not found: ${sourcePath}`);
+	const fileContentLines = await getFileContentLines(sourcePath,plugin);
+	if (!fileContentLines)
 		return;
-	}
-	const fileContent = await plugin.app.vault.cachedRead(<TFile> file).catch((error) => {
-		console.error(`Error reading file: ${error.message}`);
-		return '';
-	});
-
-	const fileContentLines = fileContent.split(/\n/g);
 	let codeblocksParameters: Array<CodeblockParameters> = [];
 
 	if (typeof cache?.sections !== 'undefined') {
@@ -86,9 +79,11 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	}
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
+	// console.log('document',codeblockPreElements,codeblocksParameters,editingEmbeds) //todo
 	try {
 		for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
-			const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
+			let codeblockParameters = codeblocksParameters[key];
+			let codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
 			if (!codeblockCodeElement)
 				return;
 			if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
@@ -96,9 +91,8 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 					await sleep(2);
 			if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
 				continue;
-			const codeblockParameters = codeblocksParameters[key];
-			if (!codeblockParameters)
-				return;
+			if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
+				continue;
 			await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin);
 		}
 	} catch (error) {

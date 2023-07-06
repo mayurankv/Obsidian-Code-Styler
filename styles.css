@@ -580,7 +580,7 @@ pre.codeblock-customizer-pre button.run-code-button {
 	--copy-code-header-right-margin: 12px;
 	--dent-difference: 24px;
 	height: 14px;
-	margin-bottom: 6px;
+	margin-bottom: 6px !important;
 }
 pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed button.run-code-button {
 	top: 500px;
@@ -604,7 +604,7 @@ pre.codeblock-customizer-pre button.run-button-disabled {
 }
 pre.codeblock-customizer-pre button.clear-button {
 	height: 14px;
-	margin-bottom: 6px;
+	margin-bottom: 6px !important;
 	margin-left: calc(var(--language-border-width) + 12px);
 	will-change: margin-right, clip-path;
 	clip-path: var(--polygon-in);
