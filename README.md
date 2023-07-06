@@ -1,7 +1,7 @@
 # Codeblock Customizer Plugin
 
 [![Release](https://img.shields.io/github/v/release/mayurankv/CodeblockCustomizer?style=for-the-badge)](https://github.com/mayurankv/CodeblockCustomizer/releases/latest)
-[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22codeblock-customizer%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=codeblock-customizer)
+[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22codeblock-styler%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=codeblock-styler)
 
 This is a plugin for [Obsidian.md](https://obsidian.md) which lets you customize the codeblocks in both editing mode and reading mode.
 
