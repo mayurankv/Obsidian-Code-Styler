@@ -126,6 +126,9 @@ pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
 	flex-grow: 1;
 	height: 100%;
 }
+pre.codeblock-customizer-pre div:last-child > [class^='codeblock-customizer-line-number'] {
+	width: unset;
+}
 .codeblock-customizer-active-line-highlight.codeblock-customizer-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
 .codeblock-customizer-active-line-highlight-codeblock.codeblock-customizer-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-customizer-line"].cm-active [class^='codeblock-customizer-line-number'],
 .codeblock-customizer-gutter-highlight [class*="codeblock-customizer-line-highlighted"] [class^='codeblock-customizer-line-number'] {

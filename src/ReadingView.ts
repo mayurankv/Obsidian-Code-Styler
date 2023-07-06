@@ -13,8 +13,8 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	await sleep(50);
 	// const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView); //todo
 	// if (!element && view) //todo
-	if (!element)
-		console.log('oh no!',element)
+	if (!element) //todo
+		console.log('oh no!',element) //todo
 		// element = view.contentEl; //todo
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
@@ -30,6 +30,17 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		codeblockPreElements = [];
 	if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
 		return;
+
+	if (!editingEmbeds) {
+		const readingViewParent = element.matchParent('.view-content > .markdown-reading-view > .markdown-preview-view > .markdown-preview-section');
+		if (readingViewParent)
+			plugin.readingStylingMutationObserver.observe(readingViewParent,{
+				childList: true,
+				attributes: false,
+				characterData: false,
+				subtree: false,
+			})
+	}
 
 	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
@@ -230,8 +241,18 @@ export function destroyReadingModeElements(): void {
 
 export const readingStylingMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
-		if (mutation.type === "childList") {
-			console.log('hi')
+		if (mutation.addedNodes.length !== 0) {
+			mutation.addedNodes.forEach((addedNode: HTMLElement)=>{
+				const codeblockPreElements = addedNode.querySelectorAll('.codeblock-customizer-pre-parent > pre:not(.frontmatter)');
+				codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
+					let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
+					if (!codeblockCodeElement)
+						return;
+					console.log(codeblockPreElement)
+					setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-customizer-codeblock-collapsed'))},PRIMARY_DELAY);
+					setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
+				})
+			})
 		}
 	});
 });

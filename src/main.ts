@@ -28,7 +28,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 
 		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
-		this.readingStylingMutationObserver = readingStylingMutationObserver; // Add reading view styling mutation observer
+		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
 		this.app.workspace.iterateRootLeaves(leaf => { // Add decoration on enabling of plugin
@@ -43,7 +43,7 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 	}
 	
 	onunload() {
-		this.readingStylingMutationObserver,disconnect();
+		this.readingStylingMutationObserver.disconnect();
 		this.executeCodeMutationObserver.disconnect();
 		removeStylesAndClasses();
 		destroyReadingModeElements();
