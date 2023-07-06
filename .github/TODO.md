@@ -17,5 +17,10 @@
     - Better issue templates using yaml
       - [Example 1](https://github.com/javalent/admonitions/tree/main/.github/ISSUE_TEMPLATE)
       - [Example 2](https://github.com/obsidian-tasks-group/obsidian-tasks/tree/main/.github/ISSUE_TEMPLATE)
-    - `dependabot.yml`
-    - `test.yml` - [Tests](https://github.com/tgrosinger/advanced-tables-obsidian/blob/main/.github/workflows/main.yml) and [More Tests](https://github.com/chhoumann/quickadd/blob/master/.github/workflows/test.yml) and [Even More Tests](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/verify.yml)
+    - `test.yml`
+      - [Example 1](https://github.com/tgrosinger/advanced-tables-obsidian/blob/main/.github/workflows/main.yml)
+      - [Example 2](https://github.com/chhoumann/quickadd/blob/master/.github/workflows/test.yml)
+      - [Example 3](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/verify.yml)
+    - Documentation:
+      - Actions:
+        - [Example 1](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/update-docs-markdown.yml)
