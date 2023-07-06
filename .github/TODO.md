@@ -15,5 +15,4 @@
 8. Check through all marked filed #NotUrgent
 9. Update github: #NotUrgent
     - Better issue templates using yaml
-    - `stale.yml`
     - `dependabot.yml`
