@@ -90,7 +90,6 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	}
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
-	// console.log('document',codeblockPreElements,codeblocksParameters,editingEmbeds) //todo
 	try {
 		for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
 			let codeblockParameters = codeblocksParameters[key];
@@ -190,6 +189,16 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	// Set line number margin - Delay to return correct width
 	setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
 }
+export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY, secondary_delay: number = SECONDARY_DELAY): void {
+	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
+	codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
+		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
+		if (!codeblockCodeElement)
+			return;
+		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-customizer-codeblock-collapsed'))},primary_delay);
+		setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},secondary_delay);
+	})
+}
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
 	codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
 	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
@@ -241,18 +250,8 @@ export function destroyReadingModeElements(): void {
 
 export const readingStylingMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
-		if (mutation.addedNodes.length !== 0) {
-			mutation.addedNodes.forEach((addedNode: HTMLElement)=>{
-				const codeblockPreElements = addedNode.querySelectorAll('.codeblock-customizer-pre-parent > pre:not(.frontmatter)');
-				codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
-					let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
-					if (!codeblockCodeElement)
-						return;
-					setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-customizer-codeblock-collapsed'))},PRIMARY_DELAY);
-					setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
-				})
-			})
-		}
+		if (mutation.addedNodes.length !== 0)
+			mutation.addedNodes.forEach((addedNode: HTMLElement)=>remeasureReadingView(addedNode))
 	});
 });
 export const executeCodeMutationObserver = new MutationObserver((mutations) => {

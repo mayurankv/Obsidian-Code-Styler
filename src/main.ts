@@ -1,11 +1,10 @@
-import { Plugin, FileView } from "obsidian";
+import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeblockCustomizerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeMirrorExtensions } from "./EditingView";
-import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewPostProcessor } from "./ReadingView";
-import { disconnect } from "process";
+import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewPostProcessor, remeasureReadingView } from "./ReadingView";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
@@ -31,9 +30,19 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
-		this.app.workspace.iterateRootLeaves(leaf => { // Add decoration on enabling of plugin
-			if (leaf.view instanceof FileView)
-				readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null, frontmatter: undefined},this);
+		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
+			if (leaf.view instanceof MarkdownView) {
+				if (leaf.view.getMode() === 'preview')
+					leaf.view.previewMode.rerender(true);
+				// else if (leaf.view.getMode() === 'source')
+				// 	console.log(leaf.view.sourceMode)
+			}
+		})
+		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
+			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview') {
+				// remeasureReadingView(leaf.view.contentEl,10,1000);
+				// readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null, frontmatter: undefined},this);
+			}
 		})
 		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
 

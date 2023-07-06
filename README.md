@@ -276,10 +276,10 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Optional outer border.
   - Optional shadow.
   - Dataview compatibility.
-  - Make list codeblocks appear indented properly in reading mode.
 - Check the feasibility of:
   - Implementing code wrapping for editing mode.
   - Implementing folding animations for editing mode.
+  - Make list codeblocks appear indented properly in reading mode.
 <!-- Check there is no conflict with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin (parameters after language) -->
 
 ### Existing Issues
