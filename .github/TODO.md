@@ -10,7 +10,10 @@
 5. Sorting `styles.css` #NotUrgent
 6. Sort header CSS logic properly - some small issues #Important
 7. Add features for outer border and codeblock shadow #NotUrgent
-8. Check through all marked filed #NotUrgent
+8. Check through: #NotUrgent
+    - `package.json`
+    - `package-lock.json`
+    - `eslintrc`
 9. Update github: #NotUrgent
     - Better issue templates using [yaml](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository)
       - [Example 1](https://github.com/javalent/admonitions/tree/main/.github/ISSUE_TEMPLATE)

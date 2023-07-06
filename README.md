@@ -271,7 +271,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 ### Future Work
 
 - Features to add:
-  - Commands to fold all, unfold all and reset default fold for codeblocks ([Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)).
+  - Commands to fold all, unfold all and reset default fold for codeblocks <!--[Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)-->.
     - Hook into existing fold commands as well.
   - Optional outer border.
   - Optional shadow.
@@ -295,7 +295,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
   - Scrollbar does not show behind line gutter
   - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
-  - [Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17).
+  - Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 - PDF Exporting
   - Highlights appear slightly different.
   - Language border colors are not correctly set.
