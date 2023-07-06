@@ -1,9 +1,12 @@
 ---
 name: "Bug report \U0001F41E"
-description: "Create a bug report for the Obsidian plugin Codeblock Customizer"
-labels: ["bug-report"]
-assignees: []
+about: Create an issue for a bug.
+title: 'Bug: '
+labels: ''
+assignees: ''
+
 ---
+
 <!--- Provide a general summary of this bug in the Title above -->
 
 ## Describe the bug

@@ -1,9 +1,12 @@
 ---
 name: "Feature request \U0001F680"
-description: "Create a feature request for the Obsidian plugin Codeblock Customizer"
-labels: ["feature-request"]
-assignees: []
+about: Create an issue regarding a feature request.
+title: 'Feature Request: '
+labels: ''
+assignees: ''
+
 ---
+
 <!--- Provide a general summary of this feature request in the Title above -->
 
 ## Summary
