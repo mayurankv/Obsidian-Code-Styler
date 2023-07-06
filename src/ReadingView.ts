@@ -197,7 +197,6 @@ export function remeasureReadingView(element: HTMLElement, primary_delay: number
 		if (!codeblockCodeElement)
 			return;
 		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-customizer-codeblock-collapsed'))},primary_delay);
-		// setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},secondary_delay);
 	})
 }
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
@@ -208,9 +207,6 @@ function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeEleme
 		codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
 		codeblockCodeElement.style.maxHeight = '';
 	}
-}
-function setLineNumberMargin(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement) {
-	codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
 }
 
 export function destroyReadingModeElements(): void {
