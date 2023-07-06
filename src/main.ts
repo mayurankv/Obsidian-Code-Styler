@@ -4,21 +4,22 @@ import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeblockCustomizerSettings } fr
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeMirrorExtensions } from "./EditingView";
-import { destroyReadingModeElements, executeCodeMutationObserver, readingViewPostProcessor } from "./ReadingView";
+import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewPostProcessor } from "./ReadingView";
+import { disconnect } from "process";
 
 export default class CodeblockCustomizerPlugin extends Plugin {
 	settings: CodeblockCustomizerSettings;
+	readingStylingMutationObserver: MutationObserver;
 	executeCodeMutationObserver: MutationObserver;
 	languageIcons: Record<string,string>;
 	
 	async onload() {
-		await this.loadSettings();
-		document.body.classList.add('codeblock-customizer');
-		updateStyling(this.settings,this.app);
-		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this));
-		
+		await this.loadSettings(); // Load Settings
 		const settingsTab = new SettingsTab(this.app,this);
 		this.addSettingTab(settingsTab);
+
+		document.body.classList.add('codeblock-customizer'); // Load Styles
+		updateStyling(this.settings,this.app);
 
 		this.languageIcons = Object.keys(LANGUAGE_ICONS_DATA).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
 			result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGE_ICONS_DATA[key]}</svg>`], { type: "image/svg+xml" }));
@@ -27,17 +28,22 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 
 		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
+		this.readingStylingMutationObserver = readingStylingMutationObserver; // Add reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
+		
 		this.app.workspace.iterateRootLeaves(leaf => { // Add decoration on enabling of plugin
 			if (leaf.view instanceof FileView)
 				readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null, frontmatter: undefined},this);
 		})
 		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
 
+		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
+
 		console.log("Loaded plugin: CodeBlock Customizer");
 	}
 	
 	onunload() {
+		this.readingStylingMutationObserver,disconnect();
 		this.executeCodeMutationObserver.disconnect();
 		removeStylesAndClasses();
 		destroyReadingModeElements();

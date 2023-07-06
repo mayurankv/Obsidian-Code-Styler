@@ -228,6 +228,13 @@ export function destroyReadingModeElements(): void {
 	})
 }
 
+export const readingStylingMutationObserver = new MutationObserver((mutations) => {
+	mutations.forEach((mutation: MutationRecord) => {
+		if (mutation.type === "childList") {
+			console.log('hi')
+		}
+	});
+});
 export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
 		if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change style of execute code output
@@ -259,5 +266,5 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 				}
 			}
 		}
-	})
+	});
 });
