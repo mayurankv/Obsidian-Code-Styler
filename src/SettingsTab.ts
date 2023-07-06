@@ -83,7 +83,7 @@ export class SettingsTab extends PluginSettingTab {
 			})
 			.addExtraButton(button => {
 				button.setTooltip("Update theme");
-				button.setIcon('arrow-up');
+				button.setIcon('save');
 				button.onClick(() => {
 					if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
 						new Notice('You cannot update the default themes'); //NOSONAR

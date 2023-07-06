@@ -13,9 +13,7 @@
 6. Sort header CSS logic properly - some small issues #Important
 7. Add features for outer border and codeblock shadow #NotUrgent
 8. Check through all marked filed #NotUrgent
-9. Update plugin icons #NotUrgent
-10. Update github: #NotUrgent
+9. Update github: #NotUrgent
     - Better issue templates using yaml
     - `stale.yml`
     - `dependabot.yml`
-    - `SECURITY.md`
