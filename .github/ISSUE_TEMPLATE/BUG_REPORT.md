@@ -1,6 +1,6 @@
 ---
 name: "Bug report \U0001F41E"
-about: Create an issue for a bug.
+about: Create an issue regarding a bug.
 title: 'Bug: '
 labels: ''
 assignees: ''
