@@ -1,4 +1,4 @@
-# vscode
+# VSCode
 .vscode 
 
 # Intellij
@@ -8,14 +8,13 @@
 # npm
 node_modules
 
-# Don't include the compiled main.js file in the repo.
-# They should be uploaded to GitHub releases instead.
+# Don't include the compiled main.js file in the repo -this should be uploaded to GitHub releases instead.
 main.js
 
 # Exclude sourcemaps
 *.map
 
-# obsidian
+# Obsidian Data
 data.json
 
 # Exclude macOS Finder (System Explorer) View States
