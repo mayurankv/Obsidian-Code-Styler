@@ -1,20 +1,19 @@
 # TODO
 
-1. Change plugin name #Important
-2. Live preview issue on open of note #Bug
+1. Live preview issue on open of note #Bug
     - Small differences in line number margins
-3. Deal with codeblocks created by indentation #NotUrgent
+2. Deal with codeblocks created by indentation #NotUrgent
     - Editing Mode (`cm-hmd-indented-code`)
     - Reading Mode
-4. Dataview compatibility #NotUrgent
-5. Fix PDF Export #Important
-6. Sorting: #NotUrgent
+3. Dataview compatibility #NotUrgent
+4. Fix PDF Export #Important
+5. Sorting: #NotUrgent
     - the order of functions in source files
     - `styles.css`
-7. Sort header CSS logic properly - some small issues #Important
-8. Add features for outer border and codeblock shadow #NotUrgent
-9. Check through all marked filed #NotUrgent
-10. Update github: #NotUrgent
+6. Sort header CSS logic properly - some small issues #Important
+7. Add features for outer border and codeblock shadow #NotUrgent
+8. Check through all marked filed #NotUrgent
+9. Update github: #NotUrgent
     - Better issue templates using yaml
       - [Example 1](https://github.com/javalent/admonitions/tree/main/.github/ISSUE_TEMPLATE)
       - [Example 2](https://github.com/obsidian-tasks-group/obsidian-tasks/tree/main/.github/ISSUE_TEMPLATE)

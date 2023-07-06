@@ -1,4 +1,4 @@
-# Contributing to Codeblock Customizer
+# Contributing to Codeblock Styler
 
 Thanks for taking the time to contribute!
 

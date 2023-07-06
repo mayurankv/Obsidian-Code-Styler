@@ -1,11 +1,11 @@
 {
-	"id": "codeblock-customizer",
-	"name": "Codeblock Customizer",
-	"version": "1.1.9",
+	"id": "codeblock-styler",
+	"name": "Codeblock Styler",
+	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This Obsidian plugin lets you customize your codeblocks in editing, and reading mode as well.",
-	"author": "mugiwara",
-	"authorUrl": "https://github.com/mugiwara85",
-	"fundingUrl": "https://www.buymeacoffee.com/ThePirateKing",
+	"description": "This Obsidian plugin lets you style codeblocks in both editing mode and reading mode.",
+	"author": "Mayuran Visakan",
+	"authorUrl": "https://github.com/mayurankv",
+	"fundingUrl": "https://www.buymeacoffee.com/mayurankv2",
 	"isDesktopOnly": false
 }

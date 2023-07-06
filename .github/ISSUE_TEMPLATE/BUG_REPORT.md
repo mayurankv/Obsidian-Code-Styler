@@ -22,10 +22,10 @@ assignees: ''
 
 ````
 
-### Expected behavior
+### Expected behaviour
 <!-- A clear and concise description of what you expected to happen. -->
 
-### Current behavior
+### Current behaviour
 <!-- A clear and concise description of what currently happens.  -->
 
 ### Environment

@@ -1,7 +1,7 @@
 import { TFile } from "obsidian";
 
-import CodeblockCustomizerPlugin from "./main";
-import { CodeblockCustomizerTheme } from "./Settings";
+import CodeblockStylerPlugin from "./main";
+import { CodeblockStylerTheme } from "./Settings";
 
 export interface CodeblockParameters {
 	language: string;
@@ -33,7 +33,7 @@ export interface Highlights {
 	regularExpressions: Array<RegExp>;
 }
 
-export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeblockCustomizerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
+export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeblockStylerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
 	//@ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,any> = plugin.app.plugins.plugins;
 	const admonitions: boolean = 'obsidian-admonition' in plugins;
@@ -73,7 +73,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
 }
 
-export function parseCodeblockParameters(parameterLine: string, theme: CodeblockCustomizerTheme): CodeblockParameters {
+export function parseCodeblockParameters(parameterLine: string, theme: CodeblockStylerTheme): CodeblockParameters {
 	let codeblockParameters: CodeblockParameters = {
 		language: '',
 		title: '',
@@ -114,7 +114,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: Codeblock
 	}
 	return codeblockParameters;
 }
-function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockCustomizerTheme): void {
+function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockStylerTheme): void {
 	if (parameterString.startsWith('title:')) {
 		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
@@ -261,7 +261,7 @@ function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<Reg
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
 }
 
-export async function getFileContentLines(sourcePath: string, plugin: CodeblockCustomizerPlugin): Promise<Array<string> | undefined> {
+export async function getFileContentLines(sourcePath: string, plugin: CodeblockStylerPlugin): Promise<Array<string> | undefined> {
 	const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
 	if (!file) {
 		console.error(`File not found: ${sourcePath}`);
