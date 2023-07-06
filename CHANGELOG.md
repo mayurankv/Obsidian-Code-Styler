@@ -15,6 +15,8 @@ See this project's [releases](/../../../releases).
 <!-- ### Security -->
 <!-- ### Notes -->
 
+<!-- Original CHANGELOG Plans:
+
 ## [Unreleased]
 
 ### Notes
@@ -191,3 +193,5 @@ If a document is opened (only in editing mode), then in very rare cases the view
 [1.0.2]: /../../../compare/mugiwara85:CodeblockCustomizer:1.0.1...mugiwara85:CodeblockCustomizer:1.0.2
 [1.0.1]: /../../../compare/mugiwara85:CodeblockCustomizer:1.0.0...mugiwara85:CodeblockCustomizer:1.0.1
 [1.0.0]: /../../../releases/tag/1.0.0
+
+-->
