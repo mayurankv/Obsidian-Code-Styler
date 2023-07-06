@@ -1,14 +1,14 @@
 # Codeblock Customizer Plugin
 
-[![Release](https://img.shields.io/github/v/release/mugiwara85/CodeblockCustomizer?style=for-the-badge)](https://github.com/mugiwara85/CodeblockCustomizer/releases/latest)
+[![Release](https://img.shields.io/github/v/release/mayurankv/CodeblockCustomizer?style=for-the-badge)](https://github.com/mayurankv/CodeblockCustomizer/releases/latest)
 [![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22codeblock-customizer%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=codeblock-customizer)
 
 This is a plugin for [Obsidian.md](https://obsidian.md) which lets you customize the codeblocks in both editing mode and reading mode.
 
-I couldn't find any plugin, where I could customize codeblocks which works reliably and in both editing and reading mode so I created my own!
-
+<!--
 > **Warning**  
 > If you used version 1.1.9 or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-customizer/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 2.0.0 or above. After that, everything should work fine.
+-->
 
 ## Settings
 
@@ -316,7 +316,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 
 ## Contributions
 
-All contributions are welcome, just create a merge request.
+All contributions are welcome, just create a merge request. The bullet points in [roadmap](#roadmap) are a good place to start!
 
 Please try to create bug reports/issues that are:
 
@@ -325,15 +325,15 @@ Please try to create bug reports/issues that are:
 - **Unique**: Please do not duplicate existing open issues, add to the existing issue
 - **Scoped**: Please create a separate issue for each bug you've identified
 
-The bullet points in [roadmap](#roadmap) are a good place to start!
-
 ### Maintainers
 
-[@mugiwara85](https://github.com/mugiwara85)
+- [@mayurankv](https://github.com/mayurankv)
 
 ### Contributors
 
-[![List of contributors](https://contrib.rocks/image?repo=mugiwara85/CodeblockCustomizer)](https://github.com/mugiwara85/CodeblockCustomizer/graphs/contributors)
+This plugin is based on the [Codeblock Customizer Plugin](https://github.com/mugiwara85/CodeblockCustomizer) by [@mugiwara85](https://github.com/mugiwara85).
+
+[![List of contributors](https://contrib.rocks/image?repo=mayurankv/CodeblockCustomizer)](https://github.com/mayurankv/CodeblockCustomizer/graphs/contributors)
 
 *Made with [contrib.rocks](https://contrib.rocks).*
 
@@ -341,7 +341,7 @@ The bullet points in [roadmap](#roadmap) are a good place to start!
 
 If you like this plugin, and would like to help support continued development, use the button below!
 
-[![Buy me a coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee%20&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000)](https://www.buymeacoffee.com/ThePirateKing)
+[![Buy me a coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee%20&emoji=&slug=mayurankv2&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=a0522d)](https://www.buymeacoffee.com/mayurankv2)
 
 ## License
 

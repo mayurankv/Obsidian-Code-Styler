@@ -710,8 +710,8 @@ export class SettingsTab extends PluginSettingTab {
 		const donationDiv = containerEl.createEl("div", { cls: "codeblock-customizer-donation", });    
 		const donationText = createEl("p", {text: "If you like this plugin, and would like to help support continued development, use the button below!"});
 		donationDiv.appendChild(donationText);
-		const donationButton = createEl("a", { href: "https://www.buymeacoffee.com/ThePirateKing"});
-		donationButton.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=ThePirateKing&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=ff0000" height="42px">`;
+		const donationButton = createEl("a", { href: "https://www.buymeacoffee.com/mayurankv2"});
+		donationButton.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=mayurankv2&button_colour=e3e7efa0&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=a0522d" height="42px">`;
 		donationDiv.appendChild(donationButton);
 	}
 
