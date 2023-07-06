@@ -248,7 +248,6 @@ export const readingStylingMutationObserver = new MutationObserver((mutations) =
 					let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
 					if (!codeblockCodeElement)
 						return;
-					console.log(codeblockPreElement)
 					setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-customizer-codeblock-collapsed'))},PRIMARY_DELAY);
 					setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
 				})
