@@ -25,26 +25,22 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 			return result
 		},{})
 
-		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
-
 		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
+		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
+		await sleep(200)
 		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
 			if (leaf.view instanceof MarkdownView) {
 				if (leaf.view.getMode() === 'preview')
 					leaf.view.previewMode.rerender(true);
-				// else if (leaf.view.getMode() === 'source')
-				// 	console.log(leaf.view.sourceMode)
+				else if (leaf.view.getMode() === 'source') {
+					leaf.view.editor.refresh()
+				}
 			}
 		})
-		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
-			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview') {
-				// remeasureReadingView(leaf.view.contentEl,10,1000);
-				// readingViewPostProcessor(leaf.view.contentEl,{sourcePath: leaf.view.file.path, getSectionInfo: (element: HTMLElement)=>null, frontmatter: undefined},this);
-			}
-		})
-		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
+
+		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
 		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
 

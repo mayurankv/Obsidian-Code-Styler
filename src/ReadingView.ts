@@ -53,10 +53,9 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 		renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,plugin);
 }
 async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeblockCustomizerPlugin): Promise<void> {
-	const fileContentLines = await getFileContentLines(sourcePath,plugin);
-	if (!fileContentLines)
+	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split('\n')[lineNumber]),sourcePath,plugin)).codeblocksParameters;
+	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
-	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>fileContentLines[lineNumber]),sourcePath,plugin)).codeblocksParameters;
 	for (let [key,codeblockPreElement] of codeblockPreElements.entries()) {
 		let codeblockParameters = codeblocksParameters[key];
 		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
@@ -186,11 +185,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
-
-	// Set line number margin - Delay to return correct width
-	// setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
 }
-export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY, secondary_delay: number = SECONDARY_DELAY): void {
+export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
 	codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
 		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
