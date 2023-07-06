@@ -43,6 +43,7 @@ See this project's [releases](/../../../releases).
 - Added optional redirecting of language colors and icons.
 - Added compatibility with many popular themes and ability for theme specific corrections.
 - Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview), [file include plugin](https://github.com/tillahoffmann/obsidian-file-include) and [admonitions plugin](https://github.com/javalent/admonitions).
+- Added automatic release on tag addition using github workflows.
 - Added issue and pull request templates.
 - Added other supporting documents such as [CONTRIBUTING](.github/CONTRIBUTING.md).
 
