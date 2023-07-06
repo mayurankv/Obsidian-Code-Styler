@@ -146,16 +146,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
 		codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
 
-	// Height Setting (for collapse animation)
-	setTimeout(()=>{ // Delay to return correct height
-		codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
-		codeblockCodeElement.style.maxHeight = 'var(--true-height)';
-		codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
-		if (codeblockParameters.fold.enabled) {
-			codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
-			codeblockCodeElement.style.maxHeight = '';
-		}
-	},PRIMARY_DELAY);
+	// Height Setting (for collapse animation) - Delay to return correct height
+	setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockParameters.fold.enabled)},PRIMARY_DELAY);
 
 	//todo (@mayurankv) Name section
 	if (codeblockCodeElement.querySelector("code [class*='codeblock-customizer-line']"))
@@ -184,10 +176,20 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		lineWrapper.appendChild(createDiv({cls: `codeblock-customizer-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
 
-	// Set line number margin
-	setTimeout(()=>{
-		codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
-	},SECONDARY_DELAY);
+	// Set line number margin - Delay to return correct width
+	setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
+}
+function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
+	codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
+	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
+	codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
+	if (fold) {
+		codeblockPreElement.classList.add("codeblock-customizer-codeblock-collapsed");
+		codeblockCodeElement.style.maxHeight = '';
+	}
+}
+function setLineNumberMargin(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement) {
+	codeblockPreElement.style.setProperty('--line-number-margin',`${(codeblockCodeElement.querySelector('[class^="codeblock-customizer-line"]:last-child [class^="codeblock-customizer-line-number"]') as HTMLElement)?.offsetWidth}px`);
 }
 
 export function destroyReadingModeElements(): void {

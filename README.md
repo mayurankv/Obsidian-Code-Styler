@@ -270,15 +270,16 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 
 ### Future Work
 
-- Features
-  - Add commands to fold all, unfold all and reset default fold for codeblocks ([Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33))
-    - Hook into existing fold commands as well
-  - Dataview compatibility
-- Appearance
-  - Work with all themes and readable line length setting
-- Check the feasibility of
-  - Implementing code wrapping for editing mode
-  - Implementing folding animations for editing mode
+- Features to add:
+  - Commands to fold all, unfold all and reset default fold for codeblocks ([Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)).
+    - Hook into existing fold commands as well.
+  - Optional outer border.
+  - Optional shadow.
+  - Dataview compatibility.
+  - Make list codeblocks appear indented properly in reading mode.
+- Check the feasibility of:
+  - Implementing code wrapping for editing mode.
+  - Implementing folding animations for editing mode.
 <!-- Check there is no conflict with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin (parameters after language) -->
 
 ### Existing Issues
