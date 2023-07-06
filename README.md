@@ -276,6 +276,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Optional outer border.
   - Optional shadow.
   - Dataview compatibility.
+  - Compatibility with codeblocks created by indentation.
 - Check the feasibility of:
   - Implementing code wrapping for editing mode.
   - Implementing folding animations for editing mode.
