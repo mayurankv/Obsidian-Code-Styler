@@ -122,7 +122,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 
 	// Add Parent Classes
 	codeblockPreElement.classList.add(`codeblock-customizer-pre`);
-	codeblockPreElement.classList.add(`language-${codeblockParameters.language}`);
+	if (codeblockParameters.language)
+		codeblockPreElement.classList.add(`language-${codeblockParameters.language}`);
 	if (codeblockPreElement.parentElement)
 		codeblockPreElement.parentElement.classList.add(`codeblock-customizer-pre-parent`);
 
@@ -187,7 +188,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	});
 
 	// Set line number margin - Delay to return correct width
-	setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
+	// setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},SECONDARY_DELAY);
 }
 export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY, secondary_delay: number = SECONDARY_DELAY): void {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
@@ -196,7 +197,7 @@ export function remeasureReadingView(element: HTMLElement, primary_delay: number
 		if (!codeblockCodeElement)
 			return;
 		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-customizer-codeblock-collapsed'))},primary_delay);
-		setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},secondary_delay);
+		// setTimeout(()=>{setLineNumberMargin(codeblockPreElement,codeblockCodeElement)},secondary_delay);
 	})
 }
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {

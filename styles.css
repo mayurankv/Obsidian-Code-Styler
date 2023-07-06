@@ -119,7 +119,6 @@ pre.codeblock-customizer-pre > code > div:only-child > [class^='codeblock-custom
 	width: var(--line-number-gutter-width);
 }
 pre.codeblock-customizer-pre [class^='codeblock-customizer-line-number'] {
-	position: absolute;
 	white-space: nowrap;
 	width: var(--line-number-margin);
 	flex-shrink: 0;
@@ -285,7 +284,8 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 	overflow: hidden !important;
 }
 .codeblock-customizer pre.codeblock-customizer-pre code {
-	display: block;
+	display: grid !important;
+	grid-template-columns: min-content auto;
 	padding-top: var(--code-padding) !important;
 	padding-bottom: var(--code-padding) !important;
 	padding-left: 0px !important;
@@ -323,8 +323,8 @@ pre.codeblock-customizer-pre.codeblock-customizer-codeblock-collapsed [class^='c
 }
 
 /** Reading mode text styling */
-pre.codeblock-customizer-pre div:has(> .codeblock-customizer-line-text) {
-	display: flex;
+pre.codeblock-customizer-pre > code > div[class*='codeblock-customizer-line'] {
+	display: contents !important;
 }
 pre.codeblock-customizer-pre .codeblock-customizer-line-text {
 	flex-basis: 100%;
