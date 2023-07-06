@@ -31,13 +31,8 @@ export default class CodeblockCustomizerPlugin extends Plugin {
 		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
 		await sleep(200)
 		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
-			if (leaf.view instanceof MarkdownView) {
-				if (leaf.view.getMode() === 'preview')
-					leaf.view.previewMode.rerender(true);
-				else if (leaf.view.getMode() === 'source') {
-					leaf.view.editor.refresh()
-				}
-			}
+			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')
+				leaf.view.previewMode.rerender(true);
 		})
 
 		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions

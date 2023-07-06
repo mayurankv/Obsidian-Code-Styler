@@ -11,23 +11,10 @@ import { createHeader, getLineClass } from "./CodeblockDecorating";
 export function createCodeMirrorExtensions(settings: CodeblockCustomizerSettings, languageIcons: Record<string,string>) {
 	const codeblockLineNumberCharWidth = StateField.define<number>({
 		create(state: EditorState): number {
-			return state.field(editorEditorField).defaultCharacterWidth;
+			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
 		},
 		update(value: number, transaction: Transaction): number {
-			let charWidths = Array.from(transaction.state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
-				let nextElement = beginningElement.previousElementSibling as HTMLElement;
-				if (!nextElement)
-					return result;
-				let lineNumberElement = nextElement.querySelector("[class^='codeblock-customizer-line-number']") as HTMLElement;
-				if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
-					return result;
-				let computedStyles = window.getComputedStyle(lineNumberElement, null);
-				result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
-				return result;
-			},[])
-			if (charWidths.length === 0)
-				return value;
-			return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
+			return getCharWidth(transaction.state,value);
 		}
 	})
 	const codeblockLines = ViewPlugin.fromClass(
@@ -394,6 +381,24 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
+function getCharWidth(state: EditorState, default_value: number): number {
+	let charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
+		let nextElement = beginningElement.previousElementSibling as HTMLElement;
+		if (!nextElement)
+			return result;
+		let lineNumberElement = nextElement.querySelector("[class^='codeblock-customizer-line-number']") as HTMLElement;
+		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
+			return result;
+		let computedStyles = window.getComputedStyle(lineNumberElement, null);
+		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
+		return result;
+	},[])
+	if (charWidths.length === 0)
+		return default_value;
+	console.log('result')
+	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
+}
+
 function ignore(state: EditorState): boolean {
 	if (!state.field(editorLivePreviewField))
 		return true;
@@ -401,8 +406,4 @@ function ignore(state: EditorState): boolean {
 	if (typeof filePath !== 'undefined')
 		return this.app.metadataCache.getCache(filePath)?.frontmatter?.['codeblock-customizer-ignore'] === true;
 	return false;
-}
-
-function isCodeblockDelimiter(line: string): boolean {
-	return true;
 }
