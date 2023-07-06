@@ -371,7 +371,6 @@ function getCharWidth(state: EditorState, default_value: number): number {
 	},[])
 	if (charWidths.length === 0)
 		return default_value;
-	console.log('result')
 	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
 }
 

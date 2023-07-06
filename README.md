@@ -274,9 +274,14 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Commands to fold all, unfold all and reset default fold for codeblocks <!--[Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)-->.
     - Hook into existing fold commands as well.
   - Optional outer border.
-  - Optional shadow.
+  - Optional shadow for codeblock.
   - Dataview compatibility.
   - Compatibility with codeblocks created by indentation.
+  - New Themes
+    - Nord
+    - Dracula
+    - Gruvbox
+    - Catpuccin
 - Check the feasibility of:
   - Implementing code wrapping for editing mode.
   - Implementing folding animations for editing mode.
@@ -288,8 +293,9 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 - First pickr change does not change color correctly.
 - Indented codeblocks are not dealt with properly.
 - Editing Mode
+  - On open of a note, there are small differences in the line number margins.
   - Weird scroll in live preview when click (due to `codeblockHeader` codemirror extension) when first line is a codeblock.
-  - If a language is excluded, it currently needs to be unfolded before it can be removed or it disappears.
+  - If a language is excluded or ignored, it currently needs to be unfolded before it can be removed or it disappears.
   - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
 - Reading Mode
   - Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
