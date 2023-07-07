@@ -60,7 +60,7 @@ body {
 	padding-left: var(--language-border-width) !important;
 }
 .codeblock-styler pre.codeblock-styler-pre code {
-	display: grid !important;
+	display: grid;
 	grid-template-columns: min-content auto;
 	padding-top: var(--code-padding) !important;
 	padding-bottom: var(--code-padding) !important;
@@ -68,7 +68,7 @@ body {
 	padding-right: 0px !important;
 	border-radius: 0px !important;
 	background: none !important;
-	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out, border-top ease-in-out var(--duration-button);
+	transition: max-height ease-in-out var(--duration-button), padding ease-in-out var(--duration-button), border-top ease-in-out var(--duration-button);
 	max-height: 0;
 	overflow-x: scroll;
 }
@@ -78,7 +78,7 @@ body {
 .codeblock-styler pre.codeblock-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
 }
-.codeblock-styler pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed code {
+.codeblock-styler pre.codeblock-styler-pre.codeblock-styler-collapsed code {
 	padding-top: 0 !important;
 	padding-bottom: 0 !important;
 }
@@ -135,7 +135,7 @@ body:not(.codeblock-styler-show-langnames-always) .codeblock-styler-header-conta
 	display: none !important;
 }
 body .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container:not([class*='language-']),
-body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language-tag-'])) .codeblock-styler-header-container {
+body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language-tag-'])) .codeblock-styler-header-container { /*todo*/
 	display: none !important;
 }
 [class^='codeblock-styler-header-container'] {
@@ -162,6 +162,7 @@ body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language
 pre.codeblock-styler-pre [class^='codeblock-styler-header-container'] {
 	background-color: var(--codeblock-styler-header-background-color);
 	border-bottom: var(--header-separator-width) solid var(--codeblock-styler-header-separator-color);
+	box-sizing: content-box;
 }
 .markdown-source-view :not(pre.codeblock-styler-pre) > [class^='codeblock-styler-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
 	background: linear-gradient(var(--codeblock-styler-header-background-color) 0%,var(--codeblock-styler-header-background-color) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
@@ -171,9 +172,8 @@ pre.codeblock-styler-pre [class^='codeblock-styler-header-container'] {
 	border-bottom: var(--codeblock-styler-header-border);
 	border-bottom: var(--collapsed-bottom-border);
 }
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock-styler-header-container'] {
-	border-bottom-width: 0;
-	border-bottom-color: transparent;
+pre.codeblock-styler-pre.codeblock-styler-collapsed [class^='codeblock-styler-header-container'] {
+	border-bottom: var(--collapsed-bottom-border);
 }
 [class^='codeblock-styler-header-container'] [class^="codeblock-styler-header-language-tag"] {
 	display: flex;
@@ -196,9 +196,8 @@ pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock
 	transition: border-radius ease-in-out var(--duration-button), padding ease-in-out var(--duration-button);
 }
 .markdown-source-view :not(pre.codeblock-styler-pre) > [class^='codeblock-styler-header-container']:not(:has(+ .HyperMD-codeblock-begin)) [class^="codeblock-styler-header-language-tag"],
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock-styler-header-container'] [class^="codeblock-styler-header-language-tag"] {
+pre.codeblock-styler-pre.codeblock-styler-collapsed [class^='codeblock-styler-header-container'] [class^="codeblock-styler-header-language-tag"] {
 	border-radius: var(--border-radius);
-	padding-bottom: calc(1em * var(--header-inner-vertical-padding) + var(--header-separator-width-padding))
 }
 .codeblock-styler-header-text {
 	display: flex;
@@ -236,12 +235,6 @@ div:has(> img.codeblock-styler-icon) {
 	padding-right: var(--header-spacing);
 	transition: padding ease-in-out var(--duration-button);
 }
-.markdown-source-view :not(pre.codeblock-styler-pre) > [class^='codeblock-styler-header-container']:not(:has(+ .HyperMD-codeblock-begin)) div:has(> img.codeblock-styler-icon),
-.markdown-source-view :not(pre.codeblock-styler-pre) > [class^='codeblock-styler-header-container']:not(:has(+ .HyperMD-codeblock-begin)) .codeblock-styler-header-text,
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock-styler-header-container'] div:has(> img.codeblock-styler-icon),
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock-styler-header-container'] .codeblock-styler-header-text {
-	padding-bottom: calc(1em * var(--header-inner-vertical-padding) + var(--header-separator-width-padding))
-}
 .codeblock-styler-icon {
 	width: var(--language-icon-size);
 	height: var(--language-icon-size);
@@ -275,7 +268,7 @@ pre.codeblock-styler-pre > code > div:first-child > [class^='codeblock-styler-li
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-styler-gutter-background-color);
 	transition: box-shadow ease-in-out var(--duration-button);
 }
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed > code > div:first-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
+pre.codeblock-styler-pre.codeblock-styler-collapsed > code > div:first-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
 	box-shadow: 0px 0px var(--codeblock-styler-gutter-background-color);
 }
 pre.codeblock-styler-pre > code > div:last-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
@@ -315,7 +308,6 @@ pre.codeblock-styler-pre > code > div:only-child > [class^='codeblock-styler-lin
 }
 pre.codeblock-styler-pre [class^='codeblock-styler-line-number'] {
 	white-space: nowrap;
-	width: var(--line-number-margin);
 	height: 100%;
 	grid-column: 1;
 	position: sticky;
@@ -349,7 +341,6 @@ pre.codeblock-styler-pre > code > div[class*='codeblock-styler-line'] {
 }
 pre.codeblock-styler-pre .codeblock-styler-line-text {
 	flex-basis: 100%;
-	margin-left: var(--line-number-margin);
 	padding-left: var(--line-number-gutter-padding);
 	grid-column: 2;
 }
@@ -413,9 +404,9 @@ pre.codeblock-styler-pre .codeblock-styler-line-text {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
 }
-pre.codeblock-styler-pre:not(.codeblock-styler-codeblock-collapsed):not(:hover) button,
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed button,
-pre.codeblock-styler-pre:not(.codeblock-styler-codeblock-collapsed):not(:hover) [class^='codeblock-styler-header-container']::after {
+pre.codeblock-styler-pre:not(.codeblock-styler-collapsed):not(:hover) button,
+pre.codeblock-styler-pre.codeblock-styler-collapsed button,
+pre.codeblock-styler-pre:not(.codeblock-styler-collapsed):not(:hover) [class^='codeblock-styler-header-container']::after {
 	visibility: hidden;
 	opacity: 0
 }
@@ -440,7 +431,7 @@ pre.codeblock-styler-pre:not(.codeblock-styler-codeblock-collapsed):not(:hover) 
 	scale: 0.8;
     transition: transform var(--duration-button) ease-out, visibility var(--duration-button), opacity var(--duration-button), scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 }
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock-styler-header-container']::after,
+pre.codeblock-styler-pre.codeblock-styler-collapsed [class^='codeblock-styler-header-container']::after,
 .markdown-source-view :not(pre.codeblock-styler-pre) > [class^='codeblock-styler-header-container']:not(:has(+ .HyperMD-codeblock-begin))::after {
 	transform: rotate(-90deg);
 }
@@ -449,7 +440,7 @@ pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock
 }
 body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) pre.codeblock-styler-pre:has( .codeblock-styler-header-container) button.copy-code-button,
 body:not(.codeblock-styler-show-langnames-always) pre.codeblock-styler-pre:not(:has( .codeblock-styler-header-container-specific)):not(:has( .codeblock-styler-header-container img.codeblock-styler-icon)) button.copy-code-button,
-body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */
+body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */ /*todo*/
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal)) !important;
 	--copy-code-header-right-margin: 12px;
 }
@@ -466,7 +457,7 @@ body .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-he
 }
 pre.codeblock-styler-pre button.copy-code-button {
 	transform: translateY(-50%);
-	top: max(calc(0.5 * var(--container-height) * 0.9),calc(0.5 * var(--container-min-height) * 0.9)) !important;
+	top: max(calc(0.5 * var(--container-height) * 1),calc(0.5 * var(--container-min-height) * 1)) !important;
 	bottom: unset !important;
 }
 pre.codeblock-styler-pre button.copy-code-button,
@@ -568,21 +559,23 @@ div.print {
 .codeblock-styler div.print pre.codeblock-styler-pre code {
 	max-height: unset;
 }
-.codeblock-styler div.print pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed code {
+.codeblock-styler div.print pre.codeblock-styler-pre.codeblock-styler-collapsed code {
 	display: none !important;
 }
 
 /*! Plugin Compatibility */
 /** Execute Code Plugin */
 pre.codeblock-styler-pre code ~ code.language-output {
+	display: block;
 	margin-bottom: 0;
-	padding-top: var(--code-padding);
-	padding-bottom: calc(2.5 * var(--code-padding));
-	padding-left: calc(var(--line-number-gutter-padding) + var(--line-number-margin));
+	padding-bottom: calc(2.5 * var(--code-padding)) !important;
+	padding-left: calc(var(--line-number-gutter-padding)) !important;
 	border-top: var(--header-separator-width) solid var(--codeblock-styler-header-separator-color);
+	transition: border-top ease-in-out var(--duration-button);
 }
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed code ~ code.language-output {
-	border-top-color: transparent
+pre.codeblock-styler-pre.codeblock-styler-collapsed code ~ code.language-output {
+	border-top-color: transparent;
+	border-top-width: 0;
 }
 pre.codeblock-styler-pre:hover code ~ code.language-output {
 	margin-bottom: 0;
@@ -605,7 +598,7 @@ pre.codeblock-styler-pre button.run-code-button {
 	height: 14px;
 	margin-bottom: 6px !important;
 }
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed button.run-code-button {
+pre.codeblock-styler-pre.codeblock-styler-collapsed button.run-code-button {
 	top: 500px;
 }
 pre.codeblock-styler-pre button.run-code-button::before {
@@ -702,7 +695,7 @@ pre.codeblock-styler-pre div.code-block-highlight-wrap {
 	opacity: 1;
 	z-index: 10;
 	transform: translateY(-50%);
-	top: max(calc(0.5 * var(--container-height) * 0.9),calc(0.5 * var(--container-min-height) * 0.9));
+	top: max(calc(0.5 * var(--container-height) * 1),calc(0.5 * var(--container-min-height) * 1));
 	margin: 0;
 	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
 	will-change: margin-right, clip-path;
@@ -711,7 +704,7 @@ pre.codeblock-styler-pre div.code-block-highlight-wrap {
 }
 body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) .cm-embed-block .codeblock-styler-pre-parent:has( pre.codeblock-styler-pre .codeblock-styler-header-container) + .edit-block-button,
 body:not(.codeblock-styler-show-langnames-always) .cm-embed-block .codeblock-styler-pre-parent:not(:has( pre.codeblock-styler-pre .codeblock-styler-header-container-specific)):not(:has( pre.codeblock-styler-pre .codeblock-styler-header-container img.codeblock-styler-icon)) + .edit-block-button,
-body .cm-embed-block .codeblock-styler-pre-parent:not(:has( pre.codeblock-styler-pre [class*='codeblock-styler-header-language-tag-'])) + .edit-block-button { /*? Depending on header visibility */
+body .cm-embed-block .codeblock-styler-pre-parent:not(:has( pre.codeblock-styler-pre [class*='codeblock-styler-header-language-tag-'])) + .edit-block-button { /*? Depending on header visibility */ /*todo*/
 	--copy-code-header-right-margin: 4px;
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 }
