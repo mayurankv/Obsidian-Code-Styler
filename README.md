@@ -313,6 +313,8 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Requires the correct context source path to be returned. See this [pull request](https://github.com/twibiral/obsidian-execute-code/pull/272).
 - Parsing of line number margin width is not precise.
   - Due to delay in reading accurate information from DOM in codemirror, the current implementation is the most efficient approach. See [here](https://discuss.codemirror.net/t/updates-not-synchronised-with-requestmeasure-and-viewplugin/4720/2).
+- The line numbers can flicker on collapse if highlighted for devices with high DPI screens due to a bug with `position: sticky`.
+  - See this [issue](https://bugs.chromium.org/p/chromium/issues/detail?id=810352&q=sticky&colspec=ID%20Pri%20M%20Stars%20ReleaseBlock%20Component%20Status%20Owner%20Summary%20OS%20Modified).
 
 ## How to install the plugin
 

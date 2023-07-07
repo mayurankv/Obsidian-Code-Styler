@@ -2,11 +2,10 @@
 
 ## Important
 
-0. Add octave color and icon
 1. Add inline code styling
-2. Add codeblock outline and shadow (see Prism and other theme)
-3. Fix weird live preview scroll
-4. Change name to Code Styler
+2. Change name to Code Styler
+3. Add codeblock outline and shadow (see Prism and other theme)
+4. Fix weird live preview scroll
 5. Publish to obsidian plugins
 
 ## Not Urgent
