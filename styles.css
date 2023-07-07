@@ -48,11 +48,16 @@ body {
 .codeblock-styler-pre-parent{
 	margin-bottom: 16px;
 }
-.codeblock-styler .codeblock-styler-pre {
+.codeblock-styler pre.codeblock-styler-pre {
+	background: var(--codeblock-styler-codeblock-background-color) !important;
 	border-radius: var(--border-radius) !important;
 	min-height: unset;
 	padding: 0px !important;
 	overflow: hidden !important;
+}
+.codeblock-styler pre.codeblock-styler-pre[class*='language-'] {
+	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), transparent var(--language-border-width), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+	padding-left: var(--language-border-width) !important;
 }
 .codeblock-styler pre.codeblock-styler-pre code {
 	display: grid !important;
@@ -86,7 +91,6 @@ body {
 }
 
 /** Editing Mode Body */
-
 .codeblock-styler .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-begin {
 	border-top-left-radius: 0px !important;
 	border-top-right-radius: 0px !important;
@@ -103,6 +107,18 @@ body .markdown-source-view :not([class^='codeblock-styler-header-container']) + 
 body .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-begin:nth-of-type(1) { /*? Depending on header visibility */
 	border-top-left-radius: var(--border-radius) !important;
 	border-top-right-radius: var(--border-radius) !important;
+}
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'] {
+	background: linear-gradient(90deg, var(--gradient-background-color) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+	overflow: hidden;
+	padding: 0 !important;
+	padding-left: var(--size-4-4) !important;
+}
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] {
+	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), var(--gradient-background-color) var(--language-border-width) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+}
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] [class^='codeblock-styler-line-number'] {
+	margin-left: var(--language-border-width);
 }
 
 /** Header styling */
@@ -235,27 +251,8 @@ pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock
 }
 
 /** Lines */
-.codeblock-styler pre.codeblock-styler-pre {
-	background: var(--codeblock-styler-codeblock-background-color) !important;
-}
-.codeblock-styler pre.codeblock-styler-pre[class*='language-'] {
-	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), transparent var(--language-border-width), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
-	padding-left: var(--language-border-width) !important;
-}
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'] {
-	background: linear-gradient(90deg, var(--gradient-background-color) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
-	overflow: hidden;
-	padding: 0 !important;
-	padding-left: var(--size-4-4) !important;
-}
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] {
-	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), var(--gradient-background-color) var(--language-border-width) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
-}
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] [class^='codeblock-styler-line-number'] {
-	margin-left: var(--language-border-width);
-}
-pre.codeblock-styler-pre [class^='codeblock-styler-line-highlighted'] {
-	background-image: linear-gradient(90deg, var(--gradient-background-color) 0% var(--gradient-highlights-color-stop), transparent 100%);
+pre.codeblock-styler-pre [class^='codeblock-styler-line-highlighted'] > .codeblock-styler-line-text {
+	background-image: linear-gradient(90deg, var(--gradient-background-color) 0% var(--gradient-highlights-color-stop), var(--codeblock-styler-codeblock-background-color) 100%);
 }
 .codeblock-styler-line-highlighted {
 	--gradient-background-color: var(--codeblock-styler-default-highlight-color) !important;
@@ -266,7 +263,7 @@ pre.codeblock-styler-pre [class^='codeblock-styler-line-highlighted'] {
 }
 .codeblock-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active,
 .codeblock-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active {
-	background: linear-gradient(to right, var(--codeblock-styler-active-codeblock-line-color), var(--gradient-highlights-color-stop), transparent) !important;
+	background: linear-gradient(to right, var(--codeblock-styler-active-codeblock-line-color), var(--gradient-highlights-color-stop), var(--codeblock-styler-codeblock-background-color)) !important;
 }
 
 /** Line numbers */
@@ -326,6 +323,9 @@ pre.codeblock-styler-pre [class^='codeblock-styler-line-number'] {
 }
 pre.codeblock-styler-pre div:last-child > [class^='codeblock-styler-line-number'] {
 	width: unset;
+}
+.codeblock-styler-gutter-highlight pre.codeblock-styler-pre [class*="codeblock-styler-line-highlighted"] [class^='codeblock-styler-line-number'] {
+	background-color: var(--gradient-background-color);
 }
 .codeblock-styler-active-line-highlight.codeblock-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active [class^='codeblock-styler-line-number'],
 .codeblock-styler-active-line-highlight-codeblock.codeblock-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active [class^='codeblock-styler-line-number'],
@@ -567,6 +567,9 @@ div.print {
 }
 .codeblock-styler div.print pre.codeblock-styler-pre code {
 	max-height: unset;
+}
+.codeblock-styler div.print pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed code {
+	display: none !important;
 }
 
 /*! Plugin Compatibility */

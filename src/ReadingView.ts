@@ -160,8 +160,9 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 
 		// Height Setting (for collapse animation) - Delay to return correct height
 		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockParameters.fold.enabled)},PRIMARY_DELAY);
-	}
-
+	} else if (codeblockParameters.fold.enabled)
+		codeblockPreElement.classList.add("codeblock-styler-codeblock-collapsed");
+	
 	// Ignore styled lines
 	if (codeblockCodeElement.querySelector("code [class*='codeblock-styler-line']"))
 		return;
