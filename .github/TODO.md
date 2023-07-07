@@ -2,10 +2,8 @@
 
 ## Important
 
-1. Add codeblock outline and shadow (see Prism and other theme)
-2. Fix weird live preview scroll
-3. Update CHANGELOG.md
-4. Publish to obsidian plugins
+1. Publish to obsidian plugins
+2. Add codeblock outline and shadow (see Prism and other theme)
 
 ## Not Urgent
 

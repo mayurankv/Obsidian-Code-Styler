@@ -15,6 +15,64 @@ See this project's [releases](/../../../releases).
 <!-- ### Security -->
 <!-- ### Notes -->
 
+## [Unreleased]
+
+### Added
+
+- 
+
+## [1.0.0] - 2023-07-08
+
+### Notes
+
+- Initial release.
+- Built upon a fork from the [Codeblock Customizer Plugin](https://github.com/mugiwara85/CodeblockCustomizer).
+
+### Added
+
+- Added smooth folding transition in reading mode.
+- Added button animations.
+- Added ignore parameter and YAML setting.
+- Added line wrapping settings and parameters.
+- Added line numbering parameters.
+- Added dynamic line number margin sizing in reading mode and editing mode.
+- Added regex line highlighting.
+- Added optional fold placeholder parameter and settings.
+- Added default theme which uses existing css variables.
+- Added current line indicator via line number color.
+- Added color styling for buttons.
+- Added gradient highlighting with color stop settings.
+- Added header font size and family customization.
+- Added icon customizability.
+- Added codeblock curvature setting.
+- Added optional language border setting.
+- Added optional redirecting of language colors and icons.
+- Added compatibility with many popular themes and ability for theme specific corrections.
+- Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview), [file include plugin](https://github.com/tillahoffmann/obsidian-file-include) and [admonitions plugin](https://github.com/javalent/admonitions).
+- Added automatic release on tag addition using github workflows.
+- Added issue and pull request templates.
+- Added other supporting documents such as [CONTRIBUTING](.github/CONTRIBUTING.md).
+- Added plugin automatically applies to open pages when loaded now.
+- Added compatibility within callouts
+- Added compatibility within lists
+
+### Changed
+
+- Refactored large portions of code.
+  - Changed settings structure.
+    - Combined light and dark themes to single theme.
+  - Restructured codemirror extensions.
+  - Restructured markdown post-processor.
+  - Refactored how runtime styles are applied.
+- Disabled markup in source mode.
+- Separated ignored languages from ignored codeblocks to allow for better parsing.
+- Changed how line numbers are spaced in reading mode.
+- Updated [README](README.md).
+- Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
+
+[Unreleased]: /../../../compare/1.0.0...HEAD
+[1.0.0]: /../../../releases/tag/1.0.0
+
 <!-- Original CHANGELOG Plans:
 
 ## [Unreleased]
