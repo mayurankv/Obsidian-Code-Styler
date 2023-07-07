@@ -294,15 +294,13 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   1. Indented codeblocks are not dealt with properly.
 - Editing Mode
   1. On open of a note, there can be small differences in the line number margins.
-  2. Weird scroll effect in live preview when click (due to `codeblockHeader` codemirror extension).
-  3. If a language is excluded or ignored, it currently needs to be unfolded before it can be removed or it disappears.
-  4. Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
-  5. Folding empty codeblocks causes the `HyperMD-codeblock-end` class and `HyperMD-codeblock` class not to be applied when unfolded.
+  2. If a language is excluded or ignored, it currently needs to be unfolded before it can be removed or it disappears.
+  3. Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
+  4. Folding empty codeblocks causes the `HyperMD-codeblock-end` class and `HyperMD-codeblock` class not to be applied when unfolded.
 - Reading Mode
   1. Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
-  2. Scrollbar does not show behind line gutter
-  3. Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
-  4. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
+  2. Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles and header icons.
+  3. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 - PDF Exporting
   1. Sometimes page breaks cut lines in half.
 

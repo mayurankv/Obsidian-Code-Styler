@@ -84,9 +84,6 @@ body {
 	max-height: 0;
 	overflow-x: scroll;
 }
-.code-styler pre.code-styler-pre code::-webkit-scrollbar {
-	display: none;
-}
 .code-styler pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
 }
@@ -625,7 +622,6 @@ pre.code-styler-pre code ~ code.language-output {
 	padding-bottom: calc(2.5 * var(--code-padding)) !important;
 	padding-left: calc(var(--line-number-gutter-padding)) !important;
 	border-top: var(--header-separator-width) solid var(--code-styler-header-separator-color);
-	transition: border-top ease-in-out var(--duration-button);
 }
 pre.code-styler-pre.code-styler-collapsed code ~ code.language-output {
 	border-top-color: transparent;
