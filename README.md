@@ -303,6 +303,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
   - Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 - PDF Exporting
+  - Sometimes page breaks cut lines in half.
   - Highlights appear slightly different.
   - Language border colors are not correctly set.
 

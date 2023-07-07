@@ -5,14 +5,10 @@
 1. Sort `styles.css` and rename variables
 2. Sort header CSS logic properly - some small issues
 3. Add inline code styling
-4. Fix PDF Export
-    - Check longer documents
-    - Prevent weird line breaks
-    - Turn off line wrapping
-5. Add codeblock outline and shadow (see Prism and other theme)
-6. Fix weird live preview scroll
-7. Change name to Code Styler
-8. Publish to obsidian plugins
+4. Add codeblock outline and shadow (see Prism and other theme)
+5. Fix weird live preview scroll
+6. Change name to Code Styler
+7. Publish to obsidian plugins
 
 ## Not Urgent
 

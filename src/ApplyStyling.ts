@@ -38,12 +38,7 @@ const THEME_STYLES: Record<string,ThemeStyle> = {
 
 export function updateStyling(settings: CodeblockStylerSettings, app: App): void {
 	let currentTheme = getCurrentTheme(app);
-	let styleTag = document.getElementById(STYLE_ID);
-	if (!styleTag) {
-		styleTag = document.createElement('style');
-		styleTag.id = STYLE_ID;
-		document.getElementsByTagName('head')[0].appendChild(styleTag);
-	}
+	let styleTag = getStyleTag();
 	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings,currentTheme)+styleLanguageColors(settings.currentTheme.settings,settings.redirectLanguages,currentTheme)).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
@@ -197,6 +192,16 @@ export function removeStylesAndClasses(): void {
 		"codeblock-styler-show-langicons",
 		"codeblock-styler-show-langicons-always",
 	);
+}
+
+function getStyleTag(style_id: string = STYLE_ID): HTMLElement {
+	let styleTag = document.getElementById(style_id);
+	if (!styleTag) {
+		styleTag = document.createElement('style');
+		styleTag.id = style_id;
+		document.getElementsByTagName('head')[0].appendChild(styleTag);
+	}
+	return styleTag
 }
 
 function getCurrentTheme(app: App): string {
