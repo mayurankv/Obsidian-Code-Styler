@@ -56,7 +56,7 @@ body {
 	overflow: hidden !important;
 }
 .codeblock-styler pre.codeblock-styler-pre[class*='language-'] {
-	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), transparent var(--language-border-width), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), var(--codeblock-styler-codeblock-background-color) var(--language-border-width), var(--codeblock-styler-codeblock-background-color) 100%) !important;
 	padding-left: var(--language-border-width) !important;
 }
 .codeblock-styler pre.codeblock-styler-pre code {

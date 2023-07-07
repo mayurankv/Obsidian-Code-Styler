@@ -304,7 +304,6 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   - Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 - PDF Exporting
   - Sometimes page breaks cut lines in half.
-  - Language border colors are not correctly set.
 
 ### Upstream Issues
 
