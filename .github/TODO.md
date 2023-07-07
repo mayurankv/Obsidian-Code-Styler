@@ -2,9 +2,9 @@
 
 ## Important
 
-1. Add inline code styling
-2. Add codeblock outline and shadow (see Prism and other theme)
-3. Fix weird live preview scroll
+1. Add codeblock outline and shadow (see Prism and other theme)
+2. Fix weird live preview scroll
+3. Update CHANGELOG.md
 4. Publish to obsidian plugins
 
 ## Not Urgent
@@ -13,6 +13,12 @@
     - Editing Mode (`cm-hmd-indented-code`)
     - Reading Mode
 2. Specific terminal appearance parameter
+    - A `terminal` parameter which makes the codeblock appear as if it were a terminal
+    - A `terminal` codeblock which allows for indicating what the command was and what the output was:
+      - Choose the output character i.e. `$` or `>` etc.
+      - Set user, directory, device etc.
+      - Make runnable using execute code plugin
+      - Make terminal codeblock use terminal appearance
 3. Dataview compatibility
 4. Check through:
     - `package.json`

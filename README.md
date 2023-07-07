@@ -290,20 +290,21 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 
 ### Existing Issues
 
-- First pickr change does not change color correctly.
-- Indented codeblocks are not dealt with properly.
+- General
+  1. Indented codeblocks are not dealt with properly.
 - Editing Mode
-  - On open of a note, there are small differences in the line number margins.
-  - Weird scroll in live preview when click (due to `codeblockHeader` codemirror extension) when first line is a codeblock.
-  - If a language is excluded or ignored, it currently needs to be unfolded before it can be removed or it disappears.
-  - Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
+  1. On open of a note, there can be small differences in the line number margins.
+  2. Weird scroll effect in live preview when click (due to `codeblockHeader` codemirror extension).
+  3. If a language is excluded or ignored, it currently needs to be unfolded before it can be removed or it disappears.
+  4. Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
+  5. Folding empty codeblocks causes the `HyperMD-codeblock-end` class and `HyperMD-codeblock` class not to be applied when unfolded.
 - Reading Mode
-  - Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
-  - Scrollbar does not show behind line gutter
-  - Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
-  - Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
+  1. Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
+  2. Scrollbar does not show behind line gutter
+  3. Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles.
+  4. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 - PDF Exporting
-  - Sometimes page breaks cut lines in half.
+  1. Sometimes page breaks cut lines in half.
 
 ### Upstream Issues
 
@@ -338,11 +339,11 @@ Please try to create bug reports/issues that are:
 
 ### Contributors
 
-This plugin is based on the [Codeblock Customizer Plugin](https://github.com/mugiwara85/CodeblockCustomizer) by [@mugiwara85](https://github.com/mugiwara85).
-
 [![List of contributors](https://contrib.rocks/image?repo=mayurankv/Obsidian-Code-Styler)](https://github.com/mayurankv/Obsidian-Code-Styler/graphs/contributors)
 
 *Made with [contrib.rocks](https://contrib.rocks).*
+
+This plugin is based on the [Codeblock Customizer Plugin](https://github.com/mugiwara85/CodeblockCustomizer) by [@mugiwara85](https://github.com/mugiwara85).
 
 ## Support
 

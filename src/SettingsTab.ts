@@ -878,7 +878,7 @@ export class SettingsTab extends PluginSettingTab {
 			.on('show', (color: Pickr.HSVaColor, instance: Pickr) => {
 				if (typeof disabled !== 'undefined' && disabled())
 					instance.hide()
-				requestAnimationFrame(() => requestAnimationFrame(() => (instance.getRoot() as any).interaction.result.select()))
+				// requestAnimationFrame(() => requestAnimationFrame(() => (instance.getRoot() as any).interaction.result.select()))
 			})
 			.on('save', (color: Pickr.HSVaColor, instance: PickrResettable) => {
 				const savedColor: Color = `#${color.toHEXA().toString().substring(1)}`;

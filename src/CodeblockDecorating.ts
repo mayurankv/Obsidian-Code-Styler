@@ -29,18 +29,18 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 	return headerContainer;
 }
 
+export function getLanguageIcon(language: string, languageIcons: Record<string,string>) {
+	language = getLanguageTag(language);
+	if (language in languageIcons)
+		return languageIcons[language];
+	return null;
+}
 function getLanguageTag(language: string) {
 	if (language in LANGUAGE_NAMES)
 		return LANGUAGE_NAMES[language];
 	else if (language !== '')
 		return language.charAt(0).toUpperCase() + language.slice(1);
 	return "";
-}
-function getLanguageIcon(language: string, languageIcons: Record<string,string>) {
-	language = getLanguageTag(language);
-	if (language in languageIcons)
-		return languageIcons[language];
-	return null;
 }
 
 export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {

@@ -6,7 +6,7 @@ import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
-import { createHeader, getLineClass } from "./CodeblockDecorating";
+import { createHeader, getLanguageIcon, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
 	const codeblockLineNumberCharWidth = StateField.define<number>({
@@ -161,7 +161,7 @@ export function createCodeMirrorExtensions(settings: CodeStylerSettings, languag
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons),block: true}));
+								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true}));
 							else
 								continue;
 					} else {
@@ -279,7 +279,14 @@ export function createCodeMirrorExtensions(settings: CodeStylerSettings, languag
 		}
 			
 		eq(other: HeaderWidget) {
-			return this.codeblockParameters == other.codeblockParameters
+			return (
+				this.codeblockParameters.language == other.codeblockParameters.language &&
+				this.codeblockParameters.title == other.codeblockParameters.title &&
+				this.codeblockParameters.fold.enabled == other.codeblockParameters.fold.enabled &&
+				this.codeblockParameters.fold.placeholder == other.codeblockParameters.fold.placeholder &&
+				this.themeSettings.header.collapsePlaceholder == other.themeSettings.header.collapsePlaceholder &&
+				getLanguageIcon(this.codeblockParameters.language,this.languageIcons) == getLanguageIcon(other.codeblockParameters.language,other.languageIcons)
+				);
 		}
 			
 		toDOM(view: EditorView): HTMLElement {
@@ -351,7 +358,7 @@ export function createCodeMirrorExtensions(settings: CodeStylerSettings, languag
 	const uncollapse: StateEffectType<(from: any, to: any) => boolean> = StateEffect.define();
 
 	function handleMouseDown(event: MouseEvent): void {
-		this.setAttribute("data-clicked","true")
+		this.setAttribute("data-clicked","true");
 	}
 
 	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse]
