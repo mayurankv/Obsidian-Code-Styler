@@ -135,7 +135,7 @@ body:not(.codeblock-styler-show-langnames-always) .codeblock-styler-header-conta
 	display: none !important;
 }
 body .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container:not([class*='language-']),
-body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language-tag-'])) .codeblock-styler-header-container { /*todo*/
+body pre.codeblock-styler-pre:not([class*='language-']) .codeblock-styler-header-container {
 	display: none !important;
 }
 [class^='codeblock-styler-header-container'] {
@@ -308,7 +308,6 @@ pre.codeblock-styler-pre > code > div:only-child > [class^='codeblock-styler-lin
 }
 pre.codeblock-styler-pre [class^='codeblock-styler-line-number'] {
 	white-space: nowrap;
-	height: 100%;
 	grid-column: 1;
 	position: sticky;
 	left: 0;
@@ -440,7 +439,7 @@ pre.codeblock-styler-pre.codeblock-styler-collapsed [class^='codeblock-styler-he
 }
 body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) pre.codeblock-styler-pre:has( .codeblock-styler-header-container) button.copy-code-button,
 body:not(.codeblock-styler-show-langnames-always) pre.codeblock-styler-pre:not(:has( .codeblock-styler-header-container-specific)):not(:has( .codeblock-styler-header-container img.codeblock-styler-icon)) button.copy-code-button,
-body pre.codeblock-styler-pre:not(:has([class*='codeblock-styler-header-language-tag-'])) button.copy-code-button { /*? Depending on header visibility */ /*todo*/
+body pre.codeblock-styler-pre:not([class*='language-']):has(.codeblock-styler-header-container) button.copy-code-button { /*? Depending on header visibility */
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal)) !important;
 	--copy-code-header-right-margin: 12px;
 }
@@ -584,7 +583,7 @@ pre.codeblock-styler-pre code ~ code.language-output input.interactive-stdin {
     color: var(--text-normal);
     background-color: var(--codeblock-styler-codeblock-background-color);
     padding: 2px 8px;
-    border-color: var(--code-comment); /*todo*/
+    border-color: var(--code-comment);
 	border-style: solid;
 	border-radius: 5px;
 	border-width: 1px;
@@ -704,7 +703,7 @@ pre.codeblock-styler-pre div.code-block-highlight-wrap {
 }
 body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) .cm-embed-block .codeblock-styler-pre-parent:has( pre.codeblock-styler-pre .codeblock-styler-header-container) + .edit-block-button,
 body:not(.codeblock-styler-show-langnames-always) .cm-embed-block .codeblock-styler-pre-parent:not(:has( pre.codeblock-styler-pre .codeblock-styler-header-container-specific)):not(:has( pre.codeblock-styler-pre .codeblock-styler-header-container img.codeblock-styler-icon)) + .edit-block-button,
-body .cm-embed-block .codeblock-styler-pre-parent:not(:has( pre.codeblock-styler-pre [class*='codeblock-styler-header-language-tag-'])) + .edit-block-button { /*? Depending on header visibility */ /*todo*/
+body .cm-embed-block .codeblock-styler-pre-parent:has( pre.codeblock-styler-pre:not([class*='language-']) .codeblock-styler-header-container) + .edit-block-button { /*? Depending on header visibility */
 	--copy-code-header-right-margin: 4px;
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 }
