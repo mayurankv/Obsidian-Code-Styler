@@ -7,18 +7,14 @@ import { createHeader, getLineClass } from "./CodeblockDecorating";
 
 export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeblockStylerPlugin, editingEmbeds: boolean = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
-	if (sourcePath === '' || (frontmatter ?? cache?.frontmatter)?.['codeblock-styler-ignore'] === true)
+	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['codeblock-styler-ignore'] === true)
 		return;
-	
+
 	await sleep(50);
-	// const view: MarkdownView | null = plugin.app.workspace.getActiveViewOfType(MarkdownView); //todo
-	// if (!element && view) //todo
-	if (!element) //todo
-		console.log('oh no!',element) //todo
-		// element = view.contentEl; //todo
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	const specific = !element.querySelector(".view-content > *");
+	const print = Boolean(element.querySelector("div.print > *")) && plugin.settings.decoratePrint;
 
 	if (!editingEmbeds && !specific)
 		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-reading-view pre:not(.frontmatter)'));
@@ -41,13 +37,14 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 				subtree: false,
 			})
 	}
-
 	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
 		renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
-	else if (specific) {
-		if (!(!editingEmbeds && element.classList.contains("admonition-content")))
-			await readingViewPostProcessor(element.matchParent('.view-content') as HTMLElement,{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
+	else if (specific && !print) {
+		if (!(!editingEmbeds && element.classList.contains("admonition-content"))) {
+			let contentEl = element.matchParent('.view-content') as HTMLElement;
+			await readingViewPostProcessor(contentEl?contentEl:(element.matchParent('div.print') as HTMLElement),{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
+		}
 	}
 	else
 		renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,plugin);

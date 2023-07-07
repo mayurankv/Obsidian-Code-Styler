@@ -1,147 +1,108 @@
 /** Define CSS variables */
 body {
-	--line-number-gutter-min-width: 32.67px;
-	--line-number-gutter-padding: 16px;
-	--header-separator-width: 2px;
-	--header-separator-width-padding: var(--header-separator-width);
+	/* Codeblock Body */
+	--border-radius: 10px;
+	--gradient-background-color: transparent;
 	--code-padding: 8px;
+	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
+	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
+	--language-border-color: var(--codeblock-styler-codeblock-background-color);
+	--language-border-width: 0px;
+
+	/* Header */
 	--header-font-size: var(--code-size);
 	--header-padding: 0px;
 	--header-inner-vertical-padding: 0.3;
 	--header-spacing: 15px;
-	--language-border-color: var(--codeblock-styler-codeblock-background-color);
-	--language-border-width: 0px;
-	--gradient-background-color: transparent;
-	--border-radius: 10px;
-	--language-icon-size: 28px;
-	--gradient-highlights-color-stop: 100%;
-	--duration-button: 240ms;
 	--header-button-spacing: 14px;
-	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
-	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
-	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
-	--codeblock-styler-button-color: var(--text-muted);
-	--codeblock-styler-button-active-color: white;
-	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
-	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-	--dent-difference: 30px;
-	--line-wrapping: pre-wrap;
-	--line-active-wrapping: var(--line-wrapping);
-	--icon-filter: none;
+	--header-separator-width: 2px;
+	--header-separator-width-padding: var(--header-separator-width);
 	--codeblock-styler-header-border: none;
 	--collapsed-bottom-border: 0 solid transparent;
+	--language-icon-size: 28px;
+	--language-icon-filter: none;
+
+	/* Lines */
+	--gradient-highlights-color-stop: 100%;
+
+	/* Line Numbers */
+	--line-number-gutter-padding: 16px;
+	--line-number-gutter-min-width: 32.67px;
+
+	/* Line Text */
+	--line-wrapping: pre-wrap;
+	--line-active-wrapping: var(--line-wrapping);
+
+	/* Buttons */
+	--codeblock-styler-button-color: var(--text-muted);
+	--codeblock-styler-button-active-color: white;
+	--duration-button: 240ms;
+	--dent-difference: 30px;
+	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
 }
 
 /*! Codeblock Styler */
-
-/** Codeblock background colours */
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'] {
-	background: linear-gradient(90deg, var(--gradient-background-color) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
-	overflow: hidden;
-	padding: 0 !important;
-	padding-left: var(--size-4-4) !important;
+/** Pre elements */
+.codeblock-styler-pre-parent{
+	margin-bottom: 16px;
 }
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] {
-	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), var(--gradient-background-color) var(--language-border-width) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+.codeblock-styler .codeblock-styler-pre {
+	border-radius: var(--border-radius) !important;
+	min-height: unset;
+	padding: 0px !important;
+	overflow: hidden !important;
 }
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] [class^='codeblock-styler-line-number'] {
-	margin-left: var(--language-border-width);
+.codeblock-styler pre.codeblock-styler-pre code {
+	display: grid !important;
+	grid-template-columns: min-content auto;
+	padding-top: var(--code-padding) !important;
+	padding-bottom: var(--code-padding) !important;
+	padding-left: 0px !important;
+	padding-right: 0px !important;
+	border-radius: 0px !important;
+	background: none !important;
+	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out, border-top ease-in-out var(--duration-button);
+	max-height: 0;
+	overflow-x: scroll;
 }
-.codeblock-styler pre.codeblock-styler-pre {
-	background: var(--codeblock-styler-codeblock-background-color) !important;
-}
-.codeblock-styler pre.codeblock-styler-pre[class*='language-'] {
-	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), transparent var(--language-border-width), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
-	padding-left: var(--language-border-width) !important;
-}
-
-/** Highlighting */
-pre.codeblock-styler-pre [class^='codeblock-styler-line-highlighted'] {
-	background-image: linear-gradient(90deg, var(--gradient-background-color) 0% var(--gradient-highlights-color-stop), transparent 100%);
-}
-.codeblock-styler-line-highlighted {
-	--gradient-background-color: var(--codeblock-styler-default-highlight-color) !important;
-}
-.codeblock-styler-active-line-highlight .cm-active,
-.codeblock-styler-active-line-highlight-editor .cm-active {
-	background: linear-gradient(to right, var(--codeblock-styler-active-editor-line-color), var(--gradient-highlights-color-stop), transparent) !important;
-}
-.codeblock-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active,
-.codeblock-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active {
-	background: linear-gradient(to right, var(--codeblock-styler-active-codeblock-line-color), var(--gradient-highlights-color-stop), transparent) !important;
-}
-
-/** Line number gutter styling */
-.codeblock-styler:not(.codeblock-styler-show-line-numbers) .codeblock-styler-line-number,
-.codeblock-styler-line-number-hide {
+.codeblock-styler pre.codeblock-styler-pre code::-webkit-scrollbar {
 	display: none;
 }
-pre.codeblock-styler-pre > code > div:first-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
-	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-styler-gutter-background-color);
-	transition: box-shadow ease-in-out var(--duration-button);
+.codeblock-styler pre.codeblock-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
+	--line-wrapping: var(--line-active-wrapping) !important;
 }
-pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed > code > div:first-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
-	box-shadow: 0px 0px var(--codeblock-styler-gutter-background-color);
+.codeblock-styler pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed code {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 }
-pre.codeblock-styler-pre > code > div:last-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
-	box-shadow: 0px var(--code-padding) var(--codeblock-styler-gutter-background-color);
-}
-pre.codeblock-styler-pre > code > div:only-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
-	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-styler-gutter-background-color),0px var(--code-padding) var(--codeblock-styler-gutter-background-color);
-}
-[class^='codeblock-styler-line-number'] {
-	padding-top: 2px;
-	padding-left: calc(4px + var(--language-border-width));
-	padding-right: 8px;
-	text-align: right;
-	min-width: var(--line-number-gutter-min-width);
-	background-color: var(--codeblock-styler-gutter-background-color);
-	font-size: var(--code-size);
-	font-family: var(--font-monospace);
-	color: var(--codeblock-styler-gutter-text-color);
-	user-select: none;
-}
-.markdown-source-view .HyperMD-codeblock .codeblock-styler-line-number,
-.markdown-source-view .HyperMD-codeblock .codeblock-styler-line-number-specific {
-	position: absolute;
-	box-sizing: content-box;
-	display: inline-block;
-	height: 100%;
-	min-width: calc(var(--line-number-gutter-min-width) - 12px);
-	overflow-x: auto;
-	direction: rtl;
-	left: 0;
-}
-.markdown-source-view .HyperMD-codeblock-begin .codeblock-styler-line-number,
-.markdown-source-view .HyperMD-codeblock-begin .codeblock-styler-line-number-specific,
-.markdown-source-view .HyperMD-codeblock-end .codeblock-styler-line-number,
-.markdown-source-view .HyperMD-codeblock-end .codeblock-styler-line-number-specific {
-	width: var(--line-number-gutter-width);
-}
-pre.codeblock-styler-pre [class^='codeblock-styler-line-number'] {
-	white-space: nowrap;
-	width: var(--line-number-margin);
-	flex-shrink: 0;
-	flex-grow: 1;
-	height: 100%;
-}
-pre.codeblock-styler-pre div:last-child > [class^='codeblock-styler-line-number'] {
-	width: unset;
-}
-.codeblock-styler-active-line-highlight.codeblock-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active [class^='codeblock-styler-line-number'],
-.codeblock-styler-active-line-highlight-codeblock.codeblock-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active [class^='codeblock-styler-line-number'],
-.codeblock-styler-gutter-highlight [class*="codeblock-styler-line-highlighted"] [class^='codeblock-styler-line-number'] {
-	background-color: rgba(0,0,0,0);
-}
-.codeblock-styler-gutter-active-line .cm-active [class^='codeblock-styler-line-number']{
-	color: var(--codeblock-styler-gutter-active-text-color);
-}
-.codeblock-styler.codeblock-styler-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-styler-line-number),
-.codeblock-styler.codeblock-styler-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-styler-line-number-specific) {
-	padding-left: calc(12px + var(--language-border-width) + var(--line-number-gutter-width) + var(--line-number-gutter-padding)) !important;
-}
-.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line']::before {
+.codeblock-styler pre.codeblock-styler-pre::before,
+.codeblock-styler pre.codeblock-styler-pre::after {
 	content: none !important;
+}
+.markdown-source-view.mod-cm6 .cm-embed-block pre.codeblock-styler-pre {
+	margin: 1em 0px;
+}
+
+/** Editing Mode Body */
+
+.codeblock-styler .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-begin {
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 0px !important;
+	border-top: none !important;
+}
+.codeblock-styler .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-end {
+	border-bottom-left-radius: var(--border-radius);
+	border-bottom-right-radius: var(--border-radius);
+}
+body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container + .HyperMD-codeblock-begin,
+body:not(.codeblock-styler-show-langnames-always) .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container:not(:has( img.codeblock-styler-icon)) + .HyperMD-codeblock-begin,
+body .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container:not(:has([class*='codeblock-styler-header-language-tag-'])) + .HyperMD-codeblock-begin,
+body .markdown-source-view :not([class^='codeblock-styler-header-container']) + [class*="codeblock-styler-line"].HyperMD-codeblock-begin,
+body .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-begin:nth-of-type(1) { /*? Depending on header visibility */
+	border-top-left-radius: var(--border-radius) !important;
+	border-top-right-radius: var(--border-radius) !important;
 }
 
 /** Header styling */
@@ -268,61 +229,121 @@ pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock
 .codeblock-styler-icon {
 	width: var(--language-icon-size);
 	height: var(--language-icon-size);
-	filter: var(--icon-filter);
+	filter: var(--language-icon-filter);
 	margin: 0 !important;
 	border: none !important;
 }
 
-/** Pre element styling */
-.codeblock-styler-pre-parent{
-	margin-bottom: 16px;
+/** Lines */
+.codeblock-styler pre.codeblock-styler-pre {
+	background: var(--codeblock-styler-codeblock-background-color) !important;
 }
-.codeblock-styler .codeblock-styler-pre {
-	border-radius: var(--border-radius) !important;
-	min-height: unset;
-	padding: 0px !important;
-	overflow: hidden !important;
+.codeblock-styler pre.codeblock-styler-pre[class*='language-'] {
+	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), transparent var(--language-border-width), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+	padding-left: var(--language-border-width) !important;
 }
-.codeblock-styler pre.codeblock-styler-pre code {
-	display: grid !important;
-	grid-template-columns: min-content auto;
-	padding-top: var(--code-padding) !important;
-	padding-bottom: var(--code-padding) !important;
-	padding-left: 0px !important;
-	padding-right: 0px !important;
-	border-radius: 0px !important;
-	background: none !important;
-	transition: max-height var(--duration-button) ease-in-out, padding var(--duration-button) ease-in-out, border-top ease-in-out var(--duration-button);
-	max-height: 0;
-	overflow-x: scroll;
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'] {
+	background: linear-gradient(90deg, var(--gradient-background-color) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+	overflow: hidden;
+	padding: 0 !important;
+	padding-left: var(--size-4-4) !important;
 }
-.codeblock-styler pre.codeblock-styler-pre code::-webkit-scrollbar {
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] {
+	background: linear-gradient(90deg, var(--language-border-color), var(--language-border-color) var(--language-border-width), var(--gradient-background-color) var(--language-border-width) var(--gradient-highlights-color-stop), transparent 100%), var(--codeblock-styler-codeblock-background-color) !important;
+}
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line'][class*='language-'] [class^='codeblock-styler-line-number'] {
+	margin-left: var(--language-border-width);
+}
+pre.codeblock-styler-pre [class^='codeblock-styler-line-highlighted'] {
+	background-image: linear-gradient(90deg, var(--gradient-background-color) 0% var(--gradient-highlights-color-stop), transparent 100%);
+}
+.codeblock-styler-line-highlighted {
+	--gradient-background-color: var(--codeblock-styler-default-highlight-color) !important;
+}
+.codeblock-styler-active-line-highlight .cm-active,
+.codeblock-styler-active-line-highlight-editor .cm-active {
+	background: linear-gradient(to right, var(--codeblock-styler-active-editor-line-color), var(--gradient-highlights-color-stop), transparent) !important;
+}
+.codeblock-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active,
+.codeblock-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active {
+	background: linear-gradient(to right, var(--codeblock-styler-active-codeblock-line-color), var(--gradient-highlights-color-stop), transparent) !important;
+}
+
+/** Line numbers */
+.codeblock-styler:not(.codeblock-styler-show-line-numbers) .codeblock-styler-line-number,
+.codeblock-styler-line-number-hide {
 	display: none;
 }
-.codeblock-styler pre.codeblock-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
-	--line-wrapping: var(--line-active-wrapping) !important;
+pre.codeblock-styler-pre > code > div:first-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
+	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-styler-gutter-background-color);
+	transition: box-shadow ease-in-out var(--duration-button);
 }
-.codeblock-styler pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed code {
-	padding-top: 0 !important;
-	padding-bottom: 0 !important;
+pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed > code > div:first-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
+	box-shadow: 0px 0px var(--codeblock-styler-gutter-background-color);
 }
-.codeblock-styler pre.codeblock-styler-pre::before,
-.codeblock-styler pre.codeblock-styler-pre::after {
+pre.codeblock-styler-pre > code > div:last-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
+	box-shadow: 0px var(--code-padding) var(--codeblock-styler-gutter-background-color);
+}
+pre.codeblock-styler-pre > code > div:only-child > [class^='codeblock-styler-line-number'] { /*? Maintain gutter color when padded */
+	box-shadow: 0px calc(-1 * var(--code-padding)) var(--codeblock-styler-gutter-background-color),0px var(--code-padding) var(--codeblock-styler-gutter-background-color);
+}
+[class^='codeblock-styler-line-number'] {
+	padding-top: 2px;
+	padding-left: calc(4px + var(--language-border-width));
+	padding-right: 8px;
+	text-align: right;
+	min-width: var(--line-number-gutter-min-width);
+	background-color: var(--codeblock-styler-gutter-background-color);
+	font-size: var(--code-size);
+	font-family: var(--font-monospace);
+	color: var(--codeblock-styler-gutter-text-color);
+	user-select: none;
+}
+.markdown-source-view .HyperMD-codeblock .codeblock-styler-line-number,
+.markdown-source-view .HyperMD-codeblock .codeblock-styler-line-number-specific {
+	position: absolute;
+	box-sizing: content-box;
+	display: inline-block;
+	height: 100%;
+	min-width: calc(var(--line-number-gutter-min-width) - 12px);
+	overflow-x: auto;
+	direction: rtl;
+	left: 0;
+}
+.markdown-source-view .HyperMD-codeblock-begin .codeblock-styler-line-number,
+.markdown-source-view .HyperMD-codeblock-begin .codeblock-styler-line-number-specific,
+.markdown-source-view .HyperMD-codeblock-end .codeblock-styler-line-number,
+.markdown-source-view .HyperMD-codeblock-end .codeblock-styler-line-number-specific {
+	width: var(--line-number-gutter-width);
+}
+pre.codeblock-styler-pre [class^='codeblock-styler-line-number'] {
+	white-space: nowrap;
+	width: var(--line-number-margin);
+	flex-shrink: 0;
+	flex-grow: 1;
+	height: 100%;
+	grid-column: 1;
+}
+pre.codeblock-styler-pre div:last-child > [class^='codeblock-styler-line-number'] {
+	width: unset;
+}
+.codeblock-styler-active-line-highlight.codeblock-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active [class^='codeblock-styler-line-number'],
+.codeblock-styler-active-line-highlight-codeblock.codeblock-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="codeblock-styler-line"].cm-active [class^='codeblock-styler-line-number'],
+.codeblock-styler-gutter-highlight [class*="codeblock-styler-line-highlighted"] [class^='codeblock-styler-line-number'] {
+	background-color: rgba(0,0,0,0);
+}
+.codeblock-styler-gutter-active-line .cm-active [class^='codeblock-styler-line-number']{
+	color: var(--codeblock-styler-gutter-active-text-color);
+}
+.codeblock-styler.codeblock-styler-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-styler-line-number),
+.codeblock-styler.codeblock-styler-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.codeblock-styler-line-number-specific) {
+	padding-left: calc(12px + var(--language-border-width) + var(--line-number-gutter-width) + var(--line-number-gutter-padding)) !important;
+}
+.codeblock-styler .markdown-source-view .HyperMD-codeblock[class*='codeblock-styler-line']::before {
 	content: none !important;
 }
-.markdown-source-view.mod-cm6 .cm-embed-block pre.codeblock-styler-pre {
-	margin: 1em 0px;
-}
 
-/** Source mode text styling */
-.HyperMD-codeblock:has(> .cm-widgetBuffer) { /*? Prevent Line Wraps */
-	white-space: nowrap;
-}
-.HyperMD-codeblock:has(> .cm-widgetBuffer) > .cm-hmd-codeblock { /*? Prevent Line Wraps */
-	white-space: break-spaces;
-}
-
-/** Reading mode text styling */
+/** Line text */
 pre.codeblock-styler-pre > code > div[class*='codeblock-styler-line'] {
 	display: contents !important;
 }
@@ -330,28 +351,52 @@ pre.codeblock-styler-pre .codeblock-styler-line-text {
 	flex-basis: 100%;
 	margin-left: var(--line-number-margin);
 	padding-left: var(--line-number-gutter-padding);
+	grid-column: 2;
+}
+.HyperMD-codeblock:has(> .cm-widgetBuffer) { /*? Prevent Line Wraps */
+	white-space: nowrap;
+}
+.HyperMD-codeblock:has(> .cm-widgetBuffer) > .cm-hmd-codeblock { /*? Prevent Line Wraps */
+	white-space: break-spaces;
 }
 
-/** Border radius styling */
-.codeblock-styler .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-begin {
-	border-top-left-radius: 0px !important;
-	border-top-right-radius: 0px !important;
-	border-top: none !important;
+/** Buttons */
+@keyframes outdent {
+	from {
+		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+		clip-path: var(--polygon-in);
+	}
+	to {
+		margin-right: var(--copy-code-header-right-margin);
+		clip-path: var(--polygon-out);
+	}
 }
-.codeblock-styler .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-end {
-	border-bottom-left-radius: var(--border-radius);
-	border-bottom-right-radius: var(--border-radius);
+@keyframes indent {
+	from {
+		margin-right: var(--copy-code-header-right-margin);
+		clip-path: var(--polygon-out);
+	}
+	to {
+		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+		clip-path: var(--polygon-in);
+	}
 }
-body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container + .HyperMD-codeblock-begin,
-body:not(.codeblock-styler-show-langnames-always) .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container:not(:has( img.codeblock-styler-icon)) + .HyperMD-codeblock-begin,
-body .markdown-source-view :not(pre.codeblock-styler-pre) > .codeblock-styler-header-container:not(:has([class*='codeblock-styler-header-language-tag-'])) + .HyperMD-codeblock-begin,
-body .markdown-source-view :not([class^='codeblock-styler-header-container']) + [class*="codeblock-styler-line"].HyperMD-codeblock-begin,
-body .markdown-source-view [class*="codeblock-styler-line"].HyperMD-codeblock-begin:nth-of-type(1) { /*? Depending on header visibility */
-	border-top-left-radius: var(--border-radius) !important;
-	border-top-right-radius: var(--border-radius) !important;
+@keyframes reverse-outdent {
+	from {
+		clip-path: var(--polygon-in);
+	}
+	to {
+		clip-path: var(--polygon-out);
+	}
 }
-
-/** Button styling */
+@keyframes reverse-indent {
+	from {
+		clip-path: var(--polygon-out);
+	}
+	to {
+		clip-path: var(--polygon-in);
+	}
+}
 .markdown-rendered pre.codeblock-styler-pre button {
     transition: visibility var(--duration-button), opacity var(--duration-button);
 	visibility: visible;
@@ -401,42 +446,6 @@ pre.codeblock-styler-pre.codeblock-styler-codeblock-collapsed [class^='codeblock
 }
 [class^='codeblock-styler-header-container']:hover::after {
 	scale: 1;
-}
-@keyframes outdent {
-	from {
-		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
-		clip-path: var(--polygon-in);
-	}
-	to {
-		margin-right: var(--copy-code-header-right-margin);
-		clip-path: var(--polygon-out);
-	}
-}
-@keyframes indent {
-	from {
-		margin-right: var(--copy-code-header-right-margin);
-		clip-path: var(--polygon-out);
-	}
-	to {
-		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
-		clip-path: var(--polygon-in);
-	}
-}
-@keyframes reverse-outdent {
-	from {
-		clip-path: var(--polygon-in);
-	}
-	to {
-		clip-path: var(--polygon-out);
-	}
-}
-@keyframes reverse-indent {
-	from {
-		clip-path: var(--polygon-out);
-	}
-	to {
-		clip-path: var(--polygon-in);
-	}
 }
 body:not(.codeblock-styler-show-langicons-always):not(.codeblock-styler-show-langnames-always) pre.codeblock-styler-pre:has( .codeblock-styler-header-container) button.copy-code-button,
 body:not(.codeblock-styler-show-langnames-always) pre.codeblock-styler-pre:not(:has( .codeblock-styler-header-container-specific)):not(:has( .codeblock-styler-header-container img.codeblock-styler-icon)) button.copy-code-button,
@@ -713,4 +722,9 @@ div.block-language-include pre.codeblock-styler-pre button.copy-code-button {
 }
 div.block-language-include pre.codeblock-styler-pre button.copy-code-button:hover {
 	margin-right: var(--copy-code-header-right-margin);
+}
+
+/*! Print Styling */
+div.print {
+	--line-wrapping: pre-wrap !important;
 }

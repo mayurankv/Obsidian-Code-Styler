@@ -64,6 +64,15 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.excludedLanguages = value;
 					(async () => {await this.plugin.saveSettings()})();
 				}));
+		new Setting(containerEl)
+			.setName('Style Codeblocks on Export')
+			.setDesc('If enabled, the PDF generated when exporting to PDF will be styled.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.decoratePrint)
+				.onChange((value) => {
+					this.plugin.settings.decoratePrint = value;
+					(async () => {await this.plugin.saveSettings()})();         
+				}));
 
 		// ========== Themes ==========
 		containerEl.createEl('h3', {text: 'Theme Settings'});

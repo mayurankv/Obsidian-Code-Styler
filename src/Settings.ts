@@ -94,6 +94,7 @@ export interface CodeblockStylerSettings {
 	currentTheme: CodeblockStylerTheme;
 	newTheme: string;
 	newHighlight: string;
+	decoratePrint: boolean;
 	excludedLanguages: string;
 	excludedCodeblocks: string;
 	specialLanguages: Array<string>;
@@ -264,6 +265,7 @@ export const DEFAULT_SETTINGS: CodeblockStylerSettings = {
 	currentTheme: structuredClone(DEFAULT_THEME),
 	newTheme: '',
 	newHighlight: '',
+	decoratePrint: true,
 	excludedLanguages: "ad-*",
 	excludedCodeblocks: "dataview, dataviewjs, math",
 	specialLanguages: ["^preview$","^include$","^output$","^run-.+$"],

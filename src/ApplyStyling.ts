@@ -111,7 +111,7 @@ function styleThemeSettings (themeSettings: CodeblockStylerThemeSettings, curren
 			--header-font-size: ${themeSettings.header.fontSize}px;
 			--line-wrapping: ${themeSettings.codeblock.unwrapLines?'pre':'pre-wrap'};
 			${!themeSettings.codeblock.wrapLinesActive?'':'--line-active-wrapping: pre-wrap;'}
-			${themeSettings.header.languageIcon.displayColor?'':'--icon-filter: grayscale(1);'}
+			${themeSettings.header.languageIcon.displayColor?'':'--language-icon-filter: grayscale(1);'}
 		}
 		${THEME_STYLES?.[currentTheme]?.border?`
 			.markdown-source-view :not(pre.codeblock-styler-pre) > [class^='codeblock-styler-header-container'] {
