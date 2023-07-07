@@ -561,6 +561,14 @@ pre.codeblock-styler-pre button.copy-code-button::before,
 	padding: 0;
 }
 
+/*! Codeblock Styler PDF Styling */
+div.print {
+	--line-wrapping: pre-wrap !important;
+}
+.codeblock-styler div.print pre.codeblock-styler-pre code {
+	max-height: unset;
+}
+
 /*! Plugin Compatibility */
 /** Execute Code Plugin */
 pre.codeblock-styler-pre code ~ code.language-output {
@@ -722,9 +730,4 @@ div.block-language-include pre.codeblock-styler-pre button.copy-code-button {
 }
 div.block-language-include pre.codeblock-styler-pre button.copy-code-button:hover {
 	margin-right: var(--copy-code-header-right-margin);
-}
-
-/*! Print Styling */
-div.print {
-	--line-wrapping: pre-wrap !important;
 }

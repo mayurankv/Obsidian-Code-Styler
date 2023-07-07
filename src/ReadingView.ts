@@ -14,7 +14,9 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	const specific = !element.querySelector(".view-content > *");
-	const print = Boolean(element.querySelector("div.print > *")) && plugin.settings.decoratePrint;
+	const printing = Boolean(element.querySelector("div.print > *"));
+	if (printing && !plugin.settings.decoratePrint)
+		return;
 
 	if (!editingEmbeds && !specific)
 		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-reading-view pre:not(.frontmatter)'));
@@ -27,7 +29,7 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
 		return;
 
-	if (!editingEmbeds) {
+	if (!editingEmbeds && !printing) {
 		const readingViewParent = element.matchParent('.view-content > .markdown-reading-view > .markdown-preview-view > .markdown-preview-section');
 		if (readingViewParent)
 			plugin.readingStylingMutationObserver.observe(readingViewParent,{
@@ -40,14 +42,14 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
 		renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
-	else if (specific && !print) {
+	else if (specific && !printing) {
 		if (!(!editingEmbeds && element.classList.contains("admonition-content"))) {
 			let contentEl = element.matchParent('.view-content') as HTMLElement;
 			await readingViewPostProcessor(contentEl?contentEl:(element.matchParent('div.print') as HTMLElement),{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
 		}
 	}
 	else
-		renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,plugin);
+		renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,printing,plugin);
 }
 async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeblockStylerPlugin): Promise<void> {
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split('\n')[lineNumber]),sourcePath,plugin)).codeblocksParameters;
@@ -63,10 +65,10 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 				await sleep(2);
 		if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 			continue;
-		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblockParameters,plugin);
+		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblockParameters,true,plugin);
 	}
 }
-async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, plugin: CodeblockStylerPlugin) {
+async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeblockStylerPlugin) {
 	const fileContentLines = await getFileContentLines(sourcePath,plugin);
 	if (!fileContentLines)
 		return;
@@ -99,7 +101,7 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 				continue;
 			if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 				continue;
-			await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,plugin);
+			await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,!printing,plugin);
 		}
 	} catch (error) {
 		console.error(`Error rendering document: ${error.message}`);
@@ -107,14 +109,16 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	}
 }
 
-async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeblockStylerPlugin) {
+async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeblockStylerPlugin) {
 	// Add Execute Code Observer
-	plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
-		childList: true,
-		subtree: true,
-		attributes: true,
-		characterData: true,
-	});
+	if (dynamic) {
+		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
+			childList: true,
+			subtree: true,
+			attributes: true,
+			characterData: true,
+		});
+	}
 
 	// Add Parent Classes
 	codeblockPreElement.classList.add(`codeblock-styler-pre`);
@@ -127,40 +131,42 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
 	codeblockPreElement.insertBefore(headerContainer, codeblockPreElement.childNodes[0]);
 	
-	// Add listener for header collapsing on click
-	headerContainer.addEventListener("click", ()=>{
-		codeblockPreElement.classList.toggle("codeblock-styler-codeblock-collapsed")
-		if (codeblockCodeElement.style.maxHeight)
-			codeblockCodeElement.style.maxHeight = '';
-		else
-			codeblockCodeElement.style.maxHeight = 'var(--true-height)';
-		const executeCodeOutput = (codeblockPreElement.querySelector('pre > code ~ code.language-output') as HTMLElement);
-		if (executeCodeOutput && executeCodeOutput.style.display !== 'none') {
-			if (executeCodeOutput.style.maxHeight)
-				executeCodeOutput.style.maxHeight = '';
+	if (dynamic) {
+		// Add listener for header collapsing on click
+		headerContainer.addEventListener("click", ()=>{
+			codeblockPreElement.classList.toggle("codeblock-styler-codeblock-collapsed")
+			if (codeblockCodeElement.style.maxHeight)
+				codeblockCodeElement.style.maxHeight = '';
 			else
-				executeCodeOutput.style.maxHeight = 'var(--true-height)';
-		}
-	});
+				codeblockCodeElement.style.maxHeight = 'var(--true-height)';
+			const executeCodeOutput = (codeblockPreElement.querySelector('pre > code ~ code.language-output') as HTMLElement);
+			if (executeCodeOutput && executeCodeOutput.style.display !== 'none') {
+				if (executeCodeOutput.style.maxHeight)
+					executeCodeOutput.style.maxHeight = '';
+				else
+					executeCodeOutput.style.maxHeight = 'var(--true-height)';
+			}
+		});
 
-	// Line Wrapping Classes
-	if (codeblockParameters.lineUnwrap.alwaysEnabled) {
-		codeblockCodeElement.style.setProperty('--line-wrapping','pre');
-		if (codeblockParameters.lineUnwrap.activeWrap)
-			codeblockCodeElement.style.setProperty('--line-active-wrapping','pre-wrap');
-		else
-			codeblockCodeElement.style.setProperty('--line-active-wrapping','pre');
-	} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
-		codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
+		// Line Wrapping Classes
+		if (codeblockParameters.lineUnwrap.alwaysEnabled) {
+			codeblockCodeElement.style.setProperty('--line-wrapping','pre');
+			if (codeblockParameters.lineUnwrap.activeWrap)
+				codeblockCodeElement.style.setProperty('--line-active-wrapping','pre-wrap');
+			else
+				codeblockCodeElement.style.setProperty('--line-active-wrapping','pre');
+		} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
+			codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
 
-	// Height Setting (for collapse animation) - Delay to return correct height
-	setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockParameters.fold.enabled)},PRIMARY_DELAY);
+		// Height Setting (for collapse animation) - Delay to return correct height
+		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockParameters.fold.enabled)},PRIMARY_DELAY);
+	}
 
-	//todo (@mayurankv) Name section
+	// Ignore styled lines
 	if (codeblockCodeElement.querySelector("code [class*='codeblock-styler-line']"))
 		return;
 
-	//todo (@mayurankv) Name section
+	// Add line numbers
 	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	if (codeblockLines.length == 1)
 		codeblockLines = ['',''];
