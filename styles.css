@@ -316,10 +316,10 @@ pre.codeblock-styler-pre > code > div:only-child > [class^='codeblock-styler-lin
 pre.codeblock-styler-pre [class^='codeblock-styler-line-number'] {
 	white-space: nowrap;
 	width: var(--line-number-margin);
-	flex-shrink: 0;
-	flex-grow: 1;
 	height: 100%;
 	grid-column: 1;
+	position: sticky;
+	left: 0;
 }
 pre.codeblock-styler-pre div:last-child > [class^='codeblock-styler-line-number'] {
 	width: unset;

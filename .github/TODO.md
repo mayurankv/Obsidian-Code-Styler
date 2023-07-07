@@ -3,11 +3,12 @@
 ## Important
 
 1. Sort header CSS logic properly - some small issues
-2. Add inline code styling
-3. Add codeblock outline and shadow (see Prism and other theme)
-4. Fix weird live preview scroll
-5. Change name to Code Styler
-6. Publish to obsidian plugins
+2. Add octave color and icon
+3. Add inline code styling
+4. Add codeblock outline and shadow (see Prism and other theme)
+5. Fix weird live preview scroll
+6. Change name to Code Styler
+7. Publish to obsidian plugins
 
 ## Not Urgent
 
