@@ -1,19 +1,19 @@
-import { LANGUAGE_NAMES, CodeblockStylerThemeSettings } from "./Settings";
+import { LANGUAGE_NAMES, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, Highlights } from "./CodeblockParsing";
 
-export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeblockStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
-	const headerContainer = createDiv({cls: `codeblock-styler-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
+export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
+	const headerContainer = createDiv({cls: `code-styler-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
 	if (codeblockParameters.language !== ''){
 		const IconURL = getLanguageIcon(codeblockParameters.language,languageIcons)
 		if (IconURL !== null) {
 			const imageWrapper = createDiv();
 			const img = document.createElement("img");
-			img.classList.add("codeblock-styler-icon");
+			img.classList.add("code-styler-icon");
 			img.src = IconURL;
 			imageWrapper.appendChild(img);
 			headerContainer.appendChild(imageWrapper);
 		}
-		headerContainer.appendChild(createDiv({cls: `codeblock-styler-header-language-tag-${codeblockParameters.language}`, text: getLanguageTag(codeblockParameters.language)}));
+		headerContainer.appendChild(createDiv({cls: `code-styler-header-language-tag-${codeblockParameters.language}`, text: getLanguageTag(codeblockParameters.language)}));
 	}
 	
 	let headerText = '';
@@ -24,7 +24,7 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 			headerText = codeblockParameters.fold.placeholder;
 		else
 			headerText = themeSettings.header.collapsePlaceholder!==''?themeSettings.header.collapsePlaceholder:'Collapsed Code';
-	headerContainer.appendChild(createDiv({cls: "codeblock-styler-header-text", text: headerText}));   
+	headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: headerText}));   
 
 	return headerContainer;
 }
@@ -46,12 +46,12 @@ function getLanguageIcon(language: string, languageIcons: Record<string,string>)
 export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {
 	let classList: Array<string> = [];
 	if (codeblockParameters.highlights.default.lineNumbers.includes(lineNumber) || codeblockParameters.highlights.default.plainText.some(text => line.indexOf(text) > -1) || codeblockParameters.highlights.default.regularExpressions.some(regExp => regExp.test(line)))
-		classList.push('codeblock-styler-line-highlighted');
+		classList.push('code-styler-line-highlighted');
 	Object.entries(codeblockParameters.highlights.alternative).forEach(([alternativeHighlight,highlightedLines]: [string,Highlights]) => {
 		if (highlightedLines.lineNumbers.includes(lineNumber) || highlightedLines.plainText.some(text => line.indexOf(text) > -1) || highlightedLines.regularExpressions.some(regExp => regExp.test(line)))
-			classList.push(`codeblock-styler-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`);
+			classList.push(`code-styler-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`);
 	})
 	if (classList.length === 0)
-		classList = ['codeblock-styler-line']
+		classList = ['code-styler-line']
 	return classList;
 }

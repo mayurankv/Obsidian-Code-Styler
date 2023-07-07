@@ -6,7 +6,7 @@ export type Percentage = `${number}%`;
 export type Display = "none" | "if_header_shown" | "always";
 
 // Interface Creation
-export interface CodeblockStylerThemeModeColors {
+export interface CodeStylerThemeModeColors {
 	codeblock: {
 		backgroundColor: Color;
 		textColor: Color;
@@ -38,7 +38,7 @@ export interface CodeblockStylerThemeModeColors {
 		buttonActiveColor: Color;
 	}
 }
-export interface CodeblockStylerThemeSettings {
+export interface CodeStylerThemeSettings {
 	codeblock: {
 		lineNumbers: boolean;
 		unwrapLines: boolean;
@@ -80,18 +80,18 @@ export interface CodeblockStylerThemeSettings {
 		iconSize: number;
 	};
 }
-export interface CodeblockStylerThemeColors {
-	light: CodeblockStylerThemeModeColors;
-	dark: CodeblockStylerThemeModeColors;
+export interface CodeStylerThemeColors {
+	light: CodeStylerThemeModeColors;
+	dark: CodeStylerThemeModeColors;
 }
-export interface CodeblockStylerTheme {
-	settings: CodeblockStylerThemeSettings;
-	colors: CodeblockStylerThemeColors;
+export interface CodeStylerTheme {
+	settings: CodeStylerThemeSettings;
+	colors: CodeStylerThemeColors;
 }
-export interface CodeblockStylerSettings {
-	themes: Record<string,CodeblockStylerTheme>;
+export interface CodeStylerSettings {
+	themes: Record<string,CodeStylerTheme>;
 	selectedTheme: string;
-	currentTheme: CodeblockStylerTheme;
+	currentTheme: CodeStylerTheme;
 	newTheme: string;
 	newHighlight: string;
 	decoratePrint: boolean;
@@ -102,7 +102,7 @@ export interface CodeblockStylerSettings {
 }
 
 // Theme Defaults
-const THEME_DEFAULT_SETTINGS: CodeblockStylerThemeSettings = {
+const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 	codeblock: {
 		lineNumbers: true,
 		unwrapLines: true,
@@ -144,7 +144,7 @@ const THEME_DEFAULT_SETTINGS: CodeblockStylerThemeSettings = {
 		iconSize: 28,
 	},
 }
-export const THEME_FALLBACK_COLORS: CodeblockStylerThemeModeColors = {
+export const THEME_FALLBACK_COLORS: CodeStylerThemeModeColors = {
 	codeblock: {
 		backgroundColor: '--code-background',
 		textColor: '--code-normal',
@@ -178,14 +178,14 @@ export const THEME_FALLBACK_COLORS: CodeblockStylerThemeModeColors = {
 }
 
 // Theme Creation
-const DEFAULT_THEME: CodeblockStylerTheme = {
+const DEFAULT_THEME: CodeStylerTheme = {
 	settings: THEME_DEFAULT_SETTINGS,
 	colors: {
 		light: THEME_FALLBACK_COLORS,
 		dark: THEME_FALLBACK_COLORS,
 	},
 }
-const SOLARIZED_THEME: CodeblockStylerTheme = {
+const SOLARIZED_THEME: CodeStylerTheme = {
 	settings: THEME_DEFAULT_SETTINGS,
 	colors: {
 		light: {
@@ -256,7 +256,7 @@ const SOLARIZED_THEME: CodeblockStylerTheme = {
 }
 
 // Plugin default settings
-export const DEFAULT_SETTINGS: CodeblockStylerSettings = {
+export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	themes: {
 		'Default': DEFAULT_THEME,
 		'Solarized': SOLARIZED_THEME,

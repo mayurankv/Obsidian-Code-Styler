@@ -1,4 +1,4 @@
-# Contributing to Codeblock Styler
+# Contributing to Obsidian Code Styler
 
 Thanks for taking the time to contribute!
 

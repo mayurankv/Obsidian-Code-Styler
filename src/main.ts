@@ -1,13 +1,13 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeblockStylerSettings } from './Settings';
+import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeMirrorExtensions } from "./EditingView";
 import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewPostProcessor } from "./ReadingView";
 
-export default class CodeblockStylerPlugin extends Plugin {
-	settings: CodeblockStylerSettings;
+export default class CodeStylerPlugin extends Plugin {
+	settings: CodeStylerSettings;
 	readingStylingMutationObserver: MutationObserver;
 	executeCodeMutationObserver: MutationObserver;
 	languageIcons: Record<string,string>;
@@ -17,7 +17,7 @@ export default class CodeblockStylerPlugin extends Plugin {
 		const settingsTab = new SettingsTab(this.app,this);
 		this.addSettingTab(settingsTab);
 
-		document.body.classList.add('codeblock-styler'); // Load Styles
+		document.body.classList.add('code-styler'); // Load Styles
 		updateStyling(this.settings,this.app);
 
 		this.languageIcons = Object.keys(LANGUAGE_ICONS_DATA).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
@@ -39,7 +39,7 @@ export default class CodeblockStylerPlugin extends Plugin {
 
 		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
 
-		console.log("Loaded plugin: CodeBlock Styler");
+		console.log("Loaded plugin: Code Styler");
 	}
 	
 	onunload() {
@@ -49,7 +49,7 @@ export default class CodeblockStylerPlugin extends Plugin {
 		destroyReadingModeElements();
 		for (const url of Object.values(this.languageIcons)) // Unload icons
 			URL.revokeObjectURL(url);
-		console.log("Unloaded plugin: CodeBlock Styler");
+		console.log("Unloaded plugin: Code Styler");
 	}
 
 	async loadSettings() {

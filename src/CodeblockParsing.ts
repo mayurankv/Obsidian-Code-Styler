@@ -1,7 +1,7 @@
 import { TFile } from "obsidian";
 
-import CodeblockStylerPlugin from "./main";
-import { CodeblockStylerTheme } from "./Settings";
+import CodeStylerPlugin from "./main";
+import { CodeStylerTheme } from "./Settings";
 
 export interface CodeblockParameters {
 	language: string;
@@ -33,7 +33,7 @@ export interface Highlights {
 	regularExpressions: Array<RegExp>;
 }
 
-export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeblockStylerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
+export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
 	//@ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,any> = plugin.app.plugins.plugins;
 	const admonitions: boolean = 'obsidian-admonition' in plugins;
@@ -73,7 +73,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
 }
 
-export function parseCodeblockParameters(parameterLine: string, theme: CodeblockStylerTheme): CodeblockParameters {
+export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
 	let codeblockParameters: CodeblockParameters = {
 		language: '',
 		title: '',
@@ -138,7 +138,7 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 	return codeblockParameters
 }
 
-function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeblockStylerTheme): void {
+function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
 	if (parameterString.startsWith('title:')) {
 		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
@@ -260,7 +260,7 @@ export function trimParameterLine(parameterLine: string): string {
 	return parameterLine.trim();
 }
 
-export async function getFileContentLines(sourcePath: string, plugin: CodeblockStylerPlugin): Promise<Array<string> | undefined> {
+export async function getFileContentLines(sourcePath: string, plugin: CodeStylerPlugin): Promise<Array<string> | undefined> {
 	const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
 	if (!file) {
 		console.error(`File not found: ${sourcePath}`);

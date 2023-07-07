@@ -1,13 +1,13 @@
 import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache } from "obsidian";
 
-import CodeblockStylerPlugin from "./main";
+import CodeStylerPlugin from "./main";
 import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
 import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeblockStylerPlugin, editingEmbeds: boolean = false) {
+export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
-	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['codeblock-styler-ignore'] === true)
+	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['code-styler-ignore'] === true)
 		return;
 
 	await sleep(50);
@@ -51,7 +51,7 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	else
 		renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,printing,plugin);
 }
-async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeblockStylerPlugin): Promise<void> {
+async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin): Promise<void> {
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split('\n')[lineNumber]),sourcePath,plugin)).codeblocksParameters;
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
@@ -68,7 +68,7 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblockParameters,true,plugin);
 	}
 }
-async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeblockStylerPlugin) {
+async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
 	const fileContentLines = await getFileContentLines(sourcePath,plugin);
 	if (!fileContentLines)
 		return;
@@ -97,7 +97,7 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 			if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
 				while(!codeblockCodeElement.classList.contains("is-loaded"))
 					await sleep(2);
-			if (codeblockCodeElement.querySelector("code [class*='codeblock-styler-line']"))
+			if (codeblockCodeElement.querySelector("code [class*='code-styler-line']"))
 				continue;
 			if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 				continue;
@@ -109,7 +109,7 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	}
 }
 
-async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeblockStylerPlugin) {
+async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeStylerPlugin) {
 	// Add Execute Code Observer
 	if (dynamic) {
 		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
@@ -121,11 +121,11 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	}
 
 	// Add Parent Classes
-	codeblockPreElement.classList.add(`codeblock-styler-pre`);
+	codeblockPreElement.classList.add(`code-styler-pre`);
 	if (codeblockParameters.language)
 		codeblockPreElement.classList.add(`language-${codeblockParameters.language}`);
 	if (codeblockPreElement.parentElement)
-		codeblockPreElement.parentElement.classList.add(`codeblock-styler-pre-parent`);
+		codeblockPreElement.parentElement.classList.add(`code-styler-pre-parent`);
 
 	// Create Header
 	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
@@ -134,7 +134,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	if (dynamic) {
 		// Add listener for header collapsing on click
 		headerContainer.addEventListener("click", ()=>{
-			codeblockPreElement.classList.toggle("codeblock-styler-collapsed")
+			codeblockPreElement.classList.toggle("code-styler-collapsed")
 			if (codeblockCodeElement.style.maxHeight)
 				codeblockCodeElement.style.maxHeight = '';
 			else
@@ -161,10 +161,10 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		// Height Setting (for collapse animation) - Delay to return correct height
 		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockParameters.fold.enabled)},PRIMARY_DELAY);
 	} else if (codeblockParameters.fold.enabled)
-		codeblockPreElement.classList.add("codeblock-styler-collapsed");
+		codeblockPreElement.classList.add("code-styler-collapsed");
 	
 	// Ignore styled lines
-	if (codeblockCodeElement.querySelector("code [class*='codeblock-styler-line']"))
+	if (codeblockCodeElement.querySelector("code [class*='code-styler-line']"))
 		return;
 
 	// Add line numbers
@@ -186,8 +186,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 			lineNumberDisplay = '-hide'
 		else if (codeblockParameters.lineNumbers.alwaysEnabled && !codeblockParameters.lineNumbers.alwaysDisabled)
 			lineNumberDisplay = '-specific'
-		lineWrapper.appendChild(createDiv({cls: `codeblock-styler-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
-		lineWrapper.appendChild(createDiv({cls: `codeblock-styler-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
+		lineWrapper.appendChild(createDiv({cls: `code-styler-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
+		lineWrapper.appendChild(createDiv({cls: `code-styler-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
 }
 export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
@@ -196,7 +196,7 @@ export function remeasureReadingView(element: HTMLElement, primary_delay: number
 		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
 		if (!codeblockCodeElement)
 			return;
-		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('codeblock-styler-collapsed'))},primary_delay);
+		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('code-styler-collapsed'))},primary_delay);
 	})
 }
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
@@ -204,22 +204,22 @@ function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeEleme
 	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
 	codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
 	if (fold) {
-		codeblockPreElement.classList.add("codeblock-styler-collapsed");
+		codeblockPreElement.classList.add("code-styler-collapsed");
 		codeblockCodeElement.style.maxHeight = '';
 	}
 }
 
 export function destroyReadingModeElements(): void {
-	document.querySelectorAll(".codeblock-styler-pre-parent").forEach(codeblockPreParent => {
-		codeblockPreParent.classList.remove('codeblock-styler-pre-parent');
+	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
+		codeblockPreParent.classList.remove('code-styler-pre-parent');
 	});
 	[
-		...Array.from(document.querySelectorAll("pre.codeblock-styler-pre div[class^='codeblock-styler-header-container']")),
-		...Array.from(document.querySelectorAll("pre.codeblock-styler-pre div[class^='codeblock-styler-line-number']")),
+		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
+		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-line-number']")),
 	].forEach(element => element.remove());
-	document.querySelectorAll("pre.codeblock-styler-pre").forEach(codeblockPreElement => {
-		codeblockPreElement.classList.remove('codeblock-styler-pre');
-		codeblockPreElement.classList.remove('codeblock-styler-collapsed');
+	document.querySelectorAll("pre.code-styler-pre").forEach(codeblockPreElement => {
+		codeblockPreElement.classList.remove('code-styler-pre');
+		codeblockPreElement.classList.remove('code-styler-collapsed');
 		(codeblockPreElement as HTMLElement).style.removeProperty('--true-height');
 		(codeblockPreElement as HTMLElement).style.removeProperty('--line-number-margin');
 		(codeblockPreElement as HTMLElement).style.removeProperty('max-height');
@@ -236,7 +236,7 @@ export function destroyReadingModeElements(): void {
 		(codeblockCodeElement as HTMLElement).style.removeProperty('--line-active-wrapping');
 		(codeblockCodeElement as HTMLElement).style.removeProperty('max-height');
 		(codeblockCodeElement as HTMLElement).style.removeProperty('white-space');
-		(codeblockCodeElement as HTMLElement).innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="codeblock-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
+		(codeblockCodeElement as HTMLElement).innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="code-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
 			const codeblockLineText = (codeblockLine.firstChild as HTMLElement);
 			if (codeblockLineText)
 				reconstructedCodeblockLines.push(codeblockLineText.innerHTML);
@@ -255,7 +255,7 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
 		if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change style of execute code output
 			const executeCodeOutput = mutation.target as HTMLElement;
-			if (executeCodeOutput.parentElement?.classList.contains('codeblock-styler-collapsed'))
+			if (executeCodeOutput.parentElement?.classList.contains('code-styler-collapsed'))
 				executeCodeOutput.style.maxHeight = '';
 		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change children of execute code output
 			const executeCodeOutput = mutation.target as HTMLElement;

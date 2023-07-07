@@ -1,9 +1,9 @@
 {
-	"id": "codeblock-styler",
-	"name": "Codeblock Styler",
+	"id": "code-styler",
+	"name": "Code Styler",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This Obsidian plugin lets you style codeblocks in both editing mode and reading mode.",
+	"description": "This Obsidian plugin lets you style codeblocks and inline code in both editing mode and reading mode.",
 	"author": "Mayuran Visakan",
 	"authorUrl": "https://github.com/mayurankv",
 	"fundingUrl": "https://www.buymeacoffee.com/mayurankv2",

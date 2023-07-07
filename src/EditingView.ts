@@ -4,11 +4,11 @@ import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
-import { CodeblockStylerSettings, CodeblockStylerThemeSettings } from "./Settings";
+import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, languageIcons: Record<string,string>) {
+export function createCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
 	const codeblockLineNumberCharWidth = StateField.define<number>({
 		create(state: EditorState): number {
 			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
@@ -19,7 +19,7 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 	})
 	const codeblockLines = ViewPlugin.fromClass(
 		class CodeblockLines {
-			settings: CodeblockStylerSettings;
+			settings: CodeStylerSettings;
 			currentSettings: {
 				excludedCodeblocks: string;
 				excludedLanguages: string;
@@ -90,7 +90,7 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 				}
 				const decorations: Array<Range<Decoration>> = [];
 				const codeblocks = findUnduplicatedCodeblocks(view);
-				const settings: CodeblockStylerSettings = this.settings;
+				const settings: CodeStylerSettings = this.settings;
 				for (const codeblock of codeblocks) {
 					let codeblockParameters: CodeblockParameters;
 					let excludedCodeblock: boolean = false;
@@ -120,7 +120,7 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+'px':'calc(var(--line-number-gutter-min-width) - 12px)'}`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'codeblock-styler-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
+								decorations.push(Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+'px':'calc(var(--line-number-gutter-min-width) - 12px)'}`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'code-styler-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
 								decorations.push(Decoration.line({}).range(syntaxNode.from));
 								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}).range(syntaxNode.from))
 								lineNumber++;
@@ -255,17 +255,17 @@ export function createCodeMirrorExtensions(settings: CodeblockStylerSettings, la
 				lineNumberDisplay = '-hide'
 			else if (this.codeblockParameters.lineNumbers.alwaysEnabled && !this.codeblockParameters.lineNumbers.alwaysDisabled)
 				lineNumberDisplay = '-specific'
-			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?'width: var(--line-number-gutter-width);':''}, cls: `codeblock-styler-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
+			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?'width: var(--line-number-gutter-width);':''}, cls: `code-styler-line-number${lineNumberDisplay}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
 	class HeaderWidget extends WidgetType {
 		codeblockParameters: CodeblockParameters;
-		themeSettings: CodeblockStylerThemeSettings;
+		themeSettings: CodeStylerThemeSettings;
 		languageIcons: Record<string,string>;
 		view: EditorView;
 		mutationObserver: MutationObserver;
 	
-		constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeblockStylerThemeSettings, languageIcons: Record<string,string>) {
+		constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>) {
 			super();
 			this.codeblockParameters = codeblockParameters;
 			this.themeSettings = themeSettings;
@@ -362,7 +362,7 @@ function getCharWidth(state: EditorState, default_value: number): number {
 		let nextElement = beginningElement.previousElementSibling as HTMLElement;
 		if (!nextElement)
 			return result;
-		let lineNumberElement = nextElement.querySelector("[class^='codeblock-styler-line-number']") as HTMLElement;
+		let lineNumberElement = nextElement.querySelector("[class^='code-styler-line-number']") as HTMLElement;
 		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
 			return result;
 		let computedStyles = window.getComputedStyle(lineNumberElement, null);
@@ -403,6 +403,6 @@ function editingViewIgnore(state: EditorState): boolean {
 		return true;
 	const filePath = state.field(editorInfoField)?.file?.path;
 	if (typeof filePath !== 'undefined')
-		return this.app.metadataCache.getCache(filePath)?.frontmatter?.['codeblock-styler-ignore'] === true;
+		return this.app.metadataCache.getCache(filePath)?.frontmatter?.['code-styler-ignore'] === true;
 	return false;
 }

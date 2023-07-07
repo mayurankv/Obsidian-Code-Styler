@@ -1,13 +1,13 @@
 # Codeblock Styler Plugin
 
-[![Release](https://img.shields.io/github/v/release/mayurankv/Obsidian-Codeblock-Styler?style=for-the-badge)](https://github.com/mayurankv/Obsidian-Codeblock-Styler/releases/latest)
-[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22codeblock-styler%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=codeblock-styler)
+[![Release](https://img.shields.io/github/v/release/mayurankv/Obsidian-Code-Styler?style=for-the-badge)](https://github.com/mayurankv/Obsidian-Code-Styler/releases/latest)
+[![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22code-styler%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=code-styler)
 
-This is a plugin for [Obsidian.md](https://obsidian.md) which lets you customize the codeblocks in both editing mode and reading mode.
+This is a plugin for [Obsidian.md](https://obsidian.md) which lets you style codeblocks and inline code in both editing mode and reading mode.
 
 <!--
 > **Warning**  
-> If you used version 1.1.9 or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/codeblock-styler/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 2.0.0 or above. After that, everything should work fine.
+> If you used version 1.1.9 or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/code-styler/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 2.0.0 or above. After that, everything should work fine.
 -->
 
 ## Settings
@@ -189,14 +189,14 @@ Example:
 
 In addition to excluding the language, the plugin can be told to not apply to a specific codeblock by including the `ignore` parameter.
 
-The plugin can further be told to not apply to a specific file by adding `codeblock-styler-ignore: true` to the frontmatter of the note.
+The plugin can further be told to not apply to a specific file by adding `code-styler-ignore: true` to the frontmatter of the note.
 
 Example:
 
 ` ```cpp ignore`
 ![Ignore](images/Ignore.png)
 
-`codeblock-styler-ignore: true`
+`code-styler-ignore: true`
 ![Ignore Metadata](images/IgnoreMetadata.png)
 
 ## Appearance
@@ -319,7 +319,7 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 ## How to install the plugin
 
 - Simply install directly from Obsidian
-- Alternatively you can just copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/codeblock-styler/` or use the [Obsidian Beta Reviewers Plugin](https://github.com/TfTHacker/obsidian42-brat).
+- Alternatively you can just copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/code-styler/` or use the [Obsidian Beta Reviewers Plugin](https://github.com/TfTHacker/obsidian42-brat).
 
 ## Contributions
 
@@ -340,7 +340,7 @@ Please try to create bug reports/issues that are:
 
 This plugin is based on the [Codeblock Customizer Plugin](https://github.com/mugiwara85/CodeblockCustomizer) by [@mugiwara85](https://github.com/mugiwara85).
 
-[![List of contributors](https://contrib.rocks/image?repo=mayurankv/Obsidian-Codeblock-Styler)](https://github.com/mayurankv/Obsidian-Codeblock-Styler/graphs/contributors)
+[![List of contributors](https://contrib.rocks/image?repo=mayurankv/Obsidian-Code-Styler)](https://github.com/mayurankv/Obsidian-Code-Styler/graphs/contributors)
 
 *Made with [contrib.rocks](https://contrib.rocks).*
 
