@@ -33,6 +33,11 @@ export interface CodeStylerThemeModeColors {
 		defaultColor: Color;
 		alternativeHighlights: Record<string,Color>;
 	},
+	inline: {
+		backgroundColor: Color;
+		textColor: Color;
+		activeTextColor: Color;
+	}
 	advanced: {
 		buttonColor: Color;
 		buttonActiveColor: Color;
@@ -71,6 +76,13 @@ export interface CodeStylerThemeSettings {
 	highlights: {
 		activeCodeblockLine: boolean;
 		activeEditorLine: boolean;
+	},
+	inline: {
+		fontWeight: number;
+		curvature: number;
+		paddingVertical: number;
+		paddingHorizontal: number;
+		marginHorizontal: number;
 	},
 	advanced: {
 		gradientHighlights: boolean;
@@ -136,6 +148,13 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 		activeCodeblockLine: false,
 		activeEditorLine: false,
 	},
+	inline: {
+		fontWeight: 4,
+		curvature: 6,
+		paddingVertical: 5,
+		paddingHorizontal: 5,
+		marginHorizontal: 0,
+	},
 	advanced: {
 		gradientHighlights: false,
 		gradientHighlightsColorStop: '70%',
@@ -170,6 +189,11 @@ export const THEME_FALLBACK_COLORS: CodeStylerThemeModeColors = {
 		activeEditorLineColor: '--color-base-20',
 		defaultColor: '--text-highlight-bg',
 		alternativeHighlights: {},
+	},
+	inline: {
+		backgroundColor: '--code-background',
+		textColor: '--code-normal',
+		activeTextColor: '--code-normal',
 	},
 	advanced: {
 		buttonColor: '--text-muted',
@@ -215,6 +239,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				defaultColor: '#E9DFBA',
 				alternativeHighlights: {},
 			},
+			inline: {
+				backgroundColor: '#FCF6E4',
+				textColor: '#bababa',
+				activeTextColor: '#bababa',
+			},
 			advanced: {
 				buttonColor: '--text-muted',
 				buttonActiveColor: '--text-normal',
@@ -246,6 +275,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				activeEditorLineColor: '#468eeb33',
 				defaultColor: '#054b5c',
 				alternativeHighlights: {},
+			},
+			inline: {
+				backgroundColor: '#002b36',
+				textColor: '#bababa',
+				activeTextColor: '#bababa',
 			},
 			advanced: {
 				buttonColor: '--text-muted',

@@ -579,6 +579,153 @@ export class SettingsTab extends PluginSettingTab {
 		const alternativeHighlightsContainer = containerEl.createDiv();
 		this.updateAlternativeHighlights(alternativeHighlightsContainer);
 
+		containerEl.createEl('h4', {text: 'Inline Code Appearance'});
+		new Setting(containerEl)
+			.setName('Inline Code Background Color')
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'inline_background',
+				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].inline.backgroundColor,
+				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].inline.backgroundColor = saveColor},
+			)});
+		new Setting(containerEl)
+			.setName('Inline Code Text Color')
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'inline_text',
+				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].inline.textColor,
+				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].inline.textColor = saveColor},
+			)});
+		new Setting(containerEl)
+			.setName('Inline Code Active Text Color')
+			.setDesc('The text color when editing inline code.')
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'inline_active_text',
+				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].inline.activeTextColor,
+				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].inline.activeTextColor = saveColor},
+			)});
+		new Setting(containerEl)
+			.setName('Inline Code Font Weight')
+			.setDesc('Determines how bold inline code appears.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(1,9,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.fontWeight)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.fontWeight = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default font weight')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.fontWeight = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.fontWeight;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.fontWeight);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				});
+			});
+		new Setting(containerEl)
+			.setName('Inline Code Curvature')
+			.setDesc('Determines how rounded inline code appear in pixels.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,12,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.curvature)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.curvature = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default curvature')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.curvature = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.curvature;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.curvature);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				});
+			});
+		new Setting(containerEl)
+			.setName('Inline Code Vertical Padding')
+			.setDesc('Determines how much vertical inner padding in pixels inline code has.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,10,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.paddingVertical)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.paddingVertical = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default vertical padding')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.paddingVertical = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.paddingVertical;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.paddingVertical);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				});
+			});
+		new Setting(containerEl)
+			.setName('Inline Code Horizontal Padding')
+			.setDesc('Determines how much horizontal inner padding in pixels inline code has.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,10,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.paddingHorizontal)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default horizontal padding')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.paddingHorizontal;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.paddingHorizontal);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				});
+			});
+		new Setting(containerEl)
+			.setName('Inline Code Horizontal Margin')
+			.setDesc('Determines how much horizontal outer margin is added to the inline code in pixels.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,8,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.marginHorizontal)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default horizontal margin')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.marginHorizontal;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.marginHorizontal);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				});
+			});
+
 		// ========== Advanced ==========
 		containerEl.createEl('h3', {text: 'Advanced Settings'});
 		

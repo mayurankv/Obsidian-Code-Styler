@@ -82,6 +82,9 @@ function getThemeColors (themeModeColors: CodeStylerThemeModeColors): string {
 		'default-highlight-color': themeModeColors.highlights.defaultColor,
 		'button-color': themeModeColors.advanced.buttonColor,
 		'button-active-color': themeModeColors.advanced.buttonActiveColor,
+		'inline-color': themeModeColors.inline.textColor,
+		'inline-color-active': themeModeColors.inline.activeTextColor,
+		'inline-background-color': themeModeColors.inline.backgroundColor,
 		...Object.entries(themeModeColors.highlights.alternativeHighlights).reduce((result: Record<string,Color>,[alternativeHighlight,color]: [string,Color]): Record<string,Color> => {
 			result[`${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-color`] = color;
 			return result;
@@ -110,6 +113,11 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
 			--header-font-size: ${themeSettings.header.fontSize}px;
 			--line-wrapping: ${themeSettings.codeblock.unwrapLines?'pre':'pre-wrap'};
+			--code-styler-inline-font-weight: ${themeSettings.inline.fontWeight}00;
+			--code-styler-inline-border-radius: ${themeSettings.inline.curvature}px;
+			--code-styler-inline-padding-vertical: ${themeSettings.inline.paddingVertical}px;
+			--code-styler-inline-padding-horizontal: ${themeSettings.inline.paddingHorizontal}px;
+			--code-styler-inline-margin-horizontal: ${themeSettings.inline.marginHorizontal}px;
 			${!themeSettings.codeblock.wrapLinesActive?'':'--line-active-wrapping: pre-wrap;'}
 			${themeSettings.header.languageIcon.displayColor?'':'--icon-filter: grayscale(1);'}
 		}

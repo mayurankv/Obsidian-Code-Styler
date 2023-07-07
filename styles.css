@@ -42,6 +42,16 @@ body {
 	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
 	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
+
+	/* Inline Code */
+	--code-styler-inline-font-weight: 400;
+	--code-styler-inline-border-radius: 6px;
+	--code-styler-inline-padding-vertical: 5px;
+	--code-styler-inline-padding-horizontal: 5px;
+	--code-styler-inline-margin-horizontal: 0px;
+	--code-styler-inline-color: var(--code-normal);
+	--code-styler-inline-color-active: var(--code-normal);
+	--code-styler-inline-background-color: var(--code-background);
 }
 
 /*! Codeblock Styler */
@@ -150,6 +160,7 @@ body pre.code-styler-pre:not([class*='language-']) .code-styler-header-container
 	display: flex !important;
 	overflow: visible;
 	transition: border-bottom ease-in-out var(--duration-button);
+	box-sizing: content-box;
 }
 .markdown-source-view :not(pre.code-styler-pre) > [class^='code-styler-header-container'] {
 	background: linear-gradient(var(--code-styler-header-background-color) 0%,var(--code-styler-header-background-color) calc(100% - var(--header-separator-width)), var(--code-styler-header-separator-color) calc(100% - var(--header-separator-width)), var(--code-styler-header-separator-color) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
@@ -164,7 +175,6 @@ body pre.code-styler-pre:not([class*='language-']) .code-styler-header-container
 pre.code-styler-pre [class^='code-styler-header-container'] {
 	background-color: var(--code-styler-header-background-color);
 	border-bottom: var(--header-separator-width) solid var(--code-styler-header-separator-color);
-	box-sizing: content-box;
 }
 .markdown-source-view :not(pre.code-styler-pre) > [class^='code-styler-header-container']:not(:has(+ .HyperMD-codeblock-begin)) {
 	background: linear-gradient(var(--code-styler-header-background-color) 0%,var(--code-styler-header-background-color) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-color) !important;
@@ -506,7 +516,7 @@ pre.code-styler-pre button.copy-code-button::before,
 .markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair {
 	transform: translateY(-50%);
 	font-size: 0;
-	top: min(calc(-0.5 * var(--container-height) * 1.1),calc(-0.5 * var(--container-min-height) * 1.1)) !important;
+	top: min(calc(-0.5 * var(--container-height) * 1.1 - var(--header-separator-width)),calc(-0.5 * var(--container-min-height) * 1.1 - var(--header-separator-width))) !important;
 	right: 0;
 	visibility: hidden;
 	padding: 0;
@@ -533,6 +543,47 @@ pre.code-styler-pre button.copy-code-button::before,
 }
 .markdown-source-view.mod-cm6 .HyperMD-codeblock-begin.code-styler-line {
 	overflow: visible;
+}
+
+/** Inline Code */
+.code-styler .cm-s-obsidian span.cm-inline-code,
+.code-styler .markdown-rendered :not(pre) > code {
+	font-weight: var(--code-styler-inline-font-weight);
+	color: var(--code-styler-inline-color);
+	background-color: var(--code-styler-inline-background-color) !important;
+	border-radius: var(--code-styler-inline-border-radius) !important;
+	padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal);
+	margin: 0px var(--code-styler-inline-margin-horizontal) !important;
+}
+
+.code-styler .cm-s-obsidian span.cm-formatting-code { /*? Standalone backticks */
+	color: var(--code-styler-inline-color-active);
+}
+
+.cm-s-obsidian span.cm-formatting-code:has(+ span.cm-inline-code:not(.cm-formatting-code)) {/*? First backtick */
+	color: var(--code-styler-inline-color-active);
+	border-radius: var(--code-styler-inline-border-radius) 0px 0px var(--inline-border-radius) !important;
+	padding-left: var(--code-styler-inline-padding-horizontal) !important;
+	padding-right: 0px !important;
+	margin-left: var(--code-styler-inline-margin-horizontal) !important;
+	margin-right: 0px !important;
+}
+
+.cm-s-obsidian span.cm-formatting-code + span.cm-inline-code:not(.cm-formatting-code) { /*? Inner code with backticks */
+	color: var(--code-styler-inline-color-active);
+	border-radius: 0px !important;
+	padding-left: 0px !important;
+	padding-right: 0px !important;
+	margin: 0px 0px !important;
+}
+
+.cm-s-obsidian span.cm-inline-code:not(.cm-formatting-code) + span.cm-formatting-code {/*? Last backtick */
+	color: var(--code-styler-inline-color-active);
+	border-radius: 0px var(--code-styler-inline-border-radius) var(--inline-border-radius) 0px !important;
+	padding-left: 0px !important;
+	padding-right: var(--code-styler-inline-padding-horizontal) !important;
+	margin-left: 0px !important;
+	margin-right: var(--code-styler-inline-margin-horizontal) !important;
 }
 
 /** Settings */
