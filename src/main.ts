@@ -29,15 +29,16 @@ export default class CodeStylerPlugin extends Plugin {
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
 		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
+
+		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
+
+		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
+
 		await sleep(200)
 		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
 			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')
 				leaf.view.previewMode.rerender(true);
 		})
-
-		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
-
-		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
 
 		console.log("Loaded plugin: Code Styler");
 	}
