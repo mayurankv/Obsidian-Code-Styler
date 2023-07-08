@@ -2,8 +2,8 @@ import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMat
 
 import CodeStylerPlugin from "./main";
 import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
-import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./CodeblockParsing";
-import { createHeader, getLineClass } from "./CodeblockDecorating";
+import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource, parseInlineCode } from "./CodeblockParsing";
+import { createHeader, createInlineOpener, getLineClass } from "./CodeblockDecorating";
 
 export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
@@ -115,25 +115,30 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 	for (let inlineCodeElement of Array.from(element.querySelectorAll(':not(pre) > code'))) {
 		if (inlineCodeElement.classList.contains('code-styler-highlighted') || inlineCodeElement.classList.contains('code-styler-highlight-ignore'))
 			return;
-		let match = /^({})?{([^\s]*)} ?(.*)$/.exec((inlineCodeElement as HTMLElement).innerText);
-		let renderString: string;
-		if (!match?.[1] && !(match?.[2] && match?.[3]))
-			return;
-		else if (match?.[1])
-			renderString = '`'+match[0].substring(2)+'`';
-		else
-			renderString = ['```',match[2],'\n',match[3],'\n```'].join('');
-		const tempRenderContainer = createDiv();
-		MarkdownRenderer.renderMarkdown(renderString,tempRenderContainer,'',new Component());
-		const renderedCodeElement = tempRenderContainer.querySelector(match?.[1]?'code':'pre > code');
-		if (!renderedCodeElement)
-			return;
-		if (!match?.[1]) {
+		let tempRenderContainer = createDiv();
+		let renderedCodeElement: HTMLElement | null;
+		let classes: Array<string>;
+		let {parameters,text} = parseInlineCode((inlineCodeElement as HTMLElement).innerText);
+		if (!parameters) {
+			if (!text)
+				return;
+			MarkdownRenderer.renderMarkdown('`'+text+'`',tempRenderContainer,'',new Component());
+			renderedCodeElement = tempRenderContainer.querySelector('code');
+			if (!renderedCodeElement)
+				return;
+			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
+			inlineCodeElement.classList.add('code-styler-highlight-ignore');
+		} else {
+			MarkdownRenderer.renderMarkdown(['```',parameters.language,'\n',text,'\n','```'].join(''),tempRenderContainer,'',new Component());
+			renderedCodeElement = tempRenderContainer.querySelector('pre > code');
+			if (!renderedCodeElement)
+				return;
 			while(!renderedCodeElement.classList.contains("is-loaded"))
 				await sleep(2);
+			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
+			inlineCodeElement.classList.add('code-styler-highlighted');
+			inlineCodeElement.insertBefore(createInlineOpener(parameters,plugin.languageIcons),inlineCodeElement.childNodes[0]);
 		}
-		inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
-		inlineCodeElement.classList.add(`code-styler-highlight${match?.[1]?'-ignore':'ed'}`);
 	}
 }
 
@@ -157,7 +162,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 
 	// Create Header
 	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
-	codeblockPreElement.insertBefore(headerContainer, codeblockPreElement.childNodes[0]);
+	codeblockPreElement.insertBefore(headerContainer,codeblockPreElement.childNodes[0]);
 	
 	if (dynamic) {
 		// Add listener for header collapsing on click
@@ -241,7 +246,6 @@ export function destroyReadingModeElements(): void {
 	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
 		codeblockPreParent.classList.remove('code-styler-pre-parent');
 	});
-	
 	[
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-line-number']")),

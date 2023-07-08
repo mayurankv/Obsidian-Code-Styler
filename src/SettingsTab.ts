@@ -734,6 +734,39 @@ export class SettingsTab extends PluginSettingTab {
 					});
 				});
 			});
+		new Setting(containerEl)
+			.setName('Inline Code Title Colour')
+			.setDesc('The text colour of inline code titles.')
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				'title_text',
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.titleTextColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.titleTextColour = saveColour},
+			)});
+		new Setting(containerEl)
+			.setName('Inline Code Title Font Weight')
+			.setDesc('Determines how bold inline code titles appear.')
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(1,9,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.titleFontWeight)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.titleFontWeight = value;
+						(async () => {await this.plugin.saveSettings()})();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip('Restore default font weight')
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.titleFontWeight = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.titleFontWeight;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.titleFontWeight);
+						(async () => {await this.plugin.saveSettings()})();
+					});
+				});
+			});
 
 		// ========== Advanced ==========
 		containerEl.createEl('h3', {text: 'Advanced Settings'});

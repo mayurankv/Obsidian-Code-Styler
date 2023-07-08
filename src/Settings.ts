@@ -37,6 +37,7 @@ export interface CodeStylerThemeModeColours {
 		backgroundColour: Colour;
 		textColour: Colour;
 		activeTextColour: Colour;
+		titleTextColour: Colour
 	}
 	advanced: {
 		buttonColour: Colour;
@@ -84,6 +85,7 @@ export interface CodeStylerThemeSettings {
 		paddingVertical: number;
 		paddingHorizontal: number;
 		marginHorizontal: number;
+		titleFontWeight: number;
 	},
 	advanced: {
 		gradientHighlights: boolean;
@@ -156,6 +158,7 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 		paddingVertical: 5,
 		paddingHorizontal: 5,
 		marginHorizontal: 0,
+		titleFontWeight: 8,
 	},
 	advanced: {
 		gradientHighlights: false,
@@ -196,6 +199,7 @@ export const THEME_FALLBACK_COLOURS: CodeStylerThemeModeColours = {
 		backgroundColour: '--code-background',
 		textColour: '--code-normal',
 		activeTextColour: '--code-normal',
+		titleTextColour: '--code-comment',
 	},
 	advanced: {
 		buttonColour: '--text-muted',
@@ -245,6 +249,7 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				backgroundColour: '#FCF6E4',
 				textColour: '#bababa',
 				activeTextColour: '#bababa',
+				titleTextColour: '#C25F30',
 			},
 			advanced: {
 				buttonColour: '--text-muted',
@@ -282,6 +287,7 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				backgroundColour: '#002b36',
 				textColour: '#bababa',
 				activeTextColour: '#bababa',
+				titleTextColour: '#000000',
 			},
 			advanced: {
 				buttonColour: '--text-muted',

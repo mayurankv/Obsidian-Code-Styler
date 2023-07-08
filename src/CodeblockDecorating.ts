@@ -1,18 +1,12 @@
 import { LANGUAGE_NAMES, CodeStylerThemeSettings } from "./Settings";
-import { CodeblockParameters, Highlights } from "./CodeblockParsing";
+import { CodeblockParameters, Highlights, InlineCodeParameters } from "./CodeblockParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
 	const headerContainer = createDiv({cls: `code-styler-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
 	if (codeblockParameters.language !== ''){
-		const IconURL = getLanguageIcon(codeblockParameters.language,languageIcons)
-		if (IconURL !== null) {
-			const imageWrapper = createDiv();
-			const img = document.createElement("img");
-			img.classList.add("code-styler-icon");
-			img.src = IconURL;
-			imageWrapper.appendChild(img);
-			headerContainer.appendChild(imageWrapper);
-		}
+		const iconURL = getLanguageIcon(codeblockParameters.language,languageIcons)
+		if (iconURL !== null)
+			headerContainer.appendChild(createImageWrapper(iconURL,createDiv()));
 		headerContainer.appendChild(createDiv({cls: `code-styler-header-language-tag-${codeblockParameters.language}`, text: getLanguageTag(codeblockParameters.language)}));
 	}
 	
@@ -27,6 +21,24 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 	headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: headerText}));   
 
 	return headerContainer;
+}
+export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>): HTMLElement {
+	const openerContainer = createSpan({cls: `code-styler-inline-opener`});
+	if (inlineCodeParameters.icon) {
+		const iconURL = getLanguageIcon(inlineCodeParameters.language,languageIcons);
+		if (iconURL !== null)
+			openerContainer.appendChild(createImageWrapper(iconURL,createSpan(),`code-styler-inline-icon`));
+	}
+	if (inlineCodeParameters.title)
+		openerContainer.appendChild(createSpan({cls: `code-styler-inline-title`, text: inlineCodeParameters.title}));
+	return openerContainer;
+}
+function createImageWrapper(iconURL: string, imageWrapper: HTMLElement, imgClass: string = "code-styler-icon"): HTMLElement {
+	const img = document.createElement("img");
+	img.classList.add(imgClass);
+	img.src = iconURL;
+	imageWrapper.appendChild(img);
+	return imageWrapper;
 }
 
 export function getLanguageIcon(language: string, languageIcons: Record<string,string>) {

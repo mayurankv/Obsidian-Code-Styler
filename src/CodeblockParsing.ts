@@ -26,6 +26,11 @@ export interface CodeblockParameters {
 	},
 	ignore: boolean;
 }
+export interface InlineCodeParameters {
+	language: string;
+	title: string;
+	icon: boolean;
+}
 
 export interface Highlights {
 	lineNumbers: Array<number>;
@@ -72,6 +77,17 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 	}
 	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
 }
+export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
+	
+	let match = /^({} ?)?{([^}]*)} ?(.*)$/.exec(codeText);
+	
+	if (!match?.[1] && !(match?.[2] && match?.[3]))
+		return {parameters: null, text: ''};
+	else if (match?.[1])
+		return {parameters: null, text: match[0].substring(match[1].length)};
+	else
+		return {parameters: parseInlineCodeParameters(match[2]), text: match[3]};
+}
 
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
 	let codeblockParameters: CodeblockParameters = {
@@ -110,7 +126,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 		const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
 		if (!parameterStrings)
 			return codeblockParameters;
-		parameterStrings.forEach((parameterString) => parseParameterString(parameterString,codeblockParameters,theme))
+		parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	}
 	return codeblockParameters;
 }
@@ -123,7 +139,7 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
 				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
 			}
-			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_])=>(num))))];
+			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins['obsidian-code-preview'].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,number])=>(num))))];
 			if (codeblockParameters.title === '')
 				codeblockParameters.title = codePreviewParams.filePath.split('\\').pop().split('/').pop();
 			codeblockParameters.language = codePreviewParams.language;
@@ -137,8 +153,24 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 	}
 	return codeblockParameters
 }
+function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters {
+	let inlineCodeParameters: InlineCodeParameters = {
+		language: '',
+		title: '',
+		icon: false,
+	}
+	let languageBreak = parameterLine.indexOf(' ');
+	inlineCodeParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
+	if (languageBreak === -1)
+		return inlineCodeParameters;
+	const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+	if (!parameterStrings)
+		return inlineCodeParameters;
+	parameterStrings.forEach((parameterString) => parseInlineCodeParameterString(parameterString,inlineCodeParameters));
+	return inlineCodeParameters;
+}
 
-function parseParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
+function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
 	if (parameterString.startsWith('title:')) {
 		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
@@ -234,6 +266,15 @@ export function isExcluded(language: string, excludedLanguagesString: string): b
 }
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,'.+')}$`,'i'))
+}
+function parseInlineCodeParameterString(parameterString: string, inlineCodeParameters: InlineCodeParameters): void {
+	if (parameterString.startsWith('title:')) {
+		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
+		if (titleMatch)
+			inlineCodeParameters.title = titleMatch[2].trim();
+	} else if (parameterString === 'icon' || (parameterString.startsWith('icon:') && parameterString.toLowerCase() === 'icon:true')) {
+		inlineCodeParameters.icon = true;
+	}
 }
 
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {

@@ -257,7 +257,7 @@ Example:
 
 ## Inline Code
 
-Inline code can be customised
+Inline code can be customised as well with background color, text color, text color whilst being edited, font weight, paddings and curvature all being customisable. Inline code can also have syntax highlighting using %%TODO%%
 
 ## Plugin Compatibility
 

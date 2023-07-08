@@ -85,6 +85,7 @@ function getThemeColours (themeModeColours: CodeStylerThemeModeColours): string 
 		'inline-colour': themeModeColours.inline.textColour,
 		'inline-colour-active': themeModeColours.inline.activeTextColour,
 		'inline-background-colour': themeModeColours.inline.backgroundColour,
+		'inline-title-colour': themeModeColours.inline.titleTextColour,
 		...Object.entries(themeModeColours.highlights.alternativeHighlights).reduce((result: Record<string,Colour>,[alternativeHighlight,colour]: [string,Colour]): Record<string,Colour> => {
 			result[`${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-colour`] = colour;
 			return result;
@@ -118,6 +119,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 			--code-styler-inline-padding-vertical: ${themeSettings.inline.paddingVertical}px;
 			--code-styler-inline-padding-horizontal: ${themeSettings.inline.paddingHorizontal}px;
 			--code-styler-inline-margin-horizontal: ${themeSettings.inline.marginHorizontal}px;
+			--code-styler-inline-title-font-weight: ${themeSettings.inline.titleFontWeight}00;
 			${!themeSettings.codeblock.wrapLinesActive?'':'--line-active-wrapping: pre-wrap;'}
 			${themeSettings.header.languageIcon.displayColour?'':'--icon-filter: grayscale(1);'}
 		}
