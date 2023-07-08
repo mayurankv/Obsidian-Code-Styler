@@ -1,0 +1,75 @@
+/** Define CSS variables */
+@import "./css/codeblocks.css";
+@import "./css/inlineCode.css";
+@import "./css/pdfExport.css";
+@import "./css/pickr.css";
+@import "./css/pluginCompatibility.css";
+
+body {
+	/* Codeblock Body */
+	--border-radius: 10px;
+	--gradient-background-colour: transparent;
+	--code-padding: 8px;
+	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
+	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
+	--language-border-colour: var(--code-styler-codeblock-background-colour);
+	--language-border-width: 0px;
+
+	/* Header */
+	--header-font-size: var(--code-size);
+	--header-padding: 0px;
+	--header-inner-vertical-padding: 0.3;
+	--header-spacing: 15px;
+	--header-button-spacing: 14px;
+	--header-separator-width: 2px;
+	--header-separator-width-padding: var(--header-separator-width);
+	--code-styler-header-border: none;
+	--collapsed-bottom-border: 0 solid transparent;
+	--language-icon-size: 28px;
+	--language-icon-filter: none;
+
+	/* Lines */
+	--gradient-highlights-colour-stop: 100%;
+
+	/* Line Numbers */
+	--line-number-height-correction: 2px;
+	--line-number-gutter-padding: 16px;
+	--line-number-gutter-min-width: 32.67px;
+
+	/* Line Text */
+	--line-wrapping: pre-wrap;
+	--line-active-wrapping: var(--line-wrapping);
+
+	/* Buttons */
+	--code-styler-button-colour: var(--text-muted);
+	--code-styler-button-active-colour: white;
+	--duration-button: 240ms;
+	--dent-difference: 30px;
+	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
+
+	/* Inline Code */
+	--code-styler-inline-font-weight: 400;
+	--code-styler-inline-border-radius: 6px;
+	--code-styler-inline-padding-vertical: 5px;
+	--code-styler-inline-padding-horizontal: 5px;
+	--code-styler-inline-margin-horizontal: 0px;
+	--code-styler-inline-colour: var(--code-normal);
+	--code-styler-inline-colour-active: var(--code-normal);
+	--code-styler-inline-background-colour: var(--code-background);
+}
+
+/** Settings */
+.setting-item.code-styler-spaced .checkbox-container + .pickr {
+	padding-left: 10px;
+}
+.code-styler-donation {
+	width: 70%;
+	margin: 0 auto;
+	text-align: center;
+}
+.code-styler-setting-text-area textarea {
+	width: 400px;
+	height: 220px;
+}

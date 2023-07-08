@@ -1,11 +1,10 @@
 # TODO
 
-1. Split up CSS files as described on Obsidian discord
-2. Check through:
+1. Check through:
     - `package.json`
     - `package-lock.json`
     - `eslintrc`
-3. Update github:
+2. Update github:
     - Better issue templates using [yaml](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository)
       - [Example 1](https://github.com/javalent/admonitions/tree/main/.github/ISSUE_TEMPLATE)
       - [Example 2](https://github.com/obsidian-tasks-group/obsidian-tasks/tree/main/.github/ISSUE_TEMPLATE)

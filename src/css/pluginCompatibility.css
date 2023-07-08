@@ -1,0 +1,162 @@
+/** Execute Code Plugin */
+pre.code-styler-pre code ~ code.language-output {
+	display: block;
+	margin-bottom: 0;
+	padding-bottom: calc(2.5 * var(--code-padding)) !important;
+	padding-left: calc(var(--line-number-gutter-padding)) !important;
+	border-top: var(--header-separator-width) solid var(--code-styler-header-separator-colour);
+}
+pre.code-styler-pre.code-styler-collapsed code ~ code.language-output {
+	border-top-color: transparent;
+	border-top-width: 0;
+}
+pre.code-styler-pre:hover code ~ code.language-output {
+	margin-bottom: 0;
+}
+pre.code-styler-pre code ~ code.language-output input.interactive-stdin {
+    color: var(--text-normal);
+    background-color: var(--code-styler-codeblock-background-colour);
+    padding: 2px 8px;
+    border-color: var(--code-comment);
+	border-style: solid;
+	border-radius: 5px;
+	border-width: 1px;
+}
+pre.code-styler-pre code ~ code.language-output hr {
+	display: none;
+}
+pre.code-styler-pre button.run-code-button {
+	--copy-code-header-right-margin: 12px;
+	--dent-difference: 24px;
+	height: 14px;
+	margin-bottom: 6px !important;
+}
+pre.code-styler-pre.code-styler-collapsed button.run-code-button {
+	top: 500px;
+}
+pre.code-styler-pre button.run-code-button::before {
+	content: "\200b";
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	padding-right: 4px;
+	background-color: var(--code-styler-button-colour);
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 28a1 1 0 0 1-1-1V5a1 1 0 0 1 1.482-.876l20 11a1 1 0 0 1 0 1.752l-20 11A1 1 0 0 1 7 28Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 28a1 1 0 0 1-1-1V5a1 1 0 0 1 1.482-.876l20 11a1 1 0 0 1 0 1.752l-20 11A1 1 0 0 1 7 28Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	mask-repeat: no-repeat;
+	vertical-align: 0px;
+}
+pre.code-styler-pre button.clear-button-disabled,
+pre.code-styler-pre button.run-button-disabled {
+	display: none !important;
+}
+pre.code-styler-pre button.clear-button {
+	height: 14px;
+	margin-bottom: 6px !important;
+	margin-left: calc(var(--language-border-width) + 12px);
+	will-change: margin-right, clip-path;
+	clip-path: var(--polygon-in);
+}
+pre.code-styler-pre button.clear-button::before {
+	content: "\200b";
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	padding-right: 4px;
+	background-color: var(--code-styler-button-colour);
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4 6 14l1.41 1.41L15 7.83V28h2V7.83l7.59 7.58L26 14 16 4z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4 6 14l1.41 1.41L15 7.83V28h2V7.83l7.59 7.58L26 14 16 4z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+	mask-repeat: no-repeat;
+	vertical-align: 0px;
+}
+pre.code-styler-pre button.clear-button:not(:active) {
+	animation: reverse-indent var(--duration-button);
+}
+pre.code-styler-pre button.clear-button:hover{
+	background-color: transparent;
+	animation: reverse-outdent var(--duration-button);
+	margin-right: var(--copy-code-header-right-margin);
+	clip-path: var(--polygon-out);
+}
+pre.code-styler-pre button.clear-button:active {
+	scale: 0.95;
+	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
+}
+.code-styler-pre-parent.has-run-code-button .load-state-indicator {
+	color: none;
+	background: none;
+	z-index: 10;
+}
+.code-styler-pre-parent.has-run-code-button .load-state-indicator::before {
+	box-shadow: none;
+}
+.code-styler-pre-parent.has-run-code-button .load-state-indicator svg {
+	color: var(--code-styler-button-colour);
+}
+.code-styler-pre-parent.has-run-code-button .load-state-indicator svg:hover {
+	color: var(--code-styler-button-active-colour);
+}
+.code-styler-pre-parent.has-run-code-button .load-state-indicator.visible {
+	transform: translateX(0);
+}
+
+/** Embed Code Plugin */
+.block-language-preview pre.code-styler-pre code {
+	white-space: unset;
+}
+pre.code-styler-pre span.code-block-line_num-wrap,
+pre.code-styler-pre div.code-block-highlight-wrap {
+	display: none;
+}
+.markdown-source-view.mod-cm6 .cm-embed-block .code-styler-pre-parent + .edit-block-button::after {
+	content: 'Edit Block';
+	font-size: var(--font-ui-smaller);
+	padding-left: 4px;
+}
+.markdown-source-view.mod-cm6 .cm-embed-block:not(:hover) .code-styler-pre-parent + .edit-block-button {
+	visibility: hidden;
+	opacity: 0
+}
+.markdown-source-view.mod-cm6 .cm-embed-block .code-styler-pre-parent + .edit-block-button {
+	--copy-code-header-right-margin: calc(2.2 * var(--header-button-spacing));
+	--dent-difference: 0px;
+	--polygon-in: polygon(0 0, 18px 0, 18px 36px, 0 36px);
+    transition: visibility var(--duration-button), opacity var(--duration-button);
+	visibility: visible;
+	opacity: 1;
+	z-index: 10;
+	transform: translateY(-50%);
+	top: max(calc(0.5 * var(--container-height) * 1),calc(0.5 * var(--container-min-height) * 1));
+	margin: 0;
+	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+	will-change: margin-right, clip-path;
+	clip-path: var(--polygon-in);
+	padding: 0;
+}
+body:not(.code-styler-show-langicons-always):not(.code-styler-show-langnames-always) .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre .code-styler-header-container) + .edit-block-button,
+body:not(.code-styler-show-langnames-always) .cm-embed-block .code-styler-pre-parent:not(:has( pre.code-styler-pre .code-styler-header-container-specific)):not(:has( pre.code-styler-pre .code-styler-header-container img.code-styler-icon)) + .edit-block-button,
+body .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre:not([class*='language-']) .code-styler-header-container) + .edit-block-button { /*? Depending on header visibility */
+	--copy-code-header-right-margin: 4px;
+	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
+}
+.markdown-source-view.mod-cm6 .cm-embed-block:hover .code-styler-pre-parent + .edit-block-button:hover {
+	background: transparent;
+	animation: reverse-outdent var(--duration-button);
+	margin-right: var(--copy-code-header-right-margin);
+	clip-path: var(--polygon-out);
+}
+.markdown-source-view.mod-cm6 .cm-embed-block:hover .code-styler-pre-parent + .edit-block-button:active {
+	scale: 0.95;
+	transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
+}
+
+/** File Include Plugin */
+div.block-language-include pre.code-styler-pre button.copy-code-button {
+	margin: 0;
+	margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+}
+div.block-language-include pre.code-styler-pre button.copy-code-button:hover {
+	margin-right: var(--copy-code-header-right-margin);
+}
