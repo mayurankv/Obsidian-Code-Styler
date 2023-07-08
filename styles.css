@@ -2,7 +2,7 @@
 body {
 	/* Codeblock Body */
 	--border-radius: 10px;
-	--gradient-background-color: transparent;
+	--gradient-background-colour: transparent;
 	--code-padding: 8px;
 	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
 	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
@@ -257,7 +257,7 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 	background-image: linear-gradient(90deg, var(--gradient-background-colour) 0% var(--gradient-highlights-colour-stop), var(--code-styler-codeblock-background-colour) 100%);
 }
 .code-styler-line-highlighted {
-	--gradient-background-color: var(--code-styler-default-highlight-colour) !important;
+	--gradient-background-colour: var(--code-styler-default-highlight-colour) !important;
 }
 .code-styler-active-line-highlight .cm-active,
 .code-styler-active-line-highlight-editor .cm-active {

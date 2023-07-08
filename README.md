@@ -1,4 +1,4 @@
-# Codeblock Styler Plugin
+# Code Styler Plugin
 
 [![Release](https://img.shields.io/github/v/release/mayurankv/Obsidian-Code-Styler?style=for-the-badge)](https://github.com/mayurankv/Obsidian-Code-Styler/releases/latest)
 [![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&style=for-the-badge&query=%24%5B%22code-styler%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)](https://obsidian.md/plugins?id=code-styler)
@@ -270,58 +270,13 @@ This plugin is also compatible with the following obsidian plugins out of the bo
 
 ## Roadmap
 
-Take a look at the [changelog](CHANGELOG.md) to see what has changed in past versions.
+See the roadmap at [Roadmap Discussion](../discussions/8).
 
-### Future Work
-
-- Features to add:
-  - Commands to fold all, unfold all and reset default fold for codeblocks <!--[Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)-->.
-    - Hook into existing fold commands as well.
-  - Optional outer border.
-  - Optional shadow for codeblock.
-  - Dataview compatibility.
-  - Compatibility with codeblocks created by indentation.
-  - New Themes
-    - Nord
-    - Dracula
-    - Gruvbox
-    - Catpuccin
-- Check the feasibility of:
-  - Implementing code wrapping for editing mode.
-  - Implementing folding animations for editing mode.
-  - Make list codeblocks appear indented properly in reading mode.
+- Commands to fold all, unfold all and reset default fold for codeblocks <!--[Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)-->.
 <!-- Check there is no conflict with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin (parameters after language) -->
 
-### Existing Issues
-
-- General
-  1. Indented codeblocks are not dealt with properly.
-- Editing Mode
-  1. On open of a note, there can be small differences in the line number margins.
-  2. If a language is excluded or ignored, it currently needs to be unfolded before it can be removed or it disappears.
-  3. Moving the cursor next to a collapsed codeblock and typing can cause it to disappear.
-  4. Folding empty codeblocks causes the `HyperMD-codeblock-end` class and `HyperMD-codeblock` class not to be applied when unfolded.
 - Reading Mode
-  1. Codeblocks constantly collapse and re-expand if editing side by side in editing mode.
-  2. Selecting codeblocks, copying and then pasting in reading mode includes line numbers and header titles and header icons.
-  3. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
-- PDF Exporting
-  1. Sometimes page breaks cut lines in half.
-- iOS
-  1. Numerous small UI issues
-      - Header isn't the right size in editing mode.
-      - Collapsed indicator not centred in reading mode
-
-### Upstream Issues
-
-- Instant reading mode updating when parameters are changed
-  - Requires Obsidian to parse postMarkdown changes following the codeblock language (see this [issue](https://forum.obsidian.md/t/postprocessor-does-not-process-changes-after-codeblock-language/61010) and this [issue](https://forum.obsidian.md/t/pass-parameters-to-codeblock/37990)).
-- `run-*` codeblocks from the [Execute Code Plugin](https://github.com/twibiral/obsidian-execute-code) in editing mode do not get changed
-  - Requires the correct context source path to be returned. See this [pull request](https://github.com/twibiral/obsidian-execute-code/pull/272).
-- Parsing of line number margin width is not precise.
-  - Due to delay in reading accurate information from DOM in codemirror, the current implementation is the most efficient approach. See [here](https://discuss.codemirror.net/t/updates-not-synchronised-with-requestmeasure-and-viewplugin/4720/2).
-- The line numbers can flicker on collapse if highlighted for devices with high DPI screens due to a bug with `position: sticky`.
-  - See this [issue](https://bugs.chromium.org/p/chromium/issues/detail?id=810352&q=sticky&colspec=ID%20Pri%20M%20Stars%20ReleaseBlock%20Component%20Status%20Owner%20Summary%20OS%20Modified).
+  1. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 
 ## How to install the plugin
 

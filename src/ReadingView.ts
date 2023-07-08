@@ -112,10 +112,10 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
 	if (!sourcePath || !element || !plugin.settings.currentTheme.settings.inline.syntaxHighlight)
 		return;
-	element.querySelectorAll(':not(pre) > code').forEach((inlineCodeElement: HTMLElement)=>{
-		if (inlineCodeElement.classList.contains('code-styler-highlighted'))
+	for (let inlineCodeElement of Array.from(element.querySelectorAll(':not(pre) > code'))) {
+		if (inlineCodeElement.classList.contains('code-styler-highlighted') || inlineCodeElement.classList.contains('code-styler-highlight-ignore'))
 			return;
-		let match = /^({})?{([^\s]*)} ?(.*)$/.exec(inlineCodeElement.innerText);
+		let match = /^({})?{([^\s]*)} ?(.*)$/.exec((inlineCodeElement as HTMLElement).innerText);
 		let renderString: string;
 		if (!match?.[1] && !(match?.[2] && match?.[3]))
 			return;
@@ -124,13 +124,17 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 		else
 			renderString = ['```',match[2],'\n',match[3],'\n```'].join('');
 		const tempRenderContainer = createDiv();
-		MarkdownRenderer.renderMarkdown(renderString,tempRenderContainer,sourcePath,new Component());
-		const renderedCodeElement = tempRenderContainer.querySelector('code');
+		MarkdownRenderer.renderMarkdown(renderString,tempRenderContainer,'',new Component());
+		const renderedCodeElement = tempRenderContainer.querySelector(match?.[1]?'code':'pre > code');
 		if (!renderedCodeElement)
 			return;
-		inlineCodeElement.classList.add('code-styler-highlighted');
+		if (!match?.[1]) {
+			while(!renderedCodeElement.classList.contains("is-loaded"))
+				await sleep(2);
+		}
 		inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
-	})
+		inlineCodeElement.classList.add(`code-styler-highlight${match?.[1]?'-ignore':'ed'}`);
+	}
 }
 
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeStylerPlugin) {
