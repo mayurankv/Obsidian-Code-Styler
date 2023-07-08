@@ -272,12 +272,6 @@ This plugin is also compatible with the following obsidian plugins out of the bo
 
 See the roadmap at [Roadmap Discussion](../../discussions/8).
 
-- Commands to fold all, unfold all and reset default fold for codeblocks <!--[Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)-->.
-<!-- Check there is no conflict with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin (parameters after language) -->
-
-- Reading Mode
-  1. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
-
 ## How to install the plugin
 
 - Simply install directly from Obsidian

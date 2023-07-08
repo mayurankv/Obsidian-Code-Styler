@@ -1,21 +1,10 @@
 # TODO
 
-## Not Urgent
-
-1. Add codeblock outline and shadow features (see Prism and other theme)
-2. Specific terminal appearance parameter
-    - A `terminal` parameter which makes the codeblock appear as if it were a terminal
-    - A `terminal` codeblock which allows for indicating what the command was and what the output was:
-      - Choose the output character i.e. `$` or `>` etc.
-      - Set user, directory, device etc.
-      - Make runnable using execute code plugin
-      - Make terminal codeblock use terminal appearance
-3. Dataview compatibility
-4. Check through:
+1. Check through:
     - `package.json`
     - `package-lock.json`
     - `eslintrc`
-5. Update github:
+2. Update github:
     - See [Creating Tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging#_creating_tags) - For Obsidian plugins, this must be the same as the version.
       - `git tag -a 1.0.1 -m "1.0.1"`
       - `git push origin 1.0.1`
@@ -35,8 +24,7 @@
     - Documentation:
       - Actions:
         - [Example 1](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/update-docs-markdown.yml)
-6. Create proper in-depth test vault
-7. Debug iOS
+3. Debug iOS
 
 ## Consider
 
@@ -48,29 +36,4 @@
 .markdown-source-view.mod-cm6 .block-language-preview code {
     white-space: pre-wrap !important;
 }
-
-/*! Inline Code */
-.cm-s-obsidian .templater-inline .cm-templater-command{ /*? Templater Plugin */
-    padding: var(--code-styler-inline-padding-vertical) 0px;
-}
 ```
-
-## Future Expansions
-
-- IDE like capabilities?
-  - Auto indent
-  - Suggestion
-  - [Contextual language commenting](https://github.com/1C0D/Obsidian-Contextual-Comments)
-  - Auto Parenthesis Matching as in [Latex Suite](https://github.com/artisticat1/obsidian-latex-suite)
-  - Minimap like vscode
-    - See [this](https://forum.obsidian.md/t/minimap-where-am-i-in-this-way-too-long-document/1460/5) and [also this](https://css-tricks.com/using-the-little-known-css-element-function-to-create-a-minimap-navigator/).
-  - Run inline code (link to codeblock in file or elsewhere or hidden for context (or just in notebook mode context if possible) - integrate with execute-code)
-- See [this plugin](https://github.com/lukasbach/obsidian-code-files)
-- Consistent syntax highlighting between reading mode and live preview mode?
-- Execute Code better compatibility?
-  - Style stdin separate to stdout?
-  - Option to style different things? (stdin,stdout,stderr,input)
-    - Extra options in settings?
-    - Check what can be styled in style settings
-  - Markup output with line numbers etc.?
-- Style templater inline code?
