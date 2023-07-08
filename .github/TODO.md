@@ -1,27 +1,24 @@
 # TODO
 
-## Important
-
-1. Add codeblock outline and shadow (see Prism and other theme)
-
 ## Not Urgent
 
-1. Deal with codeblocks created by indentation
+1. Add codeblock outline and shadow features (see Prism and other theme)
+2. Deal with codeblocks created by indentation
     - Editing Mode (`cm-hmd-indented-code`)
     - Reading Mode
-2. Specific terminal appearance parameter
+3. Specific terminal appearance parameter
     - A `terminal` parameter which makes the codeblock appear as if it were a terminal
     - A `terminal` codeblock which allows for indicating what the command was and what the output was:
       - Choose the output character i.e. `$` or `>` etc.
       - Set user, directory, device etc.
       - Make runnable using execute code plugin
       - Make terminal codeblock use terminal appearance
-3. Dataview compatibility
-4. Check through:
+4. Dataview compatibility
+5. Check through:
     - `package.json`
     - `package-lock.json`
     - `eslintrc`
-5. Update github:
+6. Update github:
     - See [Creating Tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging#_creating_tags) - For Obsidian plugins, this must be the same as the version.
       - `git tag -a 1.0.1 -m "1.0.1"`
       - `git push origin 1.0.1`
@@ -41,7 +38,7 @@
     - Documentation:
       - Actions:
         - [Example 1](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/update-docs-markdown.yml)
-6. Create proper in-depth test vault
+7. Create proper in-depth test vault
 
 ## Consider
 
