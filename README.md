@@ -304,8 +304,9 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
 - PDF Exporting
   1. Sometimes page breaks cut lines in half.
 - iOS
-  1. Line numbers don't work properly in either reading or editing mode.
-  2. Header isn't the right size in editing mode.
+  1. Numerous small UI issues
+      - Header isn't the right size in editing mode.
+      - Collapsed indicator not centred in reading mode
 
 ### Upstream Issues
 
