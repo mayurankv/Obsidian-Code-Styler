@@ -3,7 +3,7 @@ name: "Bug report \U0001F41E"
 about: Create an issue regarding a bug.
 title: 'Bug: '
 labels: 'bug'
-assignees: ''
+assignees: 'mayurankv'
 
 ---
 
