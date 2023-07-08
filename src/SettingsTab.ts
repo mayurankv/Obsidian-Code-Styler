@@ -1035,7 +1035,7 @@ export function isCss(possibleCss: string): possibleCss is CSS {
 	return possibleCss.startsWith('--') && typeof possibleCss === 'string';
 }
 function calc(calcString: string): string {
-	const splitString = calcString.replace(/(\d*)%/g,'$1').split(' ');
+	const splitString = calcString.trim().replace(/(\d*)%/g,'$1').split(' ');
 	const operators: {[key: string]: (num1:number, num2:number) => number} = {
 		'+': (num1:number, num2:number):number => Math.max(num1+num2,0),
 		'-': (num1:number ,num2:number):number => Math.max(num1-num2,0),
