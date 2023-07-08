@@ -2,8 +2,7 @@
 
 ## Important
 
-1. Publish to obsidian plugins
-2. Add codeblock outline and shadow (see Prism and other theme)
+1. Add codeblock outline and shadow (see Prism and other theme)
 
 ## Not Urgent
 

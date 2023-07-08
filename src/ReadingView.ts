@@ -213,6 +213,7 @@ export function destroyReadingModeElements(): void {
 	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
 		codeblockPreParent.classList.remove('code-styler-pre-parent');
 	});
+	
 	[
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-line-number']")),
