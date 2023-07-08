@@ -45,10 +45,10 @@ function getLanguageTag(language: string) {
 
 export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {
 	let classList: Array<string> = [];
-	if (codeblockParameters.highlights.default.lineNumbers.includes(lineNumber) || codeblockParameters.highlights.default.plainText.some(text => line.indexOf(text) > -1) || codeblockParameters.highlights.default.regularExpressions.some(regExp => regExp.test(line)))
+	if (codeblockParameters.highlights.default.lineNumbers.includes(lineNumber+codeblockParameters.lineNumbers.offset) || codeblockParameters.highlights.default.plainText.some(text => line.indexOf(text) > -1) || codeblockParameters.highlights.default.regularExpressions.some(regExp => regExp.test(line)))
 		classList.push('code-styler-line-highlighted');
 	Object.entries(codeblockParameters.highlights.alternative).forEach(([alternativeHighlight,highlightedLines]: [string,Highlights]) => {
-		if (highlightedLines.lineNumbers.includes(lineNumber) || highlightedLines.plainText.some(text => line.indexOf(text) > -1) || highlightedLines.regularExpressions.some(regExp => regExp.test(line)))
+		if (highlightedLines.lineNumbers.includes(lineNumber+codeblockParameters.lineNumbers.offset) || highlightedLines.plainText.some(text => line.indexOf(text) > -1) || highlightedLines.regularExpressions.some(regExp => regExp.test(line)))
 			classList.push(`code-styler-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}`);
 	})
 	if (classList.length === 0)
