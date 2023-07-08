@@ -270,7 +270,7 @@ This plugin is also compatible with the following obsidian plugins out of the bo
 
 ## Roadmap
 
-See the roadmap at [Roadmap Discussion](../discussions/8).
+See the roadmap at [Roadmap Discussion](../../discussions/8).
 
 - Commands to fold all, unfold all and reset default fold for codeblocks <!--[Issue 33](https://github.com/mugiwara85/CodeblockCustomizer/issues/33)-->.
 <!-- Check there is no conflict with [RunJS](https://github.com/eoureo/obsidian-runjs) plugin (parameters after language) -->
