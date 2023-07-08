@@ -303,6 +303,9 @@ Take a look at the [changelog](CHANGELOG.md) to see what has changed in past ver
   3. Docstring syntax highlighting issue. <!--[Docstring syntax highlighting issue](https://github.com/mugiwara85/CodeblockCustomizer/issues/17)-->
 - PDF Exporting
   1. Sometimes page breaks cut lines in half.
+- iOS
+  1. Line numbers don't work properly in either reading or editing mode.
+  2. Header isn't the right size in editing mode.
 
 ### Upstream Issues
 
