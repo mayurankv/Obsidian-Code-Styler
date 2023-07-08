@@ -1,11 +1,11 @@
-import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache } from "obsidian";
+import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, Component } from "obsidian";
 
 import CodeStylerPlugin from "./main";
 import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
 import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./CodeblockParsing";
 import { createHeader, getLineClass } from "./CodeblockDecorating";
 
-export async function readingViewPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean = false) {
+export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
 	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['code-styler-ignore'] === true)
 		return;
@@ -45,7 +45,7 @@ export async function readingViewPostProcessor(element: HTMLElement, {sourcePath
 	else if (specific && !printing) {
 		if (!(!editingEmbeds && element.classList.contains("admonition-content"))) {
 			let contentEl = element.matchParent('.view-content') as HTMLElement;
-			await readingViewPostProcessor(contentEl?contentEl:(element.matchParent('div.print') as HTMLElement),{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
+			await readingViewCodeblockDecoratingPostProcessor(contentEl?contentEl:(element.matchParent('div.print') as HTMLElement),{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
 		}
 	}
 	else
@@ -107,6 +107,30 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 		console.error(`Error rendering document: ${error.message}`);
 		return;
 	}
+}
+
+export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
+	if (!sourcePath || !element || !plugin.settings.currentTheme.settings.inline.syntaxHighlight)
+		return;
+	element.querySelectorAll(':not(pre) > code').forEach((inlineCodeElement: HTMLElement)=>{
+		if (inlineCodeElement.classList.contains('code-styler-highlighted'))
+			return;
+		let match = /^({})?{([^\s]*)} ?(.*)$/.exec(inlineCodeElement.innerText);
+		let renderString: string;
+		if (!match?.[1] && !(match?.[2] && match?.[3]))
+			return;
+		else if (match?.[1])
+			renderString = '`'+match[0].substring(2)+'`';
+		else
+			renderString = ['```',match[2],'\n',match[3],'\n```'].join('');
+		const tempRenderContainer = createDiv();
+		MarkdownRenderer.renderMarkdown(renderString,tempRenderContainer,sourcePath,new Component());
+		const renderedCodeElement = tempRenderContainer.querySelector('code');
+		if (!renderedCodeElement)
+			return;
+		inlineCodeElement.classList.add('code-styler-highlighted');
+		inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
+	})
 }
 
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeStylerPlugin) {

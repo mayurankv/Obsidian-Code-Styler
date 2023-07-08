@@ -39,6 +39,7 @@
       - Actions:
         - [Example 1](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/update-docs-markdown.yml)
 7. Create proper in-depth test vault
+8. Debug iOS
 
 ## Consider
 
@@ -62,7 +63,11 @@
 - IDE like capabilities?
   - Auto indent
   - Suggestion
-  - Contextual language commenting
+  - [Contextual language commenting](https://github.com/1C0D/Obsidian-Contextual-Comments)
+  - Auto Parenthesis Matching as in [Latex Suite](https://github.com/artisticat1/obsidian-latex-suite)
+  - Minimap like vscode
+    - See [this](https://forum.obsidian.md/t/minimap-where-am-i-in-this-way-too-long-document/1460/5) and [also this](https://css-tricks.com/using-the-little-known-css-element-function-to-create-a-minimap-navigator/).
+- See [this plugin](https://github.com/lukasbach/obsidian-code-files)
 - Consistent syntax highlighting between reading mode and live preview mode?
 - Execute Code better compatibility?
   - Style stdin separate to stdout?

@@ -19,7 +19,11 @@ See this project's [releases](/../../../releases).
 
 ### Added
 
-- 
+- Add inline code syntax highlighting
+
+### Changed
+
+- Replaced `color` with `colour`
 
 ## [1.0.0] - 2023-07-08
 
@@ -39,14 +43,14 @@ See this project's [releases](/../../../releases).
 - Added regex line highlighting.
 - Added optional fold placeholder parameter and settings.
 - Added default theme which uses existing css variables.
-- Added current line indicator via line number color.
-- Added color styling for buttons.
-- Added gradient highlighting with color stop settings.
+- Added current line indicator via line number colour.
+- Added colour styling for buttons.
+- Added gradient highlighting with colour stop settings.
 - Added header font size and family customization.
 - Added icon customizability.
 - Added codeblock curvature setting.
 - Added optional language border setting.
-- Added optional redirecting of language colors and icons.
+- Added optional redirecting of language colours and icons.
 - Added compatibility with many popular themes and ability for theme specific corrections.
 - Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview), [file include plugin](https://github.com/tillahoffmann/obsidian-file-include) and [admonitions plugin](https://github.com/javalent/admonitions).
 - Added automatic release on tag addition using github workflows.
@@ -93,14 +97,14 @@ See this project's [releases](/../../../releases).
 - Added regex line highlighting.
 - Added optional fold placeholder parameter and settings.
 - Added default theme which uses existing css variables.
-- Added current line indicator via line number color.
-- Added color styling for buttons.
-- Added gradient highlighting with color stop settings.
+- Added current line indicator via line number colour.
+- Added colour styling for buttons.
+- Added gradient highlighting with colour stop settings.
 - Added header font size and family customization.
 - Added icon customizability.
 - Added codeblock curvature setting.
 - Added optional language border setting.
-- Added optional redirecting of language colors and icons.
+- Added optional redirecting of language colours and icons.
 - Added compatibility with many popular themes and ability for theme specific corrections.
 - Added compatibility with the [execute code plugin](https://github.com/twibiral/obsidian-execute-code), [code preview plugin](https://github.com/zjhcn/obsidian-code-preview), [file include plugin](https://github.com/tillahoffmann/obsidian-file-include) and [admonitions plugin](https://github.com/javalent/admonitions).
 - Added automatic release on tag addition using github workflows.
@@ -139,7 +143,7 @@ See this project's [releases](/../../../releases).
 
 ### Fixed
 
-- Under Linux the color picker was not displayed.
+- Under Linux the colour picker was not displayed.
 
 ## [1.1.7] - 2023-05-04
 
@@ -178,7 +182,7 @@ See this project's [releases](/../../../releases).
 
 Found a very strange bug, but most people won't even notice it. I added a workaround which unfortunately is not a 100% percent solution (maybe around 90%). This bug however originates either from Obsidian or CodeMirror itself. I am still investigating.
 
-If a document is opened (only in editing mode), then in very rare cases the viewport is not processed to the end. This results, that the line numbers, background colors, and other styles are not set for those code block lines. As I said, it occurs in very rare cases, and the workaround helps, but it is not a permanent solution.
+If a document is opened (only in editing mode), then in very rare cases the viewport is not processed to the end. This results, that the line numbers, background colours, and other styles are not set for those code block lines. As I said, it occurs in very rare cases, and the workaround helps, but it is not a permanent solution.
 
 ## [1.1.3] - 2023-03-18
 

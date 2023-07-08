@@ -3,8 +3,8 @@ import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from './Settings';
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
-import { createCodeMirrorExtensions } from "./EditingView";
-import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewPostProcessor } from "./ReadingView";
+import { createCodeblockCodeMirrorExtensions } from "./EditingView";
+import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -28,9 +28,10 @@ export default class CodeStylerPlugin extends Plugin {
 		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
-		this.registerMarkdownPostProcessor(async (element,context) => {await readingViewPostProcessor(element,context,this)}) // Add markdownPostProcessor
+		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this)}) // Add codeblock decorating markdownPostProcessor
+		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewInlineDecoratingPostProcessor(el,ctx,this)}) // Add inline code decorating markdownPostProcessor
 
-		this.registerEditorExtension(createCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
+		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
 		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
 

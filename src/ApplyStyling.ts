@@ -1,6 +1,6 @@
 import { App } from "obsidian";
 
-import { CodeStylerSettings, CodeStylerThemeColors, CodeStylerThemeModeColors, CodeStylerThemeSettings, Color, LANGUAGE_NAMES, LANGUAGE_COLORS } from "./Settings";
+import { CodeStylerSettings, CodeStylerThemeColours, CodeStylerThemeModeColours, CodeStylerThemeSettings, Colour, LANGUAGE_NAMES, LANGUAGE_COLOURS } from "./Settings";
 import { isCss } from "./SettingsTab";
 
 interface ThemeStyle {
@@ -44,54 +44,54 @@ export function updateStyling(settings: CodeStylerSettings, app: App): void {
 		styleTag.id = STYLE_ID;
 		document.getElementsByTagName('head')[0].appendChild(styleTag);
 	}
-	styleTag.innerText = (styleThemeColors(settings.currentTheme.colors)+styleThemeSettings(settings.currentTheme.settings,currentTheme)+styleLanguageColors(settings.currentTheme.settings,settings.redirectLanguages,currentTheme)).trim().replace(/\s+/g,' ');
+	styleTag.innerText = (styleThemeColours(settings.currentTheme.colours)+styleThemeSettings(settings.currentTheme.settings,currentTheme)+styleLanguageColours(settings.currentTheme.settings,settings.redirectLanguages,currentTheme)).trim().replace(/\s+/g,' ');
 	addThemeSettingsClasses(settings.currentTheme.settings);
 }
 
-function styleThemeColors (themeColors: CodeStylerThemeColors): string {
-	return Object.keys(themeColors.light.highlights.alternativeHighlights).reduce((result: string, alternativeHighlight: string) => {
+function styleThemeColours (themeColours: CodeStylerThemeColours): string {
+	return Object.keys(themeColours.light.highlights.alternativeHighlights).reduce((result: string, alternativeHighlight: string) => {
 		return result + `
 			body.code-styler .code-styler-line-highlighted-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()} {
-				--gradient-background-color: var(--code-styler-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-color) !important;
+				--gradient-background-colour: var(--code-styler-${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-colour) !important;
 			}
 		`;
 	},`
 		body.code-styler.theme-light {
-			${getThemeColors(themeColors.light)}
+			${getThemeColours(themeColours.light)}
 		}
 		body.code-styler.theme-dark {
-			${getThemeColors(themeColors.dark)}
+			${getThemeColours(themeColours.dark)}
 		}
 	`);
 }
 
-function getThemeColors (themeModeColors: CodeStylerThemeModeColors): string {
+function getThemeColours (themeModeColours: CodeStylerThemeModeColours): string {
 	return Object.entries({
-		'codeblock-background-color': themeModeColors.codeblock.backgroundColor,
-		'codeblock-text-color': themeModeColors.codeblock.textColor,
-		'gutter-background-color': themeModeColors.gutter.backgroundColor,
-		'gutter-text-color': themeModeColors.gutter.textColor,
-		'gutter-active-text-color': themeModeColors.gutter.activeTextColor,
-		'header-background-color': themeModeColors.header.backgroundColor,
-		'header-title-text-color': themeModeColors.header.title.textColor,
-		'header-language-tag-background-color': themeModeColors.header.languageTag.backgroundColor,
-		'header-language-tag-text-color': themeModeColors.header.languageTag.textColor,
-		'header-separator-color': themeModeColors.header.lineColor,
-		'active-codeblock-line-color': themeModeColors.highlights.activeCodeblockLineColor,
-		'active-editor-line-color': themeModeColors.highlights.activeEditorLineColor,
-		'default-highlight-color': themeModeColors.highlights.defaultColor,
-		'button-color': themeModeColors.advanced.buttonColor,
-		'button-active-color': themeModeColors.advanced.buttonActiveColor,
-		'inline-color': themeModeColors.inline.textColor,
-		'inline-color-active': themeModeColors.inline.activeTextColor,
-		'inline-background-color': themeModeColors.inline.backgroundColor,
-		...Object.entries(themeModeColors.highlights.alternativeHighlights).reduce((result: Record<string,Color>,[alternativeHighlight,color]: [string,Color]): Record<string,Color> => {
-			result[`${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-color`] = color;
+		'codeblock-background-colour': themeModeColours.codeblock.backgroundColour,
+		'codeblock-text-colour': themeModeColours.codeblock.textColour,
+		'gutter-background-colour': themeModeColours.gutter.backgroundColour,
+		'gutter-text-colour': themeModeColours.gutter.textColour,
+		'gutter-active-text-colour': themeModeColours.gutter.activeTextColour,
+		'header-background-colour': themeModeColours.header.backgroundColour,
+		'header-title-text-colour': themeModeColours.header.title.textColour,
+		'header-language-tag-background-colour': themeModeColours.header.languageTag.backgroundColour,
+		'header-language-tag-text-colour': themeModeColours.header.languageTag.textColour,
+		'header-separator-colour': themeModeColours.header.lineColour,
+		'active-codeblock-line-colour': themeModeColours.highlights.activeCodeblockLineColour,
+		'active-editor-line-colour': themeModeColours.highlights.activeEditorLineColour,
+		'default-highlight-colour': themeModeColours.highlights.defaultColour,
+		'button-colour': themeModeColours.advanced.buttonColour,
+		'button-active-colour': themeModeColours.advanced.buttonActiveColour,
+		'inline-colour': themeModeColours.inline.textColour,
+		'inline-colour-active': themeModeColours.inline.activeTextColour,
+		'inline-background-colour': themeModeColours.inline.backgroundColour,
+		...Object.entries(themeModeColours.highlights.alternativeHighlights).reduce((result: Record<string,Colour>,[alternativeHighlight,colour]: [string,Colour]): Record<string,Colour> => {
+			result[`${alternativeHighlight.replace(/\s+/g, '-').toLowerCase()}-highlight-colour`] = colour;
 			return result;
 		},{})
-	}).reduce((result: string, [cssVariable,color]: [string,Color]): string => {
-		const styleColor = isCss(color)?`var(${color})`:color;
-		return result + `--code-styler-${cssVariable}: ${styleColor};`
+	}).reduce((result: string, [cssVariable,colour]: [string,Colour]): string => {
+		const styleColour = isCss(colour)?`var(${colour})`:colour;
+		return result + `--code-styler-${cssVariable}: ${styleColour};`
 	},``)
 }
 
@@ -110,7 +110,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 		body.code-styler {
 			--border-radius: ${themeSettings.codeblock.curvature}px;
 			--language-icon-size: ${themeSettings.advanced.iconSize}px;
-			--gradient-highlights-color-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColorStop:'100%'};
+			--gradient-highlights-colour-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColourStop:'100%'};
 			--header-font-size: ${themeSettings.header.fontSize}px;
 			--line-wrapping: ${themeSettings.codeblock.unwrapLines?'pre':'pre-wrap'};
 			--code-styler-inline-font-weight: ${themeSettings.inline.fontWeight}00;
@@ -119,7 +119,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 			--code-styler-inline-padding-horizontal: ${themeSettings.inline.paddingHorizontal}px;
 			--code-styler-inline-margin-horizontal: ${themeSettings.inline.marginHorizontal}px;
 			${!themeSettings.codeblock.wrapLinesActive?'':'--line-active-wrapping: pre-wrap;'}
-			${themeSettings.header.languageIcon.displayColor?'':'--icon-filter: grayscale(1);'}
+			${themeSettings.header.languageIcon.displayColour?'':'--icon-filter: grayscale(1);'}
 		}
 		${THEME_STYLES?.[currentTheme]?.border?`
 			.markdown-source-view :not(pre.code-styler-pre) > [class^='code-styler-header-container'] {
@@ -134,20 +134,20 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 	`;
 }
 
-function styleLanguageColors (themeSettings: CodeStylerThemeSettings, redirectLanguages: Record<string,{color?: Color, icon?: string}>, currentTheme: string): string {
+function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectLanguages: Record<string,{colour?: Colour, icon?: string}>, currentTheme: string): string {
 	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
-		if (languageDisplayName in LANGUAGE_COLORS || (languageName in redirectLanguages && 'color' in redirectLanguages[languageName])) {
+		if (languageDisplayName in LANGUAGE_COLOURS || (languageName in redirectLanguages && 'colour' in redirectLanguages[languageName])) {
 			result += `
 				.language-${languageName} {
-					--language-border-color: ${redirectLanguages?.[languageName]?.['color'] ?? LANGUAGE_COLORS[languageDisplayName]};
-					--language-border-width: ${themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth:0}px;
+					--language-border-colour: ${redirectLanguages?.[languageName]?.['colour'] ?? LANGUAGE_COLOURS[languageDisplayName]};
+					--language-border-width: ${themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth:0}px;
 				}
 			`;
 			if (THEME_STYLES?.[currentTheme]?.border) {
 				result += `
 					.markdown-source-view :not(pre.code-styler-pre) > [class^='code-styler-header-container'].language-${languageName}  {
 						--language-border-width: ${ //@ts-expect-error Does exist
-							themeSettings.advanced.languageBorderColor?themeSettings.advanced.languageBorderWidth+THEME_STYLES[currentTheme].border.size:0
+							themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth+THEME_STYLES[currentTheme].border.size:0
 						}px;
 					}`
 			}
@@ -173,7 +173,7 @@ function addThemeSettingsClasses (themeSettings: CodeStylerThemeSettings): void 
 		document.body.classList.remove('code-styler-gutter-active-line');
 	
 	document.body.classList.remove("code-styler-active-line-highlight","code-styler-active-line-highlight-codeblock","code-styler-active-line-highlight-editor")
-	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colors
+	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colours
 		document.body.classList.add("code-styler-active-line-highlight");
 	else if (themeSettings.highlights.activeEditorLine && !themeSettings.highlights.activeCodeblockLine) // Only outside codeblocks
 		document.body.classList.add("code-styler-active-line-highlight-editor");

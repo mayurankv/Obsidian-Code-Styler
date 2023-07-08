@@ -29,50 +29,50 @@ This setting is used to tell the plugin to not decorate certain languages. To co
 
 ### Themes
 
-The plugin comes with a 'Default' theme and a few themes based on popular color schemes. The default theme uses colors as defined by the existing Obsidian theme to minimise changes in appearance on install (it uses the CSS variables defined by the current theme).
+The plugin comes with a 'Default' theme and a few themes based on popular colour schemes. The default theme uses colours as defined by the existing Obsidian theme to minimise changes in appearance on install (it uses the CSS variables defined by the current theme).
 
-All themes have customizable colors for both light and dark mode (to make changes to a specific mode, change to that mode first and then change the colors in settings). Each theme also includes other appearance settings such as displaying line numbers, allowing highlights to cover the line numbers and more.
+All themes have customisable colours for both light and dark mode (to make changes to a specific mode, change to that mode first and then change the colours in settings). Each theme also includes other appearance settings such as displaying line numbers, allowing highlights to cover the line numbers and more.
 
-When a setting or color is changed within a theme, that change is not saved to the theme; you must then click the update button next to the theme name to update that theme to the current settings. Note that changes to the built-in themes cannot be saved.
+When a setting or colour is changed within a theme, that change is not saved to the theme; you must then click the update button next to the theme name to update that theme to the current settings. Note that changes to the built-in themes cannot be saved.
 
-The different component colors that can be set within a theme are:
+The different component colours that can be set within a theme are:
 
-- Codeblock background color
-- Codeblock text color
-- Line number gutter background color
-- Line number text color
+- Codeblock background colour
+- Codeblock text colour
+- Line number gutter background colour
+- Line number text colour
 - Codeblock line number current line indicator
-- Codeblock header background color
-- Codeblock header title text color
-- Codeblock header separator color
-- Codeblock header language tag background color
-- Codeblock header language tag text color
-- Editor active line highlight color
-- Codeblock active line highlight color
-- Default highlight color
-- Alternative highlight colors
-- Button color
-- Button active color
+- Codeblock header background colour
+- Codeblock header title text colour
+- Codeblock header separator colour
+- Codeblock header language tag background colour
+- Codeblock header language tag text colour
+- Editor active line highlight colour
+- Codeblock active line highlight colour
+- Default highlight colour
+- Alternative highlight colours
+- Button colour
+- Button active colour
 
-'Default' theme colors in dark mode with Default Obsidian theme:
+'Default' theme colours in dark mode with Default Obsidian theme:
 
-![Default Default Dark Colors](images/DefaultDefaultDarkColors.png)
+![Default Default Dark Colours](images/DefaultDefaultDarkColours.png)
 
-'Default' theme colors in light mode with Default Obsidian theme:
+'Default' theme colours in light mode with Default Obsidian theme:
 
-![Default Default Light Colors](images/DefaultDefaultLightColors.png)
+![Default Default Light Colours](images/DefaultDefaultLightColours.png)
 
-'Default' theme colors in dark mode with [Obsidianite](https://github.com/bennyxguo/Obsidian-Obsidianite) theme:
+'Default' theme colours in dark mode with [Obsidianite](https://github.com/bennyxguo/Obsidian-Obsidianite) theme:
 
-![Default Obsidianite Dark Colors](images/DefaultObsidianiteDarkColors.png)
+![Default Obsidianite Dark Colours](images/DefaultObsidianiteDarkColours.png)
 
-'Solarized' theme colors in dark mode with Default Obsidian theme:
+'Solarized' theme colours in dark mode with Default Obsidian theme:
 
-![Solarized Default Dark Colors](images/SolarizedDefaultDarkColors.png)
+![Solarized Default Dark Colours](images/SolarizedDefaultDarkColours.png)
 
-I am not a designer, so if you have created a cool theme, send me the color codes, and I might include it as a default theme in the next release :-\)
+I am not a designer, so if you have created a cool theme, send me the colour codes, and I might include it as a default theme in the next release :-\)
 
-## Parameters
+## Codeblock Parameters
 
 Codeblock parameters are added to the first line of the codeblock following the language. They can be added in any order. If no language is set, a space should be left after the codeblock delimiter ` ``` ` to indicate that the first parameter is NOT the language of the codeblock.
 
@@ -133,7 +133,7 @@ You can specify any of the following highlight types separated with commas (**wi
 - Number ranges: `hl:1-3` would highlight lines 1 through to 3
 - Plain text: `hl:foo` would highlight lines with the word `foo` inside them
 - Plain text in speech marks or quotation marks: `hl:'bar baz'` or `hl:"bar baz"` would highlight lines with the word `bar baz` inside them
-- Regular Expressions: `hl:/#\w{6}/` would highlight lines which match this regular expression (tested by `regex.test(line)`) - for this example any lines with hexadecimal colors are highlighted
+- Regular Expressions: `hl:/#\w{6}/` would highlight lines which match this regular expression (tested by `regex.test(line)`) - for this example any lines with hexadecimal colours are highlighted
 
 Combinations of these will highlight all relevant lines.
 
@@ -147,18 +147,18 @@ Highlights can be set to also highlight line numbers as well as the code in sett
 Example:
 ![Default Highlight Gutter](images/DefaultHighlightGutter.png)
 
-Highlights created by the default highlight parameter or alternative highlight parameters can be set to appear as gradient highlights which fade out to the right in the settings. A color stop percentage for this gradient can also be set.
+Highlights created by the default highlight parameter or alternative highlight parameters can be set to appear as gradient highlights which fade out to the right in the settings. A colour stop percentage for this gradient can also be set.
 
 Example:
 ![Default Highlight Gradient](images/DefaultHighlightGradient.png)
 
 #### Alternative Highlights
 
-You can also define multiple highlight colors by defining an alternative highlight color with a name. This name will be used as a parameter, and you can use it just like with the `hl` parameter.
+You can also define multiple highlight colours by defining an alternative highlight colour with a name. This name will be used as a parameter, and you can use it just like with the `hl` parameter.
 
 Example:
 
-You could add three further types of highlight colors (`info`, `warn`, `error`). After adding these in settings and setting colors as desired, you can use it in the first line of codeblocks:
+You could add three further types of highlight colours (`info`, `warn`, `error`). After adding these in settings and setting colours as desired, you can use it in the first line of codeblocks:
 
 ` ```cpp info:2 warn:4-6 error:8`
 
@@ -205,7 +205,7 @@ Example:
 
 Codeblocks can have their curvature changed in settings to make them appear more or less rounded.
 
-They can also have colored left borders based on the language (colors match the language icon) if enabled in settings. The width of this border can also be changed.
+They can also have coloured left borders based on the language (colours match the language icon) if enabled in settings. The width of this border can also be changed.
 
 Example:
 
@@ -244,9 +244,9 @@ Example:
 
 ### Active Line Indicators
 
-The active line inside codeblocks can be highlighted with a custom color if enabled in settings. It can also be indicated by a different color line number if this setting is also enabled in settings.
+The active line inside codeblocks can be highlighted with a custom colour if enabled in settings. It can also be indicated by a different colour line number if this setting is also enabled in settings.
 
-The active line outside codeblocks can also be highlighted with a custom color if enabled in settings.
+The active line outside codeblocks can also be highlighted with a custom colour if enabled in settings.
 
 Example:
 ![Active Codeblock Highlight](images/ActiveCodeblockHighlight.png)
@@ -254,6 +254,10 @@ Example:
 ![Active Line Number Indicator](images/ActiveLineNumberIndicator.png)
 
 ![Active Editor Highlight](images/ActiveEditorHighlight.png)
+
+## Inline Code
+
+Inline code can be customised
 
 ## Plugin Compatibility
 

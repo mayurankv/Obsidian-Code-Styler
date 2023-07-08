@@ -1,46 +1,46 @@
 // Typing
 export type HEX = `#${string}`;
 export type CSS = `--${string}`;
-export type Color = HEX | CSS;
+export type Colour = HEX | CSS;
 export type Percentage = `${number}%`;
 export type Display = "none" | "if_header_shown" | "always";
 
 // Interface Creation
-export interface CodeStylerThemeModeColors {
+export interface CodeStylerThemeModeColours {
 	codeblock: {
-		backgroundColor: Color;
-		textColor: Color;
+		backgroundColour: Colour;
+		textColour: Colour;
 	},
 	gutter: {
-		backgroundColor: Color;
-		textColor: Color;
-		activeTextColor: Color;
+		backgroundColour: Colour;
+		textColour: Colour;
+		activeTextColour: Colour;
 	},
 	header: {
-		backgroundColor: Color;
+		backgroundColour: Colour;
 		title: {
-			textColor: Color;
+			textColour: Colour;
 		},
 		languageTag: {
-			backgroundColor: Color;
-			textColor: Color;
+			backgroundColour: Colour;
+			textColour: Colour;
 		},
-		lineColor: Color;
+		lineColour: Colour;
 	},
 	highlights: {
-		activeCodeblockLineColor: Color;
-		activeEditorLineColor: Color;
-		defaultColor: Color;
-		alternativeHighlights: Record<string,Color>;
+		activeCodeblockLineColour: Colour;
+		activeEditorLineColour: Colour;
+		defaultColour: Colour;
+		alternativeHighlights: Record<string,Colour>;
 	},
 	inline: {
-		backgroundColor: Color;
-		textColor: Color;
-		activeTextColor: Color;
+		backgroundColour: Colour;
+		textColour: Colour;
+		activeTextColour: Colour;
 	}
 	advanced: {
-		buttonColor: Color;
-		buttonActiveColor: Color;
+		buttonColour: Colour;
+		buttonActiveColour: Colour;
 	}
 }
 export interface CodeStylerThemeSettings {
@@ -68,7 +68,7 @@ export interface CodeStylerThemeSettings {
 		},
 		languageIcon: {
 			display: Display;
-			displayColor: boolean;
+			displayColour: boolean;
 		},
 		fontSize: number;
 		collapsePlaceholder: string;
@@ -78,6 +78,7 @@ export interface CodeStylerThemeSettings {
 		activeEditorLine: boolean;
 	},
 	inline: {
+		syntaxHighlight: boolean;
 		fontWeight: number;
 		curvature: number;
 		paddingVertical: number;
@@ -86,19 +87,19 @@ export interface CodeStylerThemeSettings {
 	},
 	advanced: {
 		gradientHighlights: boolean;
-		gradientHighlightsColorStop: Percentage;
-		languageBorderColor: boolean;
+		gradientHighlightsColourStop: Percentage;
+		languageBorderColour: boolean;
 		languageBorderWidth: number;
 		iconSize: number;
 	};
 }
-export interface CodeStylerThemeColors {
-	light: CodeStylerThemeModeColors;
-	dark: CodeStylerThemeModeColors;
+export interface CodeStylerThemeColours {
+	light: CodeStylerThemeModeColours;
+	dark: CodeStylerThemeModeColours;
 }
 export interface CodeStylerTheme {
 	settings: CodeStylerThemeSettings;
-	colors: CodeStylerThemeColors;
+	colours: CodeStylerThemeColours;
 }
 export interface CodeStylerSettings {
 	themes: Record<string,CodeStylerTheme>;
@@ -110,7 +111,7 @@ export interface CodeStylerSettings {
 	excludedLanguages: string;
 	excludedCodeblocks: string;
 	specialLanguages: Array<string>;
-	redirectLanguages: Record<string,{color?: Color, icon?: string}>
+	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>
 }
 
 // Theme Defaults
@@ -139,7 +140,7 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 		},
 		languageIcon: {
 			display: "none",
-			displayColor: true,
+			displayColour: true,
 		},
 		fontSize: 14,
 		collapsePlaceholder: '',
@@ -149,6 +150,7 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 		activeEditorLine: false,
 	},
 	inline: {
+		syntaxHighlight: true,
 		fontWeight: 4,
 		curvature: 6,
 		paddingVertical: 5,
@@ -157,133 +159,133 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 	},
 	advanced: {
 		gradientHighlights: false,
-		gradientHighlightsColorStop: '70%',
-		languageBorderColor: false,
+		gradientHighlightsColourStop: '70%',
+		languageBorderColour: false,
 		languageBorderWidth: 5,
 		iconSize: 28,
 	},
 }
-export const THEME_FALLBACK_COLORS: CodeStylerThemeModeColors = {
+export const THEME_FALLBACK_COLOURS: CodeStylerThemeModeColours = {
 	codeblock: {
-		backgroundColor: '--code-background',
-		textColor: '--code-normal',
+		backgroundColour: '--code-background',
+		textColour: '--code-normal',
 	},
 	gutter: {
-		backgroundColor: '--code-background',
-		textColor: '--text-faint',
-		activeTextColor: '--text-muted',
+		backgroundColour: '--code-background',
+		textColour: '--text-faint',
+		activeTextColour: '--text-muted',
 	},
 	header: {
-		backgroundColor: '--code-background',
+		backgroundColour: '--code-background',
 		title: {
-			textColor: '--code-comment',
+			textColour: '--code-comment',
 		},
 		languageTag: {
-			backgroundColor: '--code-background',
-			textColor: '--code-comment',
+			backgroundColour: '--code-background',
+			textColour: '--code-comment',
 		},
-		lineColor: '--color-base-30',
+		lineColour: '--color-base-30',
 	},
 	highlights: {
-		activeCodeblockLineColor: '--color-base-30',
-		activeEditorLineColor: '--color-base-20',
-		defaultColor: '--text-highlight-bg',
+		activeCodeblockLineColour: '--color-base-30',
+		activeEditorLineColour: '--color-base-20',
+		defaultColour: '--text-highlight-bg',
 		alternativeHighlights: {},
 	},
 	inline: {
-		backgroundColor: '--code-background',
-		textColor: '--code-normal',
-		activeTextColor: '--code-normal',
+		backgroundColour: '--code-background',
+		textColour: '--code-normal',
+		activeTextColour: '--code-normal',
 	},
 	advanced: {
-		buttonColor: '--text-muted',
-		buttonActiveColor: '--text-normal',
+		buttonColour: '--text-muted',
+		buttonActiveColour: '--text-normal',
 	}
 }
 
 // Theme Creation
 const DEFAULT_THEME: CodeStylerTheme = {
 	settings: THEME_DEFAULT_SETTINGS,
-	colors: {
-		light: THEME_FALLBACK_COLORS,
-		dark: THEME_FALLBACK_COLORS,
+	colours: {
+		light: THEME_FALLBACK_COLOURS,
+		dark: THEME_FALLBACK_COLOURS,
 	},
 }
 const SOLARIZED_THEME: CodeStylerTheme = {
 	settings: THEME_DEFAULT_SETTINGS,
-	colors: {
+	colours: {
 		light: {
 			codeblock: {
-				backgroundColor: '#FCF6E4',
-				textColor: '#bababa',
+				backgroundColour: '#FCF6E4',
+				textColour: '#bababa',
 			},
 			gutter: {
-				backgroundColor: '#EDE8D6',
-				textColor: '#6c6c6c',
-				activeTextColor: '#8c8c8c',
+				backgroundColour: '#EDE8D6',
+				textColour: '#6c6c6c',
+				activeTextColour: '#8c8c8c',
 			},
 			header: {
-				backgroundColor: '#D5CCB4',
+				backgroundColour: '#D5CCB4',
 				title: {
-					textColor: '#866704',
+					textColour: '#866704',
 				},
 				languageTag: {
-					backgroundColor: '#B8B5AA',
-					textColor: '#C25F30',
+					backgroundColour: '#B8B5AA',
+					textColour: '#C25F30',
 				},
-				lineColor: '#EDD489',
+				lineColour: '#EDD489',
 			},
 			highlights: {
-				activeCodeblockLineColor: '#EDE8D6',
-				activeEditorLineColor: '#60460633',
-				defaultColor: '#E9DFBA',
+				activeCodeblockLineColour: '#EDE8D6',
+				activeEditorLineColour: '#60460633',
+				defaultColour: '#E9DFBA',
 				alternativeHighlights: {},
 			},
 			inline: {
-				backgroundColor: '#FCF6E4',
-				textColor: '#bababa',
-				activeTextColor: '#bababa',
+				backgroundColour: '#FCF6E4',
+				textColour: '#bababa',
+				activeTextColour: '#bababa',
 			},
 			advanced: {
-				buttonColor: '--text-muted',
-				buttonActiveColor: '--text-normal',
+				buttonColour: '--text-muted',
+				buttonActiveColour: '--text-normal',
 			}
 		},
 		dark: {
 			codeblock: {
-				backgroundColor: '#002b36',
-				textColor: '#bababa',
+				backgroundColour: '#002b36',
+				textColour: '#bababa',
 			},
 			gutter: {
-				backgroundColor: '#073642',
-				textColor: '#6c6c6c',
-				activeTextColor: '#4c4c4c',
+				backgroundColour: '#073642',
+				textColour: '#6c6c6c',
+				activeTextColour: '#4c4c4c',
 			},
 			header: {
-				backgroundColor: '#0a4554',
+				backgroundColour: '#0a4554',
 				title: {
-					textColor: '#dadada',
+					textColour: '#dadada',
 				},
 				languageTag: {
-					backgroundColor: '#008080',
-					textColor: '#000000',
+					backgroundColour: '#008080',
+					textColour: '#000000',
 				},
-				lineColor: '#46cced',
+				lineColour: '#46cced',
 			},
 			highlights: {
-				activeCodeblockLineColor: '#073642',
-				activeEditorLineColor: '#468eeb33',
-				defaultColor: '#054b5c',
+				activeCodeblockLineColour: '#073642',
+				activeEditorLineColour: '#468eeb33',
+				defaultColour: '#054b5c',
 				alternativeHighlights: {},
 			},
 			inline: {
-				backgroundColor: '#002b36',
-				textColor: '#bababa',
-				activeTextColor: '#bababa',
+				backgroundColour: '#002b36',
+				textColour: '#bababa',
+				activeTextColour: '#bababa',
 			},
 			advanced: {
-				buttonColor: '--text-muted',
-				buttonActiveColor: '--text-normal',
+				buttonColour: '--text-muted',
+				buttonActiveColour: '--text-normal',
 			}
 		},
 	},
@@ -1157,7 +1159,7 @@ export const LANGUAGE_ICONS_DATA: {[key: string]: string} = { // Icons from http
 	"YANG": `<path d="M8.877,23.159c0-5.535,3.992-7.168,7.894-7.168,3.357,0,5.988-3.811,5.988-6.624,0-3.621-2.487-5.831-4.882-7.12A13.881,13.881,0,1,0,14.5,29.8C10.491,28.248,8.877,25.324,8.877,23.159Z" style="fill:#fff"/><path d="M14.482,29.917A14,14,0,0,1,16,2a14.154,14.154,0,0,1,1.893.131l.04.013c2.255,1.213,4.944,3.452,4.944,7.223,0,2.715-2.564,6.741-6.106,6.741-2.9,0-7.776.916-7.776,7.05,0,2.022,1.451,4.946,5.542,6.531ZM16,2.236A13.765,13.765,0,0,0,13.637,29.56c-3.581-1.684-4.877-4.447-4.877-6.4,0-6.576,5.6-7.286,8.012-7.286,3.406,0,5.87-3.886,5.87-6.506,0-3.645-2.606-5.82-4.8-7.006A13.928,13.928,0,0,0,16,2.236Z" style="fill:#231f20"/><path d="M29.882,16a13.882,13.882,0,0,0-12-13.752c2.4,1.289,4.882,3.5,4.882,7.12,0,2.813-2.631,6.624-5.988,6.624-3.9,0-7.894,1.633-7.894,7.168,0,2.166,1.613,5.089,5.618,6.641A13.875,13.875,0,0,0,29.882,16Z" style="fill:#231f20"/><path d="M16,30a14.2,14.2,0,0,1-1.518-.083l-.03-.007c-4.2-1.628-5.693-4.654-5.693-6.75,0-6.576,5.6-7.286,8.012-7.286,3.406,0,5.87-3.886,5.87-6.506,0-3.655-2.621-5.833-4.82-7.016l.072-.221A14,14,0,0,1,16,30Zm-1.477-.316A13.756,13.756,0,0,0,29.764,16,13.807,13.807,0,0,0,18.5,2.466c2.115,1.272,4.377,3.441,4.377,6.9,0,2.715-2.564,6.741-6.106,6.741-2.9,0-7.776.916-7.776,7.05C9,25.178,10.443,28.1,14.523,29.684Z" style="fill:#231f20"/><circle cx="15.943" cy="22.787" r="1.506" style="fill:#fff"/><circle cx="16.007" cy="9.142" r="1.506" style="fill:#231f20"/>`,
 	"Zig": `<polygon points="5.733 19.731 5.733 12.264 8.533 12.264 8.533 8.531 2 8.531 2 23.464 5.547 23.464 8.907 19.731 5.733 19.731" style="fill:#f7a41d"/><polygon points="26.453 8.531 23.093 12.264 26.267 12.264 26.267 19.731 23.467 19.731 23.467 23.464 30 23.464 30 8.531 26.453 8.531" style="fill:#f7a41d"/><polygon points="26.875 6.707 20.513 8.531 9.467 8.531 9.467 12.264 16.847 12.264 5.115 25.293 11.497 23.464 22.533 23.464 22.533 19.731 15.148 19.731 26.875 6.707" style="fill:#f7a41d"/>`
 }
-export const LANGUAGE_COLORS : {[key: string]: string} = {
+export const LANGUAGE_COLOURS : {[key: string]: string} = {
 	".gitignore": '#dd4c35',
 	".hgignore": '#bfbfbf',
 	".npmignore": '#cb3837',

@@ -8,7 +8,7 @@ import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
 import { createHeader, getLanguageIcon, getLineClass } from "./CodeblockDecorating";
 
-export function createCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
+export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
 	const codeblockLineNumberCharWidth = StateField.define<number>({
 		create(state: EditorState): number {
 			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
@@ -71,13 +71,13 @@ export function createCodeMirrorExtensions(settings: CodeStylerSettings, languag
 					this.settings.excludedCodeblocks !== this.currentSettings.excludedCodeblocks ||
 					this.settings.excludedLanguages !== this.currentSettings.excludedLanguages ||
 					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
-					!arraysEqual(Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
+					!arraysEqual(Object.keys(this.settings.currentTheme.colours.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
 				) {
 					this.currentSettings = structuredClone({
 						excludedCodeblocks: this.settings.excludedCodeblocks,
 						excludedLanguages: this.settings.excludedLanguages,
 						collapsePlaceholder: this.settings.currentTheme.settings.header.collapsePlaceholder,
-						alternativeHighlights: Object.keys(this.settings.currentTheme.colors.light.highlights.alternativeHighlights),
+						alternativeHighlights: Object.keys(this.settings.currentTheme.colours.light.highlights.alternativeHighlights),
 					});
 					this.buildDecorations(update.view);
 				}

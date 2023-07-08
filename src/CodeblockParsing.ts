@@ -191,7 +191,7 @@ function parseParameterString(parameterString: string, codeblockParameters: Code
 			if (highlightMatch[1] === 'hl')
 				codeblockParameters.highlights.default = highlights;
 			else
-				if (highlightMatch[1] in theme.colors.light.highlights.alternativeHighlights)
+				if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
 					codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
 		}
 	}

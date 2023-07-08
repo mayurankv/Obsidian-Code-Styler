@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Color, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColors, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -39,7 +39,7 @@ export class SettingsTab extends PluginSettingTab {
 			'editorActiveLineHighlight': [],
 			'codeblockActiveLineHighlight': [],
 			'gradientHighlighting': [],
-			'languageBorderColor': [],
+			'languageBorderColour': [],
 		};
 
 		// ========== General ==========
@@ -165,20 +165,20 @@ export class SettingsTab extends PluginSettingTab {
 		
 		containerEl.createEl('h4', {text: 'Codeblock Appearance'});
 		new Setting(containerEl)
-			.setName('Codeblock Background Color')
+			.setName('Codeblock Background Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'codeblock_background',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].codeblock.backgroundColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].codeblock.backgroundColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].codeblock.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].codeblock.backgroundColour = saveColour},
 			)});
 		new Setting(containerEl)
-			.setName('Codeblock Text Color')
+			.setName('Codeblock Text Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'codeblock_text',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].codeblock.textColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].codeblock.textColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].codeblock.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].codeblock.textColour = saveColour},
 			)});
 		new Setting(containerEl)
 			.setName('Unwrap codeblock lines')
@@ -227,22 +227,22 @@ export class SettingsTab extends PluginSettingTab {
 					(async () => {await this.plugin.saveSettings()})();         
 				}));
 		new Setting(containerEl)
-			.setName('Gutter Background Color')
+			.setName('Gutter Background Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'gutter_background',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].gutter.backgroundColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].gutter.backgroundColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].gutter.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].gutter.backgroundColour = saveColour},
 				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			)});
 		this.disableableComponents['lineNumbers'].push(this.pickrs['gutter_background'].resetButton);
 		new Setting(containerEl)
-			.setName('Line Number Color')
+			.setName('Line Number Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'line_number',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].gutter.textColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].gutter.textColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].gutter.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].gutter.textColour = saveColour},
 				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			)});
 		this.disableableComponents['lineNumbers'].push(this.pickrs['line_number'].resetButton);
@@ -260,7 +260,7 @@ export class SettingsTab extends PluginSettingTab {
 			});
 		new Setting(containerEl)
 			.setName('Indicate Current Line Number')
-			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate color.')
+			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate colour.')
 			.setClass('code-styler-spaced')
 			.addToggle(toggle => {let indicateCurrentLineNumberToggle = toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.activeLine)
@@ -274,19 +274,19 @@ export class SettingsTab extends PluginSettingTab {
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'active_line_number',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].gutter.activeTextColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].gutter.activeTextColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].gutter.activeTextColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].gutter.activeTextColour = saveColour},
 				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			)});
 		
 		containerEl.createEl('h4', {text: 'Header Appearance'});
 		new Setting(containerEl)
-			.setName('Header Background Color')
+			.setName('Header Background Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'header_background',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].header.backgroundColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.backgroundColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.backgroundColour = saveColour},
 			)});
 		new Setting(containerEl)
 			.setName('Header Font Size')
@@ -314,7 +314,7 @@ export class SettingsTab extends PluginSettingTab {
 			})
 		new Setting(containerEl)
 			.setName('Header Title Text Styling')
-			.setDesc('Style the header title text using bold and italic toggles, by setting a font or by setting a text color.')
+			.setDesc('Style the header title text using bold and italic toggles, by setting a font or by setting a text colour.')
 			.addToggle(toggle => {toggle
 				.setTooltip("Toggle bold title text")
 				.setValue(this.plugin.settings.currentTheme.settings.header.title.textBold)
@@ -342,8 +342,8 @@ export class SettingsTab extends PluginSettingTab {
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'header_title_text',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].header.title.textColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.title.textColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.title.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.title.textColour = saveColour},
 			)});
 		new Setting(containerEl)
 			.setName('Collapse Placeholder Text')
@@ -356,13 +356,13 @@ export class SettingsTab extends PluginSettingTab {
 					(async () => {await this.plugin.saveSettings()})();
 				}));
 		new Setting(containerEl)
-			.setName('Header Separator Color')
-			.setDesc('Color of the line separating the codeblock header and the codeblock.')
+			.setName('Header Separator Colour')
+			.setDesc('Colour of the line separating the codeblock header and the codeblock.')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'header_separator',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].header.lineColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.lineColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.lineColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.lineColour = saveColour},
 			)});
 			
 		containerEl.createEl('h5', {text: 'Header Language Tag Appearance'});
@@ -378,12 +378,12 @@ export class SettingsTab extends PluginSettingTab {
 					(async () => {await this.plugin.saveSettings()})();
 				}));
 		new Setting(containerEl)
-			.setName('Header Language Tag Background Color')
+			.setName('Header Language Tag Background Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'header_language_tag_background',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].header.languageTag.backgroundColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.languageTag.backgroundColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.languageTag.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.backgroundColour = saveColour},
 				() => this.plugin.settings.currentTheme.settings.header.languageTag.display === 'none',
 			)});
 		this.disableableComponents['headerLanguageTags'].push(this.pickrs['header_language_tag_background'].resetButton);
@@ -392,7 +392,7 @@ export class SettingsTab extends PluginSettingTab {
 		let languageIconsFontText: TextComponent;
 		new Setting(containerEl)
 			.setName('Header Language Tag Text Styling')
-			.setDesc('Style the header language tag text using bold and italic toggles, by setting a font or by setting a text color.')
+			.setDesc('Style the header language tag text using bold and italic toggles, by setting a font or by setting a text colour.')
 			.addToggle(toggle => {languageTagsBoldToggle = toggle
 				.setTooltip("Toggle bold language tag text")
 				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textBold)
@@ -426,8 +426,8 @@ export class SettingsTab extends PluginSettingTab {
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'header_language_tag_text',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].header.languageTag.textColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].header.languageTag.textColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.languageTag.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.textColour = saveColour},
 				() => this.plugin.settings.currentTheme.settings.header.languageTag.display === 'none',
 			)});
 		this.disableableComponents['headerLanguageTags'].push(this.pickrs['header_language_tag_text'].resetButton);
@@ -444,18 +444,18 @@ export class SettingsTab extends PluginSettingTab {
 					this.disableableComponents['headerLanguageIcons'].forEach(component => {component.setDisabled(value==="none")});
 					(async () => {await this.plugin.saveSettings()})();
 				}));
-		let languageIconsColoredToggle: ToggleComponent;
+		let languageIconsColouredToggle: ToggleComponent;
 		new Setting(containerEl)
-			.setName('Language Icons Colored')
+			.setName('Language Icons Coloured')
 			.setDesc('If disabled, language icons will be black and white.')
-			.addToggle(toggle => {languageIconsColoredToggle = toggle
-				.setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.displayColor)
+			.addToggle(toggle => {languageIconsColouredToggle = toggle
+				.setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.displayColour)
 				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
 				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.header.languageIcon.displayColor = value;
+					this.plugin.settings.currentTheme.settings.header.languageIcon.displayColour = value;
 					(async () => {await this.plugin.saveSettings()})();
 				})
-				this.disableableComponents['headerLanguageIcons'].push(languageIconsColoredToggle);
+				this.disableableComponents['headerLanguageIcons'].push(languageIconsColouredToggle);
 			});
 		new Setting(containerEl)
 			.setName('Language Icon Size')
@@ -504,8 +504,8 @@ export class SettingsTab extends PluginSettingTab {
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'editor_active_line_highlight',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].highlights.activeEditorLineColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].highlights.activeEditorLineColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour = saveColour},
 				() => !this.plugin.settings.currentTheme.settings.highlights.activeEditorLine,
 			)});
 		this.disableableComponents['editorActiveLineHighlight'].push(this.pickrs['editor_active_line_highlight'].resetButton);
@@ -524,24 +524,24 @@ export class SettingsTab extends PluginSettingTab {
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'codeblock_active_line_highlight',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].highlights.activeCodeblockLineColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].highlights.activeCodeblockLineColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.activeCodeblockLineColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.activeCodeblockLineColour = saveColour},
 				() => !this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine,
 			)});
 		this.disableableComponents['codeblockActiveLineHighlight'].push(this.pickrs['codeblock_active_line_highlight'].resetButton);
 		new Setting(containerEl)
-			.setName('Default Highlight Color')
+			.setName('Default Highlight Colour')
 			.setDesc('Used by the \'hl\' parameter.')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'default_highlight',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].highlights.defaultColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].highlights.defaultColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.defaultColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.defaultColour = saveColour},
 			)});
 		let newHighlightText: TextComponent;
 		new Setting(containerEl)
 			.setName("Add Alternative Highlight")
-			.setDesc('Define a new alternative highlight name. Colors can be modified after it is added.')
+			.setDesc('Define a new alternative highlight name. The colour can be modified after it is added.')
 			.addText(value => {newHighlightText = value
 				.setPlaceholder('e.g. error, warn')
 				.onChange((value) => {
@@ -552,21 +552,21 @@ export class SettingsTab extends PluginSettingTab {
 				button.setButtonText("Add");
 				button.onClick(() => {
 					if (this.plugin.settings.newHighlight.trim() === "")
-						new Notice("Please enter a color name."); //NOSONAR
+						new Notice("Please enter a colour name."); //NOSONAR
 					else if (!/^[^\d]\w*$/.test(this.plugin.settings.newHighlight))
-						new Notice(`"${this.plugin.settings.newHighlight}" is not a valid color name.`); //NOSONAR
+						new Notice(`"${this.plugin.settings.newHighlight}" is not a valid colour name.`); //NOSONAR
 					else if (this.plugin.settings.newHighlight.trim().toLowerCase() === 'hl')
 						new Notice("Cannot override the default highlight parameter."); //NOSONAR
 					else if (PARAMETERS.includes(this.plugin.settings.newHighlight.trim().toLowerCase()))
 						new Notice("Cannot use other default parameters."); //NOSONAR
 					else {
-						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights)
+						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights)
 							new Notice(`A highlight with the name "${this.plugin.settings.newHighlight}" already exists.`); //NOSONAR
 							//todo (@mayurankv) Future: Focus on existing highlighter
 						else {
-							const newColor = getRandomColor();
-							this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColor;
-							this.plugin.settings.currentTheme.colors.dark.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColor;
+							const newColour = getRandomColour();
+							this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
+							this.plugin.settings.currentTheme.colours.dark.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
 							this.updateAlternativeHighlights(alternativeHighlightsContainer);
 							new Notice(`Added highlight "${this.plugin.settings.newHighlight}".`); //NOSONAR
 							this.plugin.settings.newHighlight = "";
@@ -581,29 +581,38 @@ export class SettingsTab extends PluginSettingTab {
 
 		containerEl.createEl('h4', {text: 'Inline Code Appearance'});
 		new Setting(containerEl)
-			.setName('Inline Code Background Color')
+			.setName('Syntax Highlight Inline Code')
+			.setDesc('If enabled, in reading mode, inline code will be syntax highlighted based on a language set with `{language} highlighted_inline_code`. See the README for more information.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.inline.syntaxHighlight)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.inline.syntaxHighlight = value;
+					(async () => {await this.plugin.saveSettings()})();    
+				}));
+		new Setting(containerEl)
+			.setName('Inline Code Background Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'inline_background',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].inline.backgroundColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].inline.backgroundColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.backgroundColour = saveColour},
 			)});
 		new Setting(containerEl)
-			.setName('Inline Code Text Color')
+			.setName('Inline Code Text Colour')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'inline_text',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].inline.textColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].inline.textColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.textColour = saveColour},
 			)});
 		new Setting(containerEl)
-			.setName('Inline Code Active Text Color')
-			.setDesc('The text color when editing inline code.')
+			.setName('Inline Code Active Text Colour')
+			.setDesc('The text colour when editing inline code.')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'inline_active_text',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].inline.activeTextColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].inline.activeTextColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.activeTextColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.activeTextColour = saveColour},
 			)});
 		new Setting(containerEl)
 			.setName('Inline Code Font Weight')
@@ -744,26 +753,26 @@ export class SettingsTab extends PluginSettingTab {
 				this.disableableComponents['wrapLines'].push(wrapLinesActiveToggle);
 			});
 		new Setting(containerEl)
-			.setName('Button Color')
+			.setName('Button Colour')
 			.setDesc('Used for UI buttons like the copy code button.')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'default_highlight',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].advanced.buttonColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].advanced.buttonColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].advanced.buttonColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].advanced.buttonColour = saveColour},
 			)});
 		new Setting(containerEl)
-			.setName('Button Active Color')
-			.setDesc('Color buttons use when activated.')
+			.setName('Button Active Colour')
+			.setDesc('Colour buttons use when activated.')
 			.then((setting) => {this.createPickr(
 				this.plugin,containerEl,setting,
 				'default_highlight',
-				(relevantThemeColors: CodeStylerThemeColors) => relevantThemeColors[getCurrentMode()].advanced.buttonActiveColor,
-				(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].advanced.buttonActiveColor = saveColor},
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].advanced.buttonActiveColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].advanced.buttonActiveColour = saveColour},
 			)});
 		new Setting(containerEl)
 			.setName('Gradient Highlighting')
-			.setDesc('If enabled, highlights fade away to the right. The slider sets the gradient color stop as a percentage.')
+			.setDesc('If enabled, highlights fade away to the right. The slider sets the gradient colour stop as a percentage.')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
 				.onChange((value) => {
@@ -775,11 +784,11 @@ export class SettingsTab extends PluginSettingTab {
 				let resettableSlider: SliderComponent;
 				setting.addSlider((slider) => {resettableSlider = slider
 					.setLimits(0,100,1)
-					.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop.slice(0,-1))
+					.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop.slice(0,-1))
 					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
 					.setDynamicTooltip()
 					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop = `${value}%`;
+						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = `${value}%`;
 						(async () => {await this.plugin.saveSettings()})();    
 					});
 					this.disableableComponents['gradientHighlighting'].push(resettableSlider);
@@ -788,23 +797,23 @@ export class SettingsTab extends PluginSettingTab {
 				setting.addExtraButton((button) => {resetButton = button
 					.setIcon("reset")
 					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
-					.setTooltip('Restore default color stop')
+					.setTooltip('Restore default colour stop')
 					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.gradientHighlightsColorStop;
-						resettableSlider.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColorStop.slice(0,-1));
+						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.gradientHighlightsColourStop;
+						resettableSlider.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop.slice(0,-1));
 						(async () => {await this.plugin.saveSettings()})();
 					});
 					this.disableableComponents['gradientHighlighting'].push(resetButton);
 				})
 			})
 		new Setting(containerEl)
-			.setName('Language Colored Borders')
-			.setDesc('If enabled, languages with icons display a left border with the color of the icon. The slider sets the width of the border.')
+			.setName('Language Coloured Borders')
+			.setDesc('If enabled, languages with icons display a left border with the colour of the icon. The slider sets the width of the border.')
 			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
+				.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
 				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.advanced.languageBorderColor = value;
-					this.disableableComponents['languageBorderColor'].forEach(component => {component.setDisabled(!value)});
+					this.plugin.settings.currentTheme.settings.advanced.languageBorderColour = value;
+					this.disableableComponents['languageBorderColour'].forEach(component => {component.setDisabled(!value)});
 					(async () => {await this.plugin.saveSettings()})();
 				}))
 			.then((setting) => {
@@ -812,34 +821,34 @@ export class SettingsTab extends PluginSettingTab {
 				setting.addSlider((slider) => {resettableSlider = slider
 					.setLimits(0,20,1)
 					.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth)
-					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
+					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = value;
 						(async () => {await this.plugin.saveSettings()})();    
 					});
-					this.disableableComponents['languageBorderColor'].push(resettableSlider);
+					this.disableableComponents['languageBorderColour'].push(resettableSlider);
 				});
 				let resetButton: ExtraButtonComponent;
 				setting.addExtraButton((button) => {resetButton = button
 					.setIcon("reset")
-					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColor)
-					.setTooltip('Restore default color stop')
+					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
+					.setTooltip('Restore default colour stop')
 					.onClick(() => {
 						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.languageBorderWidth;
 						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth);
 						(async () => {await this.plugin.saveSettings()})();
 					});
-					this.disableableComponents['languageBorderColor'].push(resetButton);
+					this.disableableComponents['languageBorderColour'].push(resetButton);
 				});
 			})
 		new Setting(containerEl)
 			.setName('Redirect Language Settings')
-			.setDesc('Use this textbox to redirect specific language colors and icons as a JSON with language names as keys and either a color key, an icon key or both as the value for a given language. Colours should be passed as CSS colors and icons should be passed as a string of the inside of an svg element. This setting is theme independent.')
+			.setDesc('Use this textbox to redirect specific language colours and icons as a JSON with language names as keys and either a colour key, an icon key or both as the value for a given language. Colours should be passed as CSS colours and icons should be passed as a string of the inside of an svg element. This setting is theme independent.')
 			.setClass('code-styler-setting-text-area')
 			.addTextArea(textArea => textArea
 				.setValue(JSON.stringify(this.plugin.settings.redirectLanguages)==='{}'?'':JSON.stringify(this.plugin.settings.redirectLanguages,null,4))
-				.setPlaceholder(JSON.stringify({toml: {color: '#012345', icon: LANGUAGE_ICONS_DATA['APL']}},null,4))
+				.setPlaceholder(JSON.stringify({toml: {colour: '#012345', icon: LANGUAGE_ICONS_DATA['APL']}},null,4))
 				.onChange((value)=>{
 					if (value === '') {
 						this.plugin.settings.redirectLanguages = {};
@@ -847,7 +856,7 @@ export class SettingsTab extends PluginSettingTab {
 					} else {
 						try {
 							this.plugin.settings.redirectLanguages = JSON.parse(value);
-							Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {color?: Color, icon?: string}])=>{
+							Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {colour?: Colour, icon?: string}])=>{
 								if ('icon' in languageSettings) {
 									if (LANGUAGE_NAMES[languageName] in this.plugin.languageIcons)
 										URL.revokeObjectURL(this.plugin.languageIcons[LANGUAGE_NAMES[languageName]]);
@@ -872,26 +881,26 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	// Setting Creation
-	createPickr(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, id: string, getRelevantThemeColor: (relevantThemeColors: CodeStylerThemeColors)=>Color, saveRelevantThemeColor: (relevantThemeColors: CodeStylerThemeColors, saveColor: Color)=>void, disabled?: ()=>boolean) {
-		let pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColor,saveRelevantThemeColor);
+	createPickr(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, id: string, getRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours)=>Colour, saveRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours, saveColour: Colour)=>void, disabled?: ()=>boolean) {
+		let pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColour,saveRelevantThemeColour);
 		pickr
-			.on('show', (color: Pickr.HSVaColor, instance: Pickr) => {
+			.on('show', (colour: Pickr.HSVaColor, instance: Pickr) => {
 				if (typeof disabled !== 'undefined' && disabled())
 					instance.hide()
 				// requestAnimationFrame(() => requestAnimationFrame(() => (instance.getRoot() as any).interaction.result.select()))
 			})
-			.on('save', (color: Pickr.HSVaColor, instance: PickrResettable) => {
-				const savedColor: Color = `#${color.toHEXA().toString().substring(1)}`;
+			.on('save', (colour: Pickr.HSVaColor, instance: PickrResettable) => {
+				const savedColour: Colour = `#${colour.toHEXA().toString().substring(1)}`;
 				instance.hide();
-				instance.addSwatch(savedColor);
-				instance.saveColor(savedColor);
+				instance.addSwatch(savedColour);
+				instance.saveColour(savedColour);
 			})
 			.on('cancel', (instance: PickrResettable) => {instance.hide()});
 		setting.addExtraButton((button) => {pickr.resetButton = button
 			.setIcon("reset")
 			.setDisabled(typeof disabled !== 'undefined' && disabled())
-			.setTooltip('Restore default color')
-			.onClick(() => {pickr.resetColor()});
+			.setTooltip('Restore default colour')
+			.onClick(() => {pickr.resetColour()});
 		});
 		this.pickrs[id]=pickr;
 	}
@@ -906,7 +915,7 @@ export class SettingsTab extends PluginSettingTab {
 	}
 	updateAlternativeHighlights(alternativeHighlightsContainer: HTMLDivElement) {
 		alternativeHighlightsContainer.empty();
-		Object.keys(this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights).forEach((alternativeHighlightName) => {
+		Object.keys(this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights).forEach((alternativeHighlightName) => {
 			new Setting(alternativeHighlightsContainer)
 				.setName(alternativeHighlightName)
 				.setDesc(`To highlight lines with this highlight, use the ${alternativeHighlightName} parameter.`)
@@ -914,15 +923,15 @@ export class SettingsTab extends PluginSettingTab {
 					this.createPickr(
 						this.plugin,alternativeHighlightsContainer,setting,
 						`alternative_highlight_${alternativeHighlightName}`,
-						(relevantThemeColors: CodeStylerThemeColors) => alternativeHighlightName in relevantThemeColors.light.highlights.alternativeHighlights?relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName]:this.plugin.settings.currentTheme.colors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName],
-						(relevantThemeColors: CodeStylerThemeColors, saveColor: Color) => {relevantThemeColors[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName] = saveColor},
+						(relevantThemeColours: CodeStylerThemeColours) => alternativeHighlightName in relevantThemeColours.light.highlights.alternativeHighlights?relevantThemeColours[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName]:this.plugin.settings.currentTheme.colours[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName],
+						(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName] = saveColour},
 					);
 					setting.addExtraButton((button) => {button
 						.setIcon("trash")
 						.setTooltip("Delete highlight")
 						.onClick(() => {
-							delete this.plugin.settings.currentTheme.colors.light.highlights.alternativeHighlights[alternativeHighlightName]
-							delete this.plugin.settings.currentTheme.colors.dark.highlights.alternativeHighlights[alternativeHighlightName]
+							delete this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[alternativeHighlightName]
+							delete this.plugin.settings.currentTheme.colours.dark.highlights.alternativeHighlights[alternativeHighlightName]
 							new Notice(`Removed highlight "${alternativeHighlightName}".`); //NOSONAR
 							this.updateAlternativeHighlights(alternativeHighlightsContainer);
 							(async () => {await this.plugin.saveSettings()})();
@@ -934,16 +943,16 @@ export class SettingsTab extends PluginSettingTab {
 }
 
 class PickrResettable extends Pickr {
-	saveColor: (saveColor: Color)=>void;
-	resetColor: ()=>void;
-	getCurrentColor: (accessTheme: boolean)=>void;
+	saveColour: (saveColour: Colour)=>void;
+	resetColour: ()=>void;
+	getCurrentColour: (accessTheme: boolean)=>void;
 	resetButton: ExtraButtonComponent;
 
-	constructor(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, getRelevantThemeColor: (relevantThemeColors: CodeStylerThemeColors)=>Color, saveRelevantThemeColor: (relevantThemeColors: CodeStylerThemeColors, saveColor: Color)=>void, tooltip?: string) {
+	constructor(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, getRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours)=>Colour, saveRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours, saveColour: Colour)=>void, tooltip?: string) {
 		const settings: Pickr.Options = {
 			el: setting.controlEl.createDiv({cls: "picker"}),
 			theme: 'nano',
-			default: getColor(getRelevantThemeColor(plugin.settings.currentTheme.colors)),
+			default: getColour(getRelevantThemeColour(plugin.settings.currentTheme.colours)),
 			position: "left-middle",
 			lockOpacity: false,
 			components: {
@@ -960,34 +969,34 @@ class PickrResettable extends Pickr {
 				},
 			},
 			i18n: {
-				'ui:dialog': 'Color picker dialog',
-				'btn:toggle': (typeof tooltip !== 'undefined')?tooltip:'Select color',
-				'btn:swatch': 'Color swatch',
-				'btn:last-color': 'Use previous color',
+				'ui:dialog': 'Colour picker dialog',
+				'btn:toggle': (typeof tooltip !== 'undefined')?tooltip:'Select colour',
+				'btn:swatch': 'Colour swatch',
+				'btn:last-color': 'Use previous colour',
 			}
 		};
 		if (containerEl.parentElement !== null)
 			settings.container = containerEl.parentElement;
 		super(settings);
-		this.saveColor = (saveColor: Color) => {
-			saveRelevantThemeColor(plugin.settings.currentTheme.colors,saveColor);
+		this.saveColour = (saveColour: Colour) => {
+			saveRelevantThemeColour(plugin.settings.currentTheme.colours,saveColour);
 			(async () => {await plugin.saveSettings()})();
 		};
-		this.resetColor = () => {
-			const resetColor: Color = getRelevantThemeColor(plugin.settings.themes[plugin.settings.selectedTheme].colors);
-			this.setColor(getColor(resetColor));
-			this.saveColor(resetColor);
+		this.resetColour = () => {
+			const resetColour: Colour = getRelevantThemeColour(plugin.settings.themes[plugin.settings.selectedTheme].colours);
+			this.setColor(getColour(resetColour));
+			this.saveColour(resetColour);
 		};
 	}
 }
 
-// Color Management
-function getRandomColor(): Color {
+// Colour Management
+function getRandomColour(): Colour {
 	const letters = "0123456789ABCDEF";
-	let color = "";
+	let colour = "";
 	for (let i = 0; i < 6; i++)
-		color += letters[Math.floor(Math.random() * 16)];
-	return `#${color}FF`;
+		colour += letters[Math.floor(Math.random() * 16)];
+	return `#${colour}FF`;
 }
 export function isCss(possibleCss: string): possibleCss is CSS {
 	return possibleCss.startsWith('--') && typeof possibleCss === 'string';
@@ -1014,11 +1023,11 @@ function getCssVariable(cssVariable: CSS): HEX {
 	else if (variableValue.startsWith('hsl'))
 		return `#${ColorTranslator.toHEXA(variableValue.replace(/calc\((.*?)\)/g,(match,capture)=>calc(capture))).substring(1)}`;
 	else
-		console.warn(`Warning: Couldn't determine color format - ${variableValue}`);
+		console.warn(`Warning: Couldn't determine colour format - ${variableValue}`);
 	return `#${ColorTranslator.toHEXA(variableValue).substring(1)}`;
 }
-export function getColor(themeColor: Color): Color {
-	return isCss(themeColor)?getCssVariable(themeColor):themeColor;;
+export function getColour(themeColour: Colour): Colour {
+	return isCss(themeColour)?getCssVariable(themeColour):themeColour;;
 }
 
 function getCurrentMode() {
