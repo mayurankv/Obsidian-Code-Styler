@@ -70,8 +70,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../../compare/1.0.0...HEAD
-[1.0.0]: /../../../releases/tag/1.0.0
+[Unreleased]: /../../compare/1.0.0...HEAD
+[1.0.0]: /../../releases/tag/1.0.0
 
 <!-- Original CHANGELOG Plans:
 
