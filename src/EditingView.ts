@@ -1,7 +1,7 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line, SelectionRange } from "@codemirror/state";
-import { language, syntaxTree } from "@codemirror/language";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
+import { syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
@@ -177,7 +177,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		}
 	})
-	const codeblockCollapse = StateField.define({
+	const codeblockCollapse = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			if (editingViewIgnore(state))
 				return Decoration.none;
@@ -210,7 +210,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					}
 				}
 				if (collapseStart && collapseEnd) {
-					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)]), block: true, inclusive: true}));
+					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)), block: true, inclusive: true}));
 					collapseStart = null;
 					collapseEnd = null;
 				}
@@ -221,14 +221,30 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			value = value.map(transaction.changes);
 			for (const effect of transaction.effects) {
 				if (effect.is(collapse))
-					value = value.update({add: effect.value, sort: true});
+					value = value.update({add: [effect.value], sort: true});
 				else if (effect.is(uncollapse))
-					value = value.update({filter: effect.value});
+					value = value.update({filter: effect.value.filter, filterFrom: effect.value.filterFrom, filterTo: effect.value.filterTo});
 			}
 			return value;
 		},
 		provide(field: StateField<DecorationSet>): Extension {
 			return EditorView.decorations.from(field);
+		},
+	})
+	const temporarilyUncollapsed = StateField.define<DecorationSet>({
+		create(state: EditorState): DecorationSet {
+			return Decoration.none;
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			value = value.map(transaction.changes)
+			const uncollapseAnnotation = transaction.annotation(temporaryUncollapseAnnotation);
+			if (uncollapseAnnotation) {
+				if (uncollapseAnnotation.uncollapse)
+					value = value.update({add: [uncollapseAnnotation.decorationRange], sort: true});
+				else
+					value = value.update({filter: (from: number, to: number, value: Decoration)=>!(from === uncollapseAnnotation.decorationRange.from && to === uncollapseAnnotation.decorationRange.to)});
+			}
+			return value;
 		}
 	})
 	const inlineCodeDecorator = StateField.define<DecorationSet>({
@@ -395,9 +411,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 			if (collapseStart && collapseEnd) {
 				if (folded)
-					view.dispatch({effects: uncollapse.of((from,to) => {return (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to)})});
+					view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: (collapseEnd as Line).from, filterTo: (collapseEnd as Line).to})});
 				else
-					view.dispatch({effects: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)])})
+					view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))})
 				view.requestMeasure();
 				collapseStart = null;
 				collapseEnd = null;
@@ -406,40 +422,35 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 
 	function readOnlyTransactionFilter() {
-		return EditorState.transactionFilter.of((tr) => {
-			let collapsedRangeSet = tr.startState.field(codeblockCollapse, false);
-			if (collapsedRangeSet) {
-				let sendToStart = false;
-				let sendToEnd = false;
-				tr.selection?.ranges?.forEach((range: SelectionRange)=>{
-					(collapsedRangeSet as DecorationSet).between(range.from, range.to, (collapseStartFrom, collapseStartTo) => {
-						console.log(range.from,range.to,collapseStartFrom,collapseStartTo)
-						if (range.from >= collapseStartFrom && range.to <= collapseStartTo) {
-							if (range.head === collapseStartTo)
-								sendToStart = true;
-							else if (range.head === collapseStartFrom) {
-								sendToEnd = true;
-							}
-						}
-					})
+		return EditorState.transactionFilter.of((transaction) => {
+			let extraTransactions: Array<TransactionSpec> = [];
+			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) || Decoration.none;
+			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) || Decoration.none;
+			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
+				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
+					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
+						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
 				})
-				if (sendToStart)
-					return [];
-				else if (sendToEnd)
-					return [];
-			}
-			return tr;
+				for (let iter = temporarilyUncollapsedRangeSet.iter(); iter.value !== null; iter.next()) {
+					if (!(iter.from <= range.head && range.head <= iter.to))
+						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
+				}
+			})
+			if (extraTransactions)
+				return [transaction,...extraTransactions];
+			return transaction;
 		})
 	}
 
-	const collapse: StateEffectType<Array<Range<Decoration>>> = StateEffect.define();
-	const uncollapse: StateEffectType<(from: any, to: any) => boolean> = StateEffect.define();
+	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
+	const uncollapse: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
+	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
 
 	function handleMouseDown(event: MouseEvent): void {
 		this.setAttribute("data-clicked","true");
 	}
 
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,inlineCodeDecorator,readOnlyTransactionFilter()]
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,readOnlyTransactionFilter()]
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
