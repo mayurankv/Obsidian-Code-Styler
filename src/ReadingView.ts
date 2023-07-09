@@ -117,12 +117,11 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 			return;
 		let tempRenderContainer = createDiv();
 		let renderedCodeElement: HTMLElement | null;
-		let classes: Array<string>;
 		let {parameters,text} = parseInlineCode((inlineCodeElement as HTMLElement).innerText);
 		if (!parameters) {
 			if (!text)
 				return;
-			MarkdownRenderer.renderMarkdown('`'+text+'`',tempRenderContainer,'',new Component());
+			MarkdownRenderer.renderMarkdown('`'.repeat(20)+text+'`'.repeat(20),tempRenderContainer,'',new Component());
 			renderedCodeElement = tempRenderContainer.querySelector('code');
 			if (!renderedCodeElement)
 				return;
@@ -137,7 +136,8 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 				await sleep(2);
 			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
 			inlineCodeElement.classList.add('code-styler-highlighted');
-			inlineCodeElement.insertBefore(createInlineOpener(parameters,plugin.languageIcons),inlineCodeElement.childNodes[0]);
+			if (parameters.icon || parameters.title)
+				inlineCodeElement.insertBefore(createInlineOpener(parameters,plugin.languageIcons),inlineCodeElement.childNodes[0]);
 		}
 	}
 }

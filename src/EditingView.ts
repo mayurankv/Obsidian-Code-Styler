@@ -1,12 +1,12 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
 import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line } from "@codemirror/state";
-import { syntaxTree } from "@codemirror/language";
+import { language, syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine } from "./CodeblockParsing";
-import { createHeader, getLanguageIcon, getLineClass } from "./CodeblockDecorating";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
+import { createHeader, createInlineOpener, getLanguageIcon, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
 	const codeblockLineNumberCharWidth = StateField.define<number>({
@@ -128,6 +128,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 						}
 					})
 				}
+				console.log(view.state.field(codeblockCollapse))
 				this.decorations = RangeSet.of(decorations,true)
 			}
 		
@@ -137,6 +138,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
+			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(codeblockCollapse) || Decoration.none),
 		}
 	);
 	const codeblockHeader = StateField.define<DecorationSet>({
@@ -209,7 +211,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					}
 				}
 				if (collapseStart && collapseEnd) {
-					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)]), block: true, side: -1}))
+					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of([Decoration.replace({block: true, inclusive: true}).range(collapseStart.from,collapseEnd.to)]), block: true, side: -1}));
 					collapseStart = null;
 					collapseEnd = null;
 				}
@@ -230,6 +232,33 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		}
 	})
+	const inlineCodeDecorator = StateField.define<DecorationSet>({
+		create(state: EditorState): DecorationSet {
+			return Decoration.none;    
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			if (editingViewIgnore(transaction.state))
+				return Decoration.none;
+			const builder = new RangeSetBuilder<Decoration>();
+			for (let i = 1; i < transaction.state.doc.lines; i++) {
+				const line = transaction.state.doc.line(i);
+				const lineText = line.text.toString();
+				Array.from(lineText.matchAll(/(`+)(.*?[^`].*?)\1/g)).forEach(([originalString,delimiter,inlineCodeSection]: [string,string,string])=>{
+					let {parameters,displacement} = parseInlineCode(inlineCodeSection);
+					let lineDisplacement = lineText.indexOf(originalString);
+					let replacementSpec: {widget?: WidgetType, inclusiveEnd: boolean} = {inclusiveEnd: true};
+					if (parameters?.title || parameters?.icon)
+						replacementSpec.widget = new OpenerWidget(parameters,languageIcons)
+					console.log(lineDisplacement,displacement,lineText,)
+					builder.add(line.from+lineDisplacement,line.from+lineDisplacement+displacement+1,Decoration.replace(replacementSpec));
+				});
+			}
+			return builder.finish();
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		}
+	})
 
 	class LineNumberWidget extends WidgetType {
 		lineNumber: number;
@@ -245,8 +274,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			this.empty = empty;
 		}
 	
-		eq(other: LineNumberWidget) {
-			return this.lineNumber === other.lineNumber && this.codeblockParameters === other.codeblockParameters && this.maxLineNum === other.maxLineNum;
+		eq(other: LineNumberWidget): boolean {
+			return this.lineNumber === other.lineNumber && this.codeblockParameters.lineNumbers.alwaysEnabled === other.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled === other.codeblockParameters.lineNumbers.alwaysDisabled && this.codeblockParameters.lineNumbers.offset === other.codeblockParameters.lineNumbers.offset && this.maxLineNum === other.maxLineNum && this.empty === other.empty;
 		}
 	
 		toDOM(view: EditorView): HTMLElement {
@@ -278,7 +307,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			});    
 		}
 			
-		eq(other: HeaderWidget) {
+		eq(other: HeaderWidget): boolean {
 			return (
 				this.codeblockParameters.language == other.codeblockParameters.language &&
 				this.codeblockParameters.title == other.codeblockParameters.title &&
@@ -310,6 +339,33 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	
 		ignoreEvent() {
 			return false;
+		}
+	}
+
+	class OpenerWidget extends WidgetType {
+		inlineCodeParameters: InlineCodeParameters;
+		languageIcons: Record<string,string>;
+
+		constructor (inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>) {
+			super();
+			this.inlineCodeParameters = inlineCodeParameters;
+			this.languageIcons = languageIcons;
+		}
+
+		eq(other: OpenerWidget): boolean {
+			return (
+				this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
+				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
+				this.inlineCodeParameters.icon == other.inlineCodeParameters.icon &&
+				getLanguageIcon(this.inlineCodeParameters.language,this.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.languageIcons)
+				);
+		}
+
+		toDOM(view: EditorView): HTMLElement {
+			let openerWrapper = createInlineOpener(this.inlineCodeParameters,this.languageIcons);
+			openerWrapper.classList.add('cm-inline-code')
+			return openerWrapper;
+			// return createInlineOpener(this.inlineCodeParameters,this.languageIcons);
 		}
 	}
 	
@@ -361,7 +417,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		this.setAttribute("data-clicked","true");
 	}
 
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse]
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,inlineCodeDecorator]
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {

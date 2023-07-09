@@ -562,7 +562,7 @@ export class SettingsTab extends PluginSettingTab {
 					else {
 						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights)
 							new Notice(`A highlight with the name "${this.plugin.settings.newHighlight}" already exists.`); //NOSONAR
-							//todo (@mayurankv) Future: Focus on existing highlighter
+							//todo (@mayurankv) Future: Focus on existing highlighter - `renderMatches`
 						else {
 							const newColour = getRandomColour();
 							this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
