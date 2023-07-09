@@ -279,7 +279,7 @@ See the roadmap at [Roadmap Discussion](../../discussions/8).
 
 ## Contributions
 
-All contributions are welcome, just create a merge request. The bullet points in [roadmap](#roadmap) are a good place to start!
+All contributions are welcome, just create a merge request. The bullet points in the [roadmap](../../discussions/8) are a good place to start!
 
 Please try to create bug reports/issues that are:
 

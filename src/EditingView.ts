@@ -1,6 +1,6 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, Line, SelectionRange } from "@codemirror/state";
 import { language, syntaxTree } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
@@ -128,7 +128,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 						}
 					})
 				}
-				console.log(view.state.field(codeblockCollapse))
 				this.decorations = RangeSet.of(decorations,true)
 			}
 		
@@ -163,7 +162,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true}));
+								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1}));
 							else
 								continue;
 					} else {
@@ -211,7 +210,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					}
 				}
 				if (collapseStart && collapseEnd) {
-					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of([Decoration.replace({block: true, inclusive: true}).range(collapseStart.from,collapseEnd.to)]), block: true, side: -1}));
+					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of([Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)]), block: true, inclusive: true}));
 					collapseStart = null;
 					collapseEnd = null;
 				}
@@ -249,7 +248,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					let replacementSpec: {widget?: WidgetType, inclusiveEnd: boolean} = {inclusiveEnd: true};
 					if (parameters?.title || parameters?.icon)
 						replacementSpec.widget = new OpenerWidget(parameters,languageIcons)
-					console.log(lineDisplacement,displacement,lineText,)
 					builder.add(line.from+lineDisplacement,line.from+lineDisplacement+displacement+1,Decoration.replace(replacementSpec));
 				});
 			}
@@ -363,7 +361,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 
 		toDOM(view: EditorView): HTMLElement {
 			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,['code-styler-inline-opener','cm-inline-code']);
-			// return createInlineOpener(this.inlineCodeParameters,this.languageIcons);
 		}
 	}
 	
@@ -408,6 +405,33 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 
+	function readOnlyTransactionFilter() {
+		return EditorState.transactionFilter.of((tr) => {
+			let collapsedRangeSet = tr.startState.field(codeblockCollapse, false);
+			if (collapsedRangeSet) {
+				let sendToStart = false;
+				let sendToEnd = false;
+				tr.selection?.ranges?.forEach((range: SelectionRange)=>{
+					(collapsedRangeSet as DecorationSet).between(range.from, range.to, (collapseStartFrom, collapseStartTo) => {
+						console.log(range.from,range.to,collapseStartFrom,collapseStartTo)
+						if (range.from >= collapseStartFrom && range.to <= collapseStartTo) {
+							if (range.head === collapseStartTo)
+								sendToStart = true;
+							else if (range.head === collapseStartFrom) {
+								sendToEnd = true;
+							}
+						}
+					})
+				})
+				if (sendToStart)
+					return [];
+				else if (sendToEnd)
+					return [];
+			}
+			return tr;
+		})
+	}
+
 	const collapse: StateEffectType<Array<Range<Decoration>>> = StateEffect.define();
 	const uncollapse: StateEffectType<(from: any, to: any) => boolean> = StateEffect.define();
 
@@ -415,7 +439,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		this.setAttribute("data-clicked","true");
 	}
 
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,inlineCodeDecorator]
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,inlineCodeDecorator,readOnlyTransactionFilter()]
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
