@@ -223,7 +223,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (effect.is(collapse))
 					value = value.update({add: [effect.value], sort: true});
 				else if (effect.is(uncollapse))
-					value = value.update({filter: effect.value.filter, filterFrom: effect.value.filterFrom, filterTo: effect.value.filterTo});
+					value = value.update({filterFrom: effect.value.filterFrom, filterTo: effect.value.filterTo, filter: effect.value.filter});
 			}
 			return value;
 		},
@@ -242,7 +242,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (uncollapseAnnotation.uncollapse)
 					value = value.update({add: [uncollapseAnnotation.decorationRange], sort: true});
 				else
-					value = value.update({filter: (from: number, to: number, value: Decoration)=>!(from === uncollapseAnnotation.decorationRange.from && to === uncollapseAnnotation.decorationRange.to)});
+					value = value.update({filterFrom: uncollapseAnnotation.decorationRange.from, filterTo: uncollapseAnnotation.decorationRange.to, filter: (from: number, to: number, value: Decoration)=>!(from === uncollapseAnnotation.decorationRange.from && to === uncollapseAnnotation.decorationRange.to)});
 			}
 			return value;
 		}
@@ -273,6 +273,26 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		}
 	})
+	function cursorIntoCollapsedTransactionFilter() {
+		return EditorState.transactionFilter.of((transaction) => {
+			let extraTransactions: Array<TransactionSpec> = [];
+			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) || Decoration.none;
+			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) || Decoration.none;
+			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
+				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
+					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
+						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
+				})
+				for (let iter = temporarilyUncollapsedRangeSet.iter(); iter.value !== null; iter.next()) {
+					if (!(iter.from <= range.head && range.head <= iter.to))
+						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
+				}
+			})
+			if (extraTransactions)
+				return [transaction,...extraTransactions];
+			return transaction;
+		})
+	}
 
 	class LineNumberWidget extends WidgetType {
 		lineNumber: number;
@@ -421,27 +441,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 
-	function readOnlyTransactionFilter() {
-		return EditorState.transactionFilter.of((transaction) => {
-			let extraTransactions: Array<TransactionSpec> = [];
-			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) || Decoration.none;
-			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) || Decoration.none;
-			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
-				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
-					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
-						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
-				})
-				for (let iter = temporarilyUncollapsedRangeSet.iter(); iter.value !== null; iter.next()) {
-					if (!(iter.from <= range.head && range.head <= iter.to))
-						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
-				}
-			})
-			if (extraTransactions)
-				return [transaction,...extraTransactions];
-			return transaction;
-		})
-	}
-
 	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
 	const uncollapse: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
 	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
@@ -450,7 +449,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		this.setAttribute("data-clicked","true");
 	}
 
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,readOnlyTransactionFilter()]
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()]
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
