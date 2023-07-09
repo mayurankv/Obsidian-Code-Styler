@@ -22,7 +22,7 @@
 		"typescript": "5.1.6"
 	},
 	"dependencies": {
-		"@codemirror/language": "^6.8.0",
+		"@codemirror/language": "https://github.com/lishid/cm-language",
 		"@lezer/common": "^1.0.3",
 		"@simonwep/pickr": "^1.8.2",
 		"colortranslator": "^2.0.0"

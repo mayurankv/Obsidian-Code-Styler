@@ -1,7 +1,7 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
 import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
-import { syntaxTree } from "@codemirror/language";
+import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
@@ -26,7 +26,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				collapsePlaceholder: string;
 				alternativeHighlights: Array<string>;
 			}
-			view: EditorView;
 			decorations: DecorationSet;
 			mutationObserver: MutationObserver;
 		
@@ -38,20 +37,19 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					collapsePlaceholder: '',
 					alternativeHighlights: [],
 				}
-				this.view = view;
-				this.decorations = RangeSet.empty;
-				this.buildDecorations(this.view);
+				this.decorations = Decoration.none;
+				this.buildDecorations(view);
 				this.mutationObserver = new MutationObserver((mutations) => {mutations.forEach((mutation: MutationRecord) => {
 						if (mutation.type === "attributes" && mutation.attributeName === "class" && (
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-begin") ||
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-end")
 						)) {
-							this.forceUpdate(this.view);
+							this.forceUpdate(view);
 						}
 					});
 				});
-				this.mutationObserver.observe(this.view.contentDOM,  {
+				this.mutationObserver.observe(view.contentDOM,  {
 					attributes: true,
 					childList: true,
 					subtree: true,
@@ -60,9 +58,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		
 			forceUpdate(view: EditorView) {
-				this.view = view;
-				this.buildDecorations(this.view);
-				this.view.requestMeasure();
+				this.buildDecorations(view);
+				view.requestMeasure();
 			}
 		
 			update(update: ViewUpdate) {
@@ -85,12 +82,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		
 			buildDecorations(view: EditorView) {
 				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
-					this.decorations = RangeSet.empty;
+					this.decorations = Decoration.none;
 					return true;
 				}
-				const decorations: Array<Range<Decoration>> = [];
+				const builder = new RangeSetBuilder<Decoration>();
 				const codeblocks = findUnduplicatedCodeblocks(view);
-				const settings: CodeStylerSettings = this.settings;
 				for (const codeblock of codeblocks) {
 					let codeblockParameters: CodeblockParameters;
 					let excludedCodeblock: boolean = false;
@@ -98,14 +94,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					let maxLineNum: number = 0;
 					let lineNumberMargin: number | undefined = 0;
 					syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
-						enter(syntaxNode) {
+						enter: (syntaxNode)=>{
 							const line = view.state.doc.lineAt(syntaxNode.from);
 							const lineText = view.state.sliceDoc(line.from,line.to);
 							const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
 							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
 							if (startLine) {
-								codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-								excludedCodeblock = isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) || codeblockParameters.ignore;
+								codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),this.settings.currentTheme);
+								excludedCodeblock = isExcluded(codeblockParameters.language,[this.settings.excludedCodeblocks,this.settings.excludedLanguages].join(',')) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
 								while (!view.state.doc.line(lineNumberCount).text.startsWith('```') || view.state.doc.line(lineNumberCount).text.indexOf('```', 3) !== -1) {
@@ -120,15 +116,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								decorations.push(Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+'px':'calc(var(--line-number-gutter-min-width) - 12px)'}`, class: (settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'code-styler-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}).range(syntaxNode.from))
-								decorations.push(Decoration.line({}).range(syntaxNode.from));
-								decorations.push(Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}).range(syntaxNode.from))
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+'px':'calc(var(--line-number-gutter-min-width) - 12px)'}`, class: (this.settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'code-styler-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(this.settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}));
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
 								lineNumber++;
 							}
 						}
 					})
 				}
-				this.decorations = RangeSet.of(decorations,true)
+				this.decorations = builder.finish();
 			}
 		
 			destroy() {
@@ -247,32 +243,63 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return value;
 		}
 	})
-	const inlineCodeDecorator = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet {
-			return Decoration.none;    
-		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (editingViewIgnore(transaction.state))
-				return Decoration.none;
-			const builder = new RangeSetBuilder<Decoration>();
-			for (let i = 1; i < transaction.state.doc.lines; i++) {
-				const line = transaction.state.doc.line(i);
-				const lineText = line.text.toString();
-				Array.from(lineText.matchAll(/(`+)(.*?[^`].*?)\1/g)).forEach(([originalString,delimiter,inlineCodeSection]: [string,string,string])=>{
-					let {parameters,displacement} = parseInlineCode(inlineCodeSection);
-					let lineDisplacement = lineText.indexOf(originalString);
-					let replacementSpec: {widget?: WidgetType, inclusiveEnd: boolean} = {inclusiveEnd: true};
-					if (parameters?.title || parameters?.icon)
-						replacementSpec.widget = new OpenerWidget(parameters,languageIcons)
-					builder.add(line.from+lineDisplacement,line.from+lineDisplacement+displacement+1,Decoration.replace(replacementSpec));
-				});
+	const inlineCodeDecorator = ViewPlugin.fromClass(
+		class InlineCodeDecoration {
+			decorations: DecorationSet;
+
+			constructor(view: EditorView) {
+				this.decorations = Decoration.none;
+				this.buildDecorations(view);
 			}
-			return builder.finish();
+
+			update(update: ViewUpdate) {
+				if (update.docChanged || update.viewportChanged || update.selectionSet)
+					this.buildDecorations(update.view);
+			}
+
+			buildDecorations(view: EditorView) {
+				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
+					this.decorations = Decoration.none;
+					return true;
+				}
+				for (const {from,to} of view.visibleRanges) {
+                    syntaxTree(view.state).iterate({from: from, to: to,
+						enter: (syntaxNode)=>{
+                            const properties = new Set(syntaxNode.node.type.prop<String>(tokenClassNodeProp)?.split(" "));
+							if (!(properties.has("inline-code") && !properties.has("formatting")))
+								return;
+							let previousSibling = syntaxNode.node.prevSibling;
+							if (!previousSibling)
+								return;
+							let delimiterSize = previousSibling.to-previousSibling.from;
+							if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
+								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
+									this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
+								});
+							} else {
+								let decorated = false;
+								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
+									decorated = true;
+								});
+								if (decorated)
+									return;
+								let inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
+								let {parameters,text} = parseInlineCode(inlineCodeText);
+								if (!parameters)
+									return;
+								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + inlineCodeText.lastIndexOf(text), value: Decoration.replace({})}]})
+								if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
+									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
+							}
+                        },
+                    });
+                };
+			}
 		},
-		provide(field: StateField<DecorationSet>): Extension {
-			return EditorView.decorations.from(field);
+		{
+			decorations: (value) => value.decorations,
 		}
-	})
+	)
 	function cursorIntoCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
 			let extraTransactions: Array<TransactionSpec> = [];

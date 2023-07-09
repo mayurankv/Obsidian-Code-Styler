@@ -77,16 +77,16 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 	}
 	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true}
 }
-export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string, displacement: number} {
+export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
 	
 	let match = /^({} ?)?{([^}]*)} ?(.*)$/.exec(codeText);
 	
 	if (!match?.[1] && !(match?.[2] && match?.[3]))
-		return {parameters: null, text: '', displacement: 0};
+		return {parameters: null, text: ''};
 	else if (match?.[1])
-		return {parameters: null, text: match[0].substring(match[1].length), displacement: 0};
+		return {parameters: null, text: match[0].substring(match[1].length)};
 	else
-		return {parameters: parseInlineCodeParameters(match[2]), text: match[3], displacement: codeText.indexOf(match[3])};
+		return {parameters: parseInlineCodeParameters(match[2]), text: match[3]};
 }
 
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
