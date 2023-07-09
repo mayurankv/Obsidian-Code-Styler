@@ -362,9 +362,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 
 		toDOM(view: EditorView): HTMLElement {
-			let openerWrapper = createInlineOpener(this.inlineCodeParameters,this.languageIcons);
-			openerWrapper.classList.add('cm-inline-code')
-			return openerWrapper;
+			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,['code-styler-inline-opener','cm-inline-code']);
 			// return createInlineOpener(this.inlineCodeParameters,this.languageIcons);
 		}
 	}

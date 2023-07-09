@@ -22,8 +22,8 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 
 	return headerContainer;
 }
-export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>): HTMLElement {
-	const openerContainer = createSpan({cls: `code-styler-inline-opener`});
+export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>, containerClasses: Array<string> = ['code-styler-inline-opener']): HTMLElement {
+	const openerContainer = createSpan({cls: containerClasses.join(' ')});
 	if (inlineCodeParameters.icon) {
 		const iconURL = getLanguageIcon(inlineCodeParameters.language,languageIcons);
 		if (iconURL !== null)
