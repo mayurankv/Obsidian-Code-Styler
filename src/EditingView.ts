@@ -351,12 +351,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				collapsedRangeSet.map(transaction.changes).between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
 					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
 						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
-				})
+				});
 				for (let iter = temporarilyUncollapsedRangeSet.map(transaction.changes).iter(); iter.value !== null; iter.next()) {
 					if (!(iter.from <= range.head && range.head <= iter.to))
 						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
 				}
-			})
+			});
 			if (extraTransactions)
 				return [transaction,...extraTransactions];
 			return transaction;
@@ -473,7 +473,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		let folded = false;
 		view.state.field(codeblockCollapse,false)?.between(position,position,()=>{
 			folded = true;
-		})
+		});
 
 		let collapseStart: Line | null = null;
 		let collapseEnd: Line | null = null;
@@ -501,7 +501,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (folded)
 					view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: (collapseEnd as Line).from, filterTo: (collapseEnd as Line).to})});
 				else
-					view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))})
+					view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
 				view.requestMeasure();
 				collapseStart = null;
 				collapseEnd = null;
