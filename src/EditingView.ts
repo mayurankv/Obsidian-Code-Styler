@@ -67,6 +67,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			update(update: ViewUpdate) {
 				if (update.docChanged || 
 					update.viewportChanged || 
+					update.state.field(editorLivePreviewField) !== update.startState.field(editorLivePreviewField) ||
 					this.settings.excludedCodeblocks !== this.currentSettings.excludedCodeblocks ||
 					this.settings.excludedLanguages !== this.currentSettings.excludedLanguages ||
 					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
@@ -257,7 +258,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 
 			update(update: ViewUpdate) {
-				if (update.docChanged || update.viewportChanged || update.selectionSet) {
+				if (update.docChanged || update.viewportChanged || update.selectionSet || update.state.field(editorLivePreviewField)!==update.startState.field(editorLivePreviewField)) {
 					if (update.docChanged)
 						this.decorations = this.decorations.map(update.changes);
 					this.buildDecorations(update.view);
@@ -326,7 +327,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 								let highlighted = false;
 								this.decorations.between(syntaxNode.from+endOfParameters+1, syntaxNode.to, (from: number, to: number, decorationValue: Decoration)=>{
-									console.log(from,to,decorationValue)
 									highlighted = true;
 								});
 								if (!highlighted)
