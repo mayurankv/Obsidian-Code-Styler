@@ -107,7 +107,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								excludedCodeblock = isExcluded(codeblockParameters.language,[this.settings.excludedCodeblocks,this.settings.excludedLanguages].join(',')) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
-								while (!view.state.doc.line(lineNumberCount).text.startsWith('```') || view.state.doc.line(lineNumberCount).text.indexOf('```', 3) !== -1) {
+								let startDelimiter = testOpeningLine(lineText);
+								while (startDelimiter !== testOpeningLine(view.state.doc.line(lineNumberCount).text)) {
 									lineNumberCount += 1;
 								}
 								maxLineNum = lineNumberCount - line.number - 1 + codeblockParameters.lineNumbers.offset;
@@ -149,15 +150,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
 			let startLine: boolean = true;
-			let startDelimiterLength: number = 3;
+			let startDelimiter: string = '```';
 			for (let i = 1; i < transaction.state.doc.lines; i++) {
 				const line = transaction.state.doc.line(i);
 				const lineText = line.text.toString();
-				let currentDelimiterLength = testOpeningLine(lineText);
-				if (currentDelimiterLength) {
+				let currentDelimiter = testOpeningLine(lineText);
+				if (currentDelimiter) {
 					if (startLine) {
 						startLine = false;
-						startDelimiterLength = currentDelimiterLength;
+						startDelimiter = currentDelimiter;
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
@@ -165,7 +166,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							else
 								continue;
 					} else {
-						if (currentDelimiterLength === startDelimiterLength)
+						if (currentDelimiter === startDelimiter)
 							startLine = true;
 					}
 				}
@@ -185,15 +186,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			let collapseStart: Line | null = null;
 			let collapseEnd: Line | null = null;
 			let startLine: boolean = true;
-			let startDelimiterLength: number = 3;
+			let startDelimiter: string = '```';
 			for (let i = 1; i < state.doc.lines; i++) {
 				const line = state.doc.line(i);
 				const lineText = line.text.toString();
-				let currentDelimiterLength = testOpeningLine(lineText);
-				if (currentDelimiterLength) {
+				let currentDelimiter = testOpeningLine(lineText);
+				if (currentDelimiter) {
 					if (startLine) {
 						startLine = false;
-						startDelimiterLength = currentDelimiterLength;
+						startDelimiter = currentDelimiter;
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
@@ -201,7 +202,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							else
 								continue;
 					} else {
-						if (currentDelimiterLength === startDelimiterLength) {
+						if (currentDelimiter === startDelimiter) {
 							startLine = true;
 							if (collapseStart)
 								collapseEnd = line;
@@ -475,19 +476,19 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		let collapseStart: Line | null = null;
 		let collapseEnd: Line | null = null;
 		let startLine: boolean = true;
-		let startDelimiterLength: number = 3;
+		let startDelimiter: string = '```';
 		for (let i = 1; i < view.state.doc.lines; i++) {
 			const line = view.state.doc.line(i);
 			const lineText = line.text.toString();
-			let currentDelimiterLength = testOpeningLine(lineText);
-			if (currentDelimiterLength) {
+			let currentDelimiter = testOpeningLine(lineText);
+			if (currentDelimiter) {
 				if (startLine) {
-					startDelimiterLength = currentDelimiterLength;
+					startDelimiter = currentDelimiter;
 					startLine = false;
 					if (position === line.from)
 						collapseStart = line;
 				} else {
-					if (currentDelimiterLength === startDelimiterLength) {
+					if (currentDelimiter === startDelimiter) {
 						startLine = true;
 						if (collapseStart)
 							collapseEnd = line;

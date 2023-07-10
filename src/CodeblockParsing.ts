@@ -290,13 +290,13 @@ export function getParameterLine(codeblockLines: Array<string>): string | undefi
 function getOpeningLine(codeblockLines: Array<string>): string | undefined {
 	return codeblockLines.find((line: string)=>Boolean(testOpeningLine(line)));
 }
-export function testOpeningLine(codeblockLine: string): number {
+export function testOpeningLine(codeblockLine: string): string {
 	let lineMatch = /^(\s*(?:>\s*)*)(```+|~~~+)/.exec(codeblockLine);
 	if (!lineMatch)
-		return 0;
+		return '';
 	if (codeblockLine.indexOf(lineMatch[2],lineMatch[1].length+lineMatch[2].length+1)===-1)
-		return lineMatch[2].length;
-	return 0;
+		return lineMatch[2];
+	return '';
 }
 function cleanParameterLine(parameterLine: string): string {
 	return trimParameterLine(parameterLine).replace(/^(?:>\s*)*(```+|~~~+)/,'$1');
