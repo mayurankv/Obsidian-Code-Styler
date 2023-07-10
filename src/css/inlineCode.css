@@ -58,3 +58,6 @@ body.code-styler span.code-styler-inline-opener > span > img.code-styler-inline-
 .code-styler span.code-styler-inline-opener span:has( > img.code-styler-inline-icon) {
 	padding-right: 8px;
 }
+.code-styler .cm-s-obsidian span.cm-inline-code .code-styler-inline-parameters {
+	color: var(--code-comment);
+}

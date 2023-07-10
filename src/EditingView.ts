@@ -316,12 +316,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
 									this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
 								});
+								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: 'code-styler-inline-parameters'})}]});
 							} else {
-								let openerDecorated = false;
+								let decorated = false;
 								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
-									openerDecorated = true;
+									if (!decorationValue.spec?.class)
+										decorated = true;
 								});
-								if (!openerDecorated) {
+								if (!decorated) {
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
 									if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
