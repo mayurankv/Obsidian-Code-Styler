@@ -3,6 +3,8 @@ import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetTy
 import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
+import { languages } from "@codemirror/language-data";
+// import { highlightTree, defaultHighlightStyle } from "@lezer/highlight";
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
@@ -254,6 +256,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 
 			update(update: ViewUpdate) {
 				if (update.docChanged || update.viewportChanged || update.selectionSet)
+					if (update.docChanged)
+						this.decorations = this.decorations.map(update.changes);
 					this.buildDecorations(update.view);
 			}
 
@@ -273,7 +277,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								return;
 							let delimiterSize = previousSibling.to-previousSibling.from;
 							if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
-								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
+								this.decorations.between(syntaxNode.from, syntaxNode.to, (from: number, to: number, decorationValue: Decoration)=>{
 									this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
 								});
 							} else {
@@ -287,9 +291,27 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								let {parameters,text} = parseInlineCode(inlineCodeText);
 								if (!parameters)
 									return;
-								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + inlineCodeText.lastIndexOf(text), value: Decoration.replace({})}]})
+								let endOfParameters = inlineCodeText.lastIndexOf(text);
+								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
 								if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
+								// const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,parameters.language);
+								// const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,`text/x-${parameters.language}`);
+								const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName('js').mime);
+								if (!mode?.token)
+									return;
+								let stream = new window.CodeMirror.StringStream(text);
+								let markDecorations: Array<Range<Decoration>> = [];
+								while (!stream.eol()) {
+									let style = mode.token(stream,window.CodeMirror.startState(mode));
+									console.log(stream.start,stream.pos,stream.current(),style)
+									if (style)
+										markDecorations.push({from: syntaxNode.from + endOfParameters + stream.start, to: syntaxNode.from + endOfParameters + stream.pos, value: Decoration.mark({class: `cm-${style}`})})
+									stream.start = stream.pos;
+								}
+								// console.log(languages)
+								this.decorations = this.decorations.update({add: markDecorations});
+
 							}
                         },
                     });
@@ -402,7 +424,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return false;
 		}
 	}
-
 	class OpenerWidget extends WidgetType {
 		inlineCodeParameters: InlineCodeParameters;
 		languageIcons: Record<string,string>;
@@ -414,6 +435,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 
 		eq(other: OpenerWidget): boolean {
+			console.log(
+				this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
+				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
+				this.inlineCodeParameters.icon == other.inlineCodeParameters.icon &&
+				getLanguageIcon(this.inlineCodeParameters.language,this.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.languageIcons)
+				)
 			return (
 				this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
 				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
@@ -476,7 +503,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		this.setAttribute("data-clicked","true");
 	}
 
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()]
+	return [inlineCodeDecorator]
+	// return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()]
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
