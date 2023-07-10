@@ -249,33 +249,39 @@ export function destroyReadingModeElements(): void {
 	[
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-line-number']")),
+		...Array.from(document.querySelectorAll(":not(pre) > code span.code-styler-inline-opener")),
 	].forEach(element => element.remove());
-	document.querySelectorAll("pre.code-styler-pre").forEach(codeblockPreElement => {
+	document.querySelectorAll("pre.code-styler-pre").forEach((codeblockPreElement: HTMLElement) => {
 		codeblockPreElement.classList.remove('code-styler-pre');
 		codeblockPreElement.classList.remove('code-styler-collapsed');
-		(codeblockPreElement as HTMLElement).style.removeProperty('--true-height');
-		(codeblockPreElement as HTMLElement).style.removeProperty('--line-number-margin');
-		(codeblockPreElement as HTMLElement).style.removeProperty('max-height');
-		(codeblockPreElement as HTMLElement).style.removeProperty('white-space');
+		codeblockPreElement.style.removeProperty('--true-height');
+		codeblockPreElement.style.removeProperty('--line-number-margin');
+		codeblockPreElement.style.removeProperty('max-height');
+		codeblockPreElement.style.removeProperty('white-space');
 	});
-	document.querySelectorAll('pre > code ~ code.language-output').forEach(executeCodeOutput => {
+	document.querySelectorAll('pre > code ~ code.language-output').forEach((executeCodeOutput: HTMLElement) => {
 		executeCodeOutput.classList.remove('execute-code-output');
-		(executeCodeOutput as HTMLElement).style.removeProperty('--true-height');
-		(executeCodeOutput as HTMLElement).style.removeProperty('max-height');
-	})
-	document.querySelectorAll('pre > code:nth-of-type(1)').forEach(codeblockCodeElement => {
-		(codeblockCodeElement as HTMLElement).style.removeProperty('--true-height');
-		(codeblockCodeElement as HTMLElement).style.removeProperty('--line-wrapping');
-		(codeblockCodeElement as HTMLElement).style.removeProperty('--line-active-wrapping');
-		(codeblockCodeElement as HTMLElement).style.removeProperty('max-height');
-		(codeblockCodeElement as HTMLElement).style.removeProperty('white-space');
-		(codeblockCodeElement as HTMLElement).innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="code-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
+		executeCodeOutput.style.removeProperty('--true-height');
+		executeCodeOutput.style.removeProperty('max-height');
+	});
+	document.querySelectorAll('pre > code:nth-of-type(1)').forEach((codeblockCodeElement: HTMLElement) => {
+		codeblockCodeElement.style.removeProperty('--true-height');
+		codeblockCodeElement.style.removeProperty('--line-wrapping');
+		codeblockCodeElement.style.removeProperty('--line-active-wrapping');
+		codeblockCodeElement.style.removeProperty('max-height');
+		codeblockCodeElement.style.removeProperty('white-space');
+		codeblockCodeElement.innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="code-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
 			const codeblockLineText = (codeblockLine.firstChild as HTMLElement);
 			if (codeblockLineText)
 				reconstructedCodeblockLines.push(codeblockLineText.innerHTML);
 			return reconstructedCodeblockLines
 		},[]).join('\n')+'\n';
-	})
+	});
+	document.querySelectorAll(":not(pre) > code").forEach((inlineCodeElement: HTMLElement) => {
+		inlineCodeElement.classList.remove('code-styler-highlighted');
+		inlineCodeElement.classList.remove('code-styler-highlight-ignore');
+		inlineCodeElement.innerHTML = inlineCodeElement.innerText;
+	});
 }
 
 export const readingStylingMutationObserver = new MutationObserver((mutations) => {

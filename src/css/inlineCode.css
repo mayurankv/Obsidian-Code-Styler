@@ -41,10 +41,11 @@
 	margin-left: 0px !important;
 	margin-right: var(--code-styler-inline-margin-horizontal) !important;
 }
-.code-styler span.code-styler-inline-opener img.code-styler-inline-icon {
+body.code-styler span.code-styler-inline-opener > span > img.code-styler-inline-icon:not([class*="emoji"]) {
 	height: calc(var(--code-size) * 1.2);
-	margin-bottom: 2px;
+	margin-bottom: 2px !important;
 	vertical-align: middle;
+	display: inline !important;
 }
 .code-styler span.code-styler-inline-opener .code-styler-inline-title {
 	font-weight: var(--code-styler-inline-title-font-weight);

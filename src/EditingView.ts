@@ -1,6 +1,6 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, ChangeSet, Line, Text, SelectionRange, Annotation } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp, LanguageSupport, StringStream } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
@@ -84,7 +84,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		
 			buildDecorations(view: EditorView) {
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
+				if (!view?.visibleRanges?.length || editingViewIgnore(view.state)) {
 					this.decorations = Decoration.none;
 					return;
 				}
@@ -253,8 +253,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 
 			constructor(view: EditorView) {
 				this.decorations = Decoration.none;
-				// this.loadedLanguages = {}; //NOTE: For future CM6 Compatibility
 				this.buildDecorations(view);
+				// this.loadedLanguages = {}; //NOTE: For future CM6 Compatibility
 			}
 
 			update(update: ViewUpdate) {
@@ -262,7 +262,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					if (update.docChanged)
 						this.decorations = this.decorations.map(update.changes);
 					this.buildDecorations(update.view);
-				// 	NOTE: The following code is for extensibility if changes to codemirror 6 highlighting are required
+				//NOTE: For future CM6 Compatibility
 				// 	const toHighlight = this.buildDecorations(update.view);
 				// 	toHighlight.forEach((highlightSet)=>{
 				// 		if (!highlightSet?.language)
@@ -290,7 +290,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 
 			buildDecorations(view: EditorView): void { //Array<{start: number, text: string, language: string}> //NOTE: For future CM6 Compatibility
-				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
+				if ((!view?.visibleRanges?.length && true) || editingViewIgnore(view.state)) {
 					this.decorations = Decoration.none;
 					return;
 					// return [];//NOTE: For future CM6 Compatibility
@@ -306,33 +306,29 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (!previousSibling)
 								return;
 							let delimiterSize = previousSibling.to-previousSibling.from;
+							let inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
+							let {parameters,text} = parseInlineCode(inlineCodeText);
+							if (!parameters)
+								return;
+							let endOfParameters = inlineCodeText.lastIndexOf(text);
 							if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
 								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
 									this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
 								});
 							} else {
-								let decorated = false;
+								let openerDecorated = false;
 								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
-									decorated = true;
+									openerDecorated = true;
 								});
-								if (decorated)
-									return;
-								let inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
-								let {parameters,text} = parseInlineCode(inlineCodeText);
-								if (!parameters)
-									return;
-								let endOfParameters = inlineCodeText.lastIndexOf(text);
-								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
-								if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
-									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
-								let highlighted = false;
-								this.decorations.between(syntaxNode.from+endOfParameters+1, syntaxNode.to, (from: number, to: number, decorationValue: Decoration)=>{
-									highlighted = true;
-								});
-								if (!highlighted)
-									this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
-								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
+								if (!openerDecorated) {
+									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
+									if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
+										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
+								}
 							}
+							this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false});
+							this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
+							// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
                         },
                     });
                 };
@@ -456,12 +452,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 
 		eq(other: OpenerWidget): boolean {
-			console.log(
-				this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
-				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
-				this.inlineCodeParameters.icon == other.inlineCodeParameters.icon &&
-				getLanguageIcon(this.inlineCodeParameters.language,this.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.languageIcons)
-				)
 			return (
 				this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
 				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
@@ -573,7 +563,6 @@ function languageHighlight({start,text,language}: {start: number, text: string, 
 	const tree = loadedLanguages[language].language.parser.parse(text);
 	let pos: number;
 	highlightTree(tree,classHighlighter,(from,to,token) => { //todo (@mayurankv) Change this highlighter
-		console.log(token)
 		if (token)
 			markDecorations.push({from: start+from, to: start+to, value: Decoration.mark({class: token})});
 		pos = to;
