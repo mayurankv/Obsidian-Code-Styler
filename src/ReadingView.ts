@@ -117,7 +117,8 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 			return;
 		let tempRenderContainer = createDiv();
 		let renderedCodeElement: HTMLElement | null;
-		let {parameters,text} = parseInlineCode((inlineCodeElement as HTMLElement).innerText);
+		let inlineCodeText = (inlineCodeElement as HTMLElement).innerText;
+		let {parameters,text} = parseInlineCode(inlineCodeText);
 		if (!parameters) {
 			if (!text)
 				return;
@@ -136,6 +137,7 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 				await sleep(2);
 			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
 			inlineCodeElement.classList.add('code-styler-highlighted');
+			inlineCodeElement.setAttribute("parameters",inlineCodeText.substring(0,inlineCodeText.lastIndexOf(text)));
 			if (parameters.icon || parameters.title)
 				inlineCodeElement.insertBefore(createInlineOpener(parameters,plugin.languageIcons),inlineCodeElement.childNodes[0]);
 		}
@@ -280,7 +282,7 @@ export function destroyReadingModeElements(): void {
 	document.querySelectorAll(":not(pre) > code").forEach((inlineCodeElement: HTMLElement) => {
 		inlineCodeElement.classList.remove('code-styler-highlighted');
 		inlineCodeElement.classList.remove('code-styler-highlight-ignore');
-		inlineCodeElement.innerHTML = inlineCodeElement.innerText;
+		inlineCodeElement.innerText = inlineCodeElement.getAttribute("parameters") + inlineCodeElement.innerText;
 	});
 }
 
