@@ -306,7 +306,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								return;
 							let delimiterSize = previousSibling.to-previousSibling.from;
 							if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
-								this.decorations.between(syntaxNode.from, syntaxNode.to, (from: number, to: number, decorationValue: Decoration)=>{
+								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
 									this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
 								});
 							} else {
@@ -324,7 +324,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
 								if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
-								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
+								let highlighted = false;
+								this.decorations.between(syntaxNode.from+endOfParameters+1, syntaxNode.to, (from: number, to: number, decorationValue: Decoration)=>{
+									console.log(from,to,decorationValue)
+									highlighted = true;
+								});
+								if (!highlighted)
+									this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
 								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
 							}
                         },
