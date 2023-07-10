@@ -348,11 +348,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) || Decoration.none;
 			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) || Decoration.none;
 			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
-				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
+				collapsedRangeSet.map(transaction.changes).between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
 					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
 						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
 				})
-				for (let iter = temporarilyUncollapsedRangeSet.iter(); iter.value !== null; iter.next()) {
+				for (let iter = temporarilyUncollapsedRangeSet.map(transaction.changes).iter(); iter.value !== null; iter.next()) {
 					if (!(iter.from <= range.head && range.head <= iter.to))
 						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
 				}
