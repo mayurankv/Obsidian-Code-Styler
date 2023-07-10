@@ -1,10 +1,10 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSet, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
-import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
+import { syntaxTree, tokenClassNodeProp, LanguageSupport, StringStream } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
-import { languages } from "@codemirror/language-data";
-// import { highlightTree, defaultHighlightStyle } from "@lezer/highlight";
+import { highlightTree, classHighlighter } from "@lezer/highlight";
+// import { languages } from "@codemirror/language-data"; //NOTE: For future CM6 Compatibility
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
@@ -85,7 +85,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			buildDecorations(view: EditorView) {
 				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
 					this.decorations = Decoration.none;
-					return true;
+					return;
 				}
 				const builder = new RangeSetBuilder<Decoration>();
 				const codeblocks = findUnduplicatedCodeblocks(view);
@@ -248,24 +248,53 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const inlineCodeDecorator = ViewPlugin.fromClass(
 		class InlineCodeDecoration {
 			decorations: DecorationSet;
+			// loadedLanguages: Record<string,LanguageSupport>; //NOTE: For future CM6 Compatibility
 
 			constructor(view: EditorView) {
 				this.decorations = Decoration.none;
+				// this.loadedLanguages = {}; //NOTE: For future CM6 Compatibility
 				this.buildDecorations(view);
 			}
 
 			update(update: ViewUpdate) {
-				if (update.docChanged || update.viewportChanged || update.selectionSet)
+				if (update.docChanged || update.viewportChanged || update.selectionSet) {
 					if (update.docChanged)
 						this.decorations = this.decorations.map(update.changes);
 					this.buildDecorations(update.view);
+				// 	NOTE: The following code is for extensibility if changes to codemirror 6 highlighting are required
+				// 	const toHighlight = this.buildDecorations(update.view);
+				// 	toHighlight.forEach((highlightSet)=>{
+				// 		if (!highlightSet?.language)
+				// 			return;
+				// 		if (highlightSet.language in this.loadedLanguages) {
+				// 			this.decorations = this.decorations.update({add: languageHighlight(highlightSet)});
+				// 		} else {
+				// 			const languageDescription = LanguageDescription.matchLanguageName(languages,highlightSet.language);
+				// 			if (!languageDescription)
+				// 				return;
+				// 			languageDescription.load().then((languageSupport)=>{
+				// 				this.loadedLanguages[highlightSet.language] = languageSupport;
+				// 				update.view.dispatch({});
+				// 				update.view.dispatch({annotations: syntaxHighlightDecorations.of(markDecorations)})
+				// 			});
+				// 		}
+				// 	});
+				// } else {
+				// 	update.transactions.forEach((transaction)=>{
+				// 		const markDecorations = transaction.annotation(syntaxHighlightDecorations);
+				// 		if (markDecorations)
+				// 			this.decorations = this.decorations.update({add: markDecorations})
+				// 	});
+				}
 			}
 
-			buildDecorations(view: EditorView) {
+			buildDecorations(view: EditorView): void { //Array<{start: number, text: string, language: string}> //NOTE: For future CM6 Compatibility
 				if (!view.visibleRanges || view.visibleRanges.length === 0 || editingViewIgnore(view.state)) {
 					this.decorations = Decoration.none;
-					return true;
+					return;
+					// return [];//NOTE: For future CM6 Compatibility
 				}
+				// let toHighlight: Array<{start: number, text: string, language: string}> = []; //NOTE: For future CM6 Compatibility
 				for (const {from,to} of view.visibleRanges) {
                     syntaxTree(view.state).iterate({from: from, to: to,
 						enter: (syntaxNode)=>{
@@ -295,27 +324,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
 								if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
-								// const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,parameters.language);
-								// const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,`text/x-${parameters.language}`);
-								const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName('js').mime);
-								if (!mode?.token)
-									return;
-								let stream = new window.CodeMirror.StringStream(text);
-								let markDecorations: Array<Range<Decoration>> = [];
-								while (!stream.eol()) {
-									let style = mode.token(stream,window.CodeMirror.startState(mode));
-									console.log(stream.start,stream.pos,stream.current(),style)
-									if (style)
-										markDecorations.push({from: syntaxNode.from + endOfParameters + stream.start, to: syntaxNode.from + endOfParameters + stream.pos, value: Decoration.mark({class: `cm-${style}`})})
-									stream.start = stream.pos;
-								}
-								// console.log(languages)
-								this.decorations = this.decorations.update({add: markDecorations});
-
+								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
+								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
 							}
                         },
                     });
                 };
+				// return toHighlight; //NOTE: For future CM6 Compatibility
 			}
 		},
 		{
@@ -494,17 +509,17 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		}
 	}
-
-	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
-	const uncollapse: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
-	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
-
 	function handleMouseDown(event: MouseEvent): void {
 		this.setAttribute("data-clicked","true");
 	}
 
+	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
+	const uncollapse: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
+	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
+	const syntaxHighlightDecorations = Annotation.define<Array<Range<Decoration>>>();
+
 	return [inlineCodeDecorator]
-	// return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()]
+	// return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()] //todo (@mayurankv) Uncomment this
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
@@ -546,6 +561,37 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 		}
 	})
 	return codeblocks;
+}
+
+function languageHighlight({start,text,language}: {start: number, text: string, language: string},loadedLanguages: Record<string,LanguageSupport>): Array<Range<Decoration>> {
+	//NOTE: Uses codemirror 6 implementation which Obsidian does not currently use
+	let markDecorations: Array<Range<Decoration>> = [];
+	const tree = loadedLanguages[language].language.parser.parse(text);
+	let pos: number;
+	highlightTree(tree,classHighlighter,(from,to,token) => { //todo (@mayurankv) Change this highlighter
+		console.log(token)
+		if (token)
+			markDecorations.push({from: start+from, to: start+to, value: Decoration.mark({class: token})});
+		pos = to;
+	});
+	return markDecorations;
+}
+function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
+	//NOTE: Uses CodeMirror 5 implementation which Obsidian currently uses
+	let markDecorations: Array<Range<Decoration>> = [];
+	//@ts-expect-error Undocumented Obsidian API
+	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime); // Alternatives: `text/x-${parameters.language}`, window.CodeMirror.findModeByName('js').mime
+	let state = window.CodeMirror.startState(mode);
+	if (mode?.token) {
+		let stream = new window.CodeMirror.StringStream(text);
+		while (!stream.eol()) {
+			let style = mode.token(stream,state);
+			if (style)
+				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})})
+			stream.start = stream.pos;
+		}
+	}
+	return markDecorations;
 }
 
 function editingViewIgnore(state: EditorState): boolean {
