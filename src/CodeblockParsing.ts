@@ -50,12 +50,12 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
         let openingCodeblockLine = getOpeningLine(codeSection);
 		if (!openingCodeblockLine)
             return;
-        let openDelimiter = /^\s*(?:>\s*)*(```+).*$/.exec(openingCodeblockLine)?.[1];
+        let openDelimiter = /^\s*(?:>\s*)*((?:```+|~~~+)).*$/.exec(openingCodeblockLine)?.[1];
 		if (!openDelimiter)
             return;
 		let openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
 		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
-		if (!admonitions || !/^\s*(?:>\s*)*```+ad-.*$/.test(openingCodeblockLine))
+		if (!admonitions || !/^\s*(?:>\s*)*(?:```+|~~~+) *ad-.*$/.test(openingCodeblockLine))
             codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
         else
             parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
@@ -119,15 +119,19 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	}
 	if (parameterLine.startsWith('```')) {
 		parameterLine = parameterLine.replace(/^```+(?=[^`]|$)/,'');
-		let languageBreak = parameterLine.indexOf(' ');
-		codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
-		if (languageBreak === -1)
-			return codeblockParameters;
-		const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
-		if (!parameterStrings)
-			return codeblockParameters;
-		parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
+	} else if (parameterLine.startsWith('~~~')) {
+		parameterLine = parameterLine.replace(/^~~~+(?=[^~]|$)/,'');
+	} else {
+		return codeblockParameters;
 	}
+	let languageBreak = parameterLine.indexOf(' ');
+	codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
+	if (languageBreak === -1)
+		return codeblockParameters;
+	const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+	if (!parameterStrings)
+		return codeblockParameters;
+	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }
 export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,any>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
@@ -279,7 +283,7 @@ function parseInlineCodeParameterString(parameterString: string, inlineCodeParam
 
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {
 	let openingCodeblockLine = getOpeningLine(codeblockLines);
-	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*`/.test(openingCodeblockLine)))
+	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*(?:`|~)/.test(openingCodeblockLine)))
 		openingCodeblockLine = cleanParameterLine(openingCodeblockLine);
 	return openingCodeblockLine
 }
@@ -287,15 +291,15 @@ function getOpeningLine(codeblockLines: Array<string>): string | undefined {
 	return codeblockLines.find((line: string)=>Boolean(testOpeningLine(line)));
 }
 export function testOpeningLine(codeblockLine: string): number {
-	let lineMatch = /^(\s*(?:>\s*)*)(```+)/.exec(codeblockLine);
+	let lineMatch = /^(\s*(?:>\s*)*)(```+|~~~+)/.exec(codeblockLine);
 	if (!lineMatch)
 		return 0;
-	if (codeblockLine.indexOf('`'.repeat(lineMatch[2].length),lineMatch[1].length+lineMatch[2].length+1)===-1)
+	if (codeblockLine.indexOf(lineMatch[2],lineMatch[1].length+lineMatch[2].length+1)===-1)
 		return lineMatch[2].length;
 	return 0;
 }
 function cleanParameterLine(parameterLine: string): string {
-	return trimParameterLine(parameterLine).replace(/^(?:>\s*)*```/,'```');
+	return trimParameterLine(parameterLine).replace(/^(?:>\s*)*(```+|~~~+)/,'$1');
 }
 export function trimParameterLine(parameterLine: string): string {
 	return parameterLine.trim();
