@@ -516,10 +516,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
 	const uncollapse: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
 	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
-	const syntaxHighlightDecorations = Annotation.define<Array<Range<Decoration>>>();
 
-	return [inlineCodeDecorator]
-	// return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()] //todo (@mayurankv) Uncomment this
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()];
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
