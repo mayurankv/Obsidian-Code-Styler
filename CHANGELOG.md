@@ -16,7 +16,13 @@ See this project's [releases](/../../../releases).
 <!-- ### Security -->
 <!-- ### Notes -->
 
-## [Unreleased]
+## Unreleased
+
+### Added
+
+- 
+
+## [1.0.1] - 2023-07-11
 
 ### Added
 
@@ -82,6 +88,7 @@ See this project's [releases](/../../../releases).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
 [Unreleased]: /../../compare/1.0.0...HEAD
+[1.0.1]: /../../../compare/1.0.0...1.0.1
 [1.0.0]: /../../releases/tag/1.0.0
 
 <!-- Original CHANGELOG Plans:
