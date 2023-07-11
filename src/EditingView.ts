@@ -309,12 +309,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							let delimiterSize = previousSibling.to-previousSibling.from;
 							let inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
 							let {parameters,text} = parseInlineCode(inlineCodeText);
+							let endOfParameters = inlineCodeText.lastIndexOf(text);
 							if (!parameters) {
-								if (!text)
-									return;
-								console.log(inlineCodeText.lastIndexOf(text),inlineCodeText)
+								if (text) {
+									if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize))
+										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: (from: number, to: number, value: Decoration)=>false});
+									else
+										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
+								}
 							} else {
-								let endOfParameters = inlineCodeText.lastIndexOf(text);
 								if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
 									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
 										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
@@ -327,7 +330,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 											decorated = true;
 									});
 									if (!decorated) {
-										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
+										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
 										if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 									}

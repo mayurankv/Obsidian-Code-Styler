@@ -261,6 +261,8 @@ Inline code can be customised as well with background color, text color, text co
 
 Inline code can also have syntax highlighting in both editing mode and reading mode with the same highlighting style as in codeblocks. This is set by using the syntax `{language} code here` (note the space between `{language}` and `code here` is not necessary).
 
+You can type the text `{text here not styled}` as inline code as well by prefacing it by an empty `{}` when the plugin is active: `{}{text here not styled}` will produce `{text here not styled}` when the cursor is outside the inline code.
+
 Example:
 
 `{python} 'result if true'.method() if 1 else result_if_false.property`
