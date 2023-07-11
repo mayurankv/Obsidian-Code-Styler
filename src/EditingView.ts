@@ -236,7 +236,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return Decoration.none;
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			value = value.map(transaction.changes)
+			value = value.map(transaction.changes);
 			const uncollapseAnnotation = transaction.annotation(temporaryUncollapseAnnotation);
 			if (uncollapseAnnotation) {
 				if (uncollapseAnnotation.uncollapse)
@@ -573,11 +573,9 @@ function languageHighlight({start,text,language}: {start: number, text: string, 
 	//NOTE: Uses codemirror 6 implementation which Obsidian does not currently use
 	let markDecorations: Array<Range<Decoration>> = [];
 	const tree = loadedLanguages[language].language.parser.parse(text);
-	let pos: number;
 	highlightTree(tree,classHighlighter,(from,to,token) => { //todo (@mayurankv) Change this highlighter
 		if (token)
 			markDecorations.push({from: start+from, to: start+to, value: Decoration.mark({class: token})});
-		pos = to;
 	});
 	return markDecorations;
 }
