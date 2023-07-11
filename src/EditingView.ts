@@ -1,7 +1,7 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, ChangeSet, Line, Text, SelectionRange, Annotation } from "@codemirror/state";
-import { syntaxTree, tokenClassNodeProp, LanguageSupport, StringStream } from "@codemirror/language";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
+import { syntaxTree, tokenClassNodeProp, LanguageSupport } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
 // import { languages } from "@codemirror/language-data"; //NOTE: For future CM6 Compatibility
@@ -291,7 +291,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 
 			buildDecorations(view: EditorView): void { //Array<{start: number, text: string, language: string}> //NOTE: For future CM6 Compatibility
-				if ((!view?.visibleRanges?.length && true) || editingViewIgnore(view.state)) {
+				if (!view?.visibleRanges?.length || editingViewIgnore(view.state)) {
 					this.decorations = Decoration.none;
 					return;
 					// return [];//NOTE: For future CM6 Compatibility
@@ -300,7 +300,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				for (const {from,to} of view.visibleRanges) {
                     syntaxTree(view.state).iterate({from: from, to: to,
 						enter: (syntaxNode)=>{
-                            const properties = new Set(syntaxNode.node.type.prop<String>(tokenClassNodeProp)?.split(" "));
+                            const properties = new Set(syntaxNode.node.type.prop<string>(tokenClassNodeProp)?.split(" "));
 							if (!(properties.has("inline-code") && !properties.has("formatting")))
 								return;
 							let previousSibling = syntaxNode.node.prevSibling;
@@ -354,8 +354,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	function cursorIntoCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
 			let extraTransactions: Array<TransactionSpec> = [];
-			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) || Decoration.none;
-			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) || Decoration.none;
+			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
+			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
 			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
 				collapsedRangeSet.map(transaction.changes).between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
 					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
@@ -508,7 +508,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 			if (collapseStart && collapseEnd) {
 				if (folded)
-					view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: (collapseEnd as Line).from, filterTo: (collapseEnd as Line).to})});
+					view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
 				else
 					view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
 				view.requestMeasure();
