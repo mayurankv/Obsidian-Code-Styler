@@ -309,29 +309,35 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							let delimiterSize = previousSibling.to-previousSibling.from;
 							let inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
 							let {parameters,text} = parseInlineCode(inlineCodeText);
-							if (!parameters)
-								return;
-							let endOfParameters = inlineCodeText.lastIndexOf(text);
-							if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
-								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
-									this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
-								});
-								this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: 'code-styler-inline-parameters'})}]});
+							if (!parameters) {
+								if (!text)
+									return;
+								console.log(inlineCodeText.lastIndexOf(text),inlineCodeText)
 							} else {
-								let decorated = false;
-								this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
-									if (!decorationValue.spec?.class)
-										decorated = true;
-								});
-								if (!decorated) {
-									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
-									if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
-										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
+								let endOfParameters = inlineCodeText.lastIndexOf(text);
+								if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
+									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
+										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
+									});
+									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: 'code-styler-inline-parameters'})}]});
+								} else {
+									let decorated = false;
+									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
+										if (!decorationValue.spec?.class)
+											decorated = true;
+									});
+									if (!decorated) {
+										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]})
+										if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
+											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
+									}
 								}
+								if (!settings.currentTheme.settings.inline.syntaxHighlight)
+									return;
+								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false});
+								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
+								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
 							}
-							this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false});
-							this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
-							// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
                         },
                     });
                 };

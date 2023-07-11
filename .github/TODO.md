@@ -23,3 +23,5 @@
         - [Example 1](https://github.com/obsidian-tasks-group/obsidian-tasks/blob/main/.github/workflows/update-docs-markdown.yml)
     - dependabot not on master branch
       - [useful](https://softwaremill.com/how-to-use-dependabot-on-github/)
+      - dependabot without git pull --rebase
+3. Add syntax highlighting for inline code to source view editing mode?

@@ -20,11 +20,17 @@ See this project's [releases](/../../../releases).
 
 ### Added
 
-- Add inline code syntax highlighting
+- Added inline code syntax highlighting
+- Added inline code titles and icons
 
 ### Changed
 
 - Replaced `color` with `colour`
+- Cursoring horizontally into codeblocks temporarily uncollapses them until the cursor is outside the codeblock
+
+### Fixed
+
+- Bug where cursoring into codeblocks and typing to make them disappear is fixed
 
 ## [1.0.0] - 2023-07-08
 

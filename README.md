@@ -257,7 +257,27 @@ Example:
 
 ## Inline Code
 
-Inline code can be customised as well with background color, text color, text color whilst being edited, font weight, paddings and curvature all being customisable. Inline code can also have syntax highlighting using %%TODO%%
+Inline code can be customised as well with background color, text color, text color whilst being edited, font weight, spacing around the inline code and curvature of the inline code all being customisable from the settings.
+
+Inline code can also have syntax highlighting in both editing mode and reading mode with the same highlighting style as in codeblocks. This is set by using the syntax `{language} code here` (note the space between `{language}` and `code here` is not necessary).
+
+Example:
+
+`{python} 'result if true'.method() if 1 else result_if_false.property`
+![Inline Code Highlighted](images/InlineCodeHighlighted.png)
+
+You can also set a title and/or display an icon before the inline code using the parameters `title:` and `icon` following the language. `title` can take multiple words in quotation marks or speech marks.
+
+Example:
+
+`{python icon} 'result if true'.method() if 1 else result_if_false.property`
+![Inline Code Highlighted Icon](images/InlineCodeHighlightedIcon.png)
+
+`{python title:'Inline If'} 'result if true'.method() if 1 else result_if_false.property`
+![Inline Code Highlighted Title](images/InlineCodeHighlightedTitle.png)
+
+`{python title:'Inline If' icon} 'result if true'.method() if 1 else result_if_false.property`
+![Inline Code Highlighted Title Icon](images/InlineCodeHighlightedTitleIcon.png)
 
 ## Plugin Compatibility
 
