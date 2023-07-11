@@ -31,9 +31,22 @@ export default class CodeStylerPlugin extends Plugin {
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this)}) // Add codeblock decorating markdownPostProcessor
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewInlineDecoratingPostProcessor(el,ctx,this)}) // Add inline code decorating markdownPostProcessor
 
-		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
+		let {codemirrorExtensions,collapseCommand} = createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons);
+		this.registerEditorExtension(codemirrorExtensions); // Add codemirror extensions
 
 		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
+
+		this.addCommand({id: 'fold-all', name: 'Fold all codeblocks', callback: ()=>{
+			//TODO Currently folds codeblocks without headers shown
+			let activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (activeView) {
+				if (activeView.getMode() === 'preview')
+					activeView.contentEl.querySelectorAll(".markdown-reading-view .code-styler-collapsed").forEach((headerElement: HTMLElement)=>{headerElement.classList.remove('code-styler-collapsed')})
+				else
+					//@ts-expect-error Undocumented Obsidian API
+					collapseCommand(activeView.editor.cm.docView.view,true);
+			}
+		}})
 
 		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
 			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')

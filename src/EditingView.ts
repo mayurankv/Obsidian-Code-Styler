@@ -11,7 +11,11 @@ import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExclu
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass } from "./CodeblockDecorating";
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
-	const codeblockLineNumberCharWidth = StateField.define<number>({
+	const collapseEffect: StateEffectType<Range<Decoration>> = StateEffect.define();
+	const uncollapseEffect: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
+	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
+	
+	const codeblockCharWidthStateField = StateField.define<number>({
 		create(state: EditorState): number {
 			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
 		},
@@ -19,7 +23,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return getCharWidth(transaction.state,value);
 		}
 	})
-	const codeblockLines = ViewPlugin.fromClass(
+	const codeblockLinesStateField = ViewPlugin.fromClass(
 		class CodeblockLines {
 			settings: CodeStylerSettings;
 			currentSettings: {
@@ -113,7 +117,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								}
 								maxLineNum = lineNumberCount - line.number - 1 + codeblockParameters.lineNumbers.offset;
 								if (maxLineNum.toString().length > 2)
-									lineNumberMargin = maxLineNum.toString().length * view.state.field(codeblockLineNumberCharWidth);
+									lineNumberMargin = maxLineNum.toString().length * view.state.field(codeblockCharWidthStateField);
 								else
 									lineNumberMargin = undefined;
 							}
@@ -137,92 +141,38 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
-			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(codeblockCollapse) || Decoration.none),
+			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(codeblockCollapseStateField) || Decoration.none),
 		}
 	);
-	const codeblockHeader = StateField.define<DecorationSet>({
+	const codeblockHeaderStateField = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
-			return Decoration.none;    
+			return addHeaders(state);    
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (editingViewIgnore(transaction.state))
-				return Decoration.none;
-			const builder = new RangeSetBuilder<Decoration>();
-			let codeblockParameters: CodeblockParameters;
-			let startLine: boolean = true;
-			let startDelimiter: string = '```';
-			for (let i = 1; i < transaction.state.doc.lines; i++) {
-				const line = transaction.state.doc.line(i);
-				const lineText = line.text.toString();
-				let currentDelimiter = testOpeningLine(lineText);
-				if (currentDelimiter) {
-					if (startLine) {
-						startLine = false;
-						startDelimiter = currentDelimiter;
-						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore)
-							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1}));
-							else
-								continue;
-					} else {
-						if (currentDelimiter === startDelimiter)
-							startLine = true;
-					}
-				}
-			}
-			return builder.finish();
+			return addHeaders(transaction.state);    
 		},
 		provide(field: StateField<DecorationSet>): Extension {
 			return EditorView.decorations.from(field);
-		}
+		},
 	})
-	const codeblockCollapse = StateField.define<DecorationSet>({
+	const codeblockCollapseStateField = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			if (editingViewIgnore(state))
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
-			let codeblockParameters: CodeblockParameters;
-			let collapseStart: Line | null = null;
-			let collapseEnd: Line | null = null;
-			let startLine: boolean = true;
-			let startDelimiter: string = '```';
-			for (let i = 1; i < state.doc.lines; i++) {
-				const line = state.doc.line(i);
-				const lineText = line.text.toString();
-				let currentDelimiter = testOpeningLine(lineText);
-				if (currentDelimiter) {
-					if (startLine) {
-						startLine = false;
-						startDelimiter = currentDelimiter;
-						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
-							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-								collapseStart = line;
-							else
-								continue;
-					} else {
-						if (currentDelimiter === startDelimiter) {
-							startLine = true;
-							if (collapseStart)
-								collapseEnd = line;
-						}
-					}
-				}
-				if (collapseStart && collapseEnd) {
-					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)), block: true, inclusive: true}));
-					collapseStart = null;
-					collapseEnd = null;
-				}
+			let codeblockHeaderDecorationSet = state.field(codeblockHeaderStateField,false) ?? Decoration.none;
+			for (let iter = codeblockHeaderDecorationSet.iter(); iter.value !== null; iter.next()) {
+				if (iter.value.spec.defaultFold)
+					builder.add(iter.value.spec.codeblockStart,iter.value.spec.codeblockEnd,Decoration.replace({effect: collapseEffect.of(Decoration.replace({block: true}).range(iter.value.spec.codeblockStart,iter.value.spec.codeblockEnd)), block: true, inclusive: true}));
 			}
 			return builder.finish();
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
 			value = value.map(transaction.changes);
 			for (const effect of transaction.effects) {
-				if (effect.is(collapse))
+				if (effect.is(collapseEffect))
 					value = value.update({add: [effect.value], sort: true});
-				else if (effect.is(uncollapse))
+				else if (effect.is(uncollapseEffect))
 					value = value.update({filterFrom: effect.value.filterFrom, filterTo: effect.value.filterTo, filter: effect.value.filter});
 			}
 			return value;
@@ -231,7 +181,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		},
 	})
-	const temporarilyUncollapsed = StateField.define<DecorationSet>({
+	const codeblockTemporaryUncollapseStateField = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			return Decoration.none;
 		},
@@ -247,7 +197,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return value;
 		}
 	})
-	const inlineCodeDecorator = ViewPlugin.fromClass(
+	const inlineCodeStateField = ViewPlugin.fromClass(
 		class InlineCodeDecoration {
 			decorations: DecorationSet;
 			// loadedLanguages: Record<string,LanguageSupport>; //NOTE: For future CM6 Compatibility
@@ -351,19 +301,19 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			decorations: (value) => value.decorations,
 		}
 	)
-	function cursorIntoCollapsedTransactionFilter() {
+	function inCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
 			let extraTransactions: Array<TransactionSpec> = [];
-			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
-			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
+			let codeblockCollapseDecorationSet = transaction.startState.field(codeblockCollapseStateField,false) ?? Decoration.none;
+			let codeblockTemporaryUncollapseDecorationSet = transaction.startState.field(codeblockTemporaryUncollapseStateField,false) ?? Decoration.none;
 			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
-				collapsedRangeSet.map(transaction.changes).between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
+				codeblockCollapseDecorationSet.map(transaction.changes).between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
 					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
-						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
+						extraTransactions.push({effects: uncollapseEffect.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
 				});
-				for (let iter = temporarilyUncollapsedRangeSet.map(transaction.changes).iter(); iter.value !== null; iter.next()) {
+				for (let iter = codeblockTemporaryUncollapseDecorationSet.map(transaction.changes).iter(); iter.value !== null; iter.next()) {
 					if (!(iter.from <= range.head && range.head <= iter.to))
-						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
+						extraTransactions.push({effects: collapseEffect.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
 				}
 			});
 			if (extraTransactions)
@@ -477,55 +427,76 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 	
-	function collapseOnClick(view: EditorView, target: HTMLElement) {
-		const position = view.posAtDOM(target);
-		let folded = false;
-		view.state.field(codeblockCollapse,false)?.between(position,position,()=>{
-			folded = true;
-		});
-
-		let collapseStart: Line | null = null;
-		let collapseEnd: Line | null = null;
-		let startLine: boolean = true;
+	function addHeaders(state: EditorState): DecorationSet {
+		if (editingViewIgnore(state))
+			return Decoration.none;
+		const builder = new RangeSetBuilder<Decoration>();
+		let codeblockParameters: CodeblockParameters;
+		let startLine: Line | null = null;
+		let addHeader: boolean = false;
 		let startDelimiter: string = '```';
-		for (let i = 1; i < view.state.doc.lines; i++) {
-			const line = view.state.doc.line(i);
+		for (let i = 1; i < state.doc.lines; i++) {
+			const line = state.doc.line(i);
 			const lineText = line.text.toString();
 			let currentDelimiter = testOpeningLine(lineText);
 			if (currentDelimiter) {
-				if (startLine) {
+				if (!startLine) {
+					startLine = line;
 					startDelimiter = currentDelimiter;
-					startLine = false;
-					if (position === line.from)
-						collapseStart = line;
+					codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
+					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore) {
+						if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+							addHeader = true;
+					}
 				} else {
 					if (currentDelimiter === startDelimiter) {
-						startLine = true;
-						if (collapseStart)
-							collapseEnd = line;
+						if (addHeader)
+							//@ts-expect-error codeblockParameters will always exist
+							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1, codeblockStart: startLine.from, codeblockEnd: line.to, defaultFold: codeblockParameters.fold.enabled}));
+						startLine = null;
 					}
 				}
 			}
-			if (collapseStart && collapseEnd) {
-				if (folded)
-					view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
+		}
+		return builder.finish();
+	}
+	function collapseOnClick(view: EditorView, target: HTMLElement) {
+		const position = view.posAtDOM(target);
+		let codeblockHeaderDecorationsSet = view.state.field(codeblockHeaderStateField,false) ?? Decoration.none;
+		for (let iter = codeblockHeaderDecorationsSet.iter(); iter.value !== null; iter.next()) {
+			if (position === iter.value.spec.codeblockStart) {
+				let fold = true;
+				view.state.field(codeblockCollapseStateField,false)?.between(position,position,()=>{
+					fold = false;
+				});
+				if (fold)
+					view.dispatch({effects: collapseEffect.of(Decoration.replace({block: true}).range(iter.value.spec.codeblockStart,iter.value.spec.codeblockEnd))});
 				else
-					view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
+					view.dispatch({effects: uncollapseEffect.of({filter: (from,to) => (to <= (iter.value as Decoration).spec.codeblockStart || from >= (iter.value as Decoration).spec.codeblockEnd), filterFrom: iter.value.spec.codeblockStart, filterTo: iter.value.spec.codeblockEnd})});
 				view.requestMeasure();
-				collapseStart = null;
-				collapseEnd = null;
 			}
+		}
+	}
+	function collapseAll(view: EditorView, fold?: boolean) {
+		let codeblockHeaderDecorationsSet = view.state.field(codeblockHeaderStateField,false) ?? Decoration.none;
+		for (let iter = codeblockHeaderDecorationsSet.iter(); iter.value !== null; iter.next()) {
+			let toFold: boolean;
+			if (typeof fold === 'undefined')
+				toFold = iter.value.spec.defaultFold;
+			else
+				toFold = fold;
+			if (toFold)
+				view.dispatch({effects: collapseEffect.of(Decoration.replace({block: true}).range(iter.value.spec.codeblockStart,iter.value.spec.codeblockEnd))});
+			else
+				view.dispatch({effects: uncollapseEffect.of({filter: (from,to) => (to <= (iter.value as Decoration).spec.codeblockStart || from >= (iter.value as Decoration).spec.codeblockEnd), filterFrom: iter.value.spec.codeblockStart, filterTo: iter.value.spec.codeblockEnd})});
+			view.requestMeasure();
 		}
 	}
 	function handleMouseDown(event: MouseEvent): void {
 		this.setAttribute("data-clicked","true");
 	}
 
-	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
-	const uncollapse: StateEffectType<{filter: (from: any, to: any) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
-	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
-
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()];
+	return {codemirrorExtensions: [codeblockCharWidthStateField,codeblockLinesStateField,codeblockHeaderStateField,codeblockCollapseStateField,codeblockTemporaryUncollapseStateField,inlineCodeStateField,inCollapsedTransactionFilter()], collapseCommand: collapseAll};
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {

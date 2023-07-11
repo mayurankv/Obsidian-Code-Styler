@@ -2,7 +2,7 @@ import { LANGUAGE_NAMES, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, Highlights, InlineCodeParameters } from "./CodeblockParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
-	const headerContainer = createDiv({cls: `code-styler-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}`});
+	const headerContainer = createDiv({cls: `code-styler-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== '')?'-specific':''}${codeblockParameters.fold.enabled?' code-styler-default-folded':''}`});
 	if (codeblockParameters.language !== ''){
 		const iconURL = getLanguageIcon(codeblockParameters.language,languageIcons)
 		if (iconURL !== null)
