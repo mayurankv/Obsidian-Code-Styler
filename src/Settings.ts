@@ -633,7 +633,7 @@ const MANUAL_PRISM_LANGUAGES: {[key: string]: string} = { // Manually generated 
 	"avdl":"Avro IDL",
 	"awk":"AWK",
 	"gawk":"GAWK",
-	"bash":"Shell",
+	"bash":"Bash",
 	"sh":"Shell",
 	"shell":"Shell",
 	"basic":"BASIC",
@@ -983,7 +983,15 @@ const MANUAL_PRISM_LANGUAGES: {[key: string]: string} = { // Manually generated 
 	"zig":"Zig"
 }
 const MANUAL_LANGUAGES: {[key: string]: string} = { // Manually created list
+	"fish":"Fish",
 	"octave":"Octave",
+	"maxima":"Maxima",
+	"mysql":"SQL",
+	"postgresql":"SQL",
+	"rscript":"R",
+	"shellscript":"Shell",
+	"sqlite":"SQL",
+	"zsh":"Zsh",
 }
 export const LANGUAGE_NAMES: {[key: string]: string} = {...PRISM_LANGUAGES,...MANUAL_PRISM_LANGUAGES,...MANUAL_LANGUAGES};
 export const LANGUAGE_ICONS_DATA: {[key: string]: string} = { // Icons from https://github.com/vscode-icons/vscode-icons/wiki/ListOfFiles and https://devicon.dev/
@@ -1179,7 +1187,7 @@ export const LANGUAGE_COLOURS : {[key: string]: string} = {
 	"Apex": '#0f9bd7',
 	"APL": '#d2d2d2',
 	"AppleScript": '#a8c2ab',
-	"Arduino": '2d9094',
+	"Arduino": '#2d9094',
 	"ARM Assembly": '#0000bf',
 	"AsciiDoc": '#e40046',
 	"ASP.NET (C#)": '#33a9dc',
