@@ -25,3 +25,4 @@
       - [useful](https://softwaremill.com/how-to-use-dependabot-on-github/)
       - dependabot without git pull --rebase
 3. Add syntax highlighting for inline code to source view editing mode?
+4. Add command to select all text inside current codeblock
