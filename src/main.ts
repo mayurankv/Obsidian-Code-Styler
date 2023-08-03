@@ -23,13 +23,13 @@ export default class CodeStylerPlugin extends Plugin {
 		this.languageIcons = Object.keys(LANGUAGE_ICONS_DATA).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
 			result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGE_ICONS_DATA[key]}</svg>`], { type: "image/svg+xml" }));
 			return result
-		},{})
+		},{});
 
 		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
-		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this)}) // Add codeblock decorating markdownPostProcessor
-		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewInlineDecoratingPostProcessor(el,ctx,this)}) // Add inline code decorating markdownPostProcessor
+		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this)}); // Add codeblock decorating markdownPostProcessor
+		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewInlineDecoratingPostProcessor(el,ctx,this)}); // Add inline code decorating markdownPostProcessor
 
 		let {codemirrorExtensions,collapseCommand} = createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons);
 		this.registerEditorExtension(codemirrorExtensions); // Add codemirror extensions
@@ -48,10 +48,12 @@ export default class CodeStylerPlugin extends Plugin {
 			}
 		}})
 
-		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
-			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')
-				leaf.view.previewMode.rerender(true);
-		})
+		this.app.workspace.onLayoutReady(()=>{
+			this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
+				if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')
+					leaf.view.previewMode.rerender(true);
+			});
+		});
 
 		console.log("Loaded plugin: Code Styler");
 	}
