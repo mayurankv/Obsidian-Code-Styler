@@ -22,6 +22,17 @@ See this project's [releases](/../../../releases).
 
 - 
 
+## [1.0.2] - 2023-08-04
+
+### Changed
+
+- Added some language name aliases
+
+### Fixed
+
+- Fixed `arduino` language colour
+- Fixed minimal theme readable line length issue
+
 ## [1.0.1] - 2023-07-11
 
 ### Added
