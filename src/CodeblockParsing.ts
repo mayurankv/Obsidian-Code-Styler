@@ -24,6 +24,7 @@ export interface CodeblockParameters {
 		default: Highlights;
 		alternative: Record<string,Highlights>
 	},
+	appearance: string;
 	ignore: boolean;
 }
 export interface InlineCodeParameters {
@@ -115,6 +116,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 			},
 			alternative: {},
 		},
+		appearance: '',
 		ignore: false,
 	}
 	if (parameterLine.startsWith('```')) {
@@ -220,6 +222,8 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 			codeblockParameters.lineUnwrap.alwaysDisabled = true;
 			codeblockParameters.lineUnwrap.activeWrap = false;
 		}
+	} else if (parameterString === 'terminal') {
+		codeblockParameters.appearance = 'terminal';
 	} else {
 		let highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
 		if (highlightMatch) {
