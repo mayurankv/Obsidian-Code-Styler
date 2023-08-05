@@ -22,6 +22,10 @@ See this project's [releases](/../../../releases).
 
 - 
 
+### Fixed
+
+- Multiline tokens are retained
+
 ## [1.0.2] - 2023-08-04
 
 ### Changed
