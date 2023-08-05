@@ -1,22 +1,77 @@
 :root {
-	--terminal-header-colour: var(--text-normal);
+	--traffic-close-red:                     #ff6159;
+	--traffic-close-red-active:              #bf4942;
+	--traffic-close-red-icon:                #4d0000;
+	--traffic-close-red-icon-active:         #190000;
+	--traffic-minimize-yellow:               #ffbd2e;
+	--traffic-minimize-yellow-active:        #bf8e22;
+	--traffic-minimize-yellow-icon:          #995700;
+	--traffic-minimize-yellow-icon-active:   #592800;
+	--traffic-maximize-green:                #28c941;
+	--traffic-maximize-green-active:         #1d9730;
+	--traffic-maximize-green-icon:           #006500;
+	--traffic-maximize-green-icon-active:    #003200;
+	--traffic-disabled-gray:                 #ddd;
 }
 
-.code-styler pre.code-styler-pre .code-styler-header-container.code-styler-terminal {
+.theme-light {
+	--terminal-header-colour: #EAE9EE;
+	--terminal-background-color: #FFFFFF;
+}
+.theme-dark {
+	--terminal-header-colour: #2F2E39;
+	--terminal-background-color: #1E1E1E;
+}
+
+[class^='code-styler-header-container'].code-styler-terminal {
 	--code-styler-header-background-colour: var(--terminal-header-colour) !important;
 	--code-styler-header-language-tag-background-colour: var(--terminal-header-colour) !important;
 }
 
-.code-styler pre.code-styler-pre .code-styler-header-container.code-styler-terminal .code-styler-header-text::before{
+pre.code-styler-pre:has([class^='code-styler-header-container'].code-styler-terminal) {
+	--language-border-width: 0 !important;
+}
+
+[class^='code-styler-header-container'].code-styler-terminal::before{
     display: block;
     content: "";
-    height: 16px;
-    width: 16px;
-    background: var(--color-red);
-    box-shadow: 25px 0 var(--color-orange), 50px 0 var(--color-green);
+    height: 12px;
+    width: 12px;
+	justify-content: center;
+    background: var(--traffic-close-red);
+    box-shadow: 20px 0 var(--traffic-minimize-yellow), 40px 0 var(--traffic-maximize-green);
     position: absolute;
-    border-radius: 100vmax;
-    top: 0;
-    margin: auto;
+    border-radius: 100%;
+	top: 0;
+	bottom: 0;
+	margin: auto 0;
     left: 14px;
+}
+
+.code-styler [class^='code-styler-header-container'].code-styler-terminal:hover::before{
+    background: var(--traffic-close-red);
+    box-shadow: 20px 0 var(--traffic-minimize-yellow), 40px 0 var(--traffic-maximize-green);
+}
+
+.code-styler-collapsed [class^='code-styler-header-container'].code-styler-terminal::before {
+    background: var(--traffic-disabled-gray);
+    box-shadow: 20px 0 var(--traffic-disabled-gray), 40px 0 var(--traffic-disabled-gray);
+}
+
+.code-styler [class^='code-styler-header-container'].code-styler-terminal:active::before{
+    background: var(--traffic-close-red);
+    box-shadow: 20px 0 var(--traffic-minimize-yellow-active), 40px 0 var(--traffic-maximize-green);
+}
+
+[class^='code-styler-header-container'].code-styler-terminal > * {
+	margin: 0;
+	padding: 4px;
+}
+
+[class^='code-styler-header-container'].code-styler-terminal > *:first-child {
+	margin-left: auto;
+}
+
+[class^='code-styler-header-container'].code-styler-terminal > *:not(:first-child):before {
+	content: '\00B7';
 }
