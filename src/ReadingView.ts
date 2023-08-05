@@ -1,4 +1,7 @@
 import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, Component } from "obsidian";
+import {unified} from "unified";
+import remarkParse from "remark-parse";
+import {visit} from "unist-util-visit";
 
 import CodeStylerPlugin from "./main";
 import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
@@ -203,10 +206,23 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		return;
 
 	// Add line numbers
-	let codeblockLines = codeblockCodeElement.innerHTML.split("\n");
-	if (codeblockLines.length == 1)
-		codeblockLines = ['',''];
+	let tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,'<br>'));
+	let stack: Array<string> = [];
+	let codeblockHTML: string = '';
 	codeblockCodeElement.innerHTML = "";
+	visit(tree,(node)=>{
+		if (node.type === 'html' || node.type === 'text') {
+			if (node.type === 'html' && node.value !== '<br>') {
+				if (node.value.startsWith('<span'))
+					stack.push(node.value);
+				else if (node.value.startsWith('</span'))
+					stack.pop();
+			} else if (node.type === 'html' && node.value === '<br>')
+				node.value = '</span>'.repeat(stack.length)+'<br>'+stack.join('');
+			codeblockHTML += node.value;
+		}
+	});
+	let codeblockLines = codeblockHTML.split('<br>');
 	codeblockLines.forEach((line,index) => {
 		if (index === codeblockLines.length-1)
 			return;
@@ -218,12 +234,13 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		codeblockCodeElement.appendChild(lineWrapper);
 		let lineNumberDisplay = '';
 		if (!codeblockParameters.lineNumbers.alwaysEnabled && codeblockParameters.lineNumbers.alwaysDisabled)
-			lineNumberDisplay = '-hide'
+			lineNumberDisplay = '-hide';
 		else if (codeblockParameters.lineNumbers.alwaysEnabled && !codeblockParameters.lineNumbers.alwaysDisabled)
-			lineNumberDisplay = '-specific'
+			lineNumberDisplay = '-specific';
 		lineWrapper.appendChild(createDiv({cls: `code-styler-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 		lineWrapper.appendChild(createDiv({cls: `code-styler-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
+	console.log(codeblockCodeElement.innerHTML)
 }
 export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
