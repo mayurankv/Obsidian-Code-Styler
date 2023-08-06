@@ -113,7 +113,7 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 }
 
 export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
-	if (!sourcePath || !element || !plugin.settings.currentTheme.settings.inline.syntaxHighlight)
+	if (!sourcePath || !element)
 		return;
 	for (let inlineCodeElement of Array.from(element.querySelectorAll(':not(pre) > code'))) {
 		if (inlineCodeElement.classList.contains('code-styler-highlighted') || inlineCodeElement.classList.contains('code-styler-highlight-ignore'))
@@ -132,11 +132,11 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
 			inlineCodeElement.classList.add('code-styler-highlight-ignore');
 		} else {
-			MarkdownRenderer.renderMarkdown(['```',parameters.language,'\n',text,'\n','```'].join(''),tempRenderContainer,'',new Component());
+			MarkdownRenderer.renderMarkdown(['```',plugin.settings.currentTheme.settings.inline.syntaxHighlight?parameters.language:'','\n',text,'\n','```'].join(''),tempRenderContainer,'',new Component());
 			renderedCodeElement = tempRenderContainer.querySelector('pre > code');
 			if (!renderedCodeElement)
 				return;
-			while(!renderedCodeElement.classList.contains("is-loaded"))
+			while(plugin.settings.currentTheme.settings.inline.syntaxHighlight && !renderedCodeElement.classList.contains("is-loaded"))
 				await sleep(2);
 			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
 			inlineCodeElement.classList.add('code-styler-highlighted');
