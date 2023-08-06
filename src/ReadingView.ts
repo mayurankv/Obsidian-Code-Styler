@@ -209,6 +209,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	let tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,'<br>'));
 	let stack: Array<string> = [];
 	let codeblockHTML: string = '';
+	let oldCodeblockLines = codeblockCodeElement.innerHTML.split("\n");
 	codeblockCodeElement.innerHTML = "";
 	visit(tree,(node)=>{
 		if (node.type === 'html' || node.type === 'text') {
@@ -223,6 +224,10 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		}
 	});
 	let codeblockLines = codeblockHTML.split('<br>');
+	console.log(codeblockLines.length,oldCodeblockLines.length)
+	// codeblockLines
+	if (codeblockLines.length == 1)
+		codeblockLines = ['',''];
 	codeblockLines.forEach((line,index) => {
 		if (index === codeblockLines.length-1)
 			return;
@@ -240,7 +245,6 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		lineWrapper.appendChild(createDiv({cls: `code-styler-line-number${lineNumberDisplay}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 		lineWrapper.appendChild(createDiv({cls: `code-styler-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
-	console.log(codeblockCodeElement.innerHTML)
 }
 export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
 	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
