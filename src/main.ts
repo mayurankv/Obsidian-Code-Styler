@@ -35,12 +35,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
 
-		this.app.workspace.onLayoutReady(()=>{
-			this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => { // Add decoration on enabling of plugin
-				if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')
-					leaf.view.previewMode.rerender(true);
-			});
-		});
+		this.app.workspace.onLayoutReady(()=>{this.rerenderPreview()}); // Add decoration on enabling of plugin
 
 		console.log("Loaded plugin: Code Styler");
 	}
@@ -63,5 +58,12 @@ export default class CodeStylerPlugin extends Plugin {
 		await this.saveData(this.settings);
 		this.app.workspace.updateOptions();
 		updateStyling(this.settings,this.app);
+	}
+
+	rerenderPreview() {
+		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => {
+			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === 'preview')
+				leaf.view.previewMode.rerender(true);
+		});
 	}
 }

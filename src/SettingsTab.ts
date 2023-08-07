@@ -4,6 +4,7 @@ import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
 import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
+import { todo } from "node:test";
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -53,7 +54,9 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.excludedCodeblocks = value;
 					(async () => {await this.plugin.saveSettings()})();
+					// this.plugin.rerenderPreview(); //todo
 				}));
+				//TODO (@mayurankv) Re-render (LP? and EM*)
 		new Setting(containerEl)
 			.setName('Exclude Languages')
 			.setDesc('Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
@@ -63,7 +66,9 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.excludedLanguages = value;
 					(async () => {await this.plugin.saveSettings()})();
+					// this.plugin.rerenderPreview(); //todo
 				}));
+				//TODO (@mayurankv) Re-render (LP? and EM*)
 		new Setting(containerEl)
 			.setName('Style Code on Export')
 			.setDesc('If enabled, styling will be applied when exporting to PDF.')
@@ -354,7 +359,9 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.collapsePlaceholder = value;
 					(async () => {await this.plugin.saveSettings()})();
+					// this.plugin.rerenderPreview(); //todo
 				}));
+				//TODO (@mayurankv) Re-render (LP and EM*)
 		new Setting(containerEl)
 			.setName('Header Separator Colour')
 			.setDesc('Colour of the line separating the codeblock header and the codeblock.')
@@ -572,6 +579,7 @@ export class SettingsTab extends PluginSettingTab {
 							this.plugin.settings.newHighlight = "";
 							newHighlightText.setValue("");
 							(async () => {await this.plugin.saveSettings()})();
+							this.plugin.rerenderPreview();
 						}
 					}
 				});
@@ -588,7 +596,9 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.inline.syntaxHighlight = value;
 					(async () => {await this.plugin.saveSettings()})();    
+					this.plugin.rerenderPreview();
 				}));
+				//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName('Inline Code Background Colour')
 			.then((setting) => {this.createPickr(
@@ -902,6 +912,7 @@ export class SettingsTab extends PluginSettingTab {
 						}
 					}
 				}));
+				//TODO (@mayurankv) Re-render (Test)
 
 
 		// ========== Donation ==========

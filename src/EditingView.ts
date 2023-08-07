@@ -250,17 +250,24 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const inlineCodeDecorator = ViewPlugin.fromClass(
 		class InlineCodeDecoration {
 			decorations: DecorationSet;
+			settings: CodeStylerSettings;
+			syntaxHighlight: boolean;
 			// loadedLanguages: Record<string,LanguageSupport>; //NOTE: For future CM6 Compatibility
 
 			constructor(view: EditorView) {
 				this.decorations = Decoration.none;
+				this.settings = settings;
+				this.syntaxHighlight = settings.currentTheme.settings.inline.syntaxHighlight;
 				this.buildDecorations(view);
 				// this.loadedLanguages = {}; //NOTE: For future CM6 Compatibility
 			}
 
 			update(update: ViewUpdate) {
-				if (update.docChanged || update.viewportChanged || update.selectionSet || update.state.field(editorLivePreviewField)!==update.startState.field(editorLivePreviewField)) {
-					if (update.docChanged)
+				if (update.docChanged || update.viewportChanged || update.selectionSet || update.state.field(editorLivePreviewField)!==update.startState.field(editorLivePreviewField) || this.settings.currentTheme.settings.inline.syntaxHighlight !== this.syntaxHighlight) {
+					if (this.settings.currentTheme.settings.inline.syntaxHighlight !== this.syntaxHighlight)
+						console.log(this.syntaxHighlight)
+					this.syntaxHighlight = this.settings.currentTheme.settings.inline.syntaxHighlight;
+					if (update.docChanged) 
 						this.decorations = this.decorations.map(update.changes);
 					this.buildDecorations(update.view);
 				//NOTE: For future CM6 Compatibility
@@ -335,9 +342,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 									}
 								}
+								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false});
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
-								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false});
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
 								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
 							}
