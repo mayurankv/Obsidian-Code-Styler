@@ -501,8 +501,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			let currentDelimiter = testOpeningLine(lineText);
 			if (currentDelimiter) {
 				if (startLine) {
-					startDelimiter = currentDelimiter;
 					startLine = false;
+					startDelimiter = currentDelimiter;
 					if (position === line.from)
 						collapseStart = line;
 				} else {

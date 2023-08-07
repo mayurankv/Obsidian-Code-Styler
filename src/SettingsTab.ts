@@ -45,6 +45,7 @@ export class SettingsTab extends PluginSettingTab {
 
 		// ========== General ==========
 
+		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName('Ignore Codeblocks')
 			.setDesc('Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
@@ -54,9 +55,13 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.excludedCodeblocks = value;
 					(async () => {await this.plugin.saveSettings()})();
-					// this.plugin.rerenderPreview(); //todo
+					clearTimeout(ignoreTimeout);
+					ignoreTimeout = setTimeout(()=>{
+						this.plugin.rerenderPreview();
+					},1000);
 				}));
-				//TODO (@mayurankv) Re-render (LP? and EM*)
+				//TODO (@mayurankv) Re-render (LP)
+		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName('Exclude Languages')
 			.setDesc('Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.')
@@ -66,9 +71,12 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.excludedLanguages = value;
 					(async () => {await this.plugin.saveSettings()})();
-					// this.plugin.rerenderPreview(); //todo
+					clearTimeout(excludeTimeout);
+					excludeTimeout = setTimeout(()=>{
+						this.plugin.rerenderPreview();
+					},1000);
 				}));
-				//TODO (@mayurankv) Re-render (LP? and EM*)
+				//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName('Style Code on Export')
 			.setDesc('If enabled, styling will be applied when exporting to PDF.')
@@ -350,6 +358,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.title.textColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.title.textColour = saveColour},
 			)});
+		let collapsePlaceholderTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName('Collapse Placeholder Text')
 			.setDesc('Title placeholder text for collapsed code when no title parameter is set.')
@@ -359,9 +368,12 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.collapsePlaceholder = value;
 					(async () => {await this.plugin.saveSettings()})();
-					// this.plugin.rerenderPreview(); //todo
+					clearTimeout(collapsePlaceholderTimeout);
+					collapsePlaceholderTimeout = setTimeout(()=>{
+						this.plugin.rerenderPreview();
+					},1000);
 				}));
-				//TODO (@mayurankv) Re-render (LP and EM*)
+				//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName('Header Separator Colour')
 			.setDesc('Colour of the line separating the codeblock header and the codeblock.')
