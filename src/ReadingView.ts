@@ -317,7 +317,7 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 				if (!executeCodeOutput.style.maxHeight) {
 					setTimeout(()=>{
 						executeCodeOutput.style.setProperty('white-space','var(--line-active-wrapping)','important');
-						executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
+						executeCodeOutput.style.setProperty('--true-height',`calc(${Math.ceil(executeCodeOutput.scrollHeight + 0.01)}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
 						executeCodeOutput.style.maxHeight = 'var(--true-height)';
 						executeCodeOutput.style.setProperty('white-space','var(--line-wrapping)','important');
 					},PRIMARY_DELAY)
@@ -338,7 +338,7 @@ function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIM
 }
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
 	codeblockCodeElement.style.setProperty('white-space','var(--line-active-wrapping)','important');
-	codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
+	codeblockCodeElement.style.setProperty('--true-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight + 0.01)}px + 2 * var(--code-padding)`);
 	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
 	codeblockCodeElement.style.setProperty('white-space','var(--line-wrapping)','important');
 	if (fold) {
