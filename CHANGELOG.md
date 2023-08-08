@@ -18,6 +18,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Changed
+
+- Round up heights to prevent rounding error scrollbars from appearing
+
 ## [1.0.3] - 2023-08-08
 
 ### Added
