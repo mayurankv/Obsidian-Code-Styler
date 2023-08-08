@@ -20,11 +20,12 @@ See this project's [releases](/../../../releases).
 
 ### Added
 
-- 
+- Re-renders on changes to relevant settings
 
 ### Fixed
 
 - Multiline tokens are retained
+- Scroll issues are fixed (apart from small near-empty codeblocks)
 
 ## [1.0.2] - 2023-08-04
 
