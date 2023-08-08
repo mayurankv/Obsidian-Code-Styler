@@ -25,7 +25,8 @@
 	background: none !important;
 	transition: max-height ease-in-out var(--duration-button), padding ease-in-out var(--duration-button), border-top ease-in-out var(--duration-button);
 	max-height: 0;
-	overflow-x: scroll;
+	overflow-x: overlay;
+	/* scrollbar-gutter: stable; */
 }
 .code-styler pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
@@ -305,8 +306,13 @@ pre.code-styler-pre .code-styler-line-text {
 }
 
 /** Scroll Bar */
-pre.code-styler-pre::-webkit-scrollbar {
-	opacity: unset !important;
+pre.code-styler-pre::-webkit-scrollbar,
+pre.code-styler-pre > code::-webkit-scrollbar {
+	/* opacity: unset !important; */
+	/* width: revert !important; */
+	/* height: revert !important; */
+	width: var(--code-padding) !important;
+	height: var(--code-padding) !important;
 }
 
 /** Buttons */

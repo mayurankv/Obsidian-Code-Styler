@@ -200,8 +200,11 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.unwrapLines = value;
+					if (!value)
+						wrapLinesActiveToggle.setValue(false);
 					this.disableableComponents['wrapLines'].forEach(component => {component.setDisabled(!value)});
-					(async () => {await this.plugin.saveSettings()})();    
+					(async () => {await this.plugin.saveSettings()})();  
+					this.plugin.rerenderPreview();
 				}));
 		new Setting(containerEl)
 			.setName('Codeblock Curvature')
@@ -581,7 +584,7 @@ export class SettingsTab extends PluginSettingTab {
 					else {
 						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights)
 							new Notice(`A highlight with the name "${this.plugin.settings.newHighlight}" already exists.`); //NOSONAR
-							//todo (@mayurankv) Future: Focus on existing highlighter - `renderMatches`
+							//TODO (@mayurankv) Future: Focus on existing highlighter - `renderMatches`
 						else {
 							const newColour = getRandomColour();
 							this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
@@ -610,7 +613,6 @@ export class SettingsTab extends PluginSettingTab {
 					(async () => {await this.plugin.saveSettings()})();    
 					this.plugin.rerenderPreview();
 				}));
-				//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName('Inline Code Background Colour')
 			.then((setting) => {this.createPickr(
@@ -803,7 +805,8 @@ export class SettingsTab extends PluginSettingTab {
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
-					(async () => {await this.plugin.saveSettings()})();    
+					(async () => {await this.plugin.saveSettings()})(); 
+					this.plugin.rerenderPreview();   
 				})
 				this.disableableComponents['wrapLines'].push(wrapLinesActiveToggle);
 			});
