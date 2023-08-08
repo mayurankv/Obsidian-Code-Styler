@@ -147,6 +147,48 @@ export async function readingViewInlineDecoratingPostProcessor(element: HTMLElem
 	}
 }
 
+export function destroyReadingModeElements(): void {
+	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
+		codeblockPreParent.classList.remove('code-styler-pre-parent');
+	});
+	[
+		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
+		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-line-number']")),
+		...Array.from(document.querySelectorAll(":not(pre) > code span.code-styler-inline-opener")),
+	].forEach(element => element.remove());
+	document.querySelectorAll("pre.code-styler-pre").forEach((codeblockPreElement: HTMLElement) => {
+		codeblockPreElement.classList.remove('code-styler-pre');
+		codeblockPreElement.classList.remove('code-styler-collapsed');
+		codeblockPreElement.style.removeProperty('--true-height');
+		codeblockPreElement.style.removeProperty('--line-number-margin');
+		codeblockPreElement.style.removeProperty('max-height');
+		codeblockPreElement.style.removeProperty('white-space');
+	});
+	document.querySelectorAll('pre > code ~ code.language-output').forEach((executeCodeOutput: HTMLElement) => {
+		executeCodeOutput.classList.remove('execute-code-output');
+		executeCodeOutput.style.removeProperty('--true-height');
+		executeCodeOutput.style.removeProperty('max-height');
+	});
+	document.querySelectorAll('pre > code:nth-of-type(1)').forEach((codeblockCodeElement: HTMLElement) => {
+		codeblockCodeElement.style.removeProperty('--true-height');
+		codeblockCodeElement.style.removeProperty('--line-wrapping');
+		codeblockCodeElement.style.removeProperty('--line-active-wrapping');
+		codeblockCodeElement.style.removeProperty('max-height');
+		codeblockCodeElement.style.removeProperty('white-space');
+		codeblockCodeElement.innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="code-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
+			const codeblockLineText = (codeblockLine.firstChild as HTMLElement);
+			if (codeblockLineText)
+				reconstructedCodeblockLines.push(codeblockLineText.innerHTML);
+			return reconstructedCodeblockLines
+		},[]).join('\n')+'\n';
+	});
+	document.querySelectorAll(":not(pre) > code").forEach((inlineCodeElement: HTMLElement) => {
+		inlineCodeElement.classList.remove('code-styler-highlighted');
+		inlineCodeElement.classList.remove('code-styler-highlight-ignore');
+		inlineCodeElement.innerText = inlineCodeElement.getAttribute("parameters") + inlineCodeElement.innerText;
+	});
+}
+
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeStylerPlugin) {
 	// Add Execute Code Observer
 	if (dynamic) {
@@ -243,66 +285,6 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		lineWrapper.appendChild(createDiv({cls: `code-styler-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 	});
 }
-export function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
-	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
-	codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
-		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
-		if (!codeblockCodeElement)
-			return;
-		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('code-styler-collapsed'))},primary_delay);
-	})
-}
-function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
-	codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
-	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
-	codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
-	if (fold) {
-		codeblockPreElement.classList.add("code-styler-collapsed");
-		codeblockCodeElement.style.maxHeight = '';
-	}
-}
-
-export function destroyReadingModeElements(): void {
-	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
-		codeblockPreParent.classList.remove('code-styler-pre-parent');
-	});
-	[
-		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
-		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-line-number']")),
-		...Array.from(document.querySelectorAll(":not(pre) > code span.code-styler-inline-opener")),
-	].forEach(element => element.remove());
-	document.querySelectorAll("pre.code-styler-pre").forEach((codeblockPreElement: HTMLElement) => {
-		codeblockPreElement.classList.remove('code-styler-pre');
-		codeblockPreElement.classList.remove('code-styler-collapsed');
-		codeblockPreElement.style.removeProperty('--true-height');
-		codeblockPreElement.style.removeProperty('--line-number-margin');
-		codeblockPreElement.style.removeProperty('max-height');
-		codeblockPreElement.style.removeProperty('white-space');
-	});
-	document.querySelectorAll('pre > code ~ code.language-output').forEach((executeCodeOutput: HTMLElement) => {
-		executeCodeOutput.classList.remove('execute-code-output');
-		executeCodeOutput.style.removeProperty('--true-height');
-		executeCodeOutput.style.removeProperty('max-height');
-	});
-	document.querySelectorAll('pre > code:nth-of-type(1)').forEach((codeblockCodeElement: HTMLElement) => {
-		codeblockCodeElement.style.removeProperty('--true-height');
-		codeblockCodeElement.style.removeProperty('--line-wrapping');
-		codeblockCodeElement.style.removeProperty('--line-active-wrapping');
-		codeblockCodeElement.style.removeProperty('max-height');
-		codeblockCodeElement.style.removeProperty('white-space');
-		codeblockCodeElement.innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="code-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
-			const codeblockLineText = (codeblockLine.firstChild as HTMLElement);
-			if (codeblockLineText)
-				reconstructedCodeblockLines.push(codeblockLineText.innerHTML);
-			return reconstructedCodeblockLines
-		},[]).join('\n')+'\n';
-	});
-	document.querySelectorAll(":not(pre) > code").forEach((inlineCodeElement: HTMLElement) => {
-		inlineCodeElement.classList.remove('code-styler-highlighted');
-		inlineCodeElement.classList.remove('code-styler-highlight-ignore');
-		inlineCodeElement.innerText = inlineCodeElement.getAttribute("parameters") + inlineCodeElement.innerText;
-	});
-}
 
 export const readingStylingMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
@@ -343,3 +325,22 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 		}
 	});
 });
+
+function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
+	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
+	codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
+		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
+		if (!codeblockCodeElement)
+			return;
+		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('code-styler-collapsed'))},primary_delay);
+	});
+}
+function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
+	codeblockCodeElement.style.setProperty('--true-height',`calc(${codeblockCodeElement.scrollHeight}px + 2 * var(--code-padding)`);
+	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
+	codeblockCodeElement.style.whiteSpace = 'var(--line-wrapping)';
+	if (fold) {
+		codeblockPreElement.classList.add("code-styler-collapsed");
+		codeblockCodeElement.style.maxHeight = '';
+	}
+}

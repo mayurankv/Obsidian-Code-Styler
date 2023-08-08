@@ -304,6 +304,11 @@ pre.code-styler-pre .code-styler-line-text {
 	white-space: break-spaces;
 }
 
+/** Scroll Bar */
+pre.code-styler-pre::-webkit-scrollbar {
+	opacity: unset !important;
+}
+
 /** Buttons */
 @keyframes outdent {
 	from {

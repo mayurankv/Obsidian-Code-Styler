@@ -38,6 +38,7 @@
     - `ts`
     - `julia`
     - `java`
+8. Changing line wrap options can be flaky
 
 See below:
 
