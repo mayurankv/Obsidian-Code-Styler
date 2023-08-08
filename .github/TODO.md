@@ -39,6 +39,7 @@
     - `julia`
     - `java`
 8. Changing line wrap options can be flaky
+9. Make reset buttons only appear when value is not default value (in settings)
 
 See below:
 

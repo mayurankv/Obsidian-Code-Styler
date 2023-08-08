@@ -361,22 +361,46 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	function cursorIntoCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
 			let extraTransactions: Array<TransactionSpec> = [];
-			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
-			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
+			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false)?.map(transaction.changes) ?? Decoration.none;
+			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false)?.map(transaction.changes) ?? Decoration.none;
 			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
-				collapsedRangeSet.map(transaction.changes).between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
+				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
 					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
 						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
 				});
-				for (let iter = temporarilyUncollapsedRangeSet.map(transaction.changes).iter(); iter.value !== null; iter.next()) {
+				for (let iter = temporarilyUncollapsedRangeSet.iter(); iter.value !== null; iter.next()) {
 					if (!(iter.from <= range.head && range.head <= iter.to))
 						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
 				}
 			});
-			if (extraTransactions)
+			if (extraTransactions.length !== 0)
 				return [transaction,...extraTransactions];
 			return transaction;
-		})
+		});
+	}
+
+	//todo Finish this filter
+	function manageCollapsedTransactionFilter() {
+		return EditorState.transactionFilter.of((transaction) => {
+			let extraTransactions: Array<TransactionSpec> = [];
+			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
+			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
+			transaction.changes.iterChanges((fromA,toA,fromB,toB,inserted)=>{
+				if (fromB === toB && inserted.toString() === '') {
+					console.log(fromA,toA,fromB,toB,inserted)
+					collapsedRangeSet.between(fromA-100, toA+100, (collapseStartFrom, collapseEndTo, decorationValue) => {
+						console.log(fromA,toA,collapseStartFrom,collapseEndTo)
+						if ((fromA <= collapseStartFrom && collapseStartFrom <= toA) || (fromA <= collapseEndTo && collapseEndTo <= toA))
+							extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
+					});
+				}
+			});
+			if (extraTransactions.length !== 0)
+				console.log('foo',extraTransactions)
+			if (extraTransactions.length !== 0)
+				return [transaction,...extraTransactions];
+			return transaction;
+		});
 	}
 
 	class LineNumberWidget extends WidgetType {

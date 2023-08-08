@@ -11,6 +11,10 @@ export default class CodeStylerPlugin extends Plugin {
 	readingStylingMutationObserver: MutationObserver;
 	executeCodeMutationObserver: MutationObserver;
 	languageIcons: Record<string,string>;
+	sizes: {
+		font: string;
+		zoom: string;
+	};
 	
 	async onload() {
 		await this.loadSettings(); // Load Settings
@@ -24,6 +28,10 @@ export default class CodeStylerPlugin extends Plugin {
 			result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGE_ICONS_DATA[key]}</svg>`], { type: "image/svg+xml" }));
 			return result
 		},{});
+		this.sizes = {
+			font: document.body.getCssPropertyValue('--font-text-size'),
+			zoom: document.body.getCssPropertyValue('--zoom-factor'),
+		};
 
 		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
@@ -33,7 +41,28 @@ export default class CodeStylerPlugin extends Plugin {
 
 		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
-		this.registerEvent(this.app.workspace.on('css-change',()=>updateStyling(this.settings,this.app),this)); // Update styling on css changes
+		let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{});
+		this.registerEvent(this.app.workspace.on('css-change',()=>{
+			updateStyling(this.settings,this.app); // Update styling on css changes
+			let currentFontSize = document.body.getCssPropertyValue('--font-text-size');
+			if (this.sizes.font !== currentFontSize) {
+				this.sizes.font = currentFontSize;
+				clearTimeout(zoomTimeout);
+				zoomTimeout = setTimeout(()=>{
+					this.rerenderPreview(); // Re-render on font size changes
+				},1000);
+			}
+		},this));
+		this.registerEvent(this.app.workspace.on('resize',()=>{
+			let currentZoomSize = document.body.getCssPropertyValue('--zoom-factor');
+			if (this.sizes.zoom !== currentZoomSize) {
+				this.sizes.zoom = currentZoomSize;
+				clearTimeout(zoomTimeout);
+				zoomTimeout = setTimeout(()=>{
+					this.rerenderPreview(); // Re-render on zoom changes
+				},1000);
+			}
+		},this));
 
 		this.app.workspace.onLayoutReady(()=>{this.rerenderPreview()}); // Add decoration on enabling of plugin
 
