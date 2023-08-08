@@ -18,6 +18,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.3] - 2023-08-08
+
 ### Added
 
 - Re-renders on changes to relevant settings
@@ -103,7 +105,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.2...HEAD
+[Unreleased]: /../../compare/1.0.3...HEAD
+[1.0.2]: /../../compare/1.0.2...1.0.3
 [1.0.2]: /../../compare/1.0.1...1.0.2
 [1.0.1]: /../../compare/1.0.0...1.0.1
 [1.0.0]: /../../releases/tag/1.0.0
