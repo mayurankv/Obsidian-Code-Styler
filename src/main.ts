@@ -4,11 +4,10 @@ import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from './Set
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions } from "./EditingView";
-import { destroyReadingModeElements, executeCodeMutationObserver, readingStylingMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
+import { destroyReadingModeElements, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
-	readingStylingMutationObserver: MutationObserver;
 	executeCodeMutationObserver: MutationObserver;
 	languageIcons: Record<string,string>;
 	sizes: {
@@ -33,7 +32,6 @@ export default class CodeStylerPlugin extends Plugin {
 			zoom: document.body.getCssPropertyValue('--zoom-factor'),
 		};
 
-		this.readingStylingMutationObserver = readingStylingMutationObserver; // Initialise reading view styling mutation observer
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 		
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this)}); // Add codeblock decorating markdownPostProcessor
@@ -70,7 +68,6 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 	
 	onunload() {
-		this.readingStylingMutationObserver.disconnect();
 		this.executeCodeMutationObserver.disconnect();
 		removeStylesAndClasses();
 		destroyReadingModeElements();

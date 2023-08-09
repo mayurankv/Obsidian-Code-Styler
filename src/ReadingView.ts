@@ -4,7 +4,7 @@ import remarkParse from "remark-parse";
 import {visit} from "unist-util-visit";
 
 import CodeStylerPlugin from "./main";
-import { PRIMARY_DELAY, SECONDARY_DELAY, TRANSITION_LENGTH } from "./Settings";
+import { TRANSITION_LENGTH } from "./Settings";
 import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource, parseInlineCode } from "./CodeblockParsing";
 import { createHeader, createInlineOpener, getLineClass } from "./CodeblockDecorating";
 
@@ -32,16 +32,6 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 	if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
 		return;
 
-	if (!editingEmbeds && !printing) {
-		const readingViewParent = element.matchParent('.view-content > .markdown-reading-view > .markdown-preview-view > .markdown-preview-section');
-		if (readingViewParent)
-			plugin.readingStylingMutationObserver.observe(readingViewParent,{
-				childList: true,
-				attributes: false,
-				characterData: false,
-				subtree: false,
-			})
-	}
 	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
 		renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
@@ -190,6 +180,10 @@ export function destroyReadingModeElements(): void {
 }
 
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeStylerPlugin) {
+	function escapeHTML(plaintext: string) {
+		return plaintext.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+	}
+	
 	// Add Execute Code Observer
 	if (dynamic) {
 		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{
@@ -213,22 +207,11 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	
 	if (dynamic) {
 		// Add listener for header collapsing on click
-		headerContainer.addEventListener("click", ()=>{
-			codeblockPreElement.classList.toggle("code-styler-collapsed")
-			if (codeblockCodeElement.style.maxHeight)
-				codeblockCodeElement.style.maxHeight = ''; //todo NOW
-			else
-				codeblockCodeElement.style.maxHeight = 'var(--true-height)'; //todo NOW
-			const executeCodeOutput = (codeblockPreElement.querySelector('pre > code ~ code.language-output') as HTMLElement);
-			if (executeCodeOutput && executeCodeOutput.style.display !== 'none') {
-				if (executeCodeOutput.style.maxHeight)
-					executeCodeOutput.style.maxHeight = ''; //todo NOW
-				else
-					executeCodeOutput.style.maxHeight = 'var(--true-height)'; //todo NOW
-			}
-		});
+		headerContainer.addEventListener("click",()=>toggleFold(codeblockPreElement));
+		if (codeblockParameters.fold.enabled)
+			codeblockPreElement.classList.add("code-styler-collapsed");
 
-		// Line Wrapping Classes
+		// Line Wrapping Classes //TODO (@mayurankv) Turn these into classes (ideally phase out codeblockCodeElement)
 		if (codeblockParameters.lineUnwrap.alwaysEnabled) {
 			codeblockCodeElement.style.setProperty('--line-wrapping','pre');
 			if (codeblockParameters.lineUnwrap.activeWrap)
@@ -237,10 +220,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 				codeblockCodeElement.style.setProperty('--line-active-wrapping','pre');
 		} else if (codeblockParameters.lineUnwrap.alwaysDisabled)
 			codeblockCodeElement.style.setProperty('--line-wrapping','pre-wrap');
-
-		// Height Setting (for collapse animation) - Delay to return correct height
-		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockParameters.fold.enabled)},PRIMARY_DELAY);
-	} else if (codeblockParameters.fold.enabled)
+	} else if (codeblockParameters.fold.enabled) //TODO (@mayurankv) Can this be removed? Is it just folding codeblocks in exports?
 		codeblockPreElement.classList.add("code-styler-collapsed");
 	
 	// Ignore styled lines
@@ -288,69 +268,20 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	});
 }
 
-export const readingStylingMutationObserver = new MutationObserver((mutations) => {
-	mutations.forEach((mutation: MutationRecord) => {
-		if (mutation.addedNodes.length !== 0)
-			mutation.addedNodes.forEach((addedNode: HTMLElement)=>remeasureReadingView(addedNode))
-	});
-});
+async function toggleFold(codeblockPreElement: HTMLElement) {
+	codeblockPreElement.querySelectorAll('pre > code').forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty('max-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains('execute-code-output')?'3.5 + var(--header-separator-width)':'2'})`));
+	await sleep(1);
+	codeblockPreElement.classList.toggle("code-styler-collapsed");
+	await sleep(TRANSITION_LENGTH);
+	codeblockPreElement.querySelectorAll('pre > code').forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty('max-height'));
+}
+
 export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
-		if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change style of execute code output
-			const executeCodeOutput = mutation.target as HTMLElement;
-			if (executeCodeOutput.parentElement?.classList.contains('code-styler-collapsed'))
-				executeCodeOutput.style.maxHeight = '';
-		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'CODE' && (mutation.target as HTMLElement).classList.contains('execute-code-output')) { // Change children of execute code output
-			const executeCodeOutput = mutation.target as HTMLElement;
-			setTimeout(()=>{
-				executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
-			},PRIMARY_DELAY)
-		} else if (mutation.type === "attributes" && mutation.attributeName === "style" && (mutation.target as HTMLElement).tagName === 'INPUT' && (mutation.target as HTMLElement).parentElement?.tagName === 'CODE') { // Change style of execute code output input box
-			const executeCodeOutput = mutation.target.parentElement as HTMLElement;
-			if (executeCodeOutput) {
-				setTimeout(()=>{
-					executeCodeOutput.style.setProperty('--true-height',`calc(${executeCodeOutput.scrollHeight}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
-				},SECONDARY_DELAY)
-			}
-		} else if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') { // Add execute code output
+		if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') { // Add execute code output
 			const executeCodeOutput = (mutation.target as HTMLElement).querySelector('pre > code ~ code.language-output') as HTMLElement;
-			if (executeCodeOutput) {
+			if (executeCodeOutput)
 				executeCodeOutput.classList.add('execute-code-output');
-				if (!executeCodeOutput.style.maxHeight) {
-					setTimeout(()=>{
-						executeCodeOutput.style.setProperty('white-space','var(--line-active-wrapping)','important');
-						executeCodeOutput.style.setProperty('--true-height',`calc(${Math.ceil(executeCodeOutput.scrollHeight + 0.01)}px + 3.5 * var(--code-padding) + var(--header-separator-width)`); //todo NOW
-						executeCodeOutput.style.maxHeight = 'var(--true-height)'; //todo NOW
-						executeCodeOutput.style.setProperty('white-space','var(--line-wrapping)','important'); //todo NOW
-					},PRIMARY_DELAY)
-				}
-			}
 		}
 	});
 });
-
-function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIMARY_DELAY): void {
-	const codeblockPreElements = element.querySelectorAll('pre:not(.frontmatter)');
-	codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{
-		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code') as HTMLElement;
-		if (!codeblockCodeElement)
-			return;
-		setTimeout(()=>{setCollapseStyling(codeblockPreElement,codeblockCodeElement,codeblockPreElement.classList.contains('code-styler-collapsed'))},primary_delay);
-	});
-}
-function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
-	codeblockCodeElement.style.setProperty('white-space','var(--line-active-wrapping)','important');
-	//todo NOW: TRANSITION_LENGTH
-	codeblockCodeElement.style.setProperty('--true-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight + 0.01)}px + 2 * var(--code-padding)`); //todo NOW
-	codeblockCodeElement.style.transitionProperty = 'padding, border-top' //todo NOW
-	codeblockCodeElement.style.maxHeight = 'var(--true-height)'; //todo NOW
-	codeblockCodeElement.style.transitionProperty = 'max-height, padding, border-top' //todo NOW
-	codeblockCodeElement.style.setProperty('white-space','var(--line-wrapping)','important');
-	if (fold) {
-		codeblockPreElement.classList.add("code-styler-collapsed");
-		codeblockCodeElement.style.maxHeight = ''; //todo NOW
-	}
-}
-function escapeHTML(plaintext: string) {
-	return plaintext.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}

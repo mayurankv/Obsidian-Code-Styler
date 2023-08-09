@@ -25,6 +25,7 @@ See this project's [releases](/../../../releases).
 ### Changed
 
 - Round up heights to prevent rounding error scrollbars from appearing
+- Convert transitions so `max-height` is only applied temporarily
 
 ### Fixed
 
@@ -118,7 +119,7 @@ See this project's [releases](/../../../releases).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
 [Unreleased]: /../../compare/1.0.3...HEAD
-[1.0.2]: /../../compare/1.0.2...1.0.3
+[1.0.3]: /../../compare/1.0.2...1.0.3
 [1.0.2]: /../../compare/1.0.1...1.0.2
 [1.0.1]: /../../compare/1.0.0...1.0.1
 [1.0.0]: /../../releases/tag/1.0.0

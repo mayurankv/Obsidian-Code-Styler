@@ -17,7 +17,7 @@
 	padding-top: var(--code-padding) !important;
 	padding-bottom: var(--code-padding) !important;
 }
-.code-styler pre.code-styler-pre code {
+.code-styler pre.code-styler-pre > code {
 	display: grid;
 	grid-template-columns: min-content auto;
 	grid-template-rows: auto;
@@ -30,16 +30,16 @@
 	transition-property: max-height, padding, border-top;
 	transition-duration: var(--duration-button);
 	transition-timing-function: ease-in-out;
-	max-height: 0;
+	max-height: unset;
 	overflow-x: overlay;
-	/* scrollbar-gutter: stable; */
 }
 .code-styler pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
 }
-.code-styler pre.code-styler-pre.code-styler-collapsed code {
+.code-styler pre.code-styler-pre.code-styler-collapsed > code {
 	padding-top: 0 !important;
 	padding-bottom: 0 !important;
+	max-height: 0 !important;
 }
 .code-styler pre.code-styler-pre::before,
 .code-styler pre.code-styler-pre::after {
