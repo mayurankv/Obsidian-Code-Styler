@@ -18,6 +18,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Add `wrap` as alias to `unwrap:false`
+
 ### Changed
 
 - Round up heights to prevent rounding error scrollbars from appearing

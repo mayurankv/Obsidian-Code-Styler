@@ -182,43 +182,71 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 	} else if (parameterString.startsWith('fold:')) {
 		let foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('fold:'.length));
 		if (foldPlaceholderMatch) {
-			codeblockParameters.fold.enabled = true;
-			codeblockParameters.fold.placeholder = foldPlaceholderMatch[2].trim();
+			codeblockParameters.fold = {
+				enabled: true,
+				placeholder: foldPlaceholderMatch[2].trim(),
+			}
 		}
 	} else if (parameterString === 'fold') {
-		codeblockParameters.fold.enabled = true;
-		codeblockParameters.fold.placeholder = '';
+		codeblockParameters.fold = {
+			enabled: true,
+			placeholder: '',
+		}
 	} else if (parameterString === 'ignore') {
 		codeblockParameters.ignore = true;
 	} else if (parameterString.startsWith('ln:')) {
 		parameterString = parameterString.slice('ln:'.length)
 		if (/^\d+$/.test(parameterString)) {
-			codeblockParameters.lineNumbers.alwaysEnabled = true;
-			codeblockParameters.lineNumbers.alwaysDisabled = false;
-			codeblockParameters.lineNumbers.offset = parseInt(parameterString)-1;
+			codeblockParameters.lineNumbers = {
+				alwaysEnabled: true,
+				alwaysDisabled: false,
+				offset: parseInt(parameterString)-1,
+			}
 		} else if (parameterString.toLowerCase() === 'true') {
-			codeblockParameters.lineNumbers.alwaysEnabled = true;
-			codeblockParameters.lineNumbers.alwaysDisabled = false;
-			codeblockParameters.lineNumbers.offset = 0;
+			codeblockParameters.lineNumbers = {
+				alwaysEnabled: true,
+				alwaysDisabled: false,
+				offset: 0,
+			}
 		} else if (parameterString.toLowerCase() === 'false') {
-			codeblockParameters.lineNumbers.alwaysEnabled = false;
-			codeblockParameters.lineNumbers.alwaysDisabled = true;
-			codeblockParameters.lineNumbers.offset = 0;
+			codeblockParameters.lineNumbers = {
+				alwaysEnabled: false,
+				alwaysDisabled: true,
+				offset: 0,
+			}
+		}
+	} else if (parameterString === 'wrap') {
+		codeblockParameters.lineUnwrap = {
+			alwaysEnabled: false,
+			alwaysDisabled: true,
+			activeWrap: false,
+		}
+	} else if (parameterString === 'unwrap') {
+		codeblockParameters.lineUnwrap = {
+			alwaysEnabled: true,
+			alwaysDisabled: false,
+			activeWrap: false,
 		}
 	} else if (parameterString.startsWith('unwrap:')) {
 		parameterString = parameterString.slice('unwrap:'.length)
 		if (parameterString.toLowerCase() === 'inactive') {
-			codeblockParameters.lineUnwrap.alwaysEnabled = true;
-			codeblockParameters.lineUnwrap.alwaysDisabled = false;
-			codeblockParameters.lineUnwrap.activeWrap = true;
+			codeblockParameters.lineUnwrap = {
+				alwaysEnabled: true,
+				alwaysDisabled: false,
+				activeWrap: true,
+			}
 		} else if (parameterString.toLowerCase() === 'true') {
-			codeblockParameters.lineUnwrap.alwaysEnabled = true;
-			codeblockParameters.lineUnwrap.alwaysDisabled = false;
-			codeblockParameters.lineUnwrap.activeWrap = false;
+			codeblockParameters.lineUnwrap = {
+				alwaysEnabled: true,
+				alwaysDisabled: false,
+				activeWrap: false,
+			}
 		} else if (parameterString.toLowerCase() === 'false') {
-			codeblockParameters.lineUnwrap.alwaysEnabled = false;
-			codeblockParameters.lineUnwrap.alwaysDisabled = true;
-			codeblockParameters.lineUnwrap.activeWrap = false;
+			codeblockParameters.lineUnwrap = {
+				alwaysEnabled: false,
+				alwaysDisabled: true,
+				activeWrap: false,
+			}
 		}
 	} else {
 		let highlightMatch = /^(\w+):(.+)$/.exec(parameterString);

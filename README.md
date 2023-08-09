@@ -172,14 +172,14 @@ Corresponding settings:
 
 Whether lines wrap or note can be set in the settings. There is an advanced option called "Wrap Lines on Click" where holding the mouse down on a codeblock's content will cause the content to be wrapped (if line unwrapping is already set in the settings).
 
-These settings can also be set on a per codeblock basis using the `unwrap` parameter which overrides the settings. Setting `unwrap:true` will unwrap lines in the codeblock, setting `unwrap:false` will wrap lines in the codeblock, and setting `unwrap:inactive` will unwrap lines in the codeblock but will wrap them when the mouse is held down on the codeblock.
+These settings can also be set on a per codeblock basis using the `unwrap` parameter which overrides the settings. Setting `unwrap:true` will unwrap lines in the codeblock, setting `unwrap:false` will wrap lines in the codeblock, and setting `unwrap:inactive` will unwrap lines in the codeblock but will wrap them when the mouse is held down on the codeblock. The parameter `wrap` is just an alias for `unwrap:false` and `unwrap` is just an alias for `unwrap:true`.
 
 Example:
 
-` ```python unwrap:true`
+` ```python unwrap:true` or ` ```python unwrap`
 ![Unwrap True](images/UnwrapTrue.gif)
 
-` ```python unwrap:false`
+` ```python unwrap:false` or ` ```python wrap`
 ![Unwrap False](images/UnwrapFalse.png)
 
 ` ```python unwrap:inactive`
