@@ -22,6 +22,10 @@ See this project's [releases](/../../../releases).
 
 - Round up heights to prevent rounding error scrollbars from appearing
 
+### Fixed
+
+- Escape HTML strings properly
+
 ## [1.0.3] - 2023-08-08
 
 ### Added
