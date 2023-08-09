@@ -20,7 +20,7 @@ See this project's [releases](/../../../releases).
 
 ### Added
 
-- Add `wrap` as alias to `unwrap:false`
+- Add `wrap` as alias to `unwrap:false` and `unwrap` as alias to `unwrap:true`
 
 ### Changed
 
