@@ -32,6 +32,7 @@
 	transition-timing-function: ease-in-out;
 	max-height: unset;
 	overflow-x: overlay;
+	white-space: var(--line-wrapping);
 }
 .code-styler pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
