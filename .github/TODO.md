@@ -40,6 +40,7 @@
     - `java`
 8. Changing line wrap options can be flaky
 9. Make reset buttons only appear when value is not default value (in settings)
+10. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
 
 See below:
 

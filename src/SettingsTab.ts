@@ -56,9 +56,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.excludedCodeblocks = value;
 					(async () => {await this.plugin.saveSettings()})();
 					clearTimeout(ignoreTimeout);
-					ignoreTimeout = setTimeout(()=>{
-						this.plugin.rerenderPreview();
-					},1000);
+					ignoreTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
 				}));
 				//TODO (@mayurankv) Re-render (LP)
 		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
@@ -72,9 +70,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.excludedLanguages = value;
 					(async () => {await this.plugin.saveSettings()})();
 					clearTimeout(excludeTimeout);
-					excludeTimeout = setTimeout(()=>{
-						this.plugin.rerenderPreview();
-					},1000);
+					excludeTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
 				}));
 				//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
@@ -372,9 +368,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.currentTheme.settings.header.collapsePlaceholder = value;
 					(async () => {await this.plugin.saveSettings()})();
 					clearTimeout(collapsePlaceholderTimeout);
-					collapsePlaceholderTimeout = setTimeout(()=>{
-						this.plugin.rerenderPreview();
-					},1000);
+					collapsePlaceholderTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
 				}));
 				//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)

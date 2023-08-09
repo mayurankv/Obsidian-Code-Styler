@@ -318,6 +318,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 export const PARAMETERS = ['title','fold','ln','unwrap','ignore'];
 export const PRIMARY_DELAY = 10;
 export const SECONDARY_DELAY = 200;
+export const TRANSITION_LENGTH = '240ms';
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names

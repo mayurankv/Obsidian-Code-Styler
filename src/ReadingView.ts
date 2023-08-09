@@ -4,7 +4,7 @@ import remarkParse from "remark-parse";
 import {visit} from "unist-util-visit";
 
 import CodeStylerPlugin from "./main";
-import { PRIMARY_DELAY, SECONDARY_DELAY } from "./Settings";
+import { PRIMARY_DELAY, SECONDARY_DELAY, TRANSITION_LENGTH } from "./Settings";
 import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource, parseInlineCode } from "./CodeblockParsing";
 import { createHeader, createInlineOpener, getLineClass } from "./CodeblockDecorating";
 
@@ -216,15 +216,15 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		headerContainer.addEventListener("click", ()=>{
 			codeblockPreElement.classList.toggle("code-styler-collapsed")
 			if (codeblockCodeElement.style.maxHeight)
-				codeblockCodeElement.style.maxHeight = '';
+				codeblockCodeElement.style.maxHeight = ''; //todo NOW
 			else
-				codeblockCodeElement.style.maxHeight = 'var(--true-height)';
+				codeblockCodeElement.style.maxHeight = 'var(--true-height)'; //todo NOW
 			const executeCodeOutput = (codeblockPreElement.querySelector('pre > code ~ code.language-output') as HTMLElement);
 			if (executeCodeOutput && executeCodeOutput.style.display !== 'none') {
 				if (executeCodeOutput.style.maxHeight)
-					executeCodeOutput.style.maxHeight = '';
+					executeCodeOutput.style.maxHeight = ''; //todo NOW
 				else
-					executeCodeOutput.style.maxHeight = 'var(--true-height)';
+					executeCodeOutput.style.maxHeight = 'var(--true-height)'; //todo NOW
 			}
 		});
 
@@ -319,9 +319,9 @@ export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 				if (!executeCodeOutput.style.maxHeight) {
 					setTimeout(()=>{
 						executeCodeOutput.style.setProperty('white-space','var(--line-active-wrapping)','important');
-						executeCodeOutput.style.setProperty('--true-height',`calc(${Math.ceil(executeCodeOutput.scrollHeight + 0.01)}px + 3.5 * var(--code-padding) + var(--header-separator-width)`);
-						executeCodeOutput.style.maxHeight = 'var(--true-height)';
-						executeCodeOutput.style.setProperty('white-space','var(--line-wrapping)','important');
+						executeCodeOutput.style.setProperty('--true-height',`calc(${Math.ceil(executeCodeOutput.scrollHeight + 0.01)}px + 3.5 * var(--code-padding) + var(--header-separator-width)`); //todo NOW
+						executeCodeOutput.style.maxHeight = 'var(--true-height)'; //todo NOW
+						executeCodeOutput.style.setProperty('white-space','var(--line-wrapping)','important'); //todo NOW
 					},PRIMARY_DELAY)
 				}
 			}
@@ -340,14 +340,15 @@ function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIM
 }
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
 	codeblockCodeElement.style.setProperty('white-space','var(--line-active-wrapping)','important');
-	codeblockCodeElement.style.setProperty('--true-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight + 0.01)}px + 2 * var(--code-padding)`);
-	codeblockCodeElement.style.transitionProperty = 'padding, border-top'
-	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
-	codeblockCodeElement.style.transitionProperty = 'max-height, padding, border-top'
+	//todo NOW: TRANSITION_LENGTH
+	codeblockCodeElement.style.setProperty('--true-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight + 0.01)}px + 2 * var(--code-padding)`); //todo NOW
+	codeblockCodeElement.style.transitionProperty = 'padding, border-top' //todo NOW
+	codeblockCodeElement.style.maxHeight = 'var(--true-height)'; //todo NOW
+	codeblockCodeElement.style.transitionProperty = 'max-height, padding, border-top' //todo NOW
 	codeblockCodeElement.style.setProperty('white-space','var(--line-wrapping)','important');
 	if (fold) {
 		codeblockPreElement.classList.add("code-styler-collapsed");
-		codeblockCodeElement.style.maxHeight = '';
+		codeblockCodeElement.style.maxHeight = ''; //todo NOW
 	}
 }
 function escapeHTML(plaintext: string) {
