@@ -13,7 +13,7 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['code-styler-ignore'] === true)
 		return;
 
-	await sleep(50);
+	await sleep(50); //TODO (@mayurankv) Why is this here? Needs to be documented (something to do with callouts and nesting)
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	const specific = !element.querySelector(".view-content > *");
@@ -261,6 +261,8 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 					stack.pop();
 			} else if (node.type === 'html' && node.value === '<br>')
 				node.value = '</span>'.repeat(stack.length)+'<br>'+stack.join('');
+			else
+				node.value = escapeHTML(node.value);
 			codeblockHTML += node.value;
 		}
 	});
@@ -339,10 +341,15 @@ function remeasureReadingView(element: HTMLElement, primary_delay: number = PRIM
 function setCollapseStyling(codeblockPreElement: HTMLElement, codeblockCodeElement: HTMLElement, fold: boolean): void {
 	codeblockCodeElement.style.setProperty('white-space','var(--line-active-wrapping)','important');
 	codeblockCodeElement.style.setProperty('--true-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight + 0.01)}px + 2 * var(--code-padding)`);
+	codeblockCodeElement.style.transitionProperty = 'padding, border-top'
 	codeblockCodeElement.style.maxHeight = 'var(--true-height)';
+	codeblockCodeElement.style.transitionProperty = 'max-height, padding, border-top'
 	codeblockCodeElement.style.setProperty('white-space','var(--line-wrapping)','important');
 	if (fold) {
 		codeblockPreElement.classList.add("code-styler-collapsed");
 		codeblockCodeElement.style.maxHeight = '';
 	}
+}
+function escapeHTML(plaintext: string) {
+	return plaintext.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

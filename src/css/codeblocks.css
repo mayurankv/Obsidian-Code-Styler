@@ -27,7 +27,9 @@
 	padding-right: 0px !important;
 	border-radius: 0px !important;
 	background: none !important;
-	transition: max-height ease-in-out var(--duration-button), padding ease-in-out var(--duration-button), border-top ease-in-out var(--duration-button);
+	transition-property: max-height, padding, border-top;
+	transition-duration: var(--duration-button);
+	transition-timing-function: ease-in-out;
 	max-height: 0;
 	overflow-x: overlay;
 	/* scrollbar-gutter: stable; */
@@ -221,17 +223,17 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 .code-styler-line-number-hide {
 	display: none;
 }
-pre.code-styler-pre > code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour);
 	transition: box-shadow ease-in-out var(--duration-button);
 }
-pre.code-styler-pre.code-styler-collapsed > code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler .code-styler-collapsed > code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
 	box-shadow: 0px 0px var(--code-styler-gutter-background-colour);
 }
-pre.code-styler-pre > code > div:last-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler code > div:last-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
 	box-shadow: 0px var(--code-padding) var(--code-styler-gutter-background-colour);
 }
-pre.code-styler-pre > code > div:only-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler code > div:only-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour),0px var(--code-padding) var(--code-styler-gutter-background-colour);
 }
 [class^='code-styler-line-number'] {
@@ -314,6 +316,11 @@ pre.code-styler-pre::-webkit-scrollbar,
 pre.code-styler-pre > code::-webkit-scrollbar {
 	width: var(--code-padding) !important;
 	height: var(--code-padding) !important;
+}
+
+pre.code-styler-pre.code-styler-collapsed::-webkit-scrollbar,
+pre.code-styler-pre.code-styler-collapsed code::-webkit-scrollbar {
+	display: none;
 }
 
 /** Buttons */
