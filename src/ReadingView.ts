@@ -13,30 +13,36 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['code-styler-ignore'] === true)
 		return;
 
-	await sleep(50); //TODO (@mayurankv) Why is this here? Needs to be documented (something to do with callouts and nesting)
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
-	const specific = !element.querySelector(".view-content > *");
+	const specific = !Boolean(element.querySelector(".view-content > *"));
 	const printing = Boolean(element.querySelector("div.print > *"));
 	if (printing && !plugin.settings.decoratePrint)
 		return;
 
 	if (!editingEmbeds && !specific)
 		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-reading-view pre:not(.frontmatter)'));
-	else if (!editingEmbeds && specific)
+	else if (!editingEmbeds && specific) {
 		codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
-	else if (editingEmbeds && !specific)
+		let admonitionCodeElement = codeblockPreElements?.[0]?.querySelector('pre:not([class]) > code[class*="language-ad-"]');
+		if (admonitionCodeElement) {
+			await sleep(50);
+			codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
+		}
+	} else if (editingEmbeds && !specific)
 		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-source-view .cm-embed-block pre:not(.frontmatter)'));
 	else
 		codeblockPreElements = [];
 	if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
 		return;
 
-	const codeblockSectionInfo: MarkdownSectionInformation | null= getSectionInfo(codeblockPreElements[0]);
+	const codeblockSectionInfo: MarkdownSectionInformation | null = getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
 		renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
 	else if (specific && !printing) {
-		if (!(!editingEmbeds && element.classList.contains("admonition-content"))) {
+		await sleep(50);
+		editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
+		if (editingEmbeds || !element.classList.contains("admonition-content")) {
 			let contentEl = element.matchParent('.view-content') as HTMLElement;
 			await readingViewCodeblockDecoratingPostProcessor(contentEl?contentEl:(element.matchParent('div.print') as HTMLElement),{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
 		}
