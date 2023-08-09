@@ -18,6 +18,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.4]
+
 ### Added
 
 - Add `wrap` as alias to `unwrap:false` and `unwrap` as alias to `unwrap:true`
@@ -25,11 +27,12 @@ See this project's [releases](/../../../releases).
 ### Changed
 
 - Round up heights to prevent rounding error scrollbars from appearing
-- Convert transitions so `max-height` is only applied temporarily
+- Convert transitions so `max-height` is only applied temporarily for animations
 
 ### Fixed
 
 - Escape HTML strings properly
+- Prevent jumping when typing and seamless editing side-by-side
 
 ## [1.0.3] - 2023-08-08
 
@@ -118,7 +121,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.3...HEAD
+[Unreleased]: /../../compare/1.0.4...HEAD
+[1.0.4]: /../../compare/1.0.3...1.0.4
 [1.0.3]: /../../compare/1.0.2...1.0.3
 [1.0.2]: /../../compare/1.0.1...1.0.2
 [1.0.1]: /../../compare/1.0.0...1.0.1
