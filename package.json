@@ -19,7 +19,7 @@
 		"esbuild": "0.17.3",
 		"eslint": "^8.46.0",
 		"obsidian": "latest",
-		"tslib": "2.6.0",
+		"tslib": "2.6.1",
 		"typescript": "5.1.6"
 	},
 	"dependencies": {
