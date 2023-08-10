@@ -18,6 +18,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Linting
+
 ### Changed
 
 - Some refactoring of code
