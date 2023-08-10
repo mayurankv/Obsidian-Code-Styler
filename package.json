@@ -1,6 +1,6 @@
 {
 	"name": "code-styler",
-	"version": "1.0.0",
+	"version": "1.0.5",
 	"description": "This is a plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
