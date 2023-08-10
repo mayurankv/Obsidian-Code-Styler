@@ -348,6 +348,6 @@ export async function getFileContentLines(sourcePath: string, plugin: CodeStyler
 	return fileContent.split(/\n/g);
 }
 
-export function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
+export function arraysEqual(array1: Array<string>,array2: Array<string>): boolean {
 	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }

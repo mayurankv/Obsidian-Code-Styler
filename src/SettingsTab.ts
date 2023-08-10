@@ -4,7 +4,6 @@ import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
 import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
-import { todo } from "node:test";
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
