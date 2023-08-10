@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { Plugin, TFile } from "obsidian";
 
 import CodeStylerPlugin from "./main";
 import { CodeStylerTheme } from "./Settings";
@@ -38,9 +38,22 @@ export interface Highlights {
 	regularExpressions: Array<RegExp>;
 }
 
+interface ExternalPlugin extends Plugin {
+	code?: (source: string, sourcePath: string)=>{
+		start: number;
+		code: string;
+		language: string;
+		highlight: string;
+		lines: Array<string>;
+		filePath: string;
+		linenumber: number;
+	};
+	analyzeHighLightLines?: (lines: string[], source: string | string[])=>Map<number,boolean>;
+}
+
 export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
 	//@ts-expect-error Undocumented Obsidian API
-	const plugins: Record<string,any> = plugin.app.plugins.plugins;
+	const plugins: Record<string,ExternalPlugin> = plugin.app.plugins.plugins;
 	const admonitions: boolean = "obsidian-admonition" in plugins;
 	const codeblocks: Array<Array<string>> = [];
 	const codeblocksParameters: Array<CodeblockParameters> = [];
@@ -137,18 +150,18 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }
-export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,any>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === "preview") {
-		if ("obsidian-code-preview" in plugins) {
+		if (plugins?.["obsidian-code-preview"]?.code && plugins?.["obsidian-code-preview"]?.analyzeHighLightLines) {
 			const codePreviewParams = await plugins["obsidian-code-preview"].code(codeblockLines.slice(1,-1).join("\n"),sourcePath);
 			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
 				if (typeof codePreviewParams.start === "number")
 					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
-				codeblockParameters.lineNumbers.alwaysEnabled = codePreviewParams.lineNumber;
+				codeblockParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParams.linenumber);
 			}
-			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,number])=>(num))))]; // eslint-disable-line @typescript-eslint/no-unused-vars
+			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,boolean])=>(num))))]; // eslint-disable-line @typescript-eslint/no-unused-vars
 			if (codeblockParameters.title === "")
-				codeblockParameters.title = codePreviewParams.filePath.split("\\").pop().split("/").pop();
+				codeblockParameters.title = codePreviewParams.filePath.split("\\").pop()?.split("/").pop() ?? "";
 			codeblockParameters.language = codePreviewParams.language;
 		}
 	} else if (codeblockParameters.language === "include") {
@@ -257,9 +270,10 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 			const highlights = parseHighlightedLines(highlightMatch[2]);
 			if (highlightMatch[1] === "hl")
 				codeblockParameters.highlights.default = highlights;
-			else
-			if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
-				codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
+			else {
+				if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
+					codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
+			}
 		}
 	}
 }

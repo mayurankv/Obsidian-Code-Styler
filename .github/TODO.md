@@ -3,7 +3,6 @@
 1. Check through:
     - `package.json`
     - `package-lock.json`
-    - `eslintrc`
 2. Update github:
     - Better issue templates using [yaml](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository)
       - [Example 1](https://github.com/javalent/admonitions/tree/main/.github/ISSUE_TEMPLATE)
