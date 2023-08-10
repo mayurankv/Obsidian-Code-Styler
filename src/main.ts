@@ -42,7 +42,7 @@ export default class CodeStylerPlugin extends Plugin {
 		let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		this.registerEvent(this.app.workspace.on('css-change',()=>{
 			updateStyling(this.settings,this.app); // Update styling on css changes
-			let currentFontSize = document.body.getCssPropertyValue('--font-text-size');
+			const currentFontSize = document.body.getCssPropertyValue('--font-text-size');
 			if (this.sizes.font !== currentFontSize) {
 				this.sizes.font = currentFontSize;
 				clearTimeout(zoomTimeout);
@@ -52,7 +52,7 @@ export default class CodeStylerPlugin extends Plugin {
 			}
 		},this));
 		this.registerEvent(this.app.workspace.on('resize',()=>{
-			let currentZoomSize = document.body.getCssPropertyValue('--zoom-factor');
+			const currentZoomSize = document.body.getCssPropertyValue('--zoom-factor');
 			if (this.sizes.zoom !== currentZoomSize) {
 				this.sizes.zoom = currentZoomSize;
 				clearTimeout(zoomTimeout);

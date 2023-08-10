@@ -34,6 +34,17 @@
 	overflow-x: overlay;
 	white-space: var(--line-wrapping);
 }
+.code-styler pre.code-styler-pre.wrapped > code {
+	--line-wrapping: pre-wrap;
+}
+.code-styler pre.code-styler-pre.unwrapped > code {
+	--line-wrapping: pre;
+	--line-active-wrapping: pre;
+}
+.code-styler pre.code-styler-pre.unwrapped-inactive > code {
+	--line-wrapping: pre;
+	--line-active-wrapping: pre-wrap;
+}
 .code-styler pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
 	--line-wrapping: var(--line-active-wrapping) !important;
 }

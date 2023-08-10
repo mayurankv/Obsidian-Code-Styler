@@ -33,7 +33,7 @@ export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, l
 		openerContainer.appendChild(createSpan({cls: `code-styler-inline-title`, text: inlineCodeParameters.title}));
 	return openerContainer;
 }
-function createImageWrapper(iconURL: string, imageWrapper: HTMLElement, imgClass: string = "code-styler-icon"): HTMLElement {
+function createImageWrapper(iconURL: string, imageWrapper: HTMLElement, imgClass = "code-styler-icon"): HTMLElement {
 	const img = document.createElement("img");
 	img.classList.add(imgClass);
 	img.src = iconURL;
@@ -66,4 +66,12 @@ export function getLineClass(codeblockParameters: CodeblockParameters, lineNumbe
 	if (classList.length === 0)
 		classList = ['code-styler-line']
 	return classList;
+}
+export function getLineNumberDisplay(codeblockParameters: CodeblockParameters): string {
+	let lineNumberDisplay = '';
+	if (!codeblockParameters.lineNumbers.alwaysEnabled && codeblockParameters.lineNumbers.alwaysDisabled)
+		lineNumberDisplay = '-hide';
+	else if (codeblockParameters.lineNumbers.alwaysEnabled && !codeblockParameters.lineNumbers.alwaysDisabled)
+		lineNumberDisplay = '-specific';
+	return lineNumberDisplay;
 }

@@ -4,7 +4,6 @@ import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
 import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from './Settings';
-import { todo } from "node:test";
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -261,7 +260,7 @@ export class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Highlight Line Numbers')
 			.setDesc('If enabled, highlights will also highlight the line numbers.')
-			.addToggle(toggle => {let highlightLineNumbersToggle = toggle
+			.addToggle(toggle => {const highlightLineNumbersToggle = toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.highlight)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
@@ -274,7 +273,7 @@ export class SettingsTab extends PluginSettingTab {
 			.setName('Indicate Current Line Number')
 			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate colour.')
 			.setClass('code-styler-spaced')
-			.addToggle(toggle => {let indicateCurrentLineNumberToggle = toggle
+			.addToggle(toggle => {const indicateCurrentLineNumberToggle = toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.activeLine)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
@@ -908,13 +907,7 @@ export class SettingsTab extends PluginSettingTab {
 					} else {
 						try {
 							this.plugin.settings.redirectLanguages = JSON.parse(value);
-							Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {colour?: Colour, icon?: string}])=>{
-								if ('icon' in languageSettings) {
-									if (LANGUAGE_NAMES[languageName] in this.plugin.languageIcons)
-										URL.revokeObjectURL(this.plugin.languageIcons[LANGUAGE_NAMES[languageName]]);
-									this.plugin.languageIcons[LANGUAGE_NAMES[languageName]] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${languageSettings.icon}</svg>`], { type: "image/svg+xml" }));
-								}
-							});
+							this.redirectLanguages();
 							(async () => {await this.plugin.saveSettings()})();
 						} catch {
 							new Notice('Invalid JSON'); //NOSONAR
@@ -933,9 +926,20 @@ export class SettingsTab extends PluginSettingTab {
 		donationDiv.appendChild(donationButton);
 	}
 
+	// Setting Parsing
+	redirectLanguages() {
+		Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {colour?: Colour, icon?: string}])=>{
+			if ('icon' in languageSettings) {
+				if (LANGUAGE_NAMES[languageName] in this.plugin.languageIcons)
+					URL.revokeObjectURL(this.plugin.languageIcons[LANGUAGE_NAMES[languageName]]);
+				this.plugin.languageIcons[LANGUAGE_NAMES[languageName]] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${languageSettings.icon}</svg>`], { type: "image/svg+xml" }));
+			}
+		});
+	}
+
 	// Setting Creation
 	createPickr(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, id: string, getRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours)=>Colour, saveRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours, saveColour: Colour)=>void, disabled?: ()=>boolean) {
-		let pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColour,saveRelevantThemeColour);
+		const pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColour,saveRelevantThemeColour);
 		pickr
 			.on('show', (colour: Pickr.HSVaColor, instance: Pickr) => {
 				if (typeof disabled !== 'undefined' && disabled())
@@ -958,7 +962,7 @@ export class SettingsTab extends PluginSettingTab {
 		this.pickrs[id]=pickr;
 	}
 	
-	// Setting Updates
+	// Setting Tab Updates
 	updateDropdown(dropdown: DropdownComponent, settings: CodeStylerSettings) {
 		dropdown.selectEl.empty();
 		Object.keys(settings.themes).forEach((theme_name: string) => {
@@ -1068,7 +1072,7 @@ function calc(calcString: string): string {
 	return calcString;
 }
 function getCssVariable(cssVariable: CSS): HEX {
-	let variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable).trim();
+	const variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable).trim();
 	if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
 		return `#${variableValue.trim().substring(1)}`;
 	else if (variableValue.startsWith('rgb'))
@@ -1080,7 +1084,7 @@ function getCssVariable(cssVariable: CSS): HEX {
 	return `#${ColorTranslator.toHEXA(variableValue).substring(1)}`;
 }
 export function getColour(themeColour: Colour): Colour {
-	return isCss(themeColour)?getCssVariable(themeColour):themeColour;;
+	return isCss(themeColour)?getCssVariable(themeColour):themeColour;
 }
 
 function getCurrentMode() {

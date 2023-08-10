@@ -27,8 +27,7 @@
 3. Add syntax highlighting for inline code to source view editing mode?
 4. Add command to select all text inside current codeblock
 5. Debug really long codeblocks not working
-6. Debug live preview callouts not working
-7. Add or update icons for:
+6. Add or update icons for:
     - `regex`
     - `maxima`
     - `zsh`
@@ -38,9 +37,11 @@
     - `ts`
     - `julia`
     - `java`
-8. Changing line wrap options can be flaky
-9. Make reset buttons only appear when value is not default value (in settings)
-10. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
+7. Changing line wrap options can be flaky
+8. Make reset buttons only appear when value is not default value (in settings)
+9. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
+10. Reduce cognitive complexity (and other issues)`
+11. Clean up reading view `remakeCodeblock`
 
 See below:
 

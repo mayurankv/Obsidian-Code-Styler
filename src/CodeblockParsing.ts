@@ -42,19 +42,22 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 	//@ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,any> = plugin.app.plugins.plugins;
 	const admonitions: boolean = 'obsidian-admonition' in plugins;
-	let codeblocks: Array<Array<string>> = [];
-	let codeblocksParameters: Array<CodeblockParameters> = [];
+	const codeblocks: Array<Array<string>> = [];
+	const codeblocksParameters: Array<CodeblockParameters> = [];
 	function parseCodeblockSection(codeSection: Array<string>): void {
         if (codeSection.length === 0)
             return;
-        let openingCodeblockLine = getOpeningLine(codeSection);
+		
+        const openingCodeblockLine = getOpeningLine(codeSection);
 		if (!openingCodeblockLine)
             return;
-        let openDelimiter = /^\s*(?:>\s*)*((?:```+|~~~+)).*$/.exec(openingCodeblockLine)?.[1];
+		
+		const openDelimiter = /^\s*(?:>\s*)*((?:```+|~~~+)).*$/.exec(openingCodeblockLine)?.[1];
 		if (!openDelimiter)
             return;
-		let openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
-		let closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter as string)!==-1);
+
+		const openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
+		const closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter)!==-1);
 		if (!admonitions || !/^\s*(?:>\s*)*(?:```+|~~~+) *ad-.*$/.test(openingCodeblockLine))
             codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex))
         else
@@ -63,8 +66,8 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
 	}
 	parseCodeblockSection(codeSection);
-	for (let codeblockLines of codeblocks) {
-		let parameterLine = getParameterLine(codeblockLines);
+	for (const codeblockLines of codeblocks) {
+		const parameterLine = getParameterLine(codeblockLines);
 		if (!parameterLine)
 			continue;
 		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
@@ -79,7 +82,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 }
 export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
 	
-	let match = /^({} ?)?{([^}]*)} ?(.*)$/.exec(codeText);
+	const match = /^({} ?)?{([^}]*)} ?(.*)$/.exec(codeText);
 	
 	if (!match?.[1] && !(match?.[2] && match?.[3]))
 		return {parameters: null, text: ''};
@@ -90,7 +93,7 @@ export function parseInlineCode(codeText: string): {parameters: InlineCodeParame
 }
 
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
-	let codeblockParameters: CodeblockParameters = {
+	const codeblockParameters: CodeblockParameters = {
 		language: '',
 		title: '',
 		fold: {
@@ -124,7 +127,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	} else {
 		return codeblockParameters;
 	}
-	let languageBreak = parameterLine.indexOf(' ');
+	const languageBreak = parameterLine.indexOf(' ');
 	codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
 	if (languageBreak === -1)
 		return codeblockParameters;
@@ -137,7 +140,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,any>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === 'preview') {
 		if ('obsidian-code-preview' in plugins) {
-			let codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
+			const codePreviewParams = await plugins['obsidian-code-preview'].code(codeblockLines.slice(1,-1).join('\n'),sourcePath);
 			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
 				if (typeof codePreviewParams.start === 'number')
 					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
@@ -158,12 +161,12 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 	return codeblockParameters
 }
 function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters {
-	let inlineCodeParameters: InlineCodeParameters = {
+	const inlineCodeParameters: InlineCodeParameters = {
 		language: '',
 		title: '',
 		icon: false,
 	}
-	let languageBreak = parameterLine.indexOf(' ');
+	const languageBreak = parameterLine.indexOf(' ');
 	inlineCodeParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
 	if (languageBreak === -1)
 		return inlineCodeParameters;
@@ -176,11 +179,11 @@ function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters 
 
 function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
 	if (parameterString.startsWith('title:')) {
-		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
+		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
 			codeblockParameters.title = titleMatch[2].trim();
 	} else if (parameterString.startsWith('fold:')) {
-		let foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('fold:'.length));
+		const foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('fold:'.length));
 		if (foldPlaceholderMatch) {
 			codeblockParameters.fold = {
 				enabled: true,
@@ -249,9 +252,9 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 			}
 		}
 	} else {
-		let highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
+		const highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
 		if (highlightMatch) {
-			let highlights = parseHighlightedLines(highlightMatch[2]);
+			const highlights = parseHighlightedLines(highlightMatch[2]);
 			if (highlightMatch[1] === 'hl')
 				codeblockParameters.highlights.default = highlights;
 			else
@@ -262,9 +265,9 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 }
 function parseHighlightedLines(highlightedLinesString: string): Highlights {
 	const highlightRules = highlightedLinesString.split(',');
-	let lineNumbers: Set<number> = new Set();
-	let plainText: Set<string> = new Set();
-	let regularExpressions: Set<RegExp> = new Set();
+	const lineNumbers: Set<number> = new Set();
+	const plainText: Set<string> = new Set();
+	const regularExpressions: Set<RegExp> = new Set();
 	highlightRules.forEach(highlightRule => {
 		if (/\d+-\d+/.test(highlightRule)) { // Number Range
 			const [start,end] = highlightRule.split('-').map(num => parseInt(num));
@@ -273,7 +276,9 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 		} else if (/^\/(.*)\/$/.test(highlightRule)) { // Regex
 			try {
 				regularExpressions.add(new RegExp(highlightRule.replace(/^\/(.*)\/$/,"$1")));
-			} catch { }
+			} catch {
+				//pass
+			}
 		} else if (/".*"/.test(highlightRule)) { // Plain Text
 			plainText.add(highlightRule.substring(1,highlightRule.length-1));
 		} else if (/'.*'/.test(highlightRule)) { // Plain Text
@@ -301,7 +306,7 @@ function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<Reg
 }
 function parseInlineCodeParameterString(parameterString: string, inlineCodeParameters: InlineCodeParameters): void {
 	if (parameterString.startsWith('title:')) {
-		let titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
+		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice('title:'.length));
 		if (titleMatch)
 			inlineCodeParameters.title = titleMatch[2].trim();
 	} else if (parameterString === 'icon' || (parameterString.startsWith('icon:') && parameterString.toLowerCase() === 'icon:true')) {
@@ -311,7 +316,7 @@ function parseInlineCodeParameterString(parameterString: string, inlineCodeParam
 
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {
 	let openingCodeblockLine = getOpeningLine(codeblockLines);
-	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*(?:`|~)/.test(openingCodeblockLine)))
+	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*(?:[`~])/.test(openingCodeblockLine)))
 		openingCodeblockLine = cleanParameterLine(openingCodeblockLine);
 	return openingCodeblockLine
 }
@@ -319,7 +324,7 @@ function getOpeningLine(codeblockLines: Array<string>): string | undefined {
 	return codeblockLines.find((line: string)=>Boolean(testOpeningLine(line)));
 }
 export function testOpeningLine(codeblockLine: string): string {
-	let lineMatch = /^(\s*(?:>\s*)*)(```+|~~~+)/.exec(codeblockLine);
+	const lineMatch = /^(\s*(?:>\s*)*)(```+|~~~+)/.exec(codeblockLine);
 	if (!lineMatch)
 		return '';
 	if (codeblockLine.indexOf(lineMatch[2],lineMatch[1].length+lineMatch[2].length+1)===-1)
@@ -348,6 +353,6 @@ export async function getFileContentLines(sourcePath: string, plugin: CodeStyler
 	return fileContent.split(/\n/g);
 }
 
-export function arraysEqual(array1: Array<any>,array2: Array<any>): boolean {
+export function arraysEqual(array1: Array<unknown>,array2: Array<unknown>): boolean {
 	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }

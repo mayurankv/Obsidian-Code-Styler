@@ -35,7 +35,7 @@ const THEME_STYLES: Record<string,ThemeStyle> = {
 }
 
 export function updateStyling(settings: CodeStylerSettings, app: App): void {
-	let currentTheme = getCurrentTheme(app);
+	const currentTheme = getCurrentTheme(app);
 	let styleTag = document.getElementById(STYLE_ID);
 	if (!styleTag) {
 		styleTag = document.createElement('style');
@@ -157,20 +157,9 @@ function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectL
 }
 
 function addThemeSettingsClasses (themeSettings: CodeStylerThemeSettings): void {
-	if (themeSettings.codeblock.lineNumbers)
-		document.body.classList.add("code-styler-show-line-numbers");
-	else
-		document.body.classList.remove("code-styler-show-line-numbers");
-
-	if (themeSettings.gutter.highlight)
-		document.body.classList.add('code-styler-gutter-highlight');
-	else
-		document.body.classList.remove('code-styler-gutter-highlight');
-
-	if (themeSettings.gutter.activeLine)
-		document.body.classList.add('code-styler-gutter-active-line');
-	else
-		document.body.classList.remove('code-styler-gutter-active-line');
+	themeSettings.codeblock.lineNumbers ? document.body.classList.add("code-styler-show-line-numbers") : document.body.classList.remove("code-styler-show-line-numbers");
+	themeSettings.gutter.highlight ? document.body.classList.add('code-styler-gutter-highlight') : document.body.classList.remove('code-styler-gutter-highlight');
+	themeSettings.gutter.activeLine ? document.body.classList.add('code-styler-gutter-active-line') : document.body.classList.remove('code-styler-gutter-active-line');
 	
 	document.body.classList.remove("code-styler-active-line-highlight","code-styler-active-line-highlight-codeblock","code-styler-active-line-highlight-editor")
 	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colours

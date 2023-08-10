@@ -34,6 +34,8 @@ assignees: 'mayurankv'
 - Obsidian Version:  <!-- Obsidian Version -->
 - Platform:  <!-- Desktop or Mobile -->
 - OS:  <!-- OS -->
+- Theme:  <!-- Obsidian Theme -->
+- CSS Snippets:  <!-- Do you have any CSS Snippets enabled? -->
 <!-- Other details that you think may affect this issue -->
 
 ### Screenshots
