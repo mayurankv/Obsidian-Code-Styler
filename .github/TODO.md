@@ -41,6 +41,7 @@
 9. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
 10. Reduce cognitive complexity (and other issues)`
 11. Fix links in pull requests doc
+12. Set up automatic updating of version for `package.json` version, `npm run version`, and `CHANGELOG` version updates (links and titles and changing unreleased to new version)
 
 See below:
 

@@ -18,6 +18,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.5]
+
 ### Added
 
 - Linting
@@ -25,6 +27,10 @@ See this project's [releases](/../../../releases).
 ### Changed
 
 - Some refactoring of code
+
+### Fixed
+
+- Re-add wrap implementations
 
 ## [1.0.4]
 
@@ -129,7 +135,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.4...HEAD
+[Unreleased]: /../../compare/1.0.5...HEAD
+[1.0.5]: /../../compare/1.0.4...1.0.5
 [1.0.4]: /../../compare/1.0.3...1.0.4
 [1.0.3]: /../../compare/1.0.2...1.0.3
 [1.0.2]: /../../compare/1.0.1...1.0.2
