@@ -92,9 +92,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				const codeblocks = findUnduplicatedCodeblocks(view);
 				for (const codeblock of codeblocks) {
 					let codeblockParameters: CodeblockParameters;
-					let excludedCodeblock: boolean = false;
-					let lineNumber: number = 0;
-					let maxLineNum: number = 0;
+					let excludedCodeblock = false;
+					let lineNumber = 0;
+					let maxLineNum = 0;
 					let lineNumberMargin: number | undefined = 0;
 					syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
 						enter: (syntaxNode)=>{
@@ -107,7 +107,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								excludedCodeblock = isExcluded(codeblockParameters.language,[this.settings.excludedCodeblocks,this.settings.excludedLanguages].join(',')) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
-								let startDelimiter = testOpeningLine(lineText);
+								const startDelimiter = testOpeningLine(lineText);
 								while (startDelimiter !== testOpeningLine(view.state.doc.line(lineNumberCount).text)) {
 									lineNumberCount += 1;
 								}
@@ -149,12 +149,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
-			let startLine: boolean = true;
-			let startDelimiter: string = '```';
+			let startLine = true;
+			let startDelimiter = '```';
 			for (let i = 1; i < transaction.state.doc.lines; i++) {
 				const line = transaction.state.doc.line(i);
 				const lineText = line.text.toString();
-				let currentDelimiter = testOpeningLine(lineText);
+				const currentDelimiter = testOpeningLine(lineText);
 				if (currentDelimiter) {
 					if (startLine) {
 						startLine = false;
@@ -185,12 +185,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			let codeblockParameters: CodeblockParameters;
 			let collapseStart: Line | null = null;
 			let collapseEnd: Line | null = null;
-			let startLine: boolean = true;
-			let startDelimiter: string = '```';
+			let startLine = true;
+			let startDelimiter = '```';
 			for (let i = 1; i < state.doc.lines; i++) {
 				const line = state.doc.line(i);
 				const lineText = line.text.toString();
-				let currentDelimiter = testOpeningLine(lineText);
+				const currentDelimiter = testOpeningLine(lineText);
 				if (currentDelimiter) {
 					if (startLine) {
 						startLine = false;
@@ -310,13 +310,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
                             const properties = new Set(syntaxNode.node.type.prop<string>(tokenClassNodeProp)?.split(" "));
 							if (!(properties.has("inline-code") && !properties.has("formatting")))
 								return;
-							let previousSibling = syntaxNode.node.prevSibling;
+							const previousSibling = syntaxNode.node.prevSibling;
 							if (!previousSibling)
 								return;
-							let delimiterSize = previousSibling.to-previousSibling.from;
-							let inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
-							let {parameters,text} = parseInlineCode(inlineCodeText);
-							let endOfParameters = inlineCodeText.lastIndexOf(text);
+							const delimiterSize = previousSibling.to-previousSibling.from;
+							const inlineCodeText = view.state.doc.sliceString(syntaxNode.from, syntaxNode.to);
+							const {parameters,text} = parseInlineCode(inlineCodeText);
+							const endOfParameters = inlineCodeText.lastIndexOf(text);
 							if (!parameters) {
 								if (text) {
 									if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize))
@@ -350,7 +350,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							}
                         },
                     });
-                };
+                }
 				// return toHighlight; //NOTE: For future CM6 Compatibility
 			}
 		},
@@ -360,9 +360,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	)
 	function cursorIntoCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
-			let extraTransactions: Array<TransactionSpec> = [];
-			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false)?.map(transaction.changes) ?? Decoration.none;
-			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false)?.map(transaction.changes) ?? Decoration.none;
+			const extraTransactions: Array<TransactionSpec> = [];
+			const collapsedRangeSet = transaction.startState.field(codeblockCollapse,false)?.map(transaction.changes) ?? Decoration.none;
+			const temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false)?.map(transaction.changes) ?? Decoration.none;
 			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
 				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
 					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
@@ -382,9 +382,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	//todo Finish this filter
 	function manageCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
-			let extraTransactions: Array<TransactionSpec> = [];
-			let collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
-			let temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
+			const extraTransactions: Array<TransactionSpec> = [];
+			const collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
+			const temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
 			transaction.changes.iterChanges((fromA,toA,fromB,toB,inserted)=>{
 				if (fromB === toB && inserted.toString() === '') {
 					console.log(fromA,toA,fromB,toB,inserted)
@@ -517,12 +517,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 
 		let collapseStart: Line | null = null;
 		let collapseEnd: Line | null = null;
-		let startLine: boolean = true;
-		let startDelimiter: string = '```';
+		let startLine = true;
+		let startDelimiter = '```';
 		for (let i = 1; i < view.state.doc.lines; i++) {
 			const line = view.state.doc.line(i);
 			const lineText = line.text.toString();
-			let currentDelimiter = testOpeningLine(lineText);
+			const currentDelimiter = testOpeningLine(lineText);
 			if (currentDelimiter) {
 				if (startLine) {
 					startLine = false;
@@ -560,14 +560,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {
-	let charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
-		let nextElement = beginningElement.previousElementSibling as HTMLElement;
+	const charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
+		const nextElement = beginningElement.previousElementSibling as HTMLElement;
 		if (!nextElement)
 			return result;
-		let lineNumberElement = nextElement.querySelector("[class^='code-styler-line-number']") as HTMLElement;
+		const lineNumberElement = nextElement.querySelector("[class^='code-styler-line-number']") as HTMLElement;
 		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
 			return result;
-		let computedStyles = window.getComputedStyle(lineNumberElement, null);
+		const computedStyles = window.getComputedStyle(lineNumberElement, null);
 		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
 		return result;
 	},[])
@@ -602,7 +602,7 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 
 function languageHighlight({start,text,language}: {start: number, text: string, language: string},loadedLanguages: Record<string,LanguageSupport>): Array<Range<Decoration>> {
 	//NOTE: Uses codemirror 6 implementation which Obsidian does not currently use
-	let markDecorations: Array<Range<Decoration>> = [];
+	const markDecorations: Array<Range<Decoration>> = [];
 	const tree = loadedLanguages[language].language.parser.parse(text);
 	highlightTree(tree,classHighlighter,(from,to,token) => { //todo (@mayurankv) Change this highlighter
 		if (token)
@@ -612,14 +612,14 @@ function languageHighlight({start,text,language}: {start: number, text: string, 
 }
 function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
 	//NOTE: Uses CodeMirror 5 implementation which Obsidian currently uses
-	let markDecorations: Array<Range<Decoration>> = [];
+	const markDecorations: Array<Range<Decoration>> = [];
 	//@ts-expect-error Undocumented Obsidian API
 	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime); // Alternatives: `text/x-${parameters.language}`, window.CodeMirror.findModeByName('js').mime
-	let state = window.CodeMirror.startState(mode);
+	const state = window.CodeMirror.startState(mode);
 	if (mode?.token) {
-		let stream = new window.CodeMirror.StringStream(text);
+		const stream = new window.CodeMirror.StringStream(text);
 		while (!stream.eol()) {
-			let style = mode.token(stream,state);
+			const style = mode.token(stream,state);
 			if (style)
 				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})})
 			stream.start = stream.pos;

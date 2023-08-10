@@ -35,7 +35,7 @@ const THEME_STYLES: Record<string,ThemeStyle> = {
 }
 
 export function updateStyling(settings: CodeStylerSettings, app: App): void {
-	let currentTheme = getCurrentTheme(app);
+	const currentTheme = getCurrentTheme(app);
 	let styleTag = document.getElementById(STYLE_ID);
 	if (!styleTag) {
 		styleTag = document.createElement('style');

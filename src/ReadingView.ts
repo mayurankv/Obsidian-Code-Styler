@@ -8,14 +8,14 @@ import { TRANSITION_LENGTH } from "./Settings";
 import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource, parseInlineCode } from "./CodeblockParsing";
 import { createHeader, createInlineOpener, getLineClass } from "./CodeblockDecorating";
 
-export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean = false) {
+export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
 	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['code-styler-ignore'] === true)
 		return;
 
 	let codeblockPreElements: Array<HTMLElement>;
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
-	const specific = !Boolean(element.querySelector(".view-content > *"));
+	const specific = !element.querySelector(".view-content > *");
 	const printing = Boolean(element.querySelector("div.print > *"));
 	if (printing && !plugin.settings.decoratePrint)
 		return;
@@ -24,7 +24,7 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-reading-view pre:not(.frontmatter)'));
 	else if (!editingEmbeds && specific) {
 		codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
-		let admonitionCodeElement = codeblockPreElements?.[0]?.querySelector('pre:not([class]) > code[class*="language-ad-"]');
+		const admonitionCodeElement = codeblockPreElements?.[0]?.querySelector('pre:not([class]) > code[class*="language-ad-"]');
 		if (admonitionCodeElement) {
 			await sleep(50);
 			codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
@@ -43,7 +43,7 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 		await sleep(50);
 		editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 		if (editingEmbeds || !element.classList.contains("admonition-content")) {
-			let contentEl = element.matchParent('.view-content') as HTMLElement;
+			const contentEl = element.matchParent('.view-content') as HTMLElement;
 			await readingViewCodeblockDecoratingPostProcessor(contentEl?contentEl:(element.matchParent('div.print') as HTMLElement),{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds); // Re-render whole document
 		}
 	}
@@ -54,9 +54,9 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split('\n')[lineNumber]),sourcePath,plugin)).codeblocksParameters;
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
-	for (let [key,codeblockPreElement] of codeblockPreElements.entries()) {
-		let codeblockParameters = codeblocksParameters[key];
-		let codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
+	for (const [key,codeblockPreElement] of codeblockPreElements.entries()) {
+		const codeblockParameters = codeblocksParameters[key];
+		const codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
 		if (!codeblockCodeElement)
 			return;
 		if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
@@ -88,9 +88,9 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
 	try {
-		for (let [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
-			let codeblockParameters = codeblocksParameters[key];
-			let codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
+		for (const [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
+			const codeblockParameters = codeblocksParameters[key];
+			const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
 			if (!codeblockCodeElement)
 				return;
 			if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
@@ -111,13 +111,13 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
 	if (!sourcePath || !element)
 		return;
-	for (let inlineCodeElement of Array.from(element.querySelectorAll(':not(pre) > code'))) {
+	for (const inlineCodeElement of Array.from(element.querySelectorAll(':not(pre) > code'))) {
 		if (inlineCodeElement.classList.contains('code-styler-highlighted') || inlineCodeElement.classList.contains('code-styler-highlight-ignore'))
 			return;
-		let tempRenderContainer = createDiv();
+		const tempRenderContainer = createDiv();
 		let renderedCodeElement: HTMLElement | null;
-		let inlineCodeText = (inlineCodeElement as HTMLElement).innerText;
-		let {parameters,text} = parseInlineCode(inlineCodeText);
+		const inlineCodeText = (inlineCodeElement as HTMLElement).innerText;
+		const {parameters,text} = parseInlineCode(inlineCodeText);
 		if (!parameters) {
 			if (!text)
 				return;
@@ -234,9 +234,9 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		return;
 
 	// Add line numbers
-	let tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,'<br>'));
-	let stack: Array<string> = [];
-	let codeblockHTML: string = '';
+	const tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,'<br>'));
+	const stack: Array<string> = [];
+	let codeblockHTML = '';
 	codeblockCodeElement.innerHTML = "";
 	visit(tree,(node)=>{
 		if (node.type === 'html' || node.type === 'text') {

@@ -261,7 +261,7 @@ export class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Highlight Line Numbers')
 			.setDesc('If enabled, highlights will also highlight the line numbers.')
-			.addToggle(toggle => {let highlightLineNumbersToggle = toggle
+			.addToggle(toggle => {const highlightLineNumbersToggle = toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.highlight)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
@@ -274,7 +274,7 @@ export class SettingsTab extends PluginSettingTab {
 			.setName('Indicate Current Line Number')
 			.setDesc('If enabled, the current line number in codeblocks will be indicated with a separate colour.')
 			.setClass('code-styler-spaced')
-			.addToggle(toggle => {let indicateCurrentLineNumberToggle = toggle
+			.addToggle(toggle => {const indicateCurrentLineNumberToggle = toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.activeLine)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
@@ -935,7 +935,7 @@ export class SettingsTab extends PluginSettingTab {
 
 	// Setting Creation
 	createPickr(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, id: string, getRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours)=>Colour, saveRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours, saveColour: Colour)=>void, disabled?: ()=>boolean) {
-		let pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColour,saveRelevantThemeColour);
+		const pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColour,saveRelevantThemeColour);
 		pickr
 			.on('show', (colour: Pickr.HSVaColor, instance: Pickr) => {
 				if (typeof disabled !== 'undefined' && disabled())
@@ -1068,7 +1068,7 @@ function calc(calcString: string): string {
 	return calcString;
 }
 function getCssVariable(cssVariable: CSS): HEX {
-	let variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable).trim();
+	const variableValue = window.getComputedStyle(document.body).getPropertyValue(cssVariable).trim();
 	if (typeof variableValue === "string" && variableValue.trim().startsWith('#'))
 		return `#${variableValue.trim().substring(1)}`;
 	else if (variableValue.startsWith('rgb'))
@@ -1080,7 +1080,7 @@ function getCssVariable(cssVariable: CSS): HEX {
 	return `#${ColorTranslator.toHEXA(variableValue).substring(1)}`;
 }
 export function getColour(themeColour: Colour): Colour {
-	return isCss(themeColour)?getCssVariable(themeColour):themeColour;;
+	return isCss(themeColour)?getCssVariable(themeColour):themeColour;
 }
 
 function getCurrentMode() {
