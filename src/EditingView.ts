@@ -20,7 +20,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		update(value: number, transaction: Transaction): number {
 			return getCharWidth(transaction.state,value);
 		}
-	})
+	});
 	const codeblockLines = ViewPlugin.fromClass(
 		class CodeblockLines {
 			settings: CodeStylerSettings;
@@ -29,7 +29,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				excludedLanguages: string;
 				collapsePlaceholder: string;
 				alternativeHighlights: Array<string>;
-			}
+			};
 			decorations: DecorationSet;
 			mutationObserver: MutationObserver;
 		
@@ -38,26 +38,26 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				this.currentSettings = {
 					excludedCodeblocks: settings.excludedCodeblocks,
 					excludedLanguages: settings.excludedLanguages,
-					collapsePlaceholder: '',
+					collapsePlaceholder: "",
 					alternativeHighlights: [],
-				}
+				};
 				this.decorations = Decoration.none;
 				this.buildDecorations(view);
 				this.mutationObserver = new MutationObserver((mutations) => {mutations.forEach((mutation: MutationRecord) => {
-						if (mutation.type === "attributes" && mutation.attributeName === "class" && (
-							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-begin") ||
+					if (mutation.type === "attributes" && mutation.attributeName === "class" && (
+						(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-begin") ||
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-end")
-						)) {
-							this.forceUpdate(view);
-						}
-					});
+					)) {
+						this.forceUpdate(view);
+					}
+				});
 				});
 				this.mutationObserver.observe(view.contentDOM,  {
 					attributes: true,
 					childList: true,
 					subtree: true,
-					attributeFilter: ['class'], // Only observe changes to the 'class' attribute
+					attributeFilter: ["class"], // Only observe changes to the 'class' attribute
 				});
 			}
 		
@@ -106,7 +106,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
 							if (startLine) {
 								codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),this.settings.currentTheme);
-								excludedCodeblock = isExcluded(codeblockParameters.language,[this.settings.excludedCodeblocks,this.settings.excludedLanguages].join(',')) || codeblockParameters.ignore;
+								excludedCodeblock = isExcluded(codeblockParameters.language,[this.settings.excludedCodeblocks,this.settings.excludedLanguages].join(",")) || codeblockParameters.ignore;
 								lineNumber = 0;
 								let lineNumberCount = line.number + 1;
 								const startDelimiter = testOpeningLine(lineText);
@@ -122,13 +122,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+'px':'calc(var(--line-number-gutter-min-width) - 12px)'}`, class: (this.settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?'code-styler-line':getLineClass(codeblockParameters,lineNumber,line.text).join(' '))+(["^$"].concat(this.settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?'':` language-${codeblockParameters.language}`)}}));
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"}`, class: (this.settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(this.settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
 								lineNumber++;
 							}
 						}
-					})
+					});
 				}
 				this.decorations = builder.finish();
 			}
@@ -139,11 +139,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
-			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(codeblockCollapse) || Decoration.none),
+			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(codeblockCollapse) || Decoration.none), // eslint-disable-line @typescript-eslint/no-unused-vars
 		}
 	);
 	const codeblockHeader = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet {
+		create(state: EditorState): DecorationSet { // eslint-disable-line @typescript-eslint/no-unused-vars
 			return Decoration.none;    
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
@@ -152,7 +152,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
 			let startLine = true;
-			let startDelimiter = '```';
+			let startDelimiter = "```";
 			for (let i = 1; i < transaction.state.doc.lines; i++) {
 				const line = transaction.state.doc.line(i);
 				const lineText = line.text.toString();
@@ -162,7 +162,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 						startLine = false;
 						startDelimiter = currentDelimiter;
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore)
+						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1}));
 							else
@@ -178,7 +178,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		provide(field: StateField<DecorationSet>): Extension {
 			return EditorView.decorations.from(field);
 		}
-	})
+	});
 	const codeblockCollapse = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			if (editingViewIgnore(state))
@@ -188,7 +188,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			let collapseStart: Line | null = null;
 			let collapseEnd: Line | null = null;
 			let startLine = true;
-			let startDelimiter = '```';
+			let startDelimiter = "```";
 			for (let i = 1; i < state.doc.lines; i++) {
 				const line = state.doc.line(i);
 				const lineText = line.text.toString();
@@ -198,7 +198,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 						startLine = false;
 						startDelimiter = currentDelimiter;
 						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(',')) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
+						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
 							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 								collapseStart = line;
 							else
@@ -232,9 +232,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		provide(field: StateField<DecorationSet>): Extension {
 			return EditorView.decorations.from(field);
 		},
-	})
+	});
 	const temporarilyUncollapsed = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet {
+		create(state: EditorState): DecorationSet { // eslint-disable-line @typescript-eslint/no-unused-vars
 			return Decoration.none;
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
@@ -244,11 +244,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (uncollapseAnnotation.uncollapse)
 					value = value.update({add: [uncollapseAnnotation.decorationRange], sort: true});
 				else
-					value = value.update({filterFrom: uncollapseAnnotation.decorationRange.from, filterTo: uncollapseAnnotation.decorationRange.to, filter: (from: number, to: number, value: Decoration)=>!(from === uncollapseAnnotation.decorationRange.from && to === uncollapseAnnotation.decorationRange.to)});
+					value = value.update({filterFrom: uncollapseAnnotation.decorationRange.from, filterTo: uncollapseAnnotation.decorationRange.to, filter: (from: number, to: number, value: Decoration)=>!(from === uncollapseAnnotation.decorationRange.from && to === uncollapseAnnotation.decorationRange.to)}); // eslint-disable-line @typescript-eslint/no-unused-vars
 			}
 			return value;
 		}
-	})
+	});
 	const inlineCodeDecorator = ViewPlugin.fromClass(
 		class InlineCodeDecoration {
 			decorations: DecorationSet;
@@ -310,9 +310,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				//NOSONAR
 				// let toHighlight: Array<{start: number, text: string, language: string}> = []; //NOTE: For future CM6 Compatibility
 				for (const {from,to} of view.visibleRanges) {
-                    syntaxTree(view.state).iterate({from: from, to: to,
+					syntaxTree(view.state).iterate({from: from, to: to,
 						enter: (syntaxNode)=>{
-                            const properties = new Set(syntaxNode.node.type.prop<string>(tokenClassNodeProp)?.split(" "));
+							const properties = new Set(syntaxNode.node.type.prop<string>(tokenClassNodeProp)?.split(" "));
 							if (!(properties.has("inline-code") && !properties.has("formatting")))
 								return;
 							const previousSibling = syntaxNode.node.prevSibling;
@@ -325,16 +325,16 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (!parameters) {
 								if (text) {
 									if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize))
-										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: (from: number, to: number, value: Decoration)=>false});
+										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: (from: number, to: number, value: Decoration)=>false}); // eslint-disable-line @typescript-eslint/no-unused-vars
 									else
 										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
 								}
 							} else {
 								if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
-									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
-										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false});
+									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
+										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false}); // eslint-disable-line @typescript-eslint/no-unused-vars
 									});
-									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: 'code-styler-inline-parameters'})}]});
+									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: "code-styler-inline-parameters"})}]});
 								} else {
 									let decorated = false;
 									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{
@@ -347,23 +347,23 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 									}
 								}
-								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false});
+								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false}); // eslint-disable-line @typescript-eslint/no-unused-vars
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
 								//NOSONAR
 								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
 							}
-                        },
-                    });
-                }
+						},
+					});
+				}
 				// return toHighlight; //NOTE: For future CM6 Compatibility
 			}
 		},
 		{
 			decorations: (value) => value.decorations,
 		}
-	)
+	);
 	function cursorIntoCollapsedTransactionFilter() {
 		return EditorState.transactionFilter.of((transaction) => {
 			const extraTransactions: Array<TransactionSpec> = [];
@@ -412,14 +412,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	class LineNumberWidget extends WidgetType {
 		lineNumber: number;
 		codeblockParameters: CodeblockParameters;
-		maxLineNum: number
+		maxLineNum: number;
 		empty: boolean;
 	
 		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, maxLineNum: number, empty: boolean) {
 			super();
 			this.lineNumber = lineNumber;
 			this.codeblockParameters = codeblockParameters;
-			this.maxLineNum = maxLineNum
+			this.maxLineNum = maxLineNum;
 			this.empty = empty;
 		}
 	
@@ -427,8 +427,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return this.lineNumber === other.lineNumber && this.codeblockParameters.lineNumbers.alwaysEnabled === other.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled === other.codeblockParameters.lineNumbers.alwaysDisabled && this.codeblockParameters.lineNumbers.offset === other.codeblockParameters.lineNumbers.offset && this.maxLineNum === other.maxLineNum && this.empty === other.empty;
 		}
 	
-		toDOM(view: EditorView): HTMLElement {
-			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?'width: var(--line-number-gutter-width);':''}, cls: `code-styler-line-number${getLineNumberDisplay(this.codeblockParameters)}`, text: this.empty?'':(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
+		toDOM(view: EditorView): HTMLElement { // eslint-disable-line @typescript-eslint/no-unused-vars
+			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: `code-styler-line-number${getLineNumberDisplay(this.codeblockParameters)}`, text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
 	class HeaderWidget extends WidgetType {
@@ -445,9 +445,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			this.languageIcons = languageIcons;
 			this.mutationObserver = new MutationObserver((mutations) => {
 				mutations.forEach(mutation => {
-					if ((mutation.target as HTMLElement).hasAttribute('data-clicked'))
-						collapseOnClick(this.view,(mutation.target as HTMLElement))
-				})
+					if ((mutation.target as HTMLElement).hasAttribute("data-clicked"))
+						collapseOnClick(this.view,(mutation.target as HTMLElement));
+				});
 			});    
 		}
 			
@@ -459,14 +459,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				this.codeblockParameters.fold.placeholder == other.codeblockParameters.fold.placeholder &&
 				this.themeSettings.header.collapsePlaceholder == other.themeSettings.header.collapsePlaceholder &&
 				getLanguageIcon(this.codeblockParameters.language,this.languageIcons) == getLanguageIcon(other.codeblockParameters.language,other.languageIcons)
-				);
+			);
 		}
 			
 		toDOM(view: EditorView): HTMLElement {
 			this.view = view;
 			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings, this.languageIcons);
-			if (this.codeblockParameters.language!=='')
-				headerContainer.classList.add(`language-${this.codeblockParameters.language}`)
+			if (this.codeblockParameters.language!=="")
+				headerContainer.classList.add(`language-${this.codeblockParameters.language}`);
 			headerContainer.addEventListener("mousedown",handleMouseDown);
 	
 			this.mutationObserver.observe(headerContainer,{
@@ -501,11 +501,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
 				this.inlineCodeParameters.icon == other.inlineCodeParameters.icon &&
 				getLanguageIcon(this.inlineCodeParameters.language,this.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.languageIcons)
-				);
+			);
 		}
 
-		toDOM(view: EditorView): HTMLElement {
-			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,['code-styler-inline-opener','cm-inline-code']);
+		toDOM(view: EditorView): HTMLElement { // eslint-disable-line @typescript-eslint/no-unused-vars
+			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,["code-styler-inline-opener","cm-inline-code"]);
 		}
 	}
 	
@@ -519,7 +519,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		let collapseStart: Line | null = null;
 		let collapseEnd: Line | null = null;
 		let startLine = true;
-		let startDelimiter = '```';
+		let startDelimiter = "```";
 		for (let i = 1; i < view.state.doc.lines; i++) {
 			const line = view.state.doc.line(i);
 			const lineText = line.text.toString();
@@ -549,7 +549,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		}
 	}
-	function handleMouseDown(event: MouseEvent): void {
+	function handleMouseDown(event: MouseEvent): void { // eslint-disable-line @typescript-eslint/no-unused-vars
 		this.setAttribute("data-clicked","true");
 	}
 
@@ -569,9 +569,9 @@ function getCharWidth(state: EditorState, default_value: number): number {
 		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
 			return result;
 		const computedStyles = window.getComputedStyle(lineNumberElement, null);
-		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length)
+		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length);
 		return result;
-	},[])
+	},[]);
 	if (charWidths.length === 0)
 		return default_value;
 	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
@@ -587,8 +587,8 @@ function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 }
 function findVisibleCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return findCodeblocks(view).filter((codeblock) => {
-		return view.visibleRanges.some((visibleRange) => codeblock.from < visibleRange.to && codeblock.to > visibleRange.from)
-	})
+		return view.visibleRanges.some((visibleRange) => codeblock.from < visibleRange.to && codeblock.to > visibleRange.from);
+	});
 }
 function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	const codeblocks: Array<SyntaxNodeRef> = [];
@@ -597,7 +597,7 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 			if (syntaxNode.type.name.includes("HyperMD-codeblock-begin") || syntaxNode.type.name === "HyperMD-codeblock_HyperMD-codeblock-bg" || syntaxNode.type.name.includes("HyperMD-codeblock-end"))
 				codeblocks.push(syntaxNode);
 		}
-	})
+	});
 	return codeblocks;
 }
 
@@ -623,7 +623,7 @@ function modeHighlight ({start,text,language}: {start: number, text: string, lan
 		while (!stream.eol()) {
 			const style = mode.token(stream,state);
 			if (style)
-				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})})
+				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})});
 			stream.start = stream.pos;
 		}
 	}
@@ -634,7 +634,7 @@ function editingViewIgnore(state: EditorState): boolean {
 	if (!state.field(editorLivePreviewField))
 		return true;
 	const filePath = state.field(editorInfoField)?.file?.path;
-	if (typeof filePath !== 'undefined')
-		return this.app.metadataCache.getCache(filePath)?.frontmatter?.['code-styler-ignore'] === true;
+	if (typeof filePath !== "undefined")
+		return this.app.metadataCache.getCache(filePath)?.frontmatter?.["code-styler-ignore"] === true;
 	return false;
 }

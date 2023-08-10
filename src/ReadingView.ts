@@ -10,7 +10,7 @@ import { createHeader, createInlineOpener, getLineClass as getLineClasses, getLi
 
 export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
-	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.['code-styler-ignore'] === true)
+	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
 		return;
 
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
@@ -34,13 +34,13 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
 	if (!sourcePath || !element)
 		return;
-	for (const inlineCodeElement of Array.from(element.querySelectorAll(':not(pre) > code'))) {
+	for (const inlineCodeElement of Array.from(element.querySelectorAll(":not(pre) > code"))) {
 		await remakeInlineCode(inlineCodeElement as HTMLElement,plugin);
 	}
 }
 export function destroyReadingModeElements(): void {
 	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
-		codeblockPreParent.classList.remove('code-styler-pre-parent');
+		codeblockPreParent.classList.remove("code-styler-pre-parent");
 	});
 	[
 		...Array.from(document.querySelectorAll("pre.code-styler-pre div[class^='code-styler-header-container']")),
@@ -48,45 +48,45 @@ export function destroyReadingModeElements(): void {
 		...Array.from(document.querySelectorAll(":not(pre) > code span.code-styler-inline-opener")),
 	].forEach(element => element.remove());
 	document.querySelectorAll("pre.code-styler-pre").forEach((codeblockPreElement: HTMLElement) => {
-		codeblockPreElement.classList.remove('code-styler-pre');
-		codeblockPreElement.classList.remove('code-styler-collapsed');
-		codeblockPreElement.style.removeProperty('--true-height');
-		codeblockPreElement.style.removeProperty('--line-number-margin');
-		codeblockPreElement.style.removeProperty('max-height');
-		codeblockPreElement.style.removeProperty('white-space');
+		codeblockPreElement.classList.remove("code-styler-pre");
+		codeblockPreElement.classList.remove("code-styler-collapsed");
+		codeblockPreElement.style.removeProperty("--true-height");
+		codeblockPreElement.style.removeProperty("--line-number-margin");
+		codeblockPreElement.style.removeProperty("max-height");
+		codeblockPreElement.style.removeProperty("white-space");
 	});
-	document.querySelectorAll('pre > code ~ code.language-output').forEach((executeCodeOutput: HTMLElement) => {
-		executeCodeOutput.classList.remove('execute-code-output');
-		executeCodeOutput.style.removeProperty('--true-height');
-		executeCodeOutput.style.removeProperty('max-height');
+	document.querySelectorAll("pre > code ~ code.language-output").forEach((executeCodeOutput: HTMLElement) => {
+		executeCodeOutput.classList.remove("execute-code-output");
+		executeCodeOutput.style.removeProperty("--true-height");
+		executeCodeOutput.style.removeProperty("max-height");
 	});
-	document.querySelectorAll('pre > code:nth-of-type(1)').forEach((codeblockCodeElement: HTMLElement) => {
-		codeblockCodeElement.style.removeProperty('--true-height');
-		codeblockCodeElement.style.removeProperty('--line-wrapping');
-		codeblockCodeElement.style.removeProperty('--line-active-wrapping');
-		codeblockCodeElement.style.removeProperty('max-height');
-		codeblockCodeElement.style.removeProperty('white-space');
-		codeblockCodeElement.innerHTML = Array.from(codeblockCodeElement.querySelectorAll('code > [class*="code-styler-line"]')).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
+	document.querySelectorAll("pre > code:nth-of-type(1)").forEach((codeblockCodeElement: HTMLElement) => {
+		codeblockCodeElement.style.removeProperty("--true-height");
+		codeblockCodeElement.style.removeProperty("--line-wrapping");
+		codeblockCodeElement.style.removeProperty("--line-active-wrapping");
+		codeblockCodeElement.style.removeProperty("max-height");
+		codeblockCodeElement.style.removeProperty("white-space");
+		codeblockCodeElement.innerHTML = Array.from(codeblockCodeElement.querySelectorAll("code > [class*=\"code-styler-line\"]")).reduce((reconstructedCodeblockLines: Array<string>, codeblockLine: HTMLElement): Array<string> => {
 			const codeblockLineText = (codeblockLine.firstChild as HTMLElement);
 			if (codeblockLineText)
 				reconstructedCodeblockLines.push(codeblockLineText.innerHTML);
-			return reconstructedCodeblockLines
-		},[]).join('\n')+'\n';
+			return reconstructedCodeblockLines;
+		},[]).join("\n")+"\n";
 	});
 	document.querySelectorAll(":not(pre) > code").forEach((inlineCodeElement: HTMLElement) => {
-		inlineCodeElement.classList.remove('code-styler-highlighted');
-		inlineCodeElement.classList.remove('code-styler-highlight-ignore');
+		inlineCodeElement.classList.remove("code-styler-highlighted");
+		inlineCodeElement.classList.remove("code-styler-highlight-ignore");
 		inlineCodeElement.innerText = inlineCodeElement.getAttribute("parameters") + inlineCodeElement.innerText;
 	});
 }
 
 async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin): Promise<void> {
-	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split('\n')[lineNumber]),sourcePath,plugin)).codeblocksParameters;
+	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split("\n")[lineNumber]),sourcePath,plugin)).codeblocksParameters;
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
 	for (const [key,codeblockPreElement] of codeblockPreElements.entries()) {
 		const codeblockParameters = codeblocksParameters[key];
-		const codeblockCodeElement = codeblockPreElement.querySelector('pre > code');
+		const codeblockCodeElement = codeblockPreElement.querySelector("pre > code");
 		if (!codeblockCodeElement)
 			return;
 		if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
@@ -101,8 +101,8 @@ async function retriggerProcessor(element: HTMLElement, context: {sourcePath: st
 	await sleep(50);
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	if (editingEmbeds || !element.classList.contains("admonition-content")) {
-		const contentEl = element.matchParent('.view-content') as HTMLElement;
-		await readingViewCodeblockDecoratingPostProcessor(contentEl || (element.matchParent('div.print') as HTMLElement),context,plugin,editingEmbeds); // Re-render whole document
+		const contentEl = element.matchParent(".view-content") as HTMLElement;
+		await readingViewCodeblockDecoratingPostProcessor(contentEl || (element.matchParent("div.print") as HTMLElement),context,plugin,editingEmbeds); // Re-render whole document
 	}
 }
 async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
@@ -139,13 +139,13 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	
 	codeblockPreElement.classList.add(...getPreClasses(codeblockParameters,dynamic));
 	if (codeblockPreElement.parentElement)
-		codeblockPreElement.parentElement.classList.add(`code-styler-pre-parent`);
+		codeblockPreElement.parentElement.classList.add("code-styler-pre-parent");
 	
 	if (!codeblockCodeElement.querySelector("code [class*='code-styler-line']")) // Ignore styled lines
-		decorateCodeblockLines(codeblockCodeElement,codeblockParameters)
+		decorateCodeblockLines(codeblockCodeElement,codeblockParameters);
 }
 async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStylerPlugin): Promise<void> {
-	if (inlineCodeElement.classList.contains('code-styler-inline'))
+	if (inlineCodeElement.classList.contains("code-styler-inline"))
 		return;
 	const inlineCodeText = inlineCodeElement.innerText;
 	const {parameters,text} = parseInlineCode(inlineCodeText);
@@ -156,7 +156,7 @@ async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStyl
 	else
 		return;
 	
-	inlineCodeElement.classList.add('code-styler-inline');
+	inlineCodeElement.classList.add("code-styler-inline");
 	if (parameters) {
 		const parameterString = inlineCodeText.substring(0,inlineCodeText.lastIndexOf(text));
 		inlineCodeElement.setAttribute("parameters",parameterString); // Store parameter string as attribute so original text can be restored on plugin removal
@@ -168,19 +168,19 @@ async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStyl
 async function getCodeblockPreElements(element: HTMLElement, specific: boolean,editingEmbeds: boolean): Promise<Array<HTMLElement>> {
 	let codeblockPreElements: Array<HTMLElement>;
 	if (!editingEmbeds && !specific)
-		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-reading-view pre:not(.frontmatter)'));
+		codeblockPreElements = Array.from(element.querySelectorAll(".markdown-reading-view pre:not(.frontmatter)"));
 	else if (editingEmbeds && !specific)
-		codeblockPreElements = Array.from(element.querySelectorAll('.markdown-source-view .cm-embed-block pre:not(.frontmatter)'));
+		codeblockPreElements = Array.from(element.querySelectorAll(".markdown-source-view .cm-embed-block pre:not(.frontmatter)"));
 	else if (!editingEmbeds && specific) {
-		codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
-		const admonitionCodeElement = codeblockPreElements?.[0]?.querySelector('pre:not([class]) > code[class*="language-ad-"]');
+		codeblockPreElements = Array.from(element.querySelectorAll("pre:not(.frontmatter)"));
+		const admonitionCodeElement = codeblockPreElements?.[0]?.querySelector("pre:not([class]) > code[class*=\"language-ad-\"]");
 		if (admonitionCodeElement) {
 			await sleep(50);
-			codeblockPreElements = Array.from(element.querySelectorAll('pre:not(.frontmatter)'));
+			codeblockPreElements = Array.from(element.querySelectorAll("pre:not(.frontmatter)"));
 		}
 	} else
 		codeblockPreElements = [];
-	return codeblockPreElements
+	return codeblockPreElements;
 }
 async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata | null, plugin: CodeStylerPlugin, editingEmbeds: boolean): Promise<Array<CodeblockParameters>> {
 	let codeblocksParameters: Array<CodeblockParameters> = [];
@@ -188,9 +188,9 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 	if (!fileContentLines)
 		return [];
 
-	if (typeof cache?.sections !== 'undefined') {
+	if (typeof cache?.sections !== "undefined") {
 		for (const section of cache.sections) {
-			if (!editingEmbeds || section.type === 'code' || section.type === 'callout') {
+			if (!editingEmbeds || section.type === "code" || section.type === "callout") {
 				const parsedCodeblocksParameters = await parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1),sourcePath,plugin);
 				if (!editingEmbeds || parsedCodeblocksParameters.nested)
 					codeblocksParameters = codeblocksParameters.concat(parsedCodeblocksParameters.codeblocksParameters);
@@ -201,29 +201,29 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 	return codeblocksParameters;
 }
 async function toggleFold(codeblockPreElement: HTMLElement): Promise<void> {
-	codeblockPreElement.querySelectorAll('pre > code').forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty('max-height',`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains('execute-code-output')?'3.5 + var(--header-separator-width)':'2'})`));
+	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty("max-height",`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains("execute-code-output")?"3.5 + var(--header-separator-width)":"2"})`));
 	await sleep(1);
 	codeblockPreElement.classList.toggle("code-styler-collapsed");
 	await sleep(TRANSITION_LENGTH);
-	codeblockPreElement.querySelectorAll('pre > code').forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty('max-height'));
+	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
 }
 function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, dynamic: boolean): void {
 	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
 	if (dynamic)
-		headerContainer.addEventListener("click",()=>{toggleFold(codeblockPreElement)}); // Add listener for header collapsing on click
+		headerContainer.addEventListener("click",()=>{toggleFold(codeblockPreElement);}); // Add listener for header collapsing on click
 	codeblockPreElement.insertBefore(headerContainer,codeblockPreElement.childNodes[0]);
 }
 function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolean): Array<string> {
-	const preClassList = ['code-styler-pre'];
+	const preClassList = ["code-styler-pre"];
 	if (codeblockParameters.language)
 		preClassList.push(`language-${codeblockParameters.language}`);
 	if (dynamic) {
 		if (codeblockParameters.fold.enabled)
 			preClassList.push("code-styler-collapsed");
 		if (codeblockParameters.lineUnwrap.alwaysEnabled)
-			preClassList.push(codeblockParameters.lineUnwrap.activeWrap?'unwrapped-inactive':'unwrapped');
+			preClassList.push(codeblockParameters.lineUnwrap.activeWrap?"unwrapped-inactive":"unwrapped");
 		else if (codeblockParameters.lineUnwrap.alwaysDisabled)
-			preClassList.push('unwrapped');
+			preClassList.push("unwrapped");
 	}
 	return preClassList;
 }
@@ -235,28 +235,28 @@ function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockPara
 }
 function getCodeblockLines(codeblockCodeElement: HTMLElement): Array<string> {
 	function escapeHTML(plaintext: string) {
-		return plaintext.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+		return plaintext.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 	}
 
-	const tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,'<br>'));
+	const tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"));
 	const stack: Array<string> = [];
-	let codeblockHTML = '';
-	visit(tree,['text','html'],(node)=>{
-		if (node.type === 'html' && node.value !== '<br>') {
-			if (node.value.startsWith('<span'))
+	let codeblockHTML = "";
+	visit(tree,["text","html"],(node)=>{
+		if (node.type === "html" && node.value !== "<br>") {
+			if (node.value.startsWith("<span"))
 				stack.push(node.value);
-			else if (node.value.startsWith('</span'))
+			else if (node.value.startsWith("</span"))
 				stack.pop();
-		} else if (node.type === 'html' && node.value === '<br>')
-			node.value = '</span>'.repeat(stack.length)+'<br>'+stack.join('');
-		else if (node.type === 'text')
+		} else if (node.type === "html" && node.value === "<br>")
+			node.value = "</span>".repeat(stack.length)+"<br>"+stack.join("");
+		else if (node.type === "text")
 			node.value = escapeHTML(node.value);
-		if ('value' in node)
+		if ("value" in node)
 			codeblockHTML += node.value;
 	});
-	let codeblockLines = codeblockHTML.split('<br>');
+	let codeblockLines = codeblockHTML.split("<br>");
 	if (codeblockLines.length == 1)
-		codeblockLines = ['',''];
+		codeblockLines = ["",""];
 	codeblockCodeElement.innerHTML = "";
 	return codeblockLines;
 }
@@ -265,14 +265,14 @@ function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameter
 	codeblockCodeElement.appendChild(lineWrapper);
 	getLineClasses(codeblockParameters,lineNumber,line).forEach((lineClass) => lineWrapper.classList.add(lineClass));
 	lineWrapper.appendChild(createDiv({cls: `code-styler-line-number${getLineNumberDisplay(codeblockParameters)}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
-	lineWrapper.appendChild(createDiv({cls: `code-styler-line-text`, text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
+	lineWrapper.appendChild(createDiv({cls: "code-styler-line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 }
 async function getHighlightedHTML(parameters: InlineCodeParameters, text: string, plugin: CodeStylerPlugin): Promise<string> {
 	const temporaryRenderingContainer = createDiv();
-	MarkdownRenderer.renderMarkdown(['```',parameters.language,'\n',text,'\n','```'].join(''),temporaryRenderingContainer,'',new Component());
-	const renderedCodeElement = temporaryRenderingContainer.querySelector('code');
+	MarkdownRenderer.renderMarkdown(["```",parameters.language,"\n",text,"\n","```"].join(""),temporaryRenderingContainer,"",new Component());
+	const renderedCodeElement = temporaryRenderingContainer.querySelector("code");
 	if (!renderedCodeElement)
-		return 'ERROR: Could not render highlighted code';
+		return "ERROR: Could not render highlighted code";
 	while(plugin.settings.currentTheme.settings.inline.syntaxHighlight && !renderedCodeElement.classList.contains("is-loaded"))
 		await sleep(2);
 	return renderedCodeElement.innerHTML;
@@ -280,10 +280,10 @@ async function getHighlightedHTML(parameters: InlineCodeParameters, text: string
 
 export const executeCodeMutationObserver = new MutationObserver((mutations) => {
 	mutations.forEach((mutation: MutationRecord) => {
-		if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === 'PRE') { // Add execute code output
-			const executeCodeOutput = (mutation.target as HTMLElement).querySelector('pre > code ~ code.language-output') as HTMLElement;
+		if (mutation.type === "childList" && (mutation.target as HTMLElement).tagName === "PRE") { // Add execute code output
+			const executeCodeOutput = (mutation.target as HTMLElement).querySelector("pre > code ~ code.language-output") as HTMLElement;
 			if (executeCodeOutput)
-				executeCodeOutput.classList.add('execute-code-output');
+				executeCodeOutput.classList.add("execute-code-output");
 		}
 	});
 });
