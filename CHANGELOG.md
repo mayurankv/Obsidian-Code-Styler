@@ -18,6 +18,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Changed
+
+- Some refactoring of code
+
 ## [1.0.4]
 
 ### Added

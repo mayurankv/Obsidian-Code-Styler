@@ -41,7 +41,7 @@
 8. Make reset buttons only appear when value is not default value (in settings)
 9. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
 10. Reduce cognitive complexity (and other issues)`
-11. Clean up reading view `remakeCodeblock`
+11. Fix links in pull requests doc
 
 See below:
 
