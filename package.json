@@ -8,7 +8,7 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"update": "ncu -u && npm install",
 		"lint": "eslint --fix --max-warnings=0 src && stylelint --fix --max-warnings=0 src/styles.css src/css",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json && echo $npm_package_version"
 	},
 	"keywords": [],
 	"author": "Mayuran Visakan",

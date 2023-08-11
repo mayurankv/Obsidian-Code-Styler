@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 See this project's [releases](/../../../releases).
-<!-- Create a new release using `git tag -a 1.x.x -m "1.x.x"` and `git push origin 1.x.x` with the correct version numbers -->
+<!-- Create a new release using `npm version x.y.z`` (or increment `z` with `patch`, `y` with `minor` and `x` with `major`) `git tag -a 1.x.x -m "1.x.x"` and `git push origin 1.x.x` with the correct version numbers -->
 
 <!-- Types of Changes -->
 <!-- ### Added -->
