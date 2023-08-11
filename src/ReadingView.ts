@@ -138,6 +138,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 	insertHeader(codeblockPreElement,codeblockParameters,plugin,dynamic);
 	
 	codeblockPreElement.classList.add(...getPreClasses(codeblockParameters,dynamic));
+	codeblockPreElement.setAttribute("defaultFold",codeblockParameters.fold.enabled.toString());
 	if (codeblockPreElement.parentElement)
 		codeblockPreElement.parentElement.classList.add("code-styler-pre-parent");
 	
