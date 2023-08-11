@@ -12,59 +12,59 @@ body {
 
 .code-styler .cm-s-obsidian span.cm-inline-code,
 .code-styler .markdown-rendered :not(pre) > code {
-	font-weight: var(--code-styler-inline-font-weight);
-	color: var(--code-styler-inline-colour);
-	background-color: var(--code-styler-inline-background-colour) !important;
-	border-radius: var(--code-styler-inline-border-radius) !important;
 	padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal) !important;
+	border-radius: var(--code-styler-inline-border-radius) !important;
 	margin: 0px var(--code-styler-inline-margin-horizontal) !important;
+	background-color: var(--code-styler-inline-background-colour) !important;
+	color: var(--code-styler-inline-colour);
+	font-weight: var(--code-styler-inline-font-weight);
 }
 .code-styler .cm-s-obsidian span.cm-formatting-code { /*? Standalone backticks */
-	color: var(--code-styler-inline-colour-active);
 	display: inline !important;
+	color: var(--code-styler-inline-colour-active);
 }
 .code-styler .cm-s-obsidian span.code-styler-inline-opener ~ span.cm-inline-code:not(.cm-formatting-code) {
-	margin-left: 0px !important;
 	padding-left: 0px !important;
 	border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
+	margin-left: 0px !important;
 }
 .code-styler .cm-s-obsidian span.code-styler-inline-opener,
 .code-styler .cm-s-obsidian span.cm-formatting-code:has(+ span.cm-inline-code:not(.cm-formatting-code)) {/*? First backtick */
-	color: var(--code-styler-inline-colour-active);
-	border-radius: var(--code-styler-inline-border-radius) 0px 0px var(--code-styler-inline-border-radius) !important;
-	padding-left: var(--code-styler-inline-padding-horizontal) !important;
 	padding-right: 0px !important;
-	margin-left: var(--code-styler-inline-margin-horizontal) !important;
+	padding-left: var(--code-styler-inline-padding-horizontal) !important;
+	border-radius: var(--code-styler-inline-border-radius) 0px 0px var(--code-styler-inline-border-radius) !important;
 	margin-right: 0px !important;
+	margin-left: var(--code-styler-inline-margin-horizontal) !important;
+	color: var(--code-styler-inline-colour-active);
 }
 .code-styler .cm-s-obsidian span.cm-formatting-code + span.cm-inline-code:not(.cm-formatting-code) { /*? Inner code with backticks */
-	color: var(--code-styler-inline-colour-active);
-	border-radius: 0px !important;
-	padding-left: 0px !important;
 	padding-right: 0px !important;
+	padding-left: 0px !important;
+	border-radius: 0px !important;
 	margin: 0px 0px !important;
+	color: var(--code-styler-inline-colour-active);
 }
 .code-styler .cm-s-obsidian span.cm-inline-code:not(.cm-formatting-code) + span.cm-formatting-code {/*? Last backtick */
-	color: var(--code-styler-inline-colour-active);
-	border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
-	padding-left: 0px !important;
 	padding-right: var(--code-styler-inline-padding-horizontal) !important;
-	margin-left: 0px !important;
+	padding-left: 0px !important;
+	border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
 	margin-right: var(--code-styler-inline-margin-horizontal) !important;
+	margin-left: 0px !important;
+	color: var(--code-styler-inline-colour-active);
 }
 body.code-styler span.code-styler-inline-opener > span > img.code-styler-inline-icon:not([class*="emoji"]) {
+	display: inline !important;
 	height: calc(var(--code-size) * 1.2);
 	margin-bottom: 2px !important;
 	vertical-align: middle;
-	display: inline !important;
 }
 .code-styler span.code-styler-inline-opener .code-styler-inline-title {
-	font-weight: var(--code-styler-inline-title-font-weight);
 	color: var(--code-styler-inline-title-colour);
+	font-weight: var(--code-styler-inline-title-font-weight);
 }
 .code-styler span.code-styler-inline-opener .code-styler-inline-title::after {
-	content: '\FF5C';
 	color: var(--code-styler-inline-title-color);
+	content: '\FF5C';
 }
 .code-styler span.code-styler-inline-opener span:has( > img.code-styler-inline-icon) {
 	padding-right: 8px;

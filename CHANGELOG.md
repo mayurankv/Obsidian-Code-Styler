@@ -18,6 +18,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- CSS linting added
+
 ### Changed
 
 - Replaced deprecated `MarkdownRenderer.renderMarkdown` to `MarkdownRenderer.render`

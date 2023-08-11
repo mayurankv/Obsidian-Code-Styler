@@ -1,0 +1,12 @@
+{
+	"extends": ["stylelint-config-idiomatic-order"],
+	"plugins": [
+		"stylelint-order",
+		"stylelint-use-logical-spec",
+		"stylelint-declaration-block-no-ignored-properties"
+	],
+	"rules": {
+		"liberty/use-logical-spec": "ignore",
+		"plugin/declaration-block-no-ignored-properties": true
+	}
+}
