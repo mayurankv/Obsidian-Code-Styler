@@ -22,6 +22,10 @@ See this project's [releases](/../../../releases).
 
 - Replaced deprecated `MarkdownRenderer.renderMarkdown` to `MarkdownRenderer.render`
 
+### Fixed
+
+- Parsing error for codeblock delimiters
+
 ## [1.0.5]
 
 ### Added

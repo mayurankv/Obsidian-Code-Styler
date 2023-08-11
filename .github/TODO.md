@@ -38,7 +38,7 @@
 4. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
 5. Set up CSS linting
 6. Set up automatic updating of version for `package.json` version, `npm run version`, and `CHANGELOG` version updates (links and titles and changing unreleased to new version)
-7. Debug really long codeblocks not working (Huh? Why did I write this? Check main vault)
+7. Add `gitall 'Update CHANGELOG'` and `gitall 'Update README'` commands
 
 ```css
 :root {
