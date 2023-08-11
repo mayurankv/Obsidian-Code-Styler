@@ -70,7 +70,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 			return;
 
 		const openDelimiterIndex = codeSection.indexOf(openingCodeblockLine);
-		const closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>line.indexOf(openDelimiter)!==-1);
+		const closeDelimiterIndex = codeSection.slice(openDelimiterIndex+1).findIndex((line)=>new RegExp(`^\\s*(?:>\\s*)*${openDelimiter}(?!${openDelimiter[0]})$`).test(line));
 		if (!admonitions || !/^\s*(?:>\s*)*(?:```+|~~~+) *ad-.*$/.test(openingCodeblockLine))
 			codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex));
 		else
