@@ -135,6 +135,7 @@ pre.code-styler-pre div.code-block-highlight-wrap {
 	clip-path: var(--polygon-in);
 	padding: 0;
 }
+/*! Complicated */
 body:not(.code-styler-show-langicons-always):not(.code-styler-show-langnames-always) .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre .code-styler-header-container) + .edit-block-button,
 body:not(.code-styler-show-langnames-always) .cm-embed-block .code-styler-pre-parent:not(:has( pre.code-styler-pre .code-styler-header-container-specific)):not(:has( pre.code-styler-pre .code-styler-header-container img.code-styler-icon)) + .edit-block-button,
 body .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre:not([class*='language-']) .code-styler-header-container) + .edit-block-button { /*? Depending on header visibility */

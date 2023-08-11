@@ -2,7 +2,7 @@ div.print {
 	--line-wrapping: pre-wrap !important;
 }
 .code-styler div.print pre.code-styler-pre code {
-	max-height: unset;
+	max-height: unset !important;
 }
 .code-styler div.print pre.code-styler-pre.code-styler-collapsed code {
 	display: none !important;
