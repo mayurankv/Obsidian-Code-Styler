@@ -1,7 +1,7 @@
 {
 	"id": "code-styler",
 	"name": "Code Styler",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"minAppVersion": "0.15.0",
 	"description": "Styles codeblocks and inline code in both editing mode and reading mode.",
 	"author": "Mayuran Visakan",
