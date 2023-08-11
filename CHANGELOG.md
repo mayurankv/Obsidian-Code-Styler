@@ -18,6 +18,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced deprecated `MarkdownRenderer.renderMarkdown` to `MarkdownRenderer.render`
+
 ## [1.0.5]
 
 ### Added

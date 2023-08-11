@@ -1,9 +1,6 @@
-# TODO
+# TODO <!-- cSpell:disable -->
 
-1. Check through:
-    - `package.json`
-    - `package-lock.json`
-2. Update github:
+1. Update github:
     - Better issue templates using [yaml](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository)
       - [Example 1](https://github.com/javalent/admonitions/tree/main/.github/ISSUE_TEMPLATE)
       - [Example 2](https://github.com/obsidian-tasks-group/obsidian-tasks/tree/main/.github/ISSUE_TEMPLATE)
@@ -23,10 +20,11 @@
     - dependabot not on master branch
       - [useful](https://softwaremill.com/how-to-use-dependabot-on-github/)
       - dependabot without git pull --rebase
-3. Add syntax highlighting for inline code to source view editing mode?
-4. Add command to select all text inside current codeblock
-5. Debug really long codeblocks not working
-6. Add or update icons for:
+2. Refactor:
+    - Reduce cognitive complexity (and other issues) in:
+      - `EditingView.ts`
+      - `CodeblockParsing.ts`
+3. Add or update icons (see below) for:
     - `regex`
     - `maxima`
     - `zsh`
@@ -36,14 +34,11 @@
     - `ts`
     - `julia`
     - `java`
-7. Changing line wrap options can be flaky
-8. Make reset buttons only appear when value is not default value (in settings)
-9. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
-10. Reduce cognitive complexity (and other issues)`
-11. Fix links in pull requests doc
-12. Set up automatic updating of version for `package.json` version, `npm run version`, and `CHANGELOG` version updates (links and titles and changing unreleased to new version)
-
-See below:
+    - `log`
+4. Implement Live preview re-rendering for relevant settings (search '//TODO (@mayurankv) Re-render' in `settingsTab.ts`)
+5. Set up CSS linting
+6. Set up automatic updating of version for `package.json` version, `npm run version`, and `CHANGELOG` version updates (links and titles and changing unreleased to new version)
+7. Debug really long codeblocks not working (Huh? Why did I write this? Check main vault)
 
 ```css
 :root {
