@@ -1,4 +1,15 @@
-/** Inline Code */
+/** Define CSS Variables */
+body {
+	--code-styler-inline-font-weight: 400;
+	--code-styler-inline-border-radius: 6px;
+	--code-styler-inline-padding-vertical: 5px;
+	--code-styler-inline-padding-horizontal: 5px;
+	--code-styler-inline-margin-horizontal: 0px;
+	--code-styler-inline-colour: var(--code-normal);
+	--code-styler-inline-colour-active: var(--code-normal);
+	--code-styler-inline-background-colour: var(--code-background);
+}
+
 .code-styler .cm-s-obsidian span.cm-inline-code,
 .code-styler .markdown-rendered :not(pre) > code {
 	font-weight: var(--code-styler-inline-font-weight);

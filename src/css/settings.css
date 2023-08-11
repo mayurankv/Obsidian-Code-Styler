@@ -1,0 +1,12 @@
+.setting-item.code-styler-spaced .checkbox-container + .pickr {
+	padding-left: 10px;
+}
+.code-styler-donation {
+	width: 70%;
+	margin: 0 auto;
+	text-align: center;
+}
+.code-styler-setting-text-area textarea {
+	width: 400px;
+	height: 220px;
+}

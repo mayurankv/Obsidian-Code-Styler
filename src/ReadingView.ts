@@ -1,7 +1,7 @@
 import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, Component } from "obsidian";
 import {unified} from "unified";
-import remarkParse from "remark-parse";
 import {visit} from "unist-util-visit";
+import remarkParse from "remark-parse";
 
 import CodeStylerPlugin from "./main";
 import { TRANSITION_LENGTH } from "./Settings";
@@ -269,7 +269,7 @@ function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameter
 }
 async function getHighlightedHTML(parameters: InlineCodeParameters, text: string, plugin: CodeStylerPlugin): Promise<string> {
 	const temporaryRenderingContainer = createDiv();
-	MarkdownRenderer.renderMarkdown(["```",parameters.language,"\n",text,"\n","```"].join(""),temporaryRenderingContainer,"",new Component());
+	MarkdownRenderer.render(plugin.app,["```",parameters.language,"\n",text,"\n","```"].join(""),temporaryRenderingContainer,"",new Component());
 	const renderedCodeElement = temporaryRenderingContainer.querySelector("code");
 	if (!renderedCodeElement)
 		return "ERROR: Could not render highlighted code";
