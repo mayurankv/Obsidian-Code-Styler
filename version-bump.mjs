@@ -22,7 +22,6 @@ process.env.release_notes = /(?<=## \[Unreleased\])[\s\S]*?\n(?=## )/.exec(chang
 writeFileSync("CHANGELOG.md",changelog.replace(/## \[Unreleased\]/,`## [Unreleased]\n\n## [${newVersion}] - ${new Date().toISOString().slice(0, 10)}`).replace(/(?<=\[Unreleased\]: \/..\/..\/compare\/)(\d+.\d+.\d+)...HEAD/,`${newVersion}...HEAD\n[${newVersion}]: /../../compare/${lastVersion}...${newVersion}`));
 
 // Push to origin
-exec(`git tag -a $npm_package_version -F- <<EOF && git push origin $npm_package_version
+exec(`git tag -a $npm_package_version -F- <<EOF && git push origin $npm_package_version && git push origin $npm_package_version
 $release_notes
 EOF`,(error)=>console.log(error));
-exec("git push origin $npm_package_version",(error)=>console.log(error));
