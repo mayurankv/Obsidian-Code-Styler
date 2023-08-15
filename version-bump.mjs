@@ -24,4 +24,4 @@ writeFileSync("CHANGELOG.md",changelog.replace(/## \[Unreleased\]/,`## [Unreleas
 // Push to origin
 exec(`gitall "Ready release $npm_package_version" && git tag -a $npm_package_version -F- <<EOF && git push origin $npm_package_version
 $release_notes
-EOF`,(error,stdout,stderr)=>console.log(error));
+EOF`,(error)=>console.log(error));

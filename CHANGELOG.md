@@ -26,10 +26,13 @@ See this project's [releases](/../../../releases).
 ### Changed
 
 - Replaced deprecated `MarkdownRenderer.renderMarkdown` to `MarkdownRenderer.render`
+- Changed parsing of HTML tags
 
 ### Fixed
 
 - Parsing error for codeblock delimiters
+- Readded scrollbar after css bug caused it to disappear
+- Fixed `wrap` parameter actually applying class `.unwrapped`
 
 ## [1.0.5] - 2023-08-11
 

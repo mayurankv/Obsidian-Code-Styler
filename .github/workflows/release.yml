@@ -25,10 +25,11 @@ jobs:
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }} # tag="${GITHUB_REF#refs/tags/}"
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
-
           gh release create "$tag" \
             --title="$tag" \
+            --notes="${git tag -l --format='%(contents:subject)' $tag}" \
+            --verify-tag \
             --draft \
             main.js manifest.json styles.css

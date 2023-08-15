@@ -3,10 +3,19 @@
 	"plugins": [
 		"stylelint-order",
 		"stylelint-use-logical-spec",
-		"stylelint-declaration-block-no-ignored-properties"
+		"stylelint-declaration-block-no-ignored-properties",
+		"stylelint-no-nested-media",
+		"stylelint-plugin-defensive-css",
+		"stylelint-high-performance-animation",
+		"stylelint-gamut",
+		"stylelint-stylistic"
 	],
 	"rules": {
 		"liberty/use-logical-spec": "ignore",
-		"plugin/declaration-block-no-ignored-properties": true
+		"plugin/declaration-block-no-ignored-properties": true,
+		"pitcher/no-nested-media": true,
+		"plugin/use-defensive-css": [true, {"accidental-hover": true, "background-repeat": true, "custom-property-fallbacks": true, "flex-wrapping": true, "scroll-chaining": true, "vendor-prefix-grouping": true}],
+		"plugin/no-low-performance-animation-properties": true,
+		"gamut/color-no-out-gamut-range": true
 	}
 }

@@ -20,12 +20,20 @@
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.19.1",
 		"eslint": "^8.47.0",
+		"eslint-plugin-json": "^3.1.0",
 		"obsidian": "latest",
 		"stylelint": "^15.10.2",
 		"stylelint-config-idiomatic-order": "^9.0.0",
 		"stylelint-config-standard": "^34.0.0",
 		"stylelint-declaration-block-no-ignored-properties": "^2.7.0",
+		"stylelint-gamut": "^1.3.3",
+		"stylelint-high-performance-animation": "^1.9.0",
+		"stylelint-no-browser-hacks": "^1.2.1",
+		"stylelint-no-nested-media": "^0.1.0",
+		"stylelint-no-unsupported-browser-features": "^7.0.0",
 		"stylelint-order": "^6.0.3",
+		"stylelint-plugin-defensive-css": "^0.8.1",
+		"stylelint-stylistic": "^0.4.3",
 		"stylelint-use-logical-spec": "^5.0.0",
 		"tslib": "2.6.1",
 		"typescript": "5.1.6"
@@ -38,8 +46,15 @@
 		"@lezer/highlight": "^1.1.6",
 		"@simonwep/pickr": "^1.8.2",
 		"colortranslator": "^3.0.2",
-		"remark-parse": "^10.0.2",
-		"unified": "^10.1.2",
-		"unist-util-visit": "^5.0.0"
-	}
+		"hast-util-from-html": "^2.0.1",
+		"hast-util-to-html": "^9.0.0",
+		"unist-util-visit-parents": "^6.0.1"
+	},
+	"contributors": [
+		"Mayuran Visakan <mayuran.k.v@gmail.com>",
+		"mugiwara85 <65603765+mugiwara85@users.noreply.github.com>",
+		"Zsolt Szalai <kampimester@gmail.com>",
+		"Dimava <dimava2@ya.ru>",
+		"Michael Naumov <mnaoumov@gmail.com>"
+	]
 }

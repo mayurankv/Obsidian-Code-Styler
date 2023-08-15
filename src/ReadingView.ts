@@ -1,7 +1,7 @@
 import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, Component } from "obsidian";
-import {unified} from "unified";
-import {visit} from "unist-util-visit";
-import remarkParse from "remark-parse";
+import { visitParents } from "unist-util-visit-parents";
+import { fromHtml } from "hast-util-from-html";
+import { toHtml } from "hast-util-to-html";
 
 import CodeStylerPlugin from "./main";
 import { TRANSITION_LENGTH } from "./Settings";
@@ -224,7 +224,7 @@ function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolea
 		if (codeblockParameters.lineUnwrap.alwaysEnabled)
 			preClassList.push(codeblockParameters.lineUnwrap.activeWrap?"unwrapped-inactive":"unwrapped");
 		else if (codeblockParameters.lineUnwrap.alwaysDisabled)
-			preClassList.push("unwrapped");
+			preClassList.push("wrapped");
 	}
 	return preClassList;
 }
@@ -235,28 +235,23 @@ function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockPara
 	});
 }
 function getCodeblockLines(codeblockCodeElement: HTMLElement): Array<string> {
-	function escapeHTML(plaintext: string) {
-		return plaintext.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-	}
-
-	const tree = unified().use(remarkParse).parse(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"));
-	const stack: Array<string> = [];
-	let codeblockHTML = "";
-	visit(tree,["text","html"],(node)=>{
-		if (node.type === "html" && node.value !== "<br>") {
-			if (node.value.startsWith("<span"))
-				stack.push(node.value);
-			else if (node.value.startsWith("</span"))
-				stack.pop();
-		} else if (node.type === "html" && node.value === "<br>")
-			node.value = "</span>".repeat(stack.length)+"<br>"+stack.join("");
-		else if (node.type === "text")
-			node.value = escapeHTML(node.value);
-		if ("value" in node)
-			codeblockHTML += node.value;
+	const htmlTree = fromHtml(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"),{fragment: true});
+	let codeblockHTML = codeblockCodeElement.innerHTML;
+	visitParents(htmlTree,["text","element"],(node,ancestors)=>{
+		if (node.type === "element" && node.tagName === "br") {
+			if (ancestors.length >= 2) {
+				codeblockHTML = codeblockHTML.replace(/\n/,ancestors.slice(1).reduce((result,element)=>{
+					const elementCopy = structuredClone(element);
+					elementCopy.children = [];
+					const splitTag = toHtml(elementCopy).split(/(?<=>)(?=<\/)/);
+					return splitTag.splice(-1)+result+splitTag.join("");
+				},"<br>"));
+			} else
+				codeblockHTML = codeblockHTML.replace(/\n/,"<br>");
+		}
 	});
 	let codeblockLines = codeblockHTML.split("<br>");
-	if (codeblockLines.length == 1)
+	if (codeblockLines.length === 1)
 		codeblockLines = ["",""];
 	codeblockCodeElement.innerHTML = "";
 	return codeblockLines;
