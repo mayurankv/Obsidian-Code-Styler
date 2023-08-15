@@ -27,9 +27,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }} # tag="${GITHUB_REF#refs/tags/}"
         run: |
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          message=$(git tag -l --format='%(contents:subject)' $tag)
+
           gh release create "$tag" \
             --title="$tag" \
-            --notes="${git tag -l --format='%(contents:subject)' $tag}" \
+            --notes="${message}" \
             --verify-tag \
             --draft \
             main.js manifest.json styles.css
