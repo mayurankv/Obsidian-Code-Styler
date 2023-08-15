@@ -18,6 +18,15 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Changed
+
+- Only style scrollbar if theme already styles it
+- Automatic update doesn't change changelog heading levels
+
+### Fixed
+
+- Added full message to automatic release
+
 ## [1.0.6] - 2023-08-15
 
 ### Added
