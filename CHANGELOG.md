@@ -18,6 +18,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.6] - 2023-08-15
+
 ### Added
 
 - CSS linting added
@@ -151,7 +153,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.5...HEAD
+[Unreleased]: /../../compare/1.0.6...HEAD
+[1.0.6]: /../../compare/1.0.5...1.0.6
 [1.0.5]: /../../compare/1.0.4...1.0.5
 [1.0.4]: /../../compare/1.0.3...1.0.4
 [1.0.3]: /../../compare/1.0.2...1.0.3
