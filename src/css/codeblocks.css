@@ -379,17 +379,6 @@ pre.code-styler-pre .code-styler-line-text {
 }
 
 /** Scroll Bar */
-pre.code-styler-pre::-webkit-scrollbar,
-pre.code-styler-pre > code::-webkit-scrollbar {
-	width: var(--code-padding);
-	height: var(--code-padding);
-	background-color: var(--code-styler-codeblock-background-colour);
-}
-pre.code-styler-pre::-webkit-scrollbar-thumb,
-pre.code-styler-pre > code::-webkit-scrollbar-thumb {
-	border-radius: 999px;
-	background-color: var(--background-modifier-border);
-}
 pre.code-styler-pre.code-styler-collapsed::-webkit-scrollbar,
 pre.code-styler-pre.code-styler-collapsed code::-webkit-scrollbar {
 	display: none;

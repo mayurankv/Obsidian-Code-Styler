@@ -8,12 +8,13 @@ interface ThemeStyle {
 		size: number;
 		style: string;
 	},
+	scrollbar?: boolean;
 	extra?: string;
 }
 
 const STYLE_ID = "code-styler-styles";
 const THEME_STYLES: Record<string,ThemeStyle> = {
-	Prism: {
+	"Prism": {
 		border: {
 			size: 1,
 			style: "1px solid var(--window-border-color)",
@@ -25,13 +26,16 @@ const THEME_STYLES: Record<string,ThemeStyle> = {
 			style: "var(--thin-muted-border)",
 		},
 	},
-	Minimal: {
+	"Minimal": {
 		extra: `
 			.markdown-source-view.mod-cm6.is-readable-line-width :not(pre.code-styler-pre) > [class^="code-styler-header-container"] {
 				box-sizing: border-box;
 			}
 		`,
 	},
+	"Obsidianite": {
+		scrollbar: true,
+	}
 };
 
 export function updateStyling(settings: CodeStylerSettings, app: App): void {
@@ -128,6 +132,14 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 				--header-separator-width-padding: calc(var(--header-separator-width) - `+ //@ts-expect-error Does Exist
 					THEME_STYLES[currentTheme].border.size+`px);
 				--collapsed-bottom-border: var(--code-styler-header-border);
+			}
+		`:""}
+		${THEME_STYLES?.[currentTheme]?.scrollbar?`
+			pre.code-styler-pre::-webkit-scrollbar,
+			pre.code-styler-pre > code::-webkit-scrollbar {
+				width: var(--code-padding);
+				height: var(--code-padding);
+				background-color: var(--code-styler-codeblock-background-colour);
 			}
 		`:""}
 		${THEME_STYLES?.[currentTheme]?.extra?THEME_STYLES[currentTheme].extra:""}
