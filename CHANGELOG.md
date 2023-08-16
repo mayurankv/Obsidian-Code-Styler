@@ -19,6 +19,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.7] - 2023-08-16
+
 ### Changed
 
 - Only style scrollbar if theme already styles it
@@ -163,7 +165,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.6...HEAD
+[Unreleased]: /../../compare/1.0.7...HEAD
+[1.0.7]: /../../compare/1.0.6...1.0.7
 [1.0.6]: /../../compare/1.0.5...1.0.6
 [1.0.5]: /../../compare/1.0.4...1.0.5
 [1.0.4]: /../../compare/1.0.3...1.0.4
