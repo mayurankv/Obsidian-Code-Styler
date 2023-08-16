@@ -4,7 +4,7 @@ import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from "./Set
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions } from "./EditingView";
-import { destroyReadingModeElements, documentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
+import { destroyReadingModeElements, documentFold as readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -66,7 +66,7 @@ export default class CodeStylerPlugin extends Plugin {
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				if (activeView.getMode() === "preview")
-					documentFold(activeView.contentEl,true);
+					readingDocumentFold(activeView.contentEl,true);
 				else if (activeView.getMode() === "source")
 					//TODO (@mayurankv) Add fold all editing view command here
 					////@ts-expect-error Undocumented Obsidian API
@@ -78,7 +78,7 @@ export default class CodeStylerPlugin extends Plugin {
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				if (activeView.getMode() === "preview")
-					documentFold(activeView.contentEl,false);
+					readingDocumentFold(activeView.contentEl,false);
 				else if (activeView.getMode() === "source")
 					//TODO (@mayurankv) Add unfold all editing view command here
 					////@ts-expect-error Undocumented Obsidian API
@@ -90,7 +90,7 @@ export default class CodeStylerPlugin extends Plugin {
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView) {
 				if (activeView.getMode() === "preview")
-					documentFold(activeView.contentEl);
+					readingDocumentFold(activeView.contentEl);
 				else if (activeView.getMode() === "source")
 					//TODO (@mayurankv) Add reset fold state editing view command here
 					////@ts-expect-error Undocumented Obsidian API
