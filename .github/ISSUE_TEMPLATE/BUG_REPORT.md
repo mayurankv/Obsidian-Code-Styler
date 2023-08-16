@@ -16,6 +16,7 @@ assignees: 'mayurankv'
 
 ### Steps to reproduce
 <!-- Steps to reproduce the behaviour. -->
+<!-- Have you tried another theme/disabling CSS snippets?. -->
 
 <!-- Provide an example of a codeblock that doesn't work as expected INSIDE the below codeblock if relevant. -->
 ````markdown

@@ -57,7 +57,7 @@ body {
 }
 .code-styler pre.code-styler-pre[class*='language-'] {
 	padding-left: var(--language-border-width) !important;
-	background: linear-gradient(90deg, var(--language-border-colour), var(--language-border-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) 100%) !important;
+	background: linear-gradient(90deg, var(--language-border-colour), var(--language-border-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) 100%), var(--code-styler-codeblock-background-colour) !important;
 }
 .code-styler code {
 	padding-top: var(--code-padding) !important;
@@ -78,7 +78,7 @@ body {
 	transition-duration: var(--duration-button);
 	transition-property: max-height, padding, border-top;
 	transition-timing-function: ease-in-out;
-	white-space: var(--line-wrapping);
+	white-space: var(--line-wrapping) !important;
 }
 .code-styler pre.code-styler-pre.wrapped > code {
 	--line-wrapping: pre-wrap;
@@ -280,8 +280,8 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 .code-styler-active-line-highlight-editor .cm-active {
 	background: linear-gradient(to right, var(--code-styler-active-editor-line-colour), var(--gradient-highlights-colour-stop), transparent) !important;
 }
-.code-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active,
-.code-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active {
+.code-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock.cm-active,
+.code-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock.cm-active {
 	background: linear-gradient(to right, var(--code-styler-active-codeblock-line-colour), var(--gradient-highlights-colour-stop), var(--code-styler-codeblock-background-colour)) !important;
 }
 
@@ -380,8 +380,10 @@ pre.code-styler-pre .code-styler-line-text {
 
 /** Scroll Bar */
 pre.code-styler-pre.code-styler-collapsed::-webkit-scrollbar,
-pre.code-styler-pre.code-styler-collapsed code::-webkit-scrollbar {
-	display: none;
+pre.code-styler-pre.code-styler-collapsed code::-webkit-scrollbar,
+pre.code-styler-pre.hide-scroll::-webkit-scrollbar,
+pre.code-styler-pre.hide-scroll code::-webkit-scrollbar {
+	display: none !important;
 }
 
 /** Buttons */

@@ -301,7 +301,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 
 			buildDecorations(view: EditorView): void { //Array<{start: number, text: string, language: string}> //NOTE: For future CM6 Compatibility //NOSONAR
-				if (!view?.visibleRanges?.length || editingViewIgnore(view.state)) {
+				if (!view?.visibleRanges?.length) {
 					this.decorations = Decoration.none;
 					return;
 					//NOSONAR
@@ -324,15 +324,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							const endOfParameters = inlineCodeText.lastIndexOf(text);
 							if (!parameters) {
 								if (text) {
-									if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize))
-										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: (from: number, to: number, value: Decoration)=>false}); // eslint-disable-line @typescript-eslint/no-unused-vars
+									if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize) || editingViewIgnore(view.state))
+										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: ()=>false}); //todo
 									else
 										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
 								}
 							} else {
 								if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
-									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number, decorationValue: Decoration)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
-										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: (from: number, to: number, value: Decoration)=>false}); // eslint-disable-line @typescript-eslint/no-unused-vars
+									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number)=>{
+										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: ()=>false}); //todo
 									});
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: "code-styler-inline-parameters"})}]});
 								} else {
@@ -341,13 +341,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 										if (!decorationValue.spec?.class)
 											decorated = true;
 									});
-									if (!decorated) {
+									if (!decorated && !editingViewIgnore(view.state)) {
 										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
 										if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 									}
 								}
-								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: (from: number, to: number, decorationValue: Decoration)=>false}); // eslint-disable-line @typescript-eslint/no-unused-vars
+								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + (editingViewIgnore(view.state)?0:endOfParameters+1), filterTo: syntaxNode.to, filter: ()=>false}); //todo
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});

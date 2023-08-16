@@ -310,10 +310,7 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 	};
 }
 export function isExcluded(language: string, excludedLanguagesString: string): boolean {
-	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage => {
-		if (regexExcludedLanguage.test(language))
-			return true;
-	});
+	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage=>regexExcludedLanguage.test(language));
 }
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,".+")}$`,"i"));
@@ -323,9 +320,8 @@ function parseInlineCodeParameterString(parameterString: string, inlineCodeParam
 		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
 		if (titleMatch)
 			inlineCodeParameters.title = titleMatch[2].trim();
-	} else if (parameterString === "icon" || (parameterString.startsWith("icon:") && parameterString.toLowerCase() === "icon:true")) {
+	} else if (parameterString === "icon" || (parameterString.startsWith("icon:") && parameterString.toLowerCase() === "icon:true"))
 		inlineCodeParameters.icon = true;
-	}
 }
 
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {

@@ -98,6 +98,8 @@ async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElem
 	}
 }
 async function retriggerProcessor(element: HTMLElement, context: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean) {
+	if (element.matchParent("div.block-language-dataviewjs") && /dataviewjs(?= |,|$)/.test(plugin.settings.excludedCodeblocks))
+		return;
 	await sleep(50);
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	if (editingEmbeds || !element.classList.contains("admonition-content")) {
@@ -176,7 +178,7 @@ async function getCodeblockPreElements(element: HTMLElement, specific: boolean,e
 		codeblockPreElements = Array.from(element.querySelectorAll("pre:not(.frontmatter)"));
 		const admonitionCodeElement = codeblockPreElements?.[0]?.querySelector("pre:not([class]) > code[class*=\"language-ad-\"]");
 		if (admonitionCodeElement) {
-			await sleep(50);
+			await sleep(50); //TODO
 			codeblockPreElements = Array.from(element.querySelectorAll("pre:not(.frontmatter)"));
 		}
 	} else
@@ -203,10 +205,12 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 }
 async function toggleFold(codeblockPreElement: HTMLElement): Promise<void> {
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty("max-height",`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains("execute-code-output")?"3.5 + var(--header-separator-width)":"2"})`));
+	codeblockPreElement.classList.add("hide-scroll");
 	await sleep(1);
 	codeblockPreElement.classList.toggle("code-styler-collapsed");
 	await sleep(TRANSITION_LENGTH);
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
+	codeblockPreElement.classList.remove("hide-scroll");
 }
 function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, dynamic: boolean): void {
 	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);

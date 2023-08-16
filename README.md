@@ -7,7 +7,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) which lets you style cod
 
 <!--
 > **Warning**  
-> If you used version 1.1.9 or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/code-styler/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version 2.0.0 or above. After that, everything should work fine.
+> If you used version 1.1.9 or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/code-styler/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version x.y.z or above. After that, everything should work fine.
 -->
 
 ## Settings

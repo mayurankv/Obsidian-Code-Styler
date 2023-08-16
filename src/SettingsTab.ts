@@ -45,6 +45,7 @@ export class SettingsTab extends PluginSettingTab {
 		// ========== General ==========
 
 		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName("Ignore Codeblocks")
 			.setDesc("Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
@@ -57,8 +58,8 @@ export class SettingsTab extends PluginSettingTab {
 					clearTimeout(ignoreTimeout);
 					ignoreTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
 				}));
-		//TODO (@mayurankv) Re-render (LP)
 		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName("Exclude Languages")
 			.setDesc("Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
@@ -71,7 +72,6 @@ export class SettingsTab extends PluginSettingTab {
 					clearTimeout(excludeTimeout);
 					excludeTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
 				}));
-		//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName("Style Code on Export")
 			.setDesc("If enabled, styling will be applied when exporting to PDF.")
@@ -357,6 +357,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.title.textColour = saveColour;},
 			);});
 		let collapsePlaceholderTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName("Collapse Placeholder Text")
 			.setDesc("Title placeholder text for collapsed code when no title parameter is set.")
@@ -369,7 +370,6 @@ export class SettingsTab extends PluginSettingTab {
 					clearTimeout(collapsePlaceholderTimeout);
 					collapsePlaceholderTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
 				}));
-		//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
 			.setName("Header Separator Colour")
 			.setDesc("Colour of the line separating the codeblock header and the codeblock.")
@@ -893,6 +893,7 @@ export class SettingsTab extends PluginSettingTab {
 				this.disableableComponents["languageBorderColour"].push(resetButton);
 				});
 			});
+		//TODO (@mayurankv) Re-render (Test)
 		new Setting(containerEl)
 			.setName("Redirect Language Settings")
 			.setDesc("Use this textbox to redirect specific language colours and icons as a JSON with language names as keys and either a colour key, an icon key or both as the value for a given language. Colours should be passed as CSS colours and icons should be passed as a string of the inside of an svg element. This setting is theme independent.")
@@ -914,8 +915,6 @@ export class SettingsTab extends PluginSettingTab {
 						}
 					}
 				}));
-		//TODO (@mayurankv) Re-render (Test)
-
 
 		// ========== Donation ==========
 		const donationDiv = containerEl.createEl("div", { cls: "code-styler-donation", });    
