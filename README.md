@@ -6,7 +6,7 @@
 This is a plugin for [Obsidian.md](https://obsidian.md) which lets you style codeblocks and inline code in both editing mode and reading mode.
 
 <!--
-> **Warning**  
+> [!important]
 > If you used version 1.1.9 or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/code-styler/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version x.y.z or above. After that, everything should work fine.
 -->
 
