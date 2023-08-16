@@ -553,6 +553,39 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		this.setAttribute("data-clicked","true");
 	}
 
+	function runOnDelimiters(state: EditorState, startLineCallback: (line: Line, lineText: string)=> Line | boolean, collapseCallback?: (collapseStart: Line, collapseEnd: Line)=>void): void {
+		const determineCollapse = typeof collapseCallback !== "undefined";
+		let collapseStart: Line | null = null;
+		let collapseEnd: Line | null = null;
+		let startLine: boolean = true;
+		let startDelimiter: string = "```";
+		for (let i = 1; i < state.doc.lines; i++) {
+			const line = state.doc.line(i);
+			const lineText = line.text.toString();
+			const currentDelimiter = testOpeningLine(lineText);
+			if (currentDelimiter) {
+				if (startLine) {
+					startLine = false;
+					startDelimiter = currentDelimiter;
+					const callbackResult: Line | boolean = startLineCallback(line,lineText);
+					if (determineCollapse && callbackResult === true)
+						continue;
+				} else {
+					if (currentDelimiter === startDelimiter) {
+						startLine = true;
+						if (determineCollapse && collapseStart)
+							collapseEnd = line;
+					}
+				}
+			}
+			if (determineCollapse && collapseStart && collapseEnd) {
+				collapseCallback(collapseStart,collapseEnd);
+				collapseStart = null;
+				collapseEnd = null;
+			}
+		}
+	}
+
 	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
 	const uncollapse: StateEffectType<{filter: (from: number, to: number) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
 	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
