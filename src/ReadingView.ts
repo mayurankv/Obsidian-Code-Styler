@@ -203,11 +203,14 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 		console.error(`Metadata cache not found for file: ${sourcePath}`);
 	return codeblocksParameters;
 }
-async function toggleFold(codeblockPreElement: HTMLElement): Promise<void> {
+async function toggleFold(codeblockPreElement: HTMLElement, fold?: boolean): Promise<void> {
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty("max-height",`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains("execute-code-output")?"3.5 + var(--header-separator-width)":"2"})`));
 	codeblockPreElement.classList.add("hide-scroll");
 	await sleep(1);
-	codeblockPreElement.classList.toggle("code-styler-collapsed");
+	if (typeof fold === "undefined")
+		codeblockPreElement.classList.toggle("code-styler-collapsed");
+	else
+		fold?codeblockPreElement.classList.add("code-styler-collapsed"):codeblockPreElement.classList.remove("code-styler-collapsed");
 	await sleep(TRANSITION_LENGTH);
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
 	codeblockPreElement.classList.remove("hide-scroll");
