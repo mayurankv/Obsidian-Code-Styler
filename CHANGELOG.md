@@ -21,6 +21,10 @@ See this project's [releases](/../../../releases).
 
 ## [1.0.7] - 2023-08-16
 
+### Added
+
+- Added framework for reuse of loop in editing view and for commands
+
 ### Changed
 
 - Only style scrollbar if theme already styles it
@@ -29,6 +33,8 @@ See this project's [releases](/../../../releases).
 ### Fixed
 
 - Added full message to automatic release
+- Fixed Blue Topaz line wrapping priority bug
+- Fixed dataviewjs glitching bug
 
 ## [1.0.6] - 2023-08-15
 
