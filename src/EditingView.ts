@@ -151,28 +151,16 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
-			let startLine = true;
-			let startDelimiter = "```";
-			for (let i = 1; i < transaction.state.doc.lines; i++) {
-				const line = transaction.state.doc.line(i);
-				const lineText = line.text.toString();
-				const currentDelimiter = testOpeningLine(lineText);
-				if (currentDelimiter) {
-					if (startLine) {
-						startLine = false;
-						startDelimiter = currentDelimiter;
-						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore)
-							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-								builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1}));
-							else
-								continue;
-					} else {
-						if (currentDelimiter === startDelimiter)
-							startLine = true;
-					}
+			runOnDelimiters(transaction.state,(line: Line, lineText: string)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
+				codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
+				if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
+					if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+						builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1}));
+					else
+						return {continue: true};
 				}
-			}
+				return {continue: false};
+			});
 			return builder.finish();
 		},
 		provide(field: StateField<DecorationSet>): Extension {
@@ -185,38 +173,18 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
 			let codeblockParameters: CodeblockParameters;
-			let collapseStart: Line | null = null;
-			let collapseEnd: Line | null = null;
-			let startLine = true;
-			let startDelimiter = "```";
-			for (let i = 1; i < state.doc.lines; i++) {
-				const line = state.doc.line(i);
-				const lineText = line.text.toString();
-				const currentDelimiter = testOpeningLine(lineText);
-				if (currentDelimiter) {
-					if (startLine) {
-						startLine = false;
-						startDelimiter = currentDelimiter;
-						codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore && codeblockParameters.fold.enabled)
-							if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-								collapseStart = line;
-							else
-								continue;
-					} else {
-						if (currentDelimiter === startDelimiter) {
-							startLine = true;
-							if (collapseStart)
-								collapseEnd = line;
-						}
-					}
+			runOnDelimiters(state,(line: Line, lineText: string)=>{
+				codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
+				if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore && codeblockParameters.fold.enabled) {
+					if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+						return {continue: false, line: line};
+					else
+						return {continue: true};
 				}
-				if (collapseStart && collapseEnd) {
-					builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)), block: true, inclusive: true}));
-					collapseStart = null;
-					collapseEnd = null;
-				}
-			}
+				return {continue: false};
+			},(collapseStart: Line, collapseEnd: Line)=>{
+				builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)), block: true, inclusive: true}));
+			});
 			return builder.finish();
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
@@ -325,14 +293,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (!parameters) {
 								if (text) {
 									if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize) || editingViewIgnore(view.state))
-										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: ()=>false}); //todo
+										this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from, filter: ()=>false});
 									else
 										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
 								}
 							} else {
 								if (view.state.selection.ranges.some((range: SelectionRange)=>range.to >= syntaxNode.from-delimiterSize && range.from <= syntaxNode.to+delimiterSize)) {
 									this.decorations.between(syntaxNode.from, syntaxNode.from, (from: number, to: number)=>{
-										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: ()=>false}); //todo
+										this.decorations = this.decorations.update({filterFrom: from, filterTo: to, filter: ()=>false});
 									});
 									this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.mark({class: "code-styler-inline-parameters"})}]});
 								} else {
@@ -347,7 +315,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 									}
 								}
-								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + (editingViewIgnore(view.state)?0:endOfParameters+1), filterTo: syntaxNode.to, filter: ()=>false}); //todo
+								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + (editingViewIgnore(view.state)?0:endOfParameters+1), filterTo: syntaxNode.to, filter: ()=>false});
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
@@ -515,46 +483,24 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		view.state.field(codeblockCollapse,false)?.between(position,position,()=>{
 			folded = true;
 		});
-
-		let collapseStart: Line | null = null;
-		let collapseEnd: Line | null = null;
-		let startLine = true;
-		let startDelimiter = "```";
-		for (let i = 1; i < view.state.doc.lines; i++) {
-			const line = view.state.doc.line(i);
-			const lineText = line.text.toString();
-			const currentDelimiter = testOpeningLine(lineText);
-			if (currentDelimiter) {
-				if (startLine) {
-					startLine = false;
-					startDelimiter = currentDelimiter;
-					if (position === line.from)
-						collapseStart = line;
-				} else {
-					if (currentDelimiter === startDelimiter) {
-						startLine = true;
-						if (collapseStart)
-							collapseEnd = line;
-					}
-				}
-			}
-			if (collapseStart && collapseEnd) {
-				if (folded)
-					view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
-				else
-					view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
-				view.requestMeasure();
-				collapseStart = null;
-				collapseEnd = null;
-			}
-		}
+		runOnDelimiters(view.state,(line: Line, lineText: string)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
+			if (position === line.from)
+				return {continue: false, line: line};
+			return {continue: false};
+		},(collapseStart: Line, collapseEnd: Line)=>{
+			if (folded)
+				view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
+			else
+				view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
+			view.requestMeasure();
+		});
 	}
 	function handleMouseDown(event: MouseEvent): void { // eslint-disable-line @typescript-eslint/no-unused-vars
 		this.setAttribute("data-clicked","true");
 	}
 
-	function runOnDelimiters(state: EditorState, startLineCallback: (line: Line, lineText: string)=> Line | boolean, collapseCallback?: (collapseStart: Line, collapseEnd: Line)=>void): void {
-		const determineCollapse = typeof collapseCallback !== "undefined";
+	function runOnDelimiters(state: EditorState, startLineCallback: (line: Line, lineText: string)=>{continue: boolean, line?: Line}, collapseCallback?: (collapseStart: Line, collapseEnd: Line)=>void): void {
+		const determineCollapse = typeof collapseCallback === "function";
 		let collapseStart: Line | null = null;
 		let collapseEnd: Line | null = null;
 		let startLine: boolean = true;
@@ -567,8 +513,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (startLine) {
 					startLine = false;
 					startDelimiter = currentDelimiter;
-					const callbackResult: Line | boolean = startLineCallback(line,lineText);
-					if (determineCollapse && callbackResult === true)
+					const callbackResult = startLineCallback(line,lineText);
+					if (determineCollapse && typeof callbackResult.line !== "undefined")
+						collapseStart = callbackResult.line;
+					if (callbackResult.continue)
 						continue;
 				} else {
 					if (currentDelimiter === startDelimiter) {
