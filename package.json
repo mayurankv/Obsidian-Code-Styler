@@ -35,7 +35,7 @@
 		"stylelint-plugin-defensive-css": "^0.8.1",
 		"stylelint-stylistic": "^0.4.3",
 		"stylelint-use-logical-spec": "^5.0.0",
-		"tslib": "2.6.1",
+		"tslib": "2.6.2",
 		"typescript": "5.1.6"
 	},
 	"dependencies": {
