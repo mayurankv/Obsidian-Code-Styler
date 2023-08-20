@@ -207,12 +207,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
 			value = value.map(transaction.changes);
-			const uncollapseAnnotation = transaction.annotation(temporaryUncollapseAnnotation);
-			if (uncollapseAnnotation) {
-				if (uncollapseAnnotation.uncollapse)
-					value = value.update({add: [uncollapseAnnotation.decorationRange], sort: true});
+			const temporaryUncollapseAnnotationInstance = transaction.annotation(temporaryUncollapseAnnotation);
+			if (temporaryUncollapseAnnotationInstance) {
+				if (temporaryUncollapseAnnotationInstance.uncollapse)
+					value = value.update({add: [temporaryUncollapseAnnotationInstance.decorationRange], sort: true});
 				else
-					value = value.update({filterFrom: uncollapseAnnotation.decorationRange.from, filterTo: uncollapseAnnotation.decorationRange.to, filter: (from: number, to: number, value: Decoration)=>!(from === uncollapseAnnotation.decorationRange.from && to === uncollapseAnnotation.decorationRange.to)}); // eslint-disable-line @typescript-eslint/no-unused-vars
+					value = value.update({filterFrom: temporaryUncollapseAnnotationInstance.decorationRange.from, filterTo: temporaryUncollapseAnnotationInstance.decorationRange.to, filter: (from: number, to: number, value: Decoration)=>!(from === temporaryUncollapseAnnotationInstance.decorationRange.from && to === temporaryUncollapseAnnotationInstance.decorationRange.to)}); // eslint-disable-line @typescript-eslint/no-unused-vars
 			}
 			return value;
 		}
@@ -352,7 +352,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return transaction;
 		});
 	}
-
 	//todo Finish this filter
 	// function manageCollapsedTransactionFilter() {
 	// 	return EditorState.transactionFilter.of((transaction) => {
@@ -376,6 +375,18 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	// 		return transaction;
 	// 	});
 	// }
+	function documentFoldTransactionFilter() {
+		return EditorState.transactionFilter.of((transaction) => {
+			const foldAnnotationInstance = transaction.annotation(foldAnnotation);
+			if (foldAnnotationInstance) {
+				if (typeof foldAnnotationInstance?.fold !== "undefined")
+					return [transaction,...documentFold(transaction.state,foldAnnotationInstance.fold)];
+				else
+					return [transaction,...documentFold(transaction.state)];
+			} else
+				return transaction;
+		});
+	}
 
 	class LineNumberWidget extends WidgetType {
 		lineNumber: number;
@@ -477,6 +488,36 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 	
+	function documentFold(state: EditorState, fold?: boolean): Array<TransactionSpec> {
+		const extraTransactions: Array<TransactionSpec> = [];
+		const reset = (typeof fold === "undefined");
+		let folded = false;
+		let defaultFold = false;
+		let codeblockParameters: CodeblockParameters;
+		//todo May need to take into account temporarily collapsed field
+		runOnDelimiters(state,(line: Line, lineText: string)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
+			folded = false;
+			state.field(codeblockCollapse,false)?.between(line.from,line.from,()=>{
+				folded = true;
+			});
+			codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
+			if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
+				if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))) {
+					if (reset)
+						defaultFold = codeblockParameters.fold.enabled;
+					return {continue: false, line: line};
+				} else
+					return {continue: true};
+			}
+			return {continue: false};
+		},(collapseStart: Line, collapseEnd: Line)=>{
+			if ((!reset && fold && !folded) || (reset && !folded && defaultFold))
+				extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
+			else if ((!reset && !fold && folded) || (reset && folded && !defaultFold))
+				extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
+		});
+		return extraTransactions;
+	}
 	function collapseOnClick(view: EditorView, target: HTMLElement) {
 		const position = view.posAtDOM(target);
 		let folded = false;
@@ -534,11 +575,21 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 
-	const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
-	const uncollapse: StateEffectType<{filter: (from: number, to: number) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
-	const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
 
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter()];
+	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter(),documentFoldTransactionFilter()];
+}
+
+const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
+const uncollapse: StateEffectType<{filter: (from: number, to: number) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
+const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
+const foldAnnotation = Annotation.define<{fold?: boolean}>();
+
+export function editingDocumentFold(view: EditorView, fold?: boolean) {
+	if (typeof fold !== "undefined")
+		view.dispatch({annotations: foldAnnotation.of({fold: fold})});
+	else
+		view.dispatch({annotations: foldAnnotation.of({})});
+	view.requestMeasure();
 }
 
 function getCharWidth(state: EditorState, default_value: number): number {

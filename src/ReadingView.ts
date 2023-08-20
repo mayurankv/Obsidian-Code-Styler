@@ -203,7 +203,7 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 		console.error(`Metadata cache not found for file: ${sourcePath}`);
 	return codeblocksParameters;
 }
-export async function documentFold(contentEl: HTMLElement, fold?: boolean) {
+export function readingDocumentFold(contentEl: HTMLElement, fold?: boolean) {
 	const codeblockPreElements = document.querySelectorAll("pre.code-styler-pre"); //todo Change document
 	if (typeof fold === "undefined") //Return all blocks to original state
 		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>toggleFold(codeblockPreElement,(codeblockPreElement.getAttribute("defaultFold")??"false")==="true"));

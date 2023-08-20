@@ -19,6 +19,14 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Added fold commands
+
+### Changed
+
+- Refactored editing view codeblock parsing to use callbacks in a loop function
+
 ## [1.0.7] - 2023-08-16
 
 ### Added

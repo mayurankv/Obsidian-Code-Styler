@@ -11,7 +11,7 @@ body {
 }
 
 .code-styler .cm-s-obsidian span.cm-inline-code,
-.code-styler .markdown-rendered :not(pre) > code {
+.code-styler .markdown-rendered :not(pre) > code:not([class*="blur"]) {
 	padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal) !important;
 	border-radius: var(--code-styler-inline-border-radius) !important;
 	margin: 0px var(--code-styler-inline-margin-horizontal) !important;

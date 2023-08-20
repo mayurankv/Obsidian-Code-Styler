@@ -3,8 +3,8 @@ import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from "./Settings";
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
-import { createCodeblockCodeMirrorExtensions } from "./EditingView";
-import { destroyReadingModeElements, documentFold as readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
+import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
+import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -68,10 +68,8 @@ export default class CodeStylerPlugin extends Plugin {
 				if (activeView.getMode() === "preview")
 					readingDocumentFold(activeView.contentEl,true);
 				else if (activeView.getMode() === "source")
-					//TODO (@mayurankv) Add fold all editing view command here
-					////@ts-expect-error Undocumented Obsidian API
-					//collapseCommand(activeView.editor.cm.docView.view,true);
-					console.debug("Command does not exist yet");
+					//@ts-expect-error Undocumented Obsidian API
+					editingDocumentFold(activeView.editor.cm.docView.view,true);
 			}
 		}});
 		this.addCommand({id: "unfold-all", name: "Unfold all codeblocks", callback: ()=>{
@@ -80,10 +78,8 @@ export default class CodeStylerPlugin extends Plugin {
 				if (activeView.getMode() === "preview")
 					readingDocumentFold(activeView.contentEl,false);
 				else if (activeView.getMode() === "source")
-					//TODO (@mayurankv) Add unfold all editing view command here
-					////@ts-expect-error Undocumented Obsidian API
-					//collapseCommand(activeView.editor.cm.docView.view,true);
-					console.debug("Command does not exist yet");
+					//@ts-expect-error Undocumented Obsidian API
+					editingDocumentFold(activeView.editor.cm.docView.view,false);
 			}
 		}});
 		this.addCommand({id: "reset-all", name: "Reset fold state for all codeblocks", callback: ()=>{
@@ -92,10 +88,8 @@ export default class CodeStylerPlugin extends Plugin {
 				if (activeView.getMode() === "preview")
 					readingDocumentFold(activeView.contentEl);
 				else if (activeView.getMode() === "source")
-					//TODO (@mayurankv) Add reset fold state editing view command here
-					////@ts-expect-error Undocumented Obsidian API
-					//collapseCommand(activeView.editor.cm.docView.view,true);
-					console.debug("Command does not exist yet");
+					//@ts-expect-error Undocumented Obsidian API
+					editingDocumentFold(activeView.editor.cm.docView.view);
 			}
 		}});
 
