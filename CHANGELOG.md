@@ -27,6 +27,10 @@ See this project's [releases](/../../../releases).
 
 - Refactored editing view codeblock parsing to use callbacks in a loop function
 
+### Fixed
+
+- Compatibility with the [blur plugin](https://github.com/gapmiss/blur)
+
 ## [1.0.7] - 2023-08-16
 
 ### Added

@@ -6,9 +6,9 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"update": "ncu -u && npm install",
+		"update": "ncu -u && npm install && node manual-update.mjs",
 		"lint": "eslint --fix --max-warnings=0 src && stylelint --fix --max-warnings=0 src/styles.css src/css",
-		"version": "node version-bump.mjs"
+		"version": "node version-bump.mjs",
 	},
 	"keywords": [],
 	"author": "Mayuran Visakan",

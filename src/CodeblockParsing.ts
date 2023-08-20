@@ -1,7 +1,7 @@
 import { Plugin, TFile } from "obsidian";
 
 import CodeStylerPlugin from "./main";
-import { CodeStylerTheme } from "./Settings";
+import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "./Settings";
 
 export interface CodeblockParameters {
 	language: string;
@@ -39,6 +39,7 @@ export interface Highlights {
 }
 
 interface ExternalPlugin extends Plugin {
+	supportedLanguages?: Array<string>;
 	code?: (source: string, sourcePath: string)=>{
 		start: number;
 		code: string;
@@ -169,6 +170,11 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
 			if (typeof fileIncludeLanguage !== "undefined")
 				codeblockParameters.language = fileIncludeLanguage;
+		}
+	} else if (/run-\w*/.test(codeblockParameters.language)) {
+		if ("execute-code" in plugins) {
+			if (codeblockParameters.language.slice(4) in EXECUTE_CODE_SUPPORTED_LANGUAGES)
+				codeblockParameters.language = codeblockParameters.language.slice(4);
 		}
 	}
 	return codeblockParameters;

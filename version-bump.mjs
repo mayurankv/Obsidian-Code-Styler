@@ -16,10 +16,10 @@ versions[newVersion] = minAppVersion;
 writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
 
 // Update CHANGELOG.md
-let changelog = readFileSync("CHANGELOG.md", "utf8");
-const lastVersion = /\[Unreleased\]: \/..\/..\/compare\/(\d+.\d+.\d+)...HEAD/.exec(changelog)?.[1] ?? "0.0.0";
-process.env.release_notes = /(?<=## \[Unreleased\])[\s\S]*?\n(?=## )/.exec(changelog)[0].trim();
-writeFileSync("CHANGELOG.md",changelog.replace(/## \[Unreleased\]/,`## [Unreleased]\n\n## [${newVersion}] - ${new Date().toISOString().slice(0, 10)}`).replace(/(?<=\[Unreleased\]: \/..\/..\/compare\/)(\d+.\d+.\d+)...HEAD/,`${newVersion}...HEAD\n[${newVersion}]: /../../compare/${lastVersion}...${newVersion}`));
+let changelogText = readFileSync("CHANGELOG.md", "utf8");
+const lastVersion = /\[Unreleased\]: \/..\/..\/compare\/(\d+.\d+.\d+)...HEAD/.exec(changelogText)?.[1] ?? "0.0.0";
+process.env.release_notes = /(?<=## \[Unreleased\])[\s\S]*?\n(?=## )/.exec(changelogText)[0].trim();
+writeFileSync("CHANGELOG.md",changelogText.replace(/## \[Unreleased\]/,`## [Unreleased]\n\n## [${newVersion}] - ${new Date().toISOString().slice(0, 10)}`).replace(/(?<=\[Unreleased\]: \/..\/..\/compare\/)(\d+.\d+.\d+)...HEAD/,`${newVersion}...HEAD\n[${newVersion}]: /../../compare/${lastVersion}...${newVersion}`));
 
 // Push to origin
 exec(`git add . && git commit -m 'Ready release ${newVersion}' && git push && git tag -a $npm_package_version -F- <<EOF && git push origin $npm_package_version && git push origin $npm_package_version
