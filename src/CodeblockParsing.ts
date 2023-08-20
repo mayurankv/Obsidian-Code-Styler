@@ -172,8 +172,9 @@ export async function pluginAdjustParameters(codeblockParameters: CodeblockParam
 				codeblockParameters.language = fileIncludeLanguage;
 		}
 	} else if (/run-\w*/.test(codeblockParameters.language)) {
+		console.log("foo");
 		if ("execute-code" in plugins) {
-			if (codeblockParameters.language.slice(4) in EXECUTE_CODE_SUPPORTED_LANGUAGES)
+			if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(codeblockParameters.language.slice(4)))
 				codeblockParameters.language = codeblockParameters.language.slice(4);
 		}
 	}

@@ -122,7 +122,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"}`, class: (this.settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(this.settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"}`, class: ((this.settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(this.settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
 								lineNumber++;
@@ -277,6 +277,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				}
 				//NOSONAR
 				// let toHighlight: Array<{start: number, text: string, language: string}> = []; //NOTE: For future CM6 Compatibility
+				const sourceMode = editingViewIgnore(view.state);
 				for (const {from,to} of view.visibleRanges) {
 					syntaxTree(view.state).iterate({from: from, to: to,
 						enter: (syntaxNode)=>{
@@ -309,13 +310,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 										if (!decorationValue.spec?.class)
 											decorated = true;
 									});
-									if (!decorated && !editingViewIgnore(view.state)) {
+									if (!decorated && !sourceMode) {
 										this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from + endOfParameters, value: Decoration.replace({})}]});
 										if (parameters?.title || (parameters?.icon && getLanguageIcon(parameters.language,languageIcons)))
 											this.decorations = this.decorations.update({add: [{from: syntaxNode.from, to: syntaxNode.from, value: Decoration.replace({widget: new OpenerWidget(parameters,languageIcons)})}]});
 									}
 								}
-								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + (editingViewIgnore(view.state)?0:endOfParameters+1), filterTo: syntaxNode.to, filter: ()=>false});
+								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: ()=>false});
+								if (sourceMode)
+									this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from + endOfParameters, filter: (from: number, to: number, value: Decoration)=>"class" in value.spec}); // eslint-disable-line @typescript-eslint/no-unused-vars
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});

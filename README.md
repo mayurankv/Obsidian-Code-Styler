@@ -33,7 +33,7 @@ The plugin comes with a 'Default' theme and a few themes based on popular colour
 
 All themes have customisable colours for both light and dark mode (to make changes to a specific mode, change to that mode first and then change the colours in settings). Each theme also includes other appearance settings such as displaying line numbers, allowing highlights to cover the line numbers and more.
 
-When a setting or colour is changed within a theme, that change is not saved to the theme; you must then click the update button next to the theme name to update that theme to the current settings. Note that changes to the built-in themes cannot be saved.
+When a setting or colour is changed within a theme, that change is not saved to the theme; you must then click the update button next to the theme name to update that theme to the current settings. Changes to the built-in themes can also be saved but to revert to the original themes, the plugin data will have to be reset.
 
 The different component colours that can be set within a theme are:
 
@@ -69,8 +69,6 @@ The different component colours that can be set within a theme are:
 'Solarized' theme colours in dark mode with Default Obsidian theme:
 
 ![Solarized Default Dark Colours](images/SolarizedDefaultDarkColours.png)
-
-I am not a designer, so if you have created a cool theme, send me the colour codes, and I might include it as a default theme in the next release :-\)
 
 ## Codeblock Parameters
 

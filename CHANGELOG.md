@@ -22,10 +22,12 @@ See this project's [releases](/../../../releases).
 ### Added
 
 - Added fold commands
+- `run-*` implemented by the execute code plugin are treated as their original language with an update script to pull current values
 
 ### Changed
 
 - Refactored editing view codeblock parsing to use callbacks in a loop function
+- Can now update default themes
 
 ### Fixed
 

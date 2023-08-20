@@ -102,14 +102,14 @@ export class SettingsTab extends PluginSettingTab {
 				button.setTooltip("Update theme");
 				button.setIcon("save");
 				button.onClick(() => {
-					if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
-						new Notice("You cannot update the default themes"); //NOSONAR
-					else {
-						this.plugin.settings.themes[this.plugin.settings.selectedTheme] = structuredClone(this.plugin.settings.currentTheme);
-						this.updateAlternativeHighlights(alternativeHighlightsContainer);
-						new Notice(`${this.plugin.settings.selectedTheme} theme saved successfully!`); //NOSONAR
-						(async () => {await this.plugin.saveSettings();})();
-					}
+					// if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
+					// 	new Notice("You cannot update the default themes"); //NOSONAR
+					// else {
+					this.plugin.settings.themes[this.plugin.settings.selectedTheme] = structuredClone(this.plugin.settings.currentTheme);
+					this.updateAlternativeHighlights(alternativeHighlightsContainer);
+					new Notice(`${this.plugin.settings.selectedTheme} theme saved successfully!`); //NOSONAR
+					(async () => {await this.plugin.saveSettings();})();
+					// }
 				});
 			})
 			.addExtraButton(button => {

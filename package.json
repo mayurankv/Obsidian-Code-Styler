@@ -8,13 +8,13 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"update": "ncu -u && npm install && node manual-update.mjs",
 		"lint": "eslint --fix --max-warnings=0 src && stylelint --fix --max-warnings=0 src/styles.css src/css",
-		"version": "node version-bump.mjs",
+		"version": "node version-bump.mjs"
 	},
 	"keywords": [],
 	"author": "Mayuran Visakan",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.5.0",
+		"@types/node": "^20.5.1",
 		"@typescript-eslint/eslint-plugin": "^6.4.0",
 		"@typescript-eslint/parser": "^6.4.0",
 		"builtin-modules": "3.3.0",
@@ -22,7 +22,7 @@
 		"eslint": "^8.47.0",
 		"eslint-plugin-json": "^3.1.0",
 		"obsidian": "latest",
-		"stylelint": "^15.10.2",
+		"stylelint": "^15.10.3",
 		"stylelint-config-idiomatic-order": "^9.0.0",
 		"stylelint-config-standard": "^34.0.0",
 		"stylelint-declaration-block-no-ignored-properties": "^2.7.0",
@@ -35,7 +35,7 @@
 		"stylelint-plugin-defensive-css": "^0.8.1",
 		"stylelint-stylistic": "^0.4.3",
 		"stylelint-use-logical-spec": "^5.0.0",
-		"tslib": "2.6.1",
+		"tslib": "2.6.2",
 		"typescript": "5.1.6"
 	},
 	"dependencies": {
