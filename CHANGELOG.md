@@ -19,6 +19,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.8] - 2023-08-23
+
 ### Added
 
 - Added fold commands
@@ -189,7 +191,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.7...HEAD
+[Unreleased]: /../../compare/1.0.8...HEAD
+[1.0.8]: /../../compare/1.0.7...1.0.8
 [1.0.7]: /../../compare/1.0.6...1.0.7
 [1.0.6]: /../../compare/1.0.5...1.0.6
 [1.0.5]: /../../compare/1.0.4...1.0.5
