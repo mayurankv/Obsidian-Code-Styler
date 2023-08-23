@@ -6,7 +6,7 @@ pre.code-styler-pre code ~ code.language-output {
 	border-top: var(--header-separator-width) solid var(--code-styler-header-separator-colour);
 	margin-bottom: 0;
 }
-pre.code-styler-pre.code-styler-collapsed code ~ code.language-output {
+pre.code-styler-pre.code-styler-folded code ~ code.language-output {
 	border-top-width: 0;
 	border-top-color: transparent;
 }
@@ -31,7 +31,7 @@ pre.code-styler-pre button.run-code-button {
 	height: 14px;
 	margin-bottom: 6px !important;
 }
-pre.code-styler-pre.code-styler-collapsed button.run-code-button {
+pre.code-styler-pre.code-styler-folded button.run-code-button {
 	top: 500px;
 }
 pre.code-styler-pre button.run-code-button::before {
@@ -135,10 +135,7 @@ pre.code-styler-pre div.code-block-highlight-wrap {
 	visibility: visible;
 	will-change: margin-right, clip-path;
 }
-/*! Complicated */
-body:not(.code-styler-show-langicons-always):not(.code-styler-show-langnames-always) .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre .code-styler-header-container) + .edit-block-button,
-body:not(.code-styler-show-langnames-always) .cm-embed-block .code-styler-pre-parent:not(:has( pre.code-styler-pre .code-styler-header-container-specific)):not(:has( pre.code-styler-pre .code-styler-header-container img.code-styler-icon)) + .edit-block-button,
-body .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre:not([class*='language-']) .code-styler-header-container) + .edit-block-button { /*? Depending on header visibility */
+body .cm-embed-block .code-styler-pre-parent:has( pre.code-styler-pre .code-styler-header-container-hidden) + .edit-block-button {
 	--copy-code-header-right-margin: 4px;
 	top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal));
 }

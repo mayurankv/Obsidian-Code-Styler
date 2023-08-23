@@ -1,46 +1,28 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Annotation } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, Line, SelectionRange } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
-//NOSONAR
-// import { LanguageSupport } from "@codemirror/language"; //NOTE: For future CM6 Compatibility
-// import { highlightTree, classHighlighter } from "@lezer/highlight"; //NOTE: For future CM6 Compatibility
-// import { languages } from "@codemirror/language-data"; //NOTE: For future CM6 Compatibility
 
 import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
-import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, getLineNumberDisplay } from "./CodeblockDecorating";
+import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, getLineNumberDisplay, isHeaderHidden } from "./CodeblockDecorating";
+
+interface SettingsState {
+	excludedCodeblocks: string;
+	excludedLanguages: string;
+	alternativeHighlights: Array<string>;
+}
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
-	const codeblockLineNumberCharWidth = StateField.define<number>({
-		create(state: EditorState): number {
-			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
-		},
-		update(value: number, transaction: Transaction): number {
-			return getCharWidth(transaction.state,value);
-		}
-	});
-	const codeblockLines = ViewPlugin.fromClass(
+	const codeblockLines = ViewPlugin.fromClass( //TODO (@mayurankv) Update
 		class CodeblockLines {
 			settings: CodeStylerSettings;
-			currentSettings: {
-				excludedCodeblocks: string;
-				excludedLanguages: string;
-				collapsePlaceholder: string;
-				alternativeHighlights: Array<string>;
-			};
 			decorations: DecorationSet;
 			mutationObserver: MutationObserver;
 		
 			constructor(view: EditorView) {
 				this.settings = settings;
-				this.currentSettings = {
-					excludedCodeblocks: settings.excludedCodeblocks,
-					excludedLanguages: settings.excludedLanguages,
-					collapsePlaceholder: "",
-					alternativeHighlights: [],
-				};
 				this.decorations = Decoration.none;
 				this.buildDecorations(view);
 				this.mutationObserver = new MutationObserver((mutations) => {mutations.forEach((mutation: MutationRecord) => {
@@ -49,7 +31,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
 							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-end")
 					)) {
-						this.forceUpdate(view);
+						this.buildDecorations(view);
+						view.requestMeasure();
 					}
 				});
 				});
@@ -57,30 +40,16 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					attributes: true,
 					childList: true,
 					subtree: true,
-					attributeFilter: ["class"], // Only observe changes to the 'class' attribute
+					attributeFilter: ["class"],
 				});
-			}
-		
-			forceUpdate(view: EditorView) {
-				this.buildDecorations(view);
-				view.requestMeasure();
 			}
 		
 			update(update: ViewUpdate) {
 				if (update.docChanged || 
 					update.viewportChanged || 
 					update.state.field(editorLivePreviewField) !== update.startState.field(editorLivePreviewField) ||
-					this.settings.excludedCodeblocks !== this.currentSettings.excludedCodeblocks ||
-					this.settings.excludedLanguages !== this.currentSettings.excludedLanguages ||
-					this.settings.currentTheme.settings.header.collapsePlaceholder !== this.currentSettings.collapsePlaceholder ||
-					!arraysEqual(Object.keys(this.settings.currentTheme.colours.light.highlights.alternativeHighlights),this.currentSettings.alternativeHighlights)
+					!settingsEqual(update.state.field(settingsState),update.startState.field(settingsState))
 				) {
-					this.currentSettings = structuredClone({
-						excludedCodeblocks: this.settings.excludedCodeblocks,
-						excludedLanguages: this.settings.excludedLanguages,
-						collapsePlaceholder: this.settings.currentTheme.settings.header.collapsePlaceholder,
-						alternativeHighlights: Object.keys(this.settings.currentTheme.colours.light.highlights.alternativeHighlights),
-					});
 					this.buildDecorations(update.view);
 				}
 			}
@@ -115,7 +84,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								}
 								maxLineNum = lineNumberCount - line.number - 1 + codeblockParameters.lineNumbers.offset;
 								if (maxLineNum.toString().length > 2)
-									lineNumberMargin = maxLineNum.toString().length * view.state.field(codeblockLineNumberCharWidth);
+									lineNumberMargin = maxLineNum.toString().length * view.state.field(charWidthState);
 								else
 									lineNumberMargin = undefined;
 							}
@@ -139,85 +108,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
-			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(codeblockCollapse) || Decoration.none), // eslint-disable-line @typescript-eslint/no-unused-vars
+			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(foldDecorations) || Decoration.none), // eslint-disable-line @typescript-eslint/no-unused-vars
 		}
 	);
-	const codeblockHeader = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet { // eslint-disable-line @typescript-eslint/no-unused-vars
-			return Decoration.none;    
-		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (editingViewIgnore(transaction.state))
-				return Decoration.none;
-			const builder = new RangeSetBuilder<Decoration>();
-			let codeblockParameters: CodeblockParameters;
-			runOnDelimiters(transaction.state,(line: Line, lineText: string)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
-				codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-				if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
-					if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-						builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,settings.currentTheme.settings,languageIcons), block: true, side: -1}));
-					else
-						return {continue: true};
-				}
-				return {continue: false};
-			});
-			return builder.finish();
-		},
-		provide(field: StateField<DecorationSet>): Extension {
-			return EditorView.decorations.from(field);
-		}
-	});
-	const codeblockCollapse = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet {
-			if (editingViewIgnore(state))
-				return Decoration.none;
-			const builder = new RangeSetBuilder<Decoration>();
-			let codeblockParameters: CodeblockParameters;
-			runOnDelimiters(state,(line: Line, lineText: string)=>{
-				codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-				if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore && codeblockParameters.fold.enabled) {
-					if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-						return {continue: false, line: line};
-					else
-						return {continue: true};
-				}
-				return {continue: false};
-			},(collapseStart: Line, collapseEnd: Line)=>{
-				builder.add(collapseStart.from,collapseEnd.to,Decoration.replace({effect: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to)), block: true, inclusive: true}));
-			});
-			return builder.finish();
-		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			value = value.map(transaction.changes);
-			for (const effect of transaction.effects) {
-				if (effect.is(collapse))
-					value = value.update({add: [effect.value], sort: true});
-				else if (effect.is(uncollapse))
-					value = value.update({filterFrom: effect.value.filterFrom, filterTo: effect.value.filterTo, filter: effect.value.filter});
-			}
-			return value;
-		},
-		provide(field: StateField<DecorationSet>): Extension {
-			return EditorView.decorations.from(field);
-		},
-	});
-	const temporarilyUncollapsed = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet { // eslint-disable-line @typescript-eslint/no-unused-vars
-			return Decoration.none;
-		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			value = value.map(transaction.changes);
-			const temporaryUncollapseAnnotationInstance = transaction.annotation(temporaryUncollapseAnnotation);
-			if (temporaryUncollapseAnnotationInstance) {
-				if (temporaryUncollapseAnnotationInstance.uncollapse)
-					value = value.update({add: [temporaryUncollapseAnnotationInstance.decorationRange], sort: true});
-				else
-					value = value.update({filterFrom: temporaryUncollapseAnnotationInstance.decorationRange.from, filterTo: temporaryUncollapseAnnotationInstance.decorationRange.to, filter: (from: number, to: number, value: Decoration)=>!(from === temporaryUncollapseAnnotationInstance.decorationRange.from && to === temporaryUncollapseAnnotationInstance.decorationRange.to)}); // eslint-disable-line @typescript-eslint/no-unused-vars
-			}
-			return value;
-		}
-	});
-	const inlineCodeDecorator = ViewPlugin.fromClass(
+	const inlineCodeDecorator = ViewPlugin.fromClass( //TODO (@mayurankv) Update
 		class InlineCodeDecoration {
 			decorations: DecorationSet;
 			settings: CodeStylerSettings;
@@ -335,61 +229,146 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			decorations: (value) => value.decorations,
 		}
 	);
-	function cursorIntoCollapsedTransactionFilter() {
-		return EditorState.transactionFilter.of((transaction) => {
-			const extraTransactions: Array<TransactionSpec> = [];
-			const collapsedRangeSet = transaction.startState.field(codeblockCollapse,false)?.map(transaction.changes) ?? Decoration.none;
-			const temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false)?.map(transaction.changes) ?? Decoration.none;
-			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
-				collapsedRangeSet.between(range.from, range.to, (collapseStartFrom, collapseEndTo, decorationValue) => {
-					if (collapseStartFrom <= range.head && range.head <= collapseEndTo)
-						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
+	
+	const settingsState = StateField.define<SettingsState>({
+		create(): SettingsState {
+			return {
+				excludedCodeblocks: settings.excludedCodeblocks,
+				excludedLanguages: settings.excludedLanguages,
+				alternativeHighlights: Object.keys(settings.currentTheme.colours.light.highlights.alternativeHighlights),
+			};
+		},
+		update(value: SettingsState): SettingsState {
+			if (settingsChanges(value,settings)) {
+				return {
+					excludedCodeblocks: settings.excludedCodeblocks,
+					excludedLanguages: settings.excludedLanguages,
+					alternativeHighlights: Object.keys(settings.currentTheme.colours.light.highlights.alternativeHighlights),
+				};
+			}
+			return value;
+		}
+	});
+	const charWidthState = StateField.define<number>({
+		create(state: EditorState): number {
+			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
+		},
+		update(value: number, transaction: Transaction): number {
+			return getCharWidth(transaction.state,value);
+		}
+	});
+	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
+		create(state: EditorState): DecorationSet {
+			if (editingViewIgnore(state))
+				return Decoration.none;
+			return buildHeaders(state);
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			if (editingViewIgnore(transaction.state))
+				return Decoration.none;
+			return buildHeaders(transaction.state,(position)=>isFolded(transaction.state,position));
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		}
+	});
+	const foldDecorations = StateField.define<DecorationSet>({
+		create(state: EditorState): DecorationSet {
+			if (editingViewIgnore(state))
+				return Decoration.none;
+			const builder = new RangeSetBuilder<Decoration>();
+			const headerDecorationsState = state.field(headerDecorations,false) ?? Decoration.none;
+			for (let iter = headerDecorationsState.iter(); iter.value !== null; iter.next()) {
+				if (!iter.value.spec.widget.codeblockParameters.fold.enabled)
+					continue;
+				codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
+					builder.add(foldStart.from,foldEnd.to,foldDecoration((iter.value as Decoration).spec.widget.codeblockParameters.language));
 				});
-				for (let iter = temporarilyUncollapsedRangeSet.iter(); iter.value !== null; iter.next()) {
+			}
+			return builder.finish();
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			value = value.map(transaction.changes);
+			value = value.update({add: transaction.effects.filter(effect=>(effect.is(fold)||effect.is(unhideFold))).map(effect=>foldRegion(effect.value))}); //TODO (@mayurankv) Can I remove `, sort: true`
+			transaction.effects.filter(effect=>(effect.is(unfold)||effect.is(hideFold))).forEach(effect=>value=value.update(unfoldRegion(effect.value)));
+			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguage(effect.value)));
+			return value;
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		},
+	});
+	const hiddenDecorations = StateField.define<DecorationSet>({
+		create(): DecorationSet {
+			return Decoration.none;
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			if (transaction.effects.some(effect=>effect.is(foldAll)))
+				return Decoration.none;
+			value = value.map(transaction.changes);
+			value = value.update({add: transaction.effects.filter(effect=>effect.is(hideFold)).map(effect=>effect.value)}); //TODO (@mayurankv) Can I remove `, sort: true`
+			transaction.effects.filter(effect=>effect.is(unhideFold)).forEach(effect=>value=value.update(unhideFoldUpdate(effect.value)));
+			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguage(effect.value)));
+			return value;
+		}
+	});
+
+	function cursorFoldExtender() {
+		return EditorState.transactionExtender.of((transaction: Transaction) => {
+			const addEffects: Array<StateEffect<unknown>> = [];
+			const foldDecorationsState = transaction.startState.field(foldDecorations,false)?.map(transaction.changes) ?? Decoration.none;
+			const hiddenDecorationsState = transaction.startState.field(hiddenDecorations,false)?.map(transaction.changes) ?? Decoration.none;
+			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
+				foldDecorationsState.between(range.from, range.to, (foldFrom, foldTo, decorationValue) => {
+					if (foldFrom <= range.head && range.head <= foldTo)
+						addEffects.push(hideFold.of({from: foldFrom, to: foldTo, value: decorationValue}));
+				});
+				for (let iter = hiddenDecorationsState.iter(); iter.value !== null; iter.next()) {
 					if (!(iter.from <= range.head && range.head <= iter.to))
-						extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(iter.from,iter.to)), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: iter.from, to: iter.to, value: iter.value}, uncollapse: false})});
+						addEffects.push(unhideFold.of({from: iter.from, to: iter.to, value: iter.value}));
 				}
 			});
-			if (extraTransactions.length !== 0)
-				return [transaction,...extraTransactions];
-			return transaction;
+			return (addEffects.length !== 0)?{effects: addEffects}:null;
 		});
 	}
-	//todo Finish this filter
-	// function manageCollapsedTransactionFilter() {
-	// 	return EditorState.transactionFilter.of((transaction) => {
-	// 		const extraTransactions: Array<TransactionSpec> = [];
-	// 		const collapsedRangeSet = transaction.startState.field(codeblockCollapse,false) ?? Decoration.none;
-	// 		const temporarilyUncollapsedRangeSet = transaction.startState.field(temporarilyUncollapsed,false) ?? Decoration.none;
-	// 		transaction.changes.iterChanges((fromA,toA,fromB,toB,inserted)=>{
-	// 			if (fromB === toB && inserted.toString() === '') {
-	// 				console.log(fromA,toA,fromB,toB,inserted)
-	// 				collapsedRangeSet.between(fromA-100, toA+100, (collapseStartFrom, collapseEndTo, decorationValue) => {
-	// 					console.log(fromA,toA,collapseStartFrom,collapseEndTo)
-	// 					if ((fromA <= collapseStartFrom && collapseStartFrom <= toA) || (fromA <= collapseEndTo && collapseEndTo <= toA))
-	// 						extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= collapseStartFrom || from >= collapseEndTo), filterFrom: collapseStartFrom, filterTo: collapseEndTo}), annotations: temporaryUncollapseAnnotation.of({decorationRange: {from: collapseStartFrom, to: collapseEndTo, value: decorationValue}, uncollapse: true})});
-	// 				});
-	// 			}
-	// 		});
-	// 		if (extraTransactions.length !== 0)
-	// 			console.log('foo',extraTransactions)
-	// 		if (extraTransactions.length !== 0)
-	// 			return [transaction,...extraTransactions];
-	// 		return transaction;
-	// 	});
-	// }
-	function documentFoldTransactionFilter() {
-		return EditorState.transactionFilter.of((transaction) => {
-			const foldAnnotationInstance = transaction.annotation(foldAnnotation);
-			if (foldAnnotationInstance) {
-				if (typeof foldAnnotationInstance?.fold !== "undefined")
-					return [transaction,...documentFold(transaction.state,foldAnnotationInstance.fold)];
+	function documentFoldExtender() {
+		return EditorState.transactionExtender.of((transaction) => {
+			let addEffects: Array<StateEffect<unknown>> = [];
+			transaction.effects.filter(effect=>effect.is(foldAll)).forEach(effect=>{
+				if (typeof effect.value?.toFold !== "undefined")
+					addEffects = addEffects.concat(documentFold(transaction.startState,effect.value.toFold)); //TODO (@mayurankv) Does this need to be state
 				else
-					return [transaction,...documentFold(transaction.state)];
-			} else
-				return transaction;
+					addEffects = addEffects.concat(documentFold(transaction.startState));
+			});
+			return (addEffects.length !== 0)?{effects: addEffects}:null;
 		});
 	}
+	function settingsChangeExtender() {
+		return EditorState.transactionExtender.of((transaction) => {
+			let addEffects: Array<StateEffect<unknown>> = [];
+			const initialSettings = transaction.startState.field(settingsState);
+			let readdFoldLanguages: Array<string> = [];
+			let removeFoldLanguages: Array<string> = [];
+			if (initialSettings.excludedCodeblocks !== settings.excludedCodeblocks) {
+				const initialExcludedCodeblocks = initialSettings.excludedCodeblocks.split(",").map(lang=>lang.trim());
+				const currentExcludedCodeblocks = settings.excludedCodeblocks.split(",").map(lang=>lang.trim());
+				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedCodeblocks,initialExcludedCodeblocks) as Array<string>);
+				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedCodeblocks,currentExcludedCodeblocks) as Array<string>);
+			}
+			if (initialSettings.excludedLanguages !== settings.excludedLanguages) {
+				const initialExcludedLanguages = initialSettings.excludedLanguages.split(",").map(lang=>lang.trim());
+				const currentExcludedLanguages = settings.excludedLanguages.split(",").map(lang=>lang.trim());
+				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedLanguages,initialExcludedLanguages) as Array<string>);
+				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedLanguages,currentExcludedLanguages) as Array<string>);
+			}
+			if (removeFoldLanguages.length !== 0)
+				addEffects.push(removeFold.of(removeFoldLanguages));
+			if (readdFoldLanguages.length !== 0)
+				addEffects = addEffects.concat(convertReaddFold(transaction,readdFoldLanguages));
+			return (addEffects.length !== 0)?{effects: addEffects}:null;
+		});
+	}
+	//TODO (@mayurankv) Urgent: Auto add temp unfold on type of fold and remove both fold and temp unfold for removal
 
 	class LineNumberWidget extends WidgetType {
 		lineNumber: number;
@@ -417,55 +396,47 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		codeblockParameters: CodeblockParameters;
 		themeSettings: CodeStylerThemeSettings;
 		languageIcons: Record<string,string>;
-		view: EditorView;
-		mutationObserver: MutationObserver;
+		iconURL: string | undefined;
+		folded: boolean;
+		hidden: boolean;
 	
-		constructor(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>) {
+		constructor(codeblockParameters: CodeblockParameters, folded: boolean, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>) {
 			super();
-			this.codeblockParameters = codeblockParameters;
-			this.themeSettings = themeSettings;
+			this.codeblockParameters = structuredClone(codeblockParameters);
+			this.themeSettings = structuredClone(themeSettings);
 			this.languageIcons = languageIcons;
-			this.mutationObserver = new MutationObserver((mutations) => {
-				mutations.forEach(mutation => {
-					if ((mutation.target as HTMLElement).hasAttribute("data-clicked"))
-						collapseOnClick(this.view,(mutation.target as HTMLElement));
-				});
-			});    
+			this.iconURL = getLanguageIcon(this.codeblockParameters.language,languageIcons);
+			this.folded = folded;
+			this.hidden = isHeaderHidden(this.codeblockParameters,this.themeSettings,this.iconURL);
 		}
 			
 		eq(other: HeaderWidget): boolean {
 			return (
-				this.codeblockParameters.language == other.codeblockParameters.language &&
-				this.codeblockParameters.title == other.codeblockParameters.title &&
-				this.codeblockParameters.fold.enabled == other.codeblockParameters.fold.enabled &&
-				this.codeblockParameters.fold.placeholder == other.codeblockParameters.fold.placeholder &&
-				this.themeSettings.header.collapsePlaceholder == other.themeSettings.header.collapsePlaceholder &&
-				getLanguageIcon(this.codeblockParameters.language,this.languageIcons) == getLanguageIcon(other.codeblockParameters.language,other.languageIcons)
+				this.codeblockParameters.language === other.codeblockParameters.language &&
+				this.codeblockParameters.title === other.codeblockParameters.title &&
+				this.codeblockParameters.fold.enabled === other.codeblockParameters.fold.enabled &&
+				this.codeblockParameters.fold.placeholder === other.codeblockParameters.fold.placeholder &&
+				this.themeSettings.header.foldPlaceholder === other.themeSettings.header.foldPlaceholder &&
+				this.themeSettings.header.languageIcon.display === other.themeSettings.header.languageIcon.display &&
+				this.themeSettings.header.languageTag.display === other.themeSettings.header.languageTag.display &&
+				this.folded === other.folded &&
+				this.iconURL === other.iconURL
 			);
 		}
 			
 		toDOM(view: EditorView): HTMLElement {
-			this.view = view;
-			const headerContainer = createHeader(this.codeblockParameters, this.themeSettings, this.languageIcons);
+			const headerContainer = createHeader(this.codeblockParameters,this.themeSettings,this.languageIcons);
 			if (this.codeblockParameters.language!=="")
 				headerContainer.classList.add(`language-${this.codeblockParameters.language}`);
-			headerContainer.addEventListener("mousedown",handleMouseDown);
-	
-			this.mutationObserver.observe(headerContainer,{
-				attributes: true,
-			});
+			if (this.folded)
+				headerContainer.classList.add("code-styler-header-folded");
+			headerContainer.onclick = event => {foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);}; // eslint-disable-line @typescript-eslint/no-unused-vars
 			return headerContainer;
 		}
-				
-		destroy(dom: HTMLElement) {
-			dom.removeAttribute("data-clicked");
-			dom.removeEventListener("mousedown",handleMouseDown);
-			this.mutationObserver.disconnect();
-		}
 	
-		ignoreEvent() {
-			return false;
-		}
+		// ignoreEvent() { //TODO (@mayurankv) Can I remove this?
+		// 	return false;
+		// }
 	}
 	class OpenerWidget extends WidgetType {
 		inlineCodeParameters: InlineCodeParameters;
@@ -490,65 +461,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,["code-styler-inline-opener","cm-inline-code"]);
 		}
 	}
-	
-	function documentFold(state: EditorState, fold?: boolean): Array<TransactionSpec> {
-		const extraTransactions: Array<TransactionSpec> = [];
-		const reset = (typeof fold === "undefined");
-		let folded = false;
-		let defaultFold = false;
-		let codeblockParameters: CodeblockParameters;
-		//todo May need to take into account temporarily collapsed field
-		runOnDelimiters(state,(line: Line, lineText: string)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
-			folded = false;
-			state.field(codeblockCollapse,false)?.between(line.from,line.from,()=>{
-				folded = true;
-			});
-			codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-			if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
-				if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))) {
-					if (reset)
-						defaultFold = codeblockParameters.fold.enabled;
-					return {continue: false, line: line};
-				} else
-					return {continue: true};
-			}
-			return {continue: false};
-		},(collapseStart: Line, collapseEnd: Line)=>{
-			if ((!reset && fold && !folded) || (reset && !folded && defaultFold))
-				extraTransactions.push({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
-			else if ((!reset && !fold && folded) || (reset && folded && !defaultFold))
-				extraTransactions.push({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
-		});
-		return extraTransactions;
-	}
-	function collapseOnClick(view: EditorView, target: HTMLElement) {
-		const position = view.posAtDOM(target);
-		let folded = false;
-		view.state.field(codeblockCollapse,false)?.between(position,position,()=>{
-			folded = true;
-		});
-		runOnDelimiters(view.state,(line: Line, lineText: string)=>{ // eslint-disable-line @typescript-eslint/no-unused-vars
-			if (position === line.from)
-				return {continue: false, line: line};
-			return {continue: false};
-		},(collapseStart: Line, collapseEnd: Line)=>{
-			if (folded)
-				view.dispatch({effects: uncollapse.of({filter: (from,to) => (to <= (collapseStart as Line).from || from >= (collapseEnd as Line).to), filterFrom: collapseEnd.from, filterTo: collapseEnd.to})});
-			else
-				view.dispatch({effects: collapse.of(Decoration.replace({block: true}).range(collapseStart.from,collapseEnd.to))});
-			view.requestMeasure();
-		});
-	}
-	function handleMouseDown(event: MouseEvent): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-		this.setAttribute("data-clicked","true");
-	}
 
-	function runOnDelimiters(state: EditorState, startLineCallback: (line: Line, lineText: string)=>{continue: boolean, line?: Line}, collapseCallback?: (collapseStart: Line, collapseEnd: Line)=>void): void {
-		const determineCollapse = typeof collapseCallback === "function";
-		let collapseStart: Line | null = null;
-		let collapseEnd: Line | null = null;
+	function buildHeaders(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold): DecorationSet {
+		const builder = new RangeSetBuilder<Decoration>();
 		let startLine: boolean = true;
 		let startDelimiter: string = "```";
+		let codeblockParameters: CodeblockParameters;
 		for (let i = 1; i < state.doc.lines; i++) {
 			const line = state.doc.line(i);
 			const lineText = line.text.toString();
@@ -557,62 +475,136 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (startLine) {
 					startLine = false;
 					startDelimiter = currentDelimiter;
-					const callbackResult = startLineCallback(line,lineText);
-					if (determineCollapse && typeof callbackResult.line !== "undefined")
-						collapseStart = callbackResult.line;
-					if (callbackResult.continue)
-						continue;
-				} else {
-					if (currentDelimiter === startDelimiter) {
-						startLine = true;
-						if (determineCollapse && collapseStart)
-							collapseEnd = line;
+					codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
+					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
+						if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+							builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(line.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
+						else
+							continue;
 					}
+				} else {
+					if (currentDelimiter === startDelimiter)
+						startLine = true;
 				}
 			}
-			if (determineCollapse && collapseStart && collapseEnd) {
-				collapseCallback(collapseStart,collapseEnd);
-				collapseStart = null;
-				collapseEnd = null;
-			}
 		}
+		return builder.finish();
+	}
+	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
+		const addEffects: Array<StateEffect<unknown>> = [];
+		const headerDecorationsState = transaction.state.field(headerDecorations,false) ?? Decoration.none; //TODO (@mayurankv) Refactor: Try and make this startState
+		for (let iter = headerDecorationsState.iter(); iter.value !== null; iter.next()) {
+			if (!iter.value.spec.widget.codeblockParameters.fold.enabled || !readdLanguages.includes(iter.value.spec.widget.codeblockParameters.language))
+				continue;
+			codeblockFoldCallback(iter.from,transaction.state,(foldStart,foldEnd)=>{
+				addEffects.push(fold.of({from: foldStart.from,to: foldEnd.to,value: {spec: {language: (iter.value as Decoration).spec.widget.codeblockParameters.language}}}));
+			});
+		}
+		return addEffects;
+	}
+	function isFolded(state: EditorState, position: number): boolean {
+		let folded = false;
+		state.field(foldDecorations,false)?.between(position,position,()=>{
+			folded = true;
+		});
+		return folded;
+	}
+	function documentFold(state: EditorState, toFold?: boolean): Array<StateEffect<unknown>> {
+		const addEffects: Array<StateEffect<unknown>> = [];
+		const reset = (typeof toFold === "undefined");
+		const headerDecorationsState = state.field(headerDecorations,false) ?? Decoration.none;
+		for (let iter = headerDecorationsState.iter(); iter.value !== null; iter.next()) {
+			if (iter.value.spec.widget.hidden)
+				continue;
+			const folded = iter.value.spec.widget.folded;
+			const defaultFold = iter.value.spec.widget.codeblockParameters.fold.enabled;
+			codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
+				if ((!reset && toFold && !folded) || (reset && !folded && defaultFold))
+					addEffects.push(fold.of({from: foldStart.from, to: foldEnd.to, value: {spec: {language: (iter.value as Decoration).spec.widget.codeblockParameters.language}}}));
+				else if ((!reset && !toFold && folded) || (reset && folded && !defaultFold))
+					addEffects.push(unfold.of({from: foldStart.from, to: foldEnd.to}));
+			});
+		}
+		return addEffects;
 	}
 
-
-	return [codeblockLineNumberCharWidth,codeblockLines,codeblockHeader,codeblockCollapse,temporarilyUncollapsed,inlineCodeDecorator,cursorIntoCollapsedTransactionFilter(),documentFoldTransactionFilter()];
+	return [
+		settingsState,charWidthState,headerDecorations,foldDecorations,hiddenDecorations,
+		codeblockLines,inlineCodeDecorator,
+		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender()
+		// ,readdConversionExtender()
+	];
 }
 
-const collapse: StateEffectType<Range<Decoration>> = StateEffect.define();
-const uncollapse: StateEffectType<{filter: (from: number, to: number) => boolean, filterFrom: number, filterTo: number}> = StateEffect.define();
-const temporaryUncollapseAnnotation = Annotation.define<{decorationRange: Range<Decoration>, uncollapse: boolean}>();
-const foldAnnotation = Annotation.define<{fold?: boolean}>();
+const fold: StateEffectType<{from: number, to: number, value: {spec: {language: string}}}> = StateEffect.define();
+const unfold: StateEffectType<{from: number, to: number}> = StateEffect.define();
+const hideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
+const unhideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
+const removeFold: StateEffectType<Array<string>> = StateEffect.define();
+const foldAll: StateEffectType<{toFold?: boolean}> = StateEffect.define();
 
-export function editingDocumentFold(view: EditorView, fold?: boolean) {
-	if (typeof fold !== "undefined")
-		view.dispatch({annotations: foldAnnotation.of({fold: fold})});
-	else
-		view.dispatch({annotations: foldAnnotation.of({})});
+function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
+	const markDecorations: Array<Range<Decoration>> = [];
+	//@ts-expect-error Undocumented Obsidian API
+	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime); // Alternatives: `text/x-${parameters.language}`, window.CodeMirror.findModeByName('js').mime
+	const state = window.CodeMirror.startState(mode);
+	if (mode?.token) {
+		const stream = new window.CodeMirror.StringStream(text);
+		while (!stream.eol()) {
+			const style = mode.token(stream,state);
+			if (style)
+				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})});
+			stream.start = stream.pos;
+		}
+	}
+	return markDecorations;
+}
+
+export function editingDocumentFold(view: EditorView, toFold?: boolean) {
+	view.dispatch({effects: foldAll.of((typeof toFold !== "undefined")?{toFold: toFold}:{})});
 	view.requestMeasure();
 }
-
-function getCharWidth(state: EditorState, default_value: number): number {
-	const charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
-		const nextElement = beginningElement.previousElementSibling as HTMLElement;
-		if (!nextElement)
-			return result;
-		const lineNumberElement = nextElement.querySelector("[class^='code-styler-line-number']") as HTMLElement;
-		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
-			return result;
-		const computedStyles = window.getComputedStyle(lineNumberElement, null);
-		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length);
-		return result;
-	},[]);
-	if (charWidths.length === 0)
-		return default_value;
-	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
+function foldOnClick(view: EditorView, target: HTMLElement, folded: boolean, language: string) {
+	codeblockFoldCallback(view.posAtDOM(target),view.state,(foldStart,foldEnd)=>{
+		view.dispatch({effects: foldLines(!folded,{from: foldStart.from, to: foldEnd.to, value: {spec: {language: language}}})});
+		view.requestMeasure();
+	});
+}
+function foldLines(toFold: boolean, foldInfo: {from: number, to: number,value: {spec: {language: string}}}): StateEffect<unknown> {
+	return toFold?fold.of(foldInfo):unfold.of({from: foldInfo.from, to: foldInfo.to});
+}
+function foldRegion({from: foldFrom, to: foldTo, value: {spec: {language}}}: {from: number, to: number,value: {spec: {language: string}}}): Range<Decoration> {
+	return foldDecoration(language).range(foldFrom,foldTo);
+}
+function unfoldRegion({from: foldFrom, to: foldTo}: {from: number, to: number}) {
+	return {filter: (from: number, to: number) => (to <= foldFrom || from >= foldTo), filterFrom: foldFrom, filterTo: foldTo};
+}
+function removeFoldLanguage(languages: Array<string>) {
+	return {filter: (from: number, to: number, value: Decoration) => !languages.includes(value?.spec?.language)};
+}
+function unhideFoldUpdate(range: Range<Decoration>) {
+	return {filterFrom: range.from, filterTo: range.to, filter: (from: number, to: number)=>!(from === range.from && to === range.to)};
+}
+function foldDecoration(language: string): Decoration {
+	return Decoration.replace({block: true, language: language});
 }
 
-function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
+function codeblockFoldCallback(startPosition: number, state: EditorState, foldCallback: (foldStart: Line, foldEnd: Line)=>void) {
+	const foldStart = state.doc.lineAt(startPosition);
+	const startDelimiter = testOpeningLine(foldStart.text.toString());
+	let foldEnd: Line | null = null;
+	for (let i = foldStart.number+1; i < state.doc.lines; i++) {
+		const line = state.doc.line(i);
+		const lineText = line.text.toString();
+		if (testOpeningLine(lineText) === startDelimiter) {
+			foldEnd = line;
+			break;
+		}
+	}
+	if (foldEnd !== null)
+		foldCallback(foldStart,foldEnd);
+}
+function findUnduplicatedCodeblocks(view: EditorView): Array<SyntaxNodeRef> { //TODO (@mayurankv) Can I get around this?
 	const codeblocks = findVisibleCodeblocks(view);
 	const unduplicatedCodeblocks: Array<SyntaxNodeRef> = [];
 	for (let i = 0; i < codeblocks.length; i++)
@@ -636,35 +628,6 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
-//NOSONAR
-// function languageHighlight({start,text,language}: {start: number, text: string, language: string},loadedLanguages: Record<string,LanguageSupport>): Array<Range<Decoration>> {
-// 	//NOTE: Uses codemirror 6 implementation which Obsidian does not currently use
-// 	let markDecorations: Array<Range<Decoration>> = [];
-// 	const tree = loadedLanguages[language].language.parser.parse(text);
-// 	highlightTree(tree,classHighlighter,(from,to,token) => { //todo (@mayurankv) Change this highlighter
-// 		if (token)
-// 			markDecorations.push({from: start+from, to: start+to, value: Decoration.mark({class: token})});
-// 	});
-// 	return markDecorations;
-// }
-function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
-	//NOTE: Uses CodeMirror 5 implementation which Obsidian currently uses
-	const markDecorations: Array<Range<Decoration>> = [];
-	//@ts-expect-error Undocumented Obsidian API
-	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime); // Alternatives: `text/x-${parameters.language}`, window.CodeMirror.findModeByName('js').mime
-	const state = window.CodeMirror.startState(mode);
-	if (mode?.token) {
-		const stream = new window.CodeMirror.StringStream(text);
-		while (!stream.eol()) {
-			const style = mode.token(stream,state);
-			if (style)
-				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})});
-			stream.start = stream.pos;
-		}
-	}
-	return markDecorations;
-}
-
 function editingViewIgnore(state: EditorState): boolean {
 	if (!state.field(editorLivePreviewField))
 		return true;
@@ -672,4 +635,29 @@ function editingViewIgnore(state: EditorState): boolean {
 	if (typeof filePath !== "undefined")
 		return this.app.metadataCache.getCache(filePath)?.frontmatter?.["code-styler-ignore"] === true;
 	return false;
+}
+function getCharWidth(state: EditorState, default_value: number): number {
+	const charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
+		const nextElement = beginningElement.previousElementSibling as HTMLElement;
+		if (!nextElement)
+			return result;
+		const lineNumberElement = nextElement.querySelector("[class^='code-styler-line-number']") as HTMLElement;
+		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
+			return result;
+		const computedStyles = window.getComputedStyle(lineNumberElement, null);
+		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length);
+		return result;
+	},[]);
+	if (charWidths.length === 0)
+		return default_value;
+	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
+}
+function settingsChanges(settingsState: SettingsState,settings: CodeStylerSettings) {
+	return !settingsEqual(settingsState,{excludedCodeblocks: settings.excludedCodeblocks, excludedLanguages: settings.excludedLanguages, alternativeHighlights: Object.keys(settings.currentTheme.colours.light.highlights.alternativeHighlights)});
+}
+function settingsEqual(initialSettingsState: SettingsState, newSettingsState: SettingsState) {
+	return initialSettingsState.excludedCodeblocks === newSettingsState.excludedCodeblocks && initialSettingsState.excludedLanguages === newSettingsState.excludedLanguages && arraysEqual(initialSettingsState.alternativeHighlights,newSettingsState.alternativeHighlights);
+}
+function setDifference(array1: Array<unknown>, array2: Array<unknown>) {
+	return array1.filter(element => !array2.includes(element));
 }

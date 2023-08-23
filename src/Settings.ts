@@ -72,7 +72,7 @@ export interface CodeStylerThemeSettings {
 			displayColour: boolean;
 		},
 		fontSize: number;
-		collapsePlaceholder: string;
+		foldPlaceholder: string;
 	},
 	highlights: {
 		activeCodeblockLine: boolean;
@@ -145,7 +145,7 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 			displayColour: true,
 		},
 		fontSize: 14,
-		collapsePlaceholder: "",
+		foldPlaceholder: "",
 	},
 	highlights: {
 		activeCodeblockLine: false,
@@ -315,6 +315,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 };
 
 // Constants
+export const FOLD_PLACEHOLDER = "Folded Code";
 export const PARAMETERS = ["title","fold","ln","unwrap","ignore"];
 export const TRANSITION_LENGTH = 240; // 240ms
 

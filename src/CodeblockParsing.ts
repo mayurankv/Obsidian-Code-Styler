@@ -40,7 +40,7 @@ export interface Highlights {
 
 interface ExternalPlugin extends Plugin {
 	supportedLanguages?: Array<string>;
-	code?: (source: string, sourcePath: string)=>{
+	code?: (source: string, sourcePath: string)=>Promise<{
 		start: number;
 		code: string;
 		language: string;
@@ -48,7 +48,7 @@ interface ExternalPlugin extends Plugin {
 		lines: Array<string>;
 		filePath: string;
 		linenumber: number;
-	};
+	}>;
 	analyzeHighLightLines?: (lines: string[], source: string | string[])=>Map<number,boolean>;
 }
 

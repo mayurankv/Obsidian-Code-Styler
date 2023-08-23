@@ -28,7 +28,7 @@ const THEME_STYLES: Record<string,ThemeStyle> = {
 	},
 	"Minimal": {
 		extra: `
-			.markdown-source-view.mod-cm6.is-readable-line-width :not(pre.code-styler-pre) > [class^="code-styler-header-container"] {
+			.markdown-source-view.mod-cm6.is-readable-line-width :not(pre.code-styler-pre) > .code-styler-header-container {
 				box-sizing: border-box;
 			}
 		`,
@@ -100,7 +100,7 @@ function getThemeColours (themeModeColours: CodeStylerThemeModeColours): string 
 
 function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentTheme: string): string {
 	return `
-		body.code-styler [class^="code-styler-header-language-tag"] {
+		body.code-styler .code-styler-header-language-tag {
 			--code-styler-header-language-tag-text-bold: ${themeSettings.header.languageTag.textBold?"bold":"normal"};
 			--code-styler-header-language-tag-text-italic: ${themeSettings.header.languageTag.textItalic?"italic":"normal"};
 			font-family: ${themeSettings.header.languageTag.textFont!==""?themeSettings.header.languageTag.textFont:"var(--font-text)"};
@@ -126,12 +126,12 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 			${themeSettings.header.languageIcon.displayColour?"":"--icon-filter: grayscale(1);"}
 		}
 		${THEME_STYLES?.[currentTheme]?.border?`
-			.markdown-source-view :not(pre.code-styler-pre) > [class^="code-styler-header-container"] {
+			.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container {
 				--code-styler-header-border:`+ //@ts-expect-error Does Exist
 					THEME_STYLES[currentTheme].border.style+`;
 				--header-separator-width-padding: calc(var(--header-separator-width) - `+ //@ts-expect-error Does Exist
 					THEME_STYLES[currentTheme].border.size+`px);
-				--collapsed-bottom-border: var(--code-styler-header-border);
+				--folded-bottom-border: var(--code-styler-header-border);
 			}
 		`:""}
 		${THEME_STYLES?.[currentTheme]?.scrollbar?`
@@ -157,7 +157,7 @@ function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectL
 			`;
 			if (THEME_STYLES?.[currentTheme]?.border) {
 				result += `
-					.markdown-source-view :not(pre.code-styler-pre) > [class^="code-styler-header-container"].language-${languageName}  {
+					.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.language-${languageName}  {
 						--language-border-width: ${ //@ts-expect-error Does exist
 	themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth+THEME_STYLES[currentTheme].border.size:0}px;
 					}`;
@@ -172,25 +172,13 @@ function addThemeSettingsClasses (themeSettings: CodeStylerThemeSettings): void 
 	themeSettings.gutter.highlight ? document.body.classList.add("code-styler-gutter-highlight") : document.body.classList.remove("code-styler-gutter-highlight");
 	themeSettings.gutter.activeLine ? document.body.classList.add("code-styler-gutter-active-line") : document.body.classList.remove("code-styler-gutter-active-line");
 	
-	document.body.classList.remove("code-styler-active-line-highlight","code-styler-active-line-highlight-codeblock","code-styler-active-line-highlight-editor");
+	document.body.classList.remove("code-styler-active-line-highlight","code-styler-active-line-highlight-codeblock","code-styler-active-line-highlight-editor"); //TODO (@mayurankv) Is this section necessary? Is this function necessary?
 	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colours
 		document.body.classList.add("code-styler-active-line-highlight");
 	else if (themeSettings.highlights.activeEditorLine && !themeSettings.highlights.activeCodeblockLine) // Only outside codeblocks
 		document.body.classList.add("code-styler-active-line-highlight-editor");
 	else if (!themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Only inside codeblocks
 		document.body.classList.add("code-styler-active-line-highlight-codeblock");
-	
-	document.body.classList.remove("code-styler-show-langnames","code-styler-show-langnames-always");
-	if (themeSettings.header.languageTag.display === "always")
-		document.body.classList.add("code-styler-show-langnames-always");
-	else if (themeSettings.header.languageTag.display === "if_header_shown")
-		document.body.classList.add("code-styler-show-langnames");
-
-	document.body.classList.remove("code-styler-show-langicons","code-styler-show-langicons-always");
-	if (themeSettings.header.languageIcon.display === "always")
-		document.body.classList.add("code-styler-show-langicons-always");
-	else if (themeSettings.header.languageIcon.display === "if_header_shown")
-		document.body.classList.add("code-styler-show-langicons");
 }
 
 export function removeStylesAndClasses(): void {
@@ -200,10 +188,6 @@ export function removeStylesAndClasses(): void {
 		"code-styler-show-line-numbers",
 		"code-styler-gutter-highlight",
 		"code-styler-gutter-active-line",
-		"code-styler-show-langnames",
-		"code-styler-show-langnames-always",
-		"code-styler-show-langicons",
-		"code-styler-show-langicons-always",
 	);
 }
 

@@ -4,6 +4,6 @@ div.print {
 .code-styler div.print pre.code-styler-pre code {
 	max-height: unset !important;
 }
-.code-styler div.print pre.code-styler-pre.code-styler-collapsed code {
+.code-styler div.print pre.code-styler-pre.code-styler-folded code {
 	display: none !important;
 }

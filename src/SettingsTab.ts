@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from "./Settings";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from "./Settings";
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -56,7 +56,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.excludedCodeblocks = value;
 					(async () => {await this.plugin.saveSettings();})();
 					clearTimeout(ignoreTimeout);
-					ignoreTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
+					ignoreTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
 				}));
 		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
 		//TODO (@mayurankv) Re-render (LP)
@@ -70,7 +70,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.excludedLanguages = value;
 					(async () => {await this.plugin.saveSettings();})();
 					clearTimeout(excludeTimeout);
-					excludeTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
+					excludeTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
 				}));
 		new Setting(containerEl)
 			.setName("Style Code on Export")
@@ -102,14 +102,10 @@ export class SettingsTab extends PluginSettingTab {
 				button.setTooltip("Update theme");
 				button.setIcon("save");
 				button.onClick(() => {
-					// if (this.plugin.settings.selectedTheme in DEFAULT_SETTINGS.themes)
-					// 	new Notice("You cannot update the default themes"); //NOSONAR
-					// else {
 					this.plugin.settings.themes[this.plugin.settings.selectedTheme] = structuredClone(this.plugin.settings.currentTheme);
 					this.updateAlternativeHighlights(alternativeHighlightsContainer);
 					new Notice(`${this.plugin.settings.selectedTheme} theme saved successfully!`); //NOSONAR
 					(async () => {await this.plugin.saveSettings();})();
-					// }
 				});
 			})
 			.addExtraButton(button => {
@@ -199,7 +195,7 @@ export class SettingsTab extends PluginSettingTab {
 						wrapLinesActiveToggle.setValue(false);
 					this.disableableComponents["wrapLines"].forEach(component => {component.setDisabled(!value);});
 					(async () => {await this.plugin.saveSettings();})();  
-					this.plugin.rerenderPreview();
+					this.plugin.renderReadingView();
 				}));
 		new Setting(containerEl)
 			.setName("Codeblock Curvature")
@@ -356,19 +352,19 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.title.textColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.title.textColour = saveColour;},
 			);});
-		let collapsePlaceholderTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		let foldPlaceholderTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
 		//TODO (@mayurankv) Re-render (LP)
 		new Setting(containerEl)
-			.setName("Collapse Placeholder Text")
-			.setDesc("Title placeholder text for collapsed code when no title parameter is set.")
+			.setName("Fold Placeholder Text")
+			.setDesc("Title placeholder text for folded code when no title parameter is set.")
 			.addText(text => text
-				.setPlaceholder("Collapsed Code")
-				.setValue(this.plugin.settings.currentTheme.settings.header.collapsePlaceholder)
+				.setPlaceholder(FOLD_PLACEHOLDER)
+				.setValue(this.plugin.settings.currentTheme.settings.header.foldPlaceholder)
 				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.header.collapsePlaceholder = value;
+					this.plugin.settings.currentTheme.settings.header.foldPlaceholder = value;
 					(async () => {await this.plugin.saveSettings();})();
-					clearTimeout(collapsePlaceholderTimeout);
-					collapsePlaceholderTimeout = setTimeout(()=>this.plugin.rerenderPreview(),1000);
+					clearTimeout(foldPlaceholderTimeout);
+					foldPlaceholderTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
 				}));
 		new Setting(containerEl)
 			.setName("Header Separator Colour")
@@ -391,6 +387,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.currentTheme.settings.header.languageTag.display = value;
 					this.disableableComponents["headerLanguageTags"].forEach(component => {component.setDisabled(value==="none");});
 					(async () => {await this.plugin.saveSettings();})();
+					this.plugin.renderReadingView();
 				}));
 		new Setting(containerEl)
 			.setName("Header Language Tag Background Colour")
@@ -458,6 +455,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.currentTheme.settings.header.languageIcon.display = value;
 					this.disableableComponents["headerLanguageIcons"].forEach(component => {component.setDisabled(value==="none");});
 					(async () => {await this.plugin.saveSettings();})();
+					this.plugin.renderReadingView();
 				}));
 		let languageIconsColouredToggle: ToggleComponent;
 		new Setting(containerEl)
@@ -587,7 +585,7 @@ export class SettingsTab extends PluginSettingTab {
 							this.plugin.settings.newHighlight = "";
 							newHighlightText.setValue("");
 							(async () => {await this.plugin.saveSettings();})();
-							this.plugin.rerenderPreview();
+							this.plugin.renderReadingView();
 						}
 					}
 				});
@@ -604,7 +602,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.inline.syntaxHighlight = value;
 					(async () => {await this.plugin.saveSettings();})();    
-					this.plugin.rerenderPreview();
+					this.plugin.renderReadingView();
 				}));
 		new Setting(containerEl)
 			.setName("Inline Code Background Colour")
@@ -799,7 +797,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
 					(async () => {await this.plugin.saveSettings();})(); 
-					this.plugin.rerenderPreview();   
+					this.plugin.renderReadingView();   
 				});
 			this.disableableComponents["wrapLines"].push(wrapLinesActiveToggle);
 			});

@@ -28,10 +28,14 @@ See this project's [releases](/../../../releases).
 
 - Refactored editing view codeblock parsing to use callbacks in a loop function
 - Can now update default themes
+- Changed how header and sub-elements are hidden
+- Changed how edit mode folds codeblocks
+- Changed variable names from collapse to fold
 
 ### Fixed
 
 - Compatibility with the [blur plugin](https://github.com/gapmiss/blur)
+- Removing codeblock languages now doesn't make folded codeblocks disappear
 
 ## [1.0.7] - 2023-08-16
 

@@ -1,32 +1,27 @@
-import { LANGUAGE_NAMES, CodeStylerThemeSettings } from "./Settings";
+import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER } from "./Settings";
 import { CodeblockParameters, Highlights, InlineCodeParameters } from "./CodeblockParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
-	const headerContainer = createDiv({cls: `code-styler-header-container${(codeblockParameters.fold.enabled || codeblockParameters.title !== "")?"-specific":""}`});
-	if (codeblockParameters.language !== ""){
-		const iconURL = getLanguageIcon(codeblockParameters.language,languageIcons);
-		if (iconURL !== null)
-			headerContainer.appendChild(createImageWrapper(iconURL,createDiv()));
-		headerContainer.appendChild(createDiv({cls: `code-styler-header-language-tag-${codeblockParameters.language}`, text: getLanguageTag(codeblockParameters.language)}));
-	}
-	
-	let headerText = "";
-	if (codeblockParameters.title !== "")
-		headerText = codeblockParameters.title;
-	else if (codeblockParameters.fold.enabled)
-		if (codeblockParameters.fold.placeholder!=="")
-			headerText = codeblockParameters.fold.placeholder;
-		else
-			headerText = themeSettings.header.collapsePlaceholder!==""?themeSettings.header.collapsePlaceholder:"Collapsed Code";
-	headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: headerText}));   
-
+	const headerContainer = createDiv();
+	const iconURL = codeblockParameters.language?getLanguageIcon(codeblockParameters.language,languageIcons):undefined;
+	if (!isHeaderHidden(codeblockParameters,themeSettings,iconURL)) {
+		headerContainer.classList.add("code-styler-header-container");
+		if (codeblockParameters.language !== "") {
+			if (isLanguageIconShown(codeblockParameters,themeSettings,iconURL))
+				headerContainer.appendChild(createImageWrapper(iconURL as string,createDiv()));
+			if (isLanguageTagShown(codeblockParameters,themeSettings))
+				headerContainer.appendChild(createDiv({cls: "code-styler-header-language-tag", text: getLanguageTag(codeblockParameters.language)})); //TODO (@mayurankv) Can I remove the language? Is this info elsewhere?
+		}
+		headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"")}));   
+	} else
+		headerContainer.classList.add("code-styler-header-container-hidden");
 	return headerContainer;
 }
 export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>, containerClasses: Array<string> = ["code-styler-inline-opener"]): HTMLElement {
 	const openerContainer = createSpan({cls: containerClasses.join(" ")});
 	if (inlineCodeParameters.icon) {
 		const iconURL = getLanguageIcon(inlineCodeParameters.language,languageIcons);
-		if (iconURL !== null)
+		if (typeof iconURL !== "undefined")
 			openerContainer.appendChild(createImageWrapper(iconURL,createSpan(),"code-styler-inline-icon"));
 	}
 	if (inlineCodeParameters.title)
@@ -41,18 +36,23 @@ function createImageWrapper(iconURL: string, imageWrapper: HTMLElement, imgClass
 	return imageWrapper;
 }
 
-export function getLanguageIcon(language: string, languageIcons: Record<string,string>) {
-	language = getLanguageTag(language);
-	if (language in languageIcons)
-		return languageIcons[language];
-	return null;
+export function getLanguageIcon(language: string, languageIcons: Record<string,string>): string | undefined {
+	return languageIcons?.[getLanguageTag(language)];
 }
 function getLanguageTag(language: string) {
-	if (language in LANGUAGE_NAMES)
-		return LANGUAGE_NAMES[language];
-	else if (language !== "")
-		return language.charAt(0).toUpperCase() + language.slice(1);
-	return "";
+	return LANGUAGE_NAMES?.[language] ?? (language.charAt(0).toUpperCase() + language.slice(1) || "");
+}
+export function isHeaderHidden(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, iconURL: string | undefined): boolean {
+	return !isHeaderRequired(codeblockParameters) && (codeblockParameters.language === "" || (themeSettings.header.languageTag.display !== "always" && (themeSettings.header.languageIcon.display !== "always" || (typeof iconURL == "undefined"))));
+}
+function isLanguageIconShown(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, iconURL: string | undefined): boolean {
+	return (typeof iconURL !== "undefined") && (themeSettings.header.languageIcon.display === "always" || (isHeaderRequired(codeblockParameters) && themeSettings.header.languageIcon.display === "if_header_shown"));
+}
+function isLanguageTagShown(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings): boolean {
+	return themeSettings.header.languageTag.display === "always" || (isHeaderRequired(codeblockParameters) && themeSettings.header.languageTag.display === "if_header_shown");
+}
+function isHeaderRequired(codeblockParameters: CodeblockParameters): boolean {
+	return codeblockParameters.fold.enabled || codeblockParameters.title !== "";
 }
 
 export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {

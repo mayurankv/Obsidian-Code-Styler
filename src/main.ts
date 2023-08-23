@@ -47,7 +47,7 @@ export default class CodeStylerPlugin extends Plugin {
 				this.sizes.font = currentFontSize;
 				clearTimeout(zoomTimeout);
 				zoomTimeout = setTimeout(()=>{
-					this.rerenderPreview(); // Re-render on font size changes
+					this.renderReadingView(); // Re-render on font size changes
 				},1000);
 			}
 		},this));
@@ -57,7 +57,7 @@ export default class CodeStylerPlugin extends Plugin {
 				this.sizes.zoom = currentZoomSize;
 				clearTimeout(zoomTimeout);
 				zoomTimeout = setTimeout(()=>{
-					this.rerenderPreview(); // Re-render on zoom changes
+					this.renderReadingView(); // Re-render on zoom changes
 				},1000);
 			}
 		},this));
@@ -93,7 +93,7 @@ export default class CodeStylerPlugin extends Plugin {
 			}
 		}});
 
-		this.app.workspace.onLayoutReady(()=>{this.rerenderPreview();}); // Add decoration on enabling of plugin
+		this.app.workspace.onLayoutReady(()=>{this.renderReadingView();}); // Add decoration on enabling of plugin
 
 		console.log("Loaded plugin: Code Styler");
 	}
@@ -117,7 +117,7 @@ export default class CodeStylerPlugin extends Plugin {
 		updateStyling(this.settings,this.app);
 	}
 
-	rerenderPreview() {
+	renderReadingView() {
 		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => {
 			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === "preview")
 				leaf.view.previewMode.rerender(true);

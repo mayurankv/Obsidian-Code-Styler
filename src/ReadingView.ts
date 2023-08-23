@@ -49,7 +49,7 @@ export function destroyReadingModeElements(): void {
 	].forEach(element => element.remove());
 	document.querySelectorAll("pre.code-styler-pre").forEach((codeblockPreElement: HTMLElement) => {
 		codeblockPreElement.classList.remove("code-styler-pre");
-		codeblockPreElement.classList.remove("code-styler-collapsed");
+		codeblockPreElement.classList.remove("code-styler-folded");
 		codeblockPreElement.style.removeProperty("--true-height");
 		codeblockPreElement.style.removeProperty("--line-number-margin");
 		codeblockPreElement.style.removeProperty("max-height");
@@ -203,30 +203,32 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 		console.error(`Metadata cache not found for file: ${sourcePath}`);
 	return codeblocksParameters;
 }
+function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, dynamic: boolean): void {
+	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
+	if (dynamic)
+		headerContainer.addEventListener("click",()=>{toggleFold(codeblockPreElement);}); // Add listener for header folding on click
+	codeblockPreElement.insertBefore(headerContainer,codeblockPreElement.childNodes[0]);
+}
 export function readingDocumentFold(contentEl: HTMLElement, fold?: boolean) {
-	const codeblockPreElements = document.querySelectorAll("pre.code-styler-pre"); //todo Change document
+	const codeblockPreElements = contentEl.querySelectorAll("pre.code-styler-pre");
 	if (typeof fold === "undefined") //Return all blocks to original state
-		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>toggleFold(codeblockPreElement,(codeblockPreElement.getAttribute("defaultFold")??"false")==="true"));
+		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{toggleFold(codeblockPreElement,(codeblockPreElement.getAttribute("defaultFold")??"false")==="true");});
 	else //Fold or unfold all blocks
-		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>toggleFold(codeblockPreElement,fold));
+		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{toggleFold(codeblockPreElement,fold);});
 }
 async function toggleFold(codeblockPreElement: HTMLElement, fold?: boolean): Promise<void> {
+	if (codeblockPreElement.firstElementChild?.classList?.contains("code-styler-header-container-hidden"))
+		return;
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty("max-height",`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains("execute-code-output")?"3.5 + var(--header-separator-width)":"2"})`));
 	codeblockPreElement.classList.add("hide-scroll");
 	await sleep(1);
 	if (typeof fold === "undefined")
-		codeblockPreElement.classList.toggle("code-styler-collapsed");
+		codeblockPreElement.classList.toggle("code-styler-folded");
 	else
-		fold?codeblockPreElement.classList.add("code-styler-collapsed"):codeblockPreElement.classList.remove("code-styler-collapsed");
+		fold?codeblockPreElement.classList.add("code-styler-folded"):codeblockPreElement.classList.remove("code-styler-folded");
 	await sleep(TRANSITION_LENGTH);
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
 	codeblockPreElement.classList.remove("hide-scroll");
-}
-function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, dynamic: boolean): void {
-	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
-	if (dynamic)
-		headerContainer.addEventListener("click",()=>{toggleFold(codeblockPreElement);}); // Add listener for header collapsing on click
-	codeblockPreElement.insertBefore(headerContainer,codeblockPreElement.childNodes[0]);
 }
 function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolean): Array<string> {
 	const preClassList = ["code-styler-pre"];
@@ -234,7 +236,7 @@ function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolea
 		preClassList.push(`language-${codeblockParameters.language}`);
 	if (dynamic) {
 		if (codeblockParameters.fold.enabled)
-			preClassList.push("code-styler-collapsed");
+			preClassList.push("code-styler-folded");
 		if (codeblockParameters.lineUnwrap.alwaysEnabled)
 			preClassList.push(codeblockParameters.lineUnwrap.activeWrap?"unwrapped-inactive":"unwrapped");
 		else if (codeblockParameters.lineUnwrap.alwaysDisabled)

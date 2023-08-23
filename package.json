@@ -14,9 +14,9 @@
 	"author": "Mayuran Visakan",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.5.1",
-		"@typescript-eslint/eslint-plugin": "^6.4.0",
-		"@typescript-eslint/parser": "^6.4.0",
+		"@types/node": "^20.5.4",
+		"@typescript-eslint/eslint-plugin": "^6.4.1",
+		"@typescript-eslint/parser": "^6.4.1",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.19.2",
 		"eslint": "^8.47.0",
