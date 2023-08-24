@@ -108,7 +108,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
-			provide: (plugin) => EditorView.atomicRanges.of((view)=>view.state.field(foldDecorations) || Decoration.none), // eslint-disable-line @typescript-eslint/no-unused-vars
+			provide: () => EditorView.atomicRanges.of((view)=>view.state.field(foldDecorations) || Decoration.none),
 		}
 	);
 	const inlineCodeDecorator = ViewPlugin.fromClass( //TODO (@mayurankv) Update
@@ -179,7 +179,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								}
 								this.decorations = this.decorations.update({filterFrom: syntaxNode.from + endOfParameters+1, filterTo: syntaxNode.to, filter: ()=>false});
 								if (sourceMode)
-									this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from + endOfParameters, filter: (from: number, to: number, value: Decoration)=>"class" in value.spec}); // eslint-disable-line @typescript-eslint/no-unused-vars
+									this.decorations = this.decorations.update({filterFrom: syntaxNode.from, filterTo: syntaxNode.from + endOfParameters, filter: (from: number, to: number, value: Decoration)=>"class" in value.spec});
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
@@ -269,7 +269,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return Decoration.none;
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (transaction.effects.some(effect=>effect.is(foldAll))) //editingViewIgnore(transaction.state) || 
+			if (transaction.effects.some(effect=>effect.is(foldAll))) // editingViewIgnore(transaction.state) || 
 				return Decoration.none;
 			value = value.map(transaction.changes);
 			value = value.update({add: transaction.effects.filter(effect=>effect.is(hideFold)).map(effect=>effect.value)}); //TODO (@mayurankv) Can I remove `, sort: true`
@@ -354,7 +354,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return this.lineNumber === other.lineNumber && this.codeblockParameters.lineNumbers.alwaysEnabled === other.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled === other.codeblockParameters.lineNumbers.alwaysDisabled && this.codeblockParameters.lineNumbers.offset === other.codeblockParameters.lineNumbers.offset && this.maxLineNum === other.maxLineNum && this.empty === other.empty;
 		}
 	
-		toDOM(view: EditorView): HTMLElement { // eslint-disable-line @typescript-eslint/no-unused-vars
+		toDOM(): HTMLElement {
 			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: `code-styler-line-number${getLineNumberDisplay(this.codeblockParameters)}`, text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
@@ -396,7 +396,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				headerContainer.classList.add(`language-${this.codeblockParameters.language}`);
 			if (this.folded)
 				headerContainer.classList.add("code-styler-header-folded");
-			headerContainer.onclick = event => {foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);}; // eslint-disable-line @typescript-eslint/no-unused-vars
+			headerContainer.onclick = () => {foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);};
 			return headerContainer;
 		}
 	
@@ -423,7 +423,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			);
 		}
 
-		toDOM(view: EditorView): HTMLElement { // eslint-disable-line @typescript-eslint/no-unused-vars
+		toDOM(): HTMLElement {
 			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,["code-styler-inline-opener","cm-inline-code"]);
 		}
 	}
@@ -498,7 +498,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		settingsState,charWidthState,headerDecorations,foldDecorations,hiddenDecorations,
 		codeblockLines,inlineCodeDecorator,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender()
-		// ,readdConversionExtender()
 	];
 }
 
@@ -512,7 +511,7 @@ const foldAll: StateEffectType<{toFold?: boolean}> = StateEffect.define();
 function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
 	const markDecorations: Array<Range<Decoration>> = [];
 	//@ts-expect-error Undocumented Obsidian API
-	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime); // Alternatives: `text/x-${parameters.language}`, window.CodeMirror.findModeByName('js').mime
+	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime);
 	const state = window.CodeMirror.startState(mode);
 	if (mode?.token) {
 		const stream = new window.CodeMirror.StringStream(text);

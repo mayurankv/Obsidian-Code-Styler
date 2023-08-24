@@ -19,6 +19,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Added ability to parse execute code codeblock parameters
+
 ## [1.0.8] - 2023-08-23
 
 ### Added
