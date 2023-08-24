@@ -44,7 +44,7 @@ export class SettingsTab extends PluginSettingTab {
 
 		// ========== General ==========
 
-		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName("Ignore Codeblocks")
 			.setDesc("Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
@@ -57,7 +57,7 @@ export class SettingsTab extends PluginSettingTab {
 					clearTimeout(ignoreTimeout);
 					ignoreTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
 				}));
-		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName("Exclude Languages")
 			.setDesc("Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
@@ -350,7 +350,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.title.textColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.title.textColour = saveColour;},
 			);});
-		let foldPlaceholderTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		let foldPlaceholderTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName("Fold Placeholder Text")
 			.setDesc("Title placeholder text for folded code when no title parameter is set.")

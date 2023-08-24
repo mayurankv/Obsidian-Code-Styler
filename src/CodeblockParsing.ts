@@ -173,7 +173,7 @@ async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters,
 				codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
 			codeblockParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParams.linenumber);
 		}
-		codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,boolean])=>(num))))]; // eslint-disable-line @typescript-eslint/no-unused-vars
+		codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,boolean])=>(num))))];
 		if (codeblockParameters.title === "")
 			codeblockParameters.title = codePreviewParams.filePath.split("\\").pop()?.split("/").pop() ?? "";
 		codeblockParameters.language = codePreviewParams.language;

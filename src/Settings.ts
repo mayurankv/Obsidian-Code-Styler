@@ -112,8 +112,9 @@ export interface CodeStylerSettings {
 	decoratePrint: boolean;
 	excludedLanguages: string;
 	excludedCodeblocks: string;
-	specialLanguages: Array<string>;
-	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>
+	specialLanguages: Array<string>; //TODO (@mayurankv) Delete after 1.0.9 released
+	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>;
+	version: string;
 }
 
 // Theme Defaults
@@ -310,14 +311,63 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	decoratePrint: true,
 	excludedLanguages: "ad-*",
 	excludedCodeblocks: "dataview, dataviewjs, math",
-	specialLanguages: ["^preview$","^include$","^output$","^run-.+$"],
+	specialLanguages: [], //TODO (@mayurankv) Delete after 1.0.9 released
 	redirectLanguages: {},
+	version: "1.0.8",
+};
+
+function convertSettings(settings: CodeStylerSettings): CodeStylerSettings { //TODO (@mayurankv) Add to `main.ts` after 1.0.9 released
+	if (typeof settings?.version === "undefined")
+		return settingsClear();
+	while (semverNewer(DEFAULT_SETTINGS.version,settings.version)) {
+		if (settings.version in settingsUpdaters)
+			settings = settingsUpdaters[settings.version](settings);
+		else
+			settings = settingsClear();
+	}
+	return settings;
+}
+function semverNewer(newVersion: string, oldVersion: string): boolean {
+	return newVersion.localeCompare(oldVersion, undefined, { numeric: true }) === 1;
+}
+function settingsVersionUpdate(settings: CodeStylerSettings, version: string, themeUpdater: (theme: CodeStylerTheme)=>CodeStylerTheme = (theme)=>theme, otherSettingsUpdater: (settings: CodeStylerSettings)=>CodeStylerSettings = (settings)=>settings, redirectLanguagesUpdater: (redirectLanguages: Record<string,{colour?: Colour, icon?: string}>)=>Record<string,{colour?: Colour, icon?: string}> = (redirectLanguages)=>redirectLanguages): CodeStylerSettings {
+	for (const [name, theme] of Object.entries(settings.themes)) {
+		settings.themes[name] = themeUpdater(theme);
+	}
+	settings.currentTheme = structuredClone(settings.themes[settings.selectedTheme]);
+	settings.redirectLanguages = redirectLanguagesUpdater(settings.redirectLanguages);
+	settings = otherSettingsUpdater(settings);
+	settings.version = version;
+	return settings;
+}
+function settingsPreserve(settings: CodeStylerSettings): CodeStylerSettings {
+	return settings;
+}
+function settingsClear(): CodeStylerSettings {
+	return DEFAULT_SETTINGS;
+}
+
+const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStylerSettings> = {
+	"1.0.0": settingsClear,
+	"1.0.1": settingsClear,
+	"1.0.2": settingsClear,
+	"1.0.3": settingsClear,
+	"1.0.4": settingsClear,
+	"1.0.5": settingsClear,
+	"1.0.6": settingsClear,
+	"1.0.7": settingsPreserve,
+	"1.0.8": settingsPreserve,
+	"1.0.9": (settings)=>settingsVersionUpdate(settings,"1.0.8",(theme)=>theme,(settings)=>{//@ts-expect-error For older interface versions
+		delete settings.specialLanguages;
+		return settings;
+	}),
 };
 
 // Constants
 export const FOLD_PLACEHOLDER = "Folded Code";
 export const PARAMETERS = ["title","fold","ln","unwrap","ignore"];
 export const TRANSITION_LENGTH = 240; // 240ms
+export const SPECIAL_LANGUAGES = ["^preview$","^include$","^output$","^run-.+$"];
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names

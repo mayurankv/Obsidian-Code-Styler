@@ -4,7 +4,7 @@ import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
-import { CodeStylerSettings, CodeStylerThemeSettings } from "./Settings";
+import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, arraysEqual, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, getLineNumberDisplay, isHeaderHidden } from "./CodeblockDecorating";
 
@@ -91,7 +91,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"}`, class: ((this.settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(this.settings.specialLanguages).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"}`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
 								lineNumber++;
@@ -443,7 +443,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					startDelimiter = currentDelimiter;
 					codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
 					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
-						if (!settings.specialLanguages.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 							builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(line.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
 						else
 							continue;

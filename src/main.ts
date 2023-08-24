@@ -39,7 +39,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
 
-		let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{}); // eslint-disable-line @typescript-eslint/no-empty-function
+		let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		this.registerEvent(this.app.workspace.on("css-change",()=>{
 			updateStyling(this.settings,this.app); // Update styling on css changes
 			const currentFontSize = document.body.getCssPropertyValue("--font-text-size");
@@ -108,7 +108,7 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, structuredClone(DEFAULT_SETTINGS), await this.loadData());
+		this.settings = Object.assign({},structuredClone(DEFAULT_SETTINGS),await this.loadData());
 	}
 
 	async saveSettings() {
