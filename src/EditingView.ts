@@ -116,16 +116,12 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			decorations: DecorationSet;
 			settings: CodeStylerSettings;
 			syntaxHighlight: boolean;
-			//NOSONAR
-			// loadedLanguages: Record<string,LanguageSupport>; //NOTE: For future CM6 Compatibility
 
 			constructor(view: EditorView) {
 				this.decorations = Decoration.none;
 				this.settings = settings;
 				this.syntaxHighlight = settings.currentTheme.settings.inline.syntaxHighlight;
 				this.buildDecorations(view);
-				//NOSONAR
-				// this.loadedLanguages = {}; //NOTE: For future CM6 Compatibility
 			}
 
 			update(update: ViewUpdate) {
@@ -134,43 +130,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					if (update.docChanged) 
 						this.decorations = this.decorations.map(update.changes);
 					this.buildDecorations(update.view);
-				//NOSONAR
-				//NOTE: For future CM6 Compatibility
-				// 	const toHighlight = this.buildDecorations(update.view);
-				// 	toHighlight.forEach((highlightSet)=>{
-				// 		if (!highlightSet?.language)
-				// 			return;
-				// 		if (highlightSet.language in this.loadedLanguages) {
-				// 			this.decorations = this.decorations.update({add: languageHighlight(highlightSet)});
-				// 		} else {
-				// 			const languageDescription = LanguageDescription.matchLanguageName(languages,highlightSet.language);
-				// 			if (!languageDescription)
-				// 				return;
-				// 			languageDescription.load().then((languageSupport)=>{
-				// 				this.loadedLanguages[highlightSet.language] = languageSupport;
-				// 				update.view.dispatch({});
-				// 				update.view.dispatch({annotations: syntaxHighlightDecorations.of(markDecorations)})
-				// 			});
-				// 		}
-				// 	});
-				// } else {
-				// 	update.transactions.forEach((transaction)=>{
-				// 		const markDecorations = transaction.annotation(syntaxHighlightDecorations);
-				// 		if (markDecorations)
-				// 			this.decorations = this.decorations.update({add: markDecorations})
-				// 	});
 				}
 			}
 
-			buildDecorations(view: EditorView): void { //Array<{start: number, text: string, language: string}> //NOTE: For future CM6 Compatibility //NOSONAR
+			buildDecorations(view: EditorView): void {
 				if (!view?.visibleRanges?.length) {
 					this.decorations = Decoration.none;
 					return;
-					//NOSONAR
-					// return [];//NOTE: For future CM6 Compatibility
 				}
-				//NOSONAR
-				// let toHighlight: Array<{start: number, text: string, language: string}> = []; //NOTE: For future CM6 Compatibility
 				const sourceMode = editingViewIgnore(view.state);
 				for (const {from,to} of view.visibleRanges) {
 					syntaxTree(view.state).iterate({from: from, to: to,
@@ -216,13 +183,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								if (!settings.currentTheme.settings.inline.syntaxHighlight)
 									return;
 								this.decorations = this.decorations.update({add: modeHighlight({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language})});
-								//NOSONAR
-								// toHighlight.push({start: syntaxNode.from + endOfParameters, text: text, language: parameters.language}); //NOTE: For future CM6 Compatibility
 							}
 						},
 					});
 				}
-				// return toHighlight; //NOTE: For future CM6 Compatibility
 			}
 		},
 		{
@@ -288,6 +252,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return builder.finish();
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			// if (editingViewIgnore(transaction.state))
+			// 	return Decoration.none;
 			value = value.map(transaction.changes);
 			value = value.update({add: transaction.effects.filter(effect=>(effect.is(fold)||effect.is(unhideFold))).map(effect=>foldRegion(effect.value))}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>(effect.is(unfold)||effect.is(hideFold))).forEach(effect=>value=value.update(unfoldRegion(effect.value)));
@@ -303,7 +269,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return Decoration.none;
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (transaction.effects.some(effect=>effect.is(foldAll)))
+			if (transaction.effects.some(effect=>effect.is(foldAll))) //editingViewIgnore(transaction.state) || 
 				return Decoration.none;
 			value = value.map(transaction.changes);
 			value = value.update({add: transaction.effects.filter(effect=>effect.is(hideFold)).map(effect=>effect.value)}); //TODO (@mayurankv) Can I remove `, sort: true`

@@ -2,6 +2,7 @@ import { Plugin, TFile } from "obsidian";
 
 import CodeStylerPlugin from "./main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "./Settings";
+import { ExportType, CodeBlockArgs, getArgs } from "./external/executeCode/CodeBlockArgs";
 
 export interface CodeblockParameters {
 	language: string;
@@ -53,11 +54,10 @@ interface ExternalPlugin extends Plugin {
 }
 
 export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
-	//@ts-expect-error Undocumented Obsidian API
+	// @ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,ExternalPlugin> = plugin.app.plugins.plugins;
-	const admonitions: boolean = "obsidian-admonition" in plugins;
+	const admonitions: boolean = ("obsidian-admonition" in plugins);
 	const codeblocks: Array<Array<string>> = [];
-	const codeblocksParameters: Array<CodeblockParameters> = [];
 	function parseCodeblockSection(codeSection: Array<string>): void {
 		if (codeSection.length === 0)
 			return;
@@ -80,19 +80,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
 	}
 	parseCodeblockSection(codeSection);
-	for (const codeblockLines of codeblocks) {
-		const parameterLine = getParameterLine(codeblockLines);
-		if (!parameterLine)
-			continue;
-		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
-			
-		if (isExcluded(codeblockParameters.language,plugin.settings.excludedCodeblocks))
-			continue;
-		
-		codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugins,codeblockLines,sourcePath);
-		codeblocksParameters.push(codeblockParameters);
-	}
-	return {codeblocksParameters: codeblocksParameters, nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true};
+	return {codeblocksParameters: await parseCodeblocks(codeblocks,sourcePath,plugin,plugins), nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true};
 }
 export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
 	
@@ -106,6 +94,22 @@ export function parseInlineCode(codeText: string): {parameters: InlineCodeParame
 		return {parameters: parseInlineCodeParameters(match[2]), text: match[3]};
 }
 
+async function parseCodeblocks(codeblocks: Array<Array<string>>, sourcePath: string, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>): Promise<Array<CodeblockParameters>> {
+	const codeblocksParameters: Array<CodeblockParameters> = [];
+	for (const codeblockLines of codeblocks) {
+		const parameterLine = getParameterLine(codeblockLines);
+		if (!parameterLine)
+			continue;
+		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
+			
+		if (isExcluded(codeblockParameters.language,plugin.settings.excludedCodeblocks))
+			continue;
+		
+		codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugins,codeblockLines,sourcePath);
+		codeblocksParameters.push(codeblockParameters);
+	}
+	return codeblocksParameters;
+}
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
 	const codeblockParameters: CodeblockParameters = {
 		language: "",
@@ -151,32 +155,50 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }
-export async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
-	if (codeblockParameters.language === "preview") {
-		if (plugins?.["obsidian-code-preview"]?.code && plugins?.["obsidian-code-preview"]?.analyzeHighLightLines) {
-			const codePreviewParams = await plugins["obsidian-code-preview"].code(codeblockLines.slice(1,-1).join("\n"),sourcePath);
-			if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
-				if (typeof codePreviewParams.start === "number")
-					codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
-				codeblockParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParams.linenumber);
-			}
-			codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,boolean])=>(num))))]; // eslint-disable-line @typescript-eslint/no-unused-vars
-			if (codeblockParameters.title === "")
-				codeblockParameters.title = codePreviewParams.filePath.split("\\").pop()?.split("/").pop() ?? "";
-			codeblockParameters.language = codePreviewParams.language;
+async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+	if (codeblockParameters.language === "preview")
+		codeblockParameters = await pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines,sourcePath);
+	else if (codeblockParameters.language === "include")
+		codeblockParameters = pluginAdjustFileInclude(codeblockParameters,plugins,codeblockLines);
+	else if (/run-\w*/.test(codeblockParameters.language))
+		codeblockParameters = pluginAdjustExecuteCodeRun(codeblockParameters,plugins);
+	codeblockParameters = pluginAdjustExecuteCode(codeblockParameters,plugins,codeblockLines);
+	return codeblockParameters;
+}
+async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+	if (plugins?.["obsidian-code-preview"]?.code && plugins?.["obsidian-code-preview"]?.analyzeHighLightLines) {
+		const codePreviewParams = await plugins["obsidian-code-preview"].code(codeblockLines.slice(1,-1).join("\n"),sourcePath);
+		if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
+			if (typeof codePreviewParams.start === "number")
+				codeblockParameters.lineNumbers.offset = codePreviewParams.start - 1;
+			codeblockParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParams.linenumber);
 		}
-	} else if (codeblockParameters.language === "include") {
-		if ("file-include" in plugins) {
-			const fileIncludeLanguage = codeblockLines[0].match(/include(?:[:\s]+(?<lang>\w+))?/)?.groups?.lang;
-			if (typeof fileIncludeLanguage !== "undefined")
-				codeblockParameters.language = fileIncludeLanguage;
-		}
-	} else if (/run-\w*/.test(codeblockParameters.language)) {
-		console.log("foo");
-		if ("execute-code" in plugins) {
-			if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(codeblockParameters.language.slice(4)))
-				codeblockParameters.language = codeblockParameters.language.slice(4);
-		}
+		codeblockParameters.highlights.default.lineNumbers = [...new Set(codeblockParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),([num,_]: [number,boolean])=>(num))))]; // eslint-disable-line @typescript-eslint/no-unused-vars
+		if (codeblockParameters.title === "")
+			codeblockParameters.title = codePreviewParams.filePath.split("\\").pop()?.split("/").pop() ?? "";
+		codeblockParameters.language = codePreviewParams.language;
+	}
+	return codeblockParameters;
+}
+function pluginAdjustFileInclude(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>): CodeblockParameters {
+	if ("file-include" in plugins) {
+		const fileIncludeLanguage = /include (\w+)/.exec(codeblockLines[0])?.[1];
+		if (typeof fileIncludeLanguage !== "undefined")
+			codeblockParameters.language = fileIncludeLanguage;
+	}
+	return codeblockParameters;
+}
+function pluginAdjustExecuteCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>): CodeblockParameters {
+	if ("execute-code" in plugins) {
+		const codeblockArgs: CodeBlockArgs = getArgs(codeblockLines[0]);
+		codeblockParameters.title = codeblockParameters.title || codeblockArgs?.label || "";
+	}
+	return codeblockParameters;
+}
+function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>): CodeblockParameters {
+	if ("execute-code" in plugins) {
+		if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(codeblockParameters.language.slice(4)))
+			codeblockParameters.language = codeblockParameters.language.slice(4);
 	}
 	return codeblockParameters;
 }
@@ -198,11 +220,26 @@ function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters 
 }
 
 function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
-	if (parameterString.startsWith("title:")) {
-		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
-		if (titleMatch)
-			codeblockParameters.title = titleMatch[2].trim();
-	} else if (parameterString.startsWith("fold:")) {
+	if (parameterString === "ignore")
+		codeblockParameters.ignore = true;
+	else if (parameterString.startsWith("title:"))
+		manageTitle(parameterString,codeblockParameters);
+	else if (parameterString.startsWith("fold:") || parameterString === "fold")
+		manageFolding(parameterString,codeblockParameters);
+	else if (parameterString.startsWith("ln:"))
+		manageLineNumbering(parameterString,codeblockParameters);
+	else if (parameterString === "wrap" || parameterString === "unwrap" || parameterString.startsWith("unwrap:"))
+		manageWrapping(parameterString,codeblockParameters);
+	else
+		addHighlights(parameterString,codeblockParameters,theme);
+}
+function manageTitle(parameterString: string, codeblockParameters: CodeblockParameters) {
+	const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
+	if (titleMatch)
+		codeblockParameters.title = titleMatch[2].trim();
+}
+function manageFolding(parameterString: string, codeblockParameters: CodeblockParameters) {
+	if (parameterString.startsWith("fold:")) {
 		const foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("fold:".length));
 		if (foldPlaceholderMatch) {
 			codeblockParameters.fold = {
@@ -215,30 +252,32 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 			enabled: true,
 			placeholder: "",
 		};
-	} else if (parameterString === "ignore") {
-		codeblockParameters.ignore = true;
-	} else if (parameterString.startsWith("ln:")) {
-		parameterString = parameterString.slice("ln:".length);
-		if (/^\d+$/.test(parameterString)) {
-			codeblockParameters.lineNumbers = {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
-				offset: parseInt(parameterString)-1,
-			};
-		} else if (parameterString.toLowerCase() === "true") {
-			codeblockParameters.lineNumbers = {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
-				offset: 0,
-			};
-		} else if (parameterString.toLowerCase() === "false") {
-			codeblockParameters.lineNumbers = {
-				alwaysEnabled: false,
-				alwaysDisabled: true,
-				offset: 0,
-			};
-		}
-	} else if (parameterString === "wrap") {
+	}
+}
+function manageLineNumbering(parameterString: string, codeblockParameters: CodeblockParameters) {
+	parameterString = parameterString.slice("ln:".length);
+	if (/^\d+$/.test(parameterString)) {
+		codeblockParameters.lineNumbers = {
+			alwaysEnabled: true,
+			alwaysDisabled: false,
+			offset: parseInt(parameterString)-1,
+		};
+	} else if (parameterString.toLowerCase() === "true") {
+		codeblockParameters.lineNumbers = {
+			alwaysEnabled: true,
+			alwaysDisabled: false,
+			offset: 0,
+		};
+	} else if (parameterString.toLowerCase() === "false") {
+		codeblockParameters.lineNumbers = {
+			alwaysEnabled: false,
+			alwaysDisabled: true,
+			offset: 0,
+		};
+	}
+}
+function manageWrapping(parameterString: string, codeblockParameters: CodeblockParameters) {
+	if (parameterString === "wrap") {
 		codeblockParameters.lineUnwrap = {
 			alwaysEnabled: false,
 			alwaysDisabled: true,
@@ -271,16 +310,17 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 				activeWrap: false,
 			};
 		}
-	} else {
-		const highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
-		if (highlightMatch) {
-			const highlights = parseHighlightedLines(highlightMatch[2]);
-			if (highlightMatch[1] === "hl")
-				codeblockParameters.highlights.default = highlights;
-			else {
-				if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
-					codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
-			}
+	}
+}
+function addHighlights(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme) {
+	const highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
+	if (highlightMatch) {
+		const highlights = parseHighlightedLines(highlightMatch[2]);
+		if (highlightMatch[1] === "hl")
+			codeblockParameters.highlights.default = highlights;
+		else {
+			if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
+				codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
 		}
 	}
 }
