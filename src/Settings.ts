@@ -341,6 +341,7 @@ function settingsVersionUpdate(settings: CodeStylerSettings, version: string, th
 	return settings;
 }
 function settingsPreserve(settings: CodeStylerSettings): CodeStylerSettings {
+	settings.version = Object.keys(settingsUpdaters).find((value,index,array)=>array?.[index-1]===settings.version) ?? "1.0.0";
 	return settings;
 }
 function settingsClear(): CodeStylerSettings {
