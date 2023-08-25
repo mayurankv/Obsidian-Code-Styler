@@ -19,6 +19,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.9] - 2023-08-25
+
 ### Added
 
 - Added ability to parse execute code codeblock parameters
@@ -207,7 +209,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.8...HEAD
+[Unreleased]: /../../compare/1.0.9...HEAD
+[1.0.9]: /../../compare/1.0.8...1.0.9
 [1.0.8]: /../../compare/1.0.7...1.0.8
 [1.0.7]: /../../compare/1.0.6...1.0.7
 [1.0.6]: /../../compare/1.0.5...1.0.6

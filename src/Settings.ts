@@ -313,7 +313,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	excludedCodeblocks: "dataview, dataviewjs, math",
 	specialLanguages: [], //TODO (@mayurankv) Delete after 1.0.9 released
 	redirectLanguages: {},
-	version: "1.0.8",
+	version: "1.0.9",
 };
 
 function convertSettings(settings: CodeStylerSettings): CodeStylerSettings { //TODO (@mayurankv) Add to `main.ts` after 1.0.9 released
