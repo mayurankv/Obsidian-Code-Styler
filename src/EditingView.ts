@@ -1,6 +1,6 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, Line, SelectionRange } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Compartment, Annotation } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
@@ -105,7 +105,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
-			provide: () => EditorView.atomicRanges.of((view)=>view.state.field(foldDecorations) || Decoration.none),
+			// provide: () => EditorView.atomicRanges.of((view)=>view.state.field(foldDecorations,false) ?? Decoration.none), //TODO (@mayurankv) Can this be removed?
 		}
 	);
 	const inlineCodeDecorator = ViewPlugin.fromClass( //TODO (@mayurankv) Update
@@ -218,21 +218,19 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return getCharWidth(transaction.state,value);
 		}
 	});
+	const headerCompartment = new Compartment;
 	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
 		create(state: EditorState): DecorationSet {
-			if (editingViewIgnore(state))
-				return Decoration.none;
 			return buildHeaders(state);
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (editingViewIgnore(transaction.state))
-				return Decoration.none;
 			return buildHeaders(transaction.state,(position)=>isFolded(transaction.state,position));
 		},
 		provide(field: StateField<DecorationSet>): Extension {
 			return EditorView.decorations.from(field);
 		}
 	});
+	const foldCompartment = new Compartment;
 	const foldDecorations = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			if (editingViewIgnore(state))
@@ -251,8 +249,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
 			// if (editingViewIgnore(transaction.state))
 			// 	return Decoration.none;
-			value = value.map(transaction.changes);
-			value = value.update({filter: (from: number, to: number)=>from!==to});
+			value = value.map(transaction.changes).update({filter: (from: number, to: number)=>from!==to});
 			value = value.update({add: transaction.effects.filter(effect=>(effect.is(fold)||effect.is(unhideFold))).map(effect=>foldRegion(effect.value))}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>(effect.is(unfold)||effect.is(hideFold))).forEach(effect=>value=value.update(unfoldRegion(effect.value)));
 			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguages(effect.value)));
@@ -262,6 +259,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		},
 	});
+	const hiddenCompartment = new Compartment;
 	const hiddenDecorations = StateField.define<DecorationSet>({
 		create(): DecorationSet {
 			return Decoration.none;
@@ -270,8 +268,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			if (transaction.effects.some(effect=>effect.is(foldAll)))
 				return Decoration.none;
 			// editingViewIgnore(transaction.state) || 
-			value = value.map(transaction.changes);
-			value = value.update({filter: (from: number, to: number)=>from!==to});
+			value = value.map(transaction.changes).update({filter: (from: number, to: number)=>from!==to});
 			value = value.update({add: transaction.effects.filter(effect=>effect.is(hideFold)).map(effect=>effect.value)}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>effect.is(unhideFold)).forEach(effect=>value=value.update(unhideFoldUpdate(effect.value)));
 			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguages(effect.value)));
@@ -279,6 +276,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	});
 
+	const sourceModeListener = EditorView.updateListener.of((update: ViewUpdate) => {
+		const ignore = editingViewIgnore(update.state);
+		if (editingViewIgnore(update.startState) !== ignore) { //TODO (@mayurankv) Can I make this startState only?
+			update.view.dispatch({effects: [headerCompartment.reconfigure(ignore?[]:headerDecorations),foldCompartment.reconfigure(ignore?[]:foldDecorations),hiddenCompartment.reconfigure(ignore?[]:hiddenDecorations)]});
+			if (!ignore)
+				update.view.dispatch({effects: foldAll.of({})});
+		}
+	});
 	function cursorFoldExtender() {
 		return EditorState.transactionExtender.of((transaction: Transaction) => {
 			const addEffects: Array<StateEffect<unknown>> = [];
@@ -495,9 +500,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 
 	return [
-		settingsState,charWidthState,headerDecorations,foldDecorations,hiddenDecorations,
+		sourceModeListener,
+		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
+		settingsState,charWidthState,headerCompartment.of(headerDecorations),foldCompartment.of(foldDecorations),hiddenCompartment.of(hiddenDecorations),
 		codeblockLines,inlineCodeDecorator,
-		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender()
 	];
 }
 
@@ -507,6 +513,7 @@ const hideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
 const unhideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
 const removeFold: StateEffectType<Array<string>> = StateEffect.define();
 const foldAll: StateEffectType<{toFold?: boolean}> = StateEffect.define();
+const sourceModeAnnotation = Annotation.define<{sourceMode: boolean}>();
 
 function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
 	const markDecorations: Array<Range<Decoration>> = [];
