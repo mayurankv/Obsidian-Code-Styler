@@ -1,6 +1,6 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from "./Settings";
+import { convertSettings, DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from "./Settings";
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
@@ -108,7 +108,7 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({},structuredClone(DEFAULT_SETTINGS),await this.loadData());
+		this.settings = Object.assign({},structuredClone(DEFAULT_SETTINGS),convertSettings(await this.loadData()));
 	}
 
 	async saveSettings() {

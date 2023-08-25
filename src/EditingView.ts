@@ -305,7 +305,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 	function buildLineDecorations(state: EditorState): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
-		const sourceMode = isSourceMode(state);
 		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 			const foldStart = state.doc.lineAt(iter.from);
 			const startDelimiter = testOpeningLine(foldStart.text.toString());

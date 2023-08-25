@@ -112,7 +112,6 @@ export interface CodeStylerSettings {
 	decoratePrint: boolean;
 	excludedLanguages: string;
 	excludedCodeblocks: string;
-	specialLanguages: Array<string>; //TODO (@mayurankv) Delete after 1.0.9 released
 	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>;
 	version: string;
 }
@@ -311,12 +310,11 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	decoratePrint: true,
 	excludedLanguages: "ad-*",
 	excludedCodeblocks: "dataview, dataviewjs, math",
-	specialLanguages: [], //TODO (@mayurankv) Delete after 1.0.9 released
 	redirectLanguages: {},
 	version: "1.0.9",
 };
 
-function convertSettings(settings: CodeStylerSettings): CodeStylerSettings { //TODO (@mayurankv) Add to `main.ts` after 1.0.9 released
+export function convertSettings(settings: CodeStylerSettings): CodeStylerSettings {
 	if (typeof settings?.version === "undefined")
 		return settingsClear();
 	while (semverNewer(DEFAULT_SETTINGS.version,settings.version)) {
