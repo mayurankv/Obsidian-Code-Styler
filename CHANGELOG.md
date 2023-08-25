@@ -24,10 +24,16 @@ See this project's [releases](/../../../releases).
 - Added ability to parse execute code codeblock parameters
 - Added automated settings updates between versions
 
+### Changes
+
+- Changed `ViewPlugins` to `StateFields`
+
 ### Fixed
 
 - Dealt with removing decorations in source mode properly (headers, fold regions)
+- Fixed limiting behaviour in source mode apart from codeblock line styling
 - Cursor unfold/refold is now based on full range
+- Fixed small CSS bugs
 
 ## [1.0.8] - 2023-08-23
 
