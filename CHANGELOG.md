@@ -24,6 +24,10 @@ See this project's [releases](/../../../releases).
 - Added ability to parse execute code codeblock parameters
 - Added automated settings updates between versions
 
+### Fixed
+
+- Dealt with removing decorations in source mode properly (headers, fold regions)
+
 ## [1.0.8] - 2023-08-23
 
 ### Added

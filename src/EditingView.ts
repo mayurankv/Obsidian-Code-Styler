@@ -1,6 +1,6 @@
 import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { ViewPlugin, EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
-import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, TransactionSpec, Line, SelectionRange, Compartment, Annotation } from "@codemirror/state";
+import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, Line, SelectionRange, Compartment } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
@@ -247,8 +247,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return builder.finish();
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			// if (editingViewIgnore(transaction.state))
-			// 	return Decoration.none;
 			value = value.map(transaction.changes).update({filter: (from: number, to: number)=>from!==to});
 			value = value.update({add: transaction.effects.filter(effect=>(effect.is(fold)||effect.is(unhideFold))).map(effect=>foldRegion(effect.value))}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>(effect.is(unfold)||effect.is(hideFold))).forEach(effect=>value=value.update(unfoldRegion(effect.value)));
@@ -267,7 +265,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
 			if (transaction.effects.some(effect=>effect.is(foldAll)))
 				return Decoration.none;
-			// editingViewIgnore(transaction.state) || 
 			value = value.map(transaction.changes).update({filter: (from: number, to: number)=>from!==to});
 			value = value.update({add: transaction.effects.filter(effect=>effect.is(hideFold)).map(effect=>effect.value)}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>effect.is(unhideFold)).forEach(effect=>value=value.update(unhideFoldUpdate(effect.value)));
@@ -513,7 +510,6 @@ const hideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
 const unhideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
 const removeFold: StateEffectType<Array<string>> = StateEffect.define();
 const foldAll: StateEffectType<{toFold?: boolean}> = StateEffect.define();
-const sourceModeAnnotation = Annotation.define<{sourceMode: boolean}>();
 
 function modeHighlight ({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
 	const markDecorations: Array<Range<Decoration>> = [];
