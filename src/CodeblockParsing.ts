@@ -138,20 +138,23 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 		},
 		ignore: false,
 	};
-	if (parameterLine.startsWith("```")) {
+
+	if (parameterLine.startsWith("```"))
 		parameterLine = parameterLine.replace(/^```+(?=[^`]|$)/,"");
-	} else if (parameterLine.startsWith("~~~")) {
+	else if (parameterLine.startsWith("~~~"))
 		parameterLine = parameterLine.replace(/^~~~+(?=[^~]|$)/,"");
-	} else {
+	else
 		return codeblockParameters;
-	}
+
 	const languageBreak = parameterLine.indexOf(" ");
 	codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
 	if (languageBreak === -1)
 		return codeblockParameters;
+
 	const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
 	if (!parameterStrings)
 		return codeblockParameters;
+	
 	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }

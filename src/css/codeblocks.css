@@ -264,7 +264,8 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 
 /** Line numbers */
 .code-styler:not(.code-styler-show-line-numbers) .code-styler-line-number,
-.code-styler-line-number-hide {
+.code-styler-line-number-hide,
+:not([class*="HyperMD-codeblock"]) > [class^='code-styler-line-number'] {
 	display: none;
 }
 .code-styler code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
@@ -280,7 +281,7 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 .code-styler code > div:only-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour),0px var(--code-padding) var(--code-styler-gutter-background-colour);
 }
-[class^='code-styler-line-number'] {
+[class*="HyperMD-codeblock"] > [class^='code-styler-line-number'] {
 	min-width: var(--line-number-gutter-min-width);
 	padding-right: 8px;
 	padding-left: calc(4px + var(--language-border-width));

@@ -16,6 +16,26 @@ interface SettingsState {
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
 	const livePreviewCompartment = new Compartment;
+	const ignoreCompartment = new Compartment;
+
+	const ignoreListener = EditorView.updateListener.of((update: ViewUpdate) => { //TODO (@mayurankv) Can I make this startState only? Does it need to be?
+		const livePreviewExtensions = livePreviewCompartment.get(update.state);
+		const toIgnore = isSourceMode(update.state);
+		const fileIgnore = isFileIgnored(update.state) && !(Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
+		const fileUnignore = !toIgnore && !isFileIgnored(update.state) && (Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
+		if (isSourceMode(update.startState) !== toIgnore || fileIgnore || fileUnignore) {
+			update.view.dispatch({effects: livePreviewCompartment.reconfigure((toIgnore||fileIgnore)?[]:[headerDecorations,foldDecorations,hiddenDecorations])});
+			if (!toIgnore && !fileIgnore)
+				update.view.dispatch({effects: foldAll.of({})});
+		}
+	});
+	const ignoreFileListener = EditorView.updateListener.of((update: ViewUpdate) => {
+		const ignoreExtensions = ignoreCompartment.get(update.state);
+		const fileIgnore = isFileIgnored(update.state) && !(Array.isArray(ignoreExtensions) && ignoreExtensions.length === 0);
+		const fileUnignore = !isFileIgnored(update.state) && (Array.isArray(ignoreExtensions) && ignoreExtensions.length === 0);
+		if (fileIgnore || fileUnignore)
+			update.view.dispatch({effects: ignoreCompartment.reconfigure(fileIgnore?[]:inlineDecorations)});
+	});
 
 	const livePreviewCodeblockLines = ViewPlugin.fromClass( //TODO (@mayurankv) Update - could this be a statefield?
 		class CodeblockLines {
@@ -56,7 +76,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		
 			buildDecorations(view: EditorView) {
-				if (!view?.visibleRanges?.length || livePreviewIgnore(view.state)) {
+				if (!view?.visibleRanges?.length || isFileIgnored(view.state) || isSourceMode(view.state)) {
 					this.decorations = Decoration.none;
 					return;
 				}
@@ -105,7 +125,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		{
 			decorations: (value) => value.decorations,
-			// provide: () => EditorView.atomicRanges.of((view)=>view.state.field(foldDecorations,false) ?? Decoration.none), //TODO (@mayurankv) Can this be removed?
 		}
 	);
 	
@@ -142,6 +161,17 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
 			return buildHeaderDecorations(transaction.state,(position)=>isFolded(transaction.state,position));
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		}
+	});
+	const lineDecorations = StateField.define<DecorationSet>({
+		create(state: EditorState): DecorationSet {
+			return buildLineDecorations(state);
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet { //source mode and settings state
+			return buildLineDecorations(transaction.state);
 		},
 		provide(field: StateField<DecorationSet>): Extension {
 			return EditorView.decorations.from(field);
@@ -196,15 +226,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	});
 
-	const sourceModeListener = EditorView.updateListener.of((update: ViewUpdate) => {
-		const sourceMode = isSourceMode(update.state);
-		if (isSourceMode(update.startState) !== sourceMode) { //TODO (@mayurankv) Can I make this startState only?
-			console.log("foo");
-			update.view.dispatch({effects: livePreviewCompartment.reconfigure(sourceMode?[]:[headerDecorations,foldDecorations,hiddenDecorations])});
-			if (!sourceMode)
-				update.view.dispatch({effects: foldAll.of({})});
-		}
-	});
 	function settingsChangeExtender() {
 		return EditorState.transactionExtender.of((transaction) => {
 			let addEffects: Array<StateEffect<unknown>> = [];
@@ -268,7 +289,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		maxLineNum: number;
 		empty: boolean;
 	
-		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, maxLineNum: number, empty: boolean) {
+		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, maxLineNum: number, empty: boolean = false) {
 			super();
 			this.lineNumber = lineNumber;
 			this.codeblockParameters = codeblockParameters;
@@ -352,7 +373,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 
 	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
-		let startLine: boolean = true;
+		let startLine: Line | null = null;
 		let startDelimiter: string = "```";
 		let codeblockParameters: CodeblockParameters;
 		for (let i = 1; i < state.doc.lines; i++) {
@@ -360,20 +381,54 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			const lineText = line.text.toString();
 			const currentDelimiter = testOpeningLine(lineText);
 			if (currentDelimiter) {
-				if (startLine) {
-					startLine = false;
+				if (startLine === null) {
+					startLine = line;
 					startDelimiter = currentDelimiter;
-					codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),settings.currentTheme);
-					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
-						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-							builder.add(line.from,line.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(line.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
-						else
-							continue;
-					}
 				} else {
-					if (currentDelimiter === startDelimiter)
-						startLine = true;
+					if (currentDelimiter === startDelimiter) {
+						codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
+						if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
+							if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+								builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
+						}
+						startLine = null;
+					}
 				}
+			}
+		}
+		return builder.finish();
+	}
+	function buildLineDecorations(state: EditorState): DecorationSet {
+		const builder = new RangeSetBuilder<Decoration>();
+		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
+			const foldStart = state.doc.lineAt(iter.from);
+			const startDelimiter = testOpeningLine(foldStart.text.toString());
+			const codeblockParameters = iter.value.spec.widget.codeblockParameters;
+			let foldEnd: Line | null = null;
+			//TODO (@mayurankv) Can I improve below 5 lines
+			const lineNumberCount = foldStart.number + 1;
+			// while (startDelimiter !== testOpeningLine(state.doc.line(lineNumberCount).text)) {
+			// 	lineNumberCount += 1;
+			// }
+			const maxLineNum = lineNumberCount - foldStart.number - 1 + codeblockParameters.lineNumbers.offset;
+			const lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * state.field(charWidthState):undefined;
+			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+			builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
+			for (let i = foldStart.number+1; i <= state.doc.lines; i++) {
+				const line = state.doc?.line(i);
+				if (!line)
+					break;
+				const lineText = line.text.toString();
+				if (testOpeningLine(lineText) === startDelimiter) {
+					foldEnd = line;
+					break;
+				}
+				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+				builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i-foldStart.number,codeblockParameters,maxLineNum,false)}));
+			}
+			if (foldEnd !== null) {
+				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+				builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			}
 		}
 		return builder.finish();
@@ -387,10 +442,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (ranges === null)
 					return;
 				const {parameters,text,section} = ranges;
-				if (parameters.value === null) {
-					if (text.value)
-						addUnstyledInlineDecorations(state,builder,parameters as {from: number, to: number, value: null},text,section);
-				} else
+				if (parameters.value === null)
+					addUnstyledInlineDecorations(state,builder,parameters as {from: number, to: number, value: null},text,section,sourceMode);
+				else
 					addStyledInlineDecorations(state,builder,parameters as {from: number, to: number, value: InlineCodeParameters},text,section,sourceMode);
 			},
 		});
@@ -408,6 +462,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return;
 		modeHighlight({start: parameters.to, text: text.value, language: parameters.value.language},builder);
 	}
+	
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		for (let iter = (transaction.state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) { //TODO (@mayurankv) Refactor: Try and make this startState
@@ -445,10 +500,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 
 	return [
-		sourceModeListener,
+		ignoreListener,ignoreFileListener,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
-		settingsState,charWidthState,livePreviewCompartment.of([headerDecorations,foldDecorations,hiddenDecorations]),inlineDecorations,
-		livePreviewCodeblockLines,
+		settingsState,charWidthState,livePreviewCompartment.of([]),ignoreCompartment.of([]),
+		lineDecorations,
+		// livePreviewCodeblockLines,
 	];
 }
 
@@ -477,9 +533,9 @@ function getInlineDelimiterSize(syntaxNode: SyntaxNodeRef): number | null {
 		return null;
 	return previousSibling.to-previousSibling.from;
 }
-function addUnstyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: null}, text: {from: number, to: number, value: string}, section: {from: number, to: number}) {
+function addUnstyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: null}, text: {from: number, to: number, value: string}, section: {from: number, to: number}, sourceMode: boolean) {
 	if (text.value) {
-		if (!state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to) && !livePreviewIgnore(state))
+		if (!state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to) && !sourceMode)
 			builder.add(parameters.from, parameters.to, Decoration.replace({}));
 	}
 }
@@ -534,7 +590,7 @@ function codeblockFoldCallback(startPosition: number, state: EditorState, foldCa
 	const foldStart = state.doc.lineAt(startPosition);
 	const startDelimiter = testOpeningLine(foldStart.text.toString());
 	let foldEnd: Line | null = null;
-	for (let i = foldStart.number+1; i < state.doc.lines; i++) {
+	for (let i = foldStart.number+1; i <= state.doc.lines; i++) {
 		const line = state.doc.line(i);
 		const lineText = line.text.toString();
 		if (testOpeningLine(lineText) === startDelimiter) {
@@ -569,13 +625,10 @@ function findCodeblocks(view: EditorView): Array<SyntaxNodeRef> {
 	return codeblocks;
 }
 
-function livePreviewIgnore(state: EditorState): boolean {
-	return isFileIgnored(state) || isSourceMode(state);
-}
 function isFileIgnored(state: EditorState): boolean {
 	const filePath = state.field(editorInfoField)?.file?.path;
 	if (typeof filePath !== "undefined")
-		return this.app.metadataCache.getCache(filePath)?.frontmatter?.["code-styler-ignore"] === true;
+		return this.app.metadataCache.getCache(filePath)?.frontmatter?.["code-styler-ignore"]?.toString() === "true";
 	return false;
 }
 function isSourceMode(state: EditorState): boolean {
