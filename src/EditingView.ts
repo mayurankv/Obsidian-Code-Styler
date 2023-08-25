@@ -83,16 +83,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 									lineNumberCount += 1;
 								}
 								maxLineNum = lineNumberCount - line.number - 1 + codeblockParameters.lineNumbers.offset;
-								if (maxLineNum.toString().length > 2)
-									lineNumberMargin = maxLineNum.toString().length * view.state.field(charWidthState);
-								else
-									lineNumberMargin = undefined;
+								lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * view.state.field(charWidthState):undefined;
 							}
 							if (excludedCodeblock)
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"}`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
+								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+								// builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
 								lineNumber++;
 							}
@@ -255,9 +252,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			// if (editingViewIgnore(transaction.state))
 			// 	return Decoration.none;
 			value = value.map(transaction.changes);
+			value = value.update({filter: (from: number, to: number)=>from!==to});
 			value = value.update({add: transaction.effects.filter(effect=>(effect.is(fold)||effect.is(unhideFold))).map(effect=>foldRegion(effect.value))}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>(effect.is(unfold)||effect.is(hideFold))).forEach(effect=>value=value.update(unfoldRegion(effect.value)));
-			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguage(effect.value)));
+			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguages(effect.value)));
 			return value;
 		},
 		provide(field: StateField<DecorationSet>): Extension {
@@ -269,12 +267,14 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return Decoration.none;
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			if (transaction.effects.some(effect=>effect.is(foldAll))) // editingViewIgnore(transaction.state) || 
+			if (transaction.effects.some(effect=>effect.is(foldAll)))
 				return Decoration.none;
+			// editingViewIgnore(transaction.state) || 
 			value = value.map(transaction.changes);
+			value = value.update({filter: (from: number, to: number)=>from!==to});
 			value = value.update({add: transaction.effects.filter(effect=>effect.is(hideFold)).map(effect=>effect.value)}); //TODO (@mayurankv) Can I remove `, sort: true`
 			transaction.effects.filter(effect=>effect.is(unhideFold)).forEach(effect=>value=value.update(unhideFoldUpdate(effect.value)));
-			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguage(effect.value)));
+			transaction.effects.filter(effect=>effect.is(removeFold)).forEach(effect=>value=value.update(removeFoldLanguages(effect.value)));
 			return value;
 		}
 	});
@@ -544,7 +544,7 @@ function foldRegion({from: foldFrom, to: foldTo, value: {spec: {language}}}: {fr
 function unfoldRegion({from: foldFrom, to: foldTo}: {from: number, to: number}) {
 	return {filter: (from: number, to: number) => (to <= foldFrom || from >= foldTo), filterFrom: foldFrom, filterTo: foldTo};
 }
-function removeFoldLanguage(languages: Array<string>) {
+function removeFoldLanguages(languages: Array<string>) {
 	return {filter: (from: number, to: number, value: Decoration) => !languages.includes(value?.spec?.language)};
 }
 function unhideFoldUpdate(range: Range<Decoration>) {
