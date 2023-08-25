@@ -27,6 +27,7 @@ See this project's [releases](/../../../releases).
 ### Fixed
 
 - Dealt with removing decorations in source mode properly (headers, fold regions)
+- Cursor unfold/refold is now based on full range
 
 ## [1.0.8] - 2023-08-23
 
