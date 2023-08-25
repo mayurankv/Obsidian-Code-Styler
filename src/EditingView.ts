@@ -15,7 +15,7 @@ interface SettingsState {
 }
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
-	const codeblockLines = ViewPlugin.fromClass( //TODO (@mayurankv) Update
+	const codeblockLines = ViewPlugin.fromClass( //TODO (@mayurankv) Update - could this be a statefield?
 		class CodeblockLines {
 			settings: CodeStylerSettings;
 			decorations: DecorationSet;
@@ -45,8 +45,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		
 			update(update: ViewUpdate) {
-				if (update.docChanged || 
-					update.viewportChanged || 
+				if (update.docChanged || update.viewportChanged || 
 					update.state.field(editorLivePreviewField) !== update.startState.field(editorLivePreviewField) ||
 					!settingsEqual(update.state.field(settingsState),update.startState.field(settingsState))
 				) {
@@ -281,36 +280,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				update.view.dispatch({effects: foldAll.of({})});
 		}
 	});
-	function cursorFoldExtender() {
-		return EditorState.transactionExtender.of((transaction: Transaction) => {
-			const addEffects: Array<StateEffect<unknown>> = [];
-			const foldDecorationsState = transaction.startState.field(foldDecorations,false)?.map(transaction.changes) ?? Decoration.none;
-			const hiddenDecorationsState = transaction.startState.field(hiddenDecorations,false)?.map(transaction.changes) ?? Decoration.none;
-			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
-				foldDecorationsState.between(range.from, range.to, (foldFrom, foldTo, decorationValue) => {
-					if (foldFrom <= range.head && range.head <= foldTo)
-						addEffects.push(hideFold.of({from: foldFrom, to: foldTo, value: decorationValue}));
-				});
-				for (let iter = hiddenDecorationsState.iter(); iter.value !== null; iter.next()) {
-					if (!(iter.from <= range.head && range.head <= iter.to))
-						addEffects.push(unhideFold.of({from: iter.from, to: iter.to, value: iter.value}));
-				}
-			});
-			return (addEffects.length !== 0)?{effects: addEffects}:null;
-		});
-	}
-	function documentFoldExtender() {
-		return EditorState.transactionExtender.of((transaction) => {
-			let addEffects: Array<StateEffect<unknown>> = [];
-			transaction.effects.filter(effect=>effect.is(foldAll)).forEach(effect=>{
-				if (typeof effect.value?.toFold !== "undefined")
-					addEffects = addEffects.concat(documentFold(transaction.startState,effect.value.toFold)); //TODO (@mayurankv) Does this need to be state
-				else
-					addEffects = addEffects.concat(documentFold(transaction.startState));
-			});
-			return (addEffects.length !== 0)?{effects: addEffects}:null;
-		});
-	}
 	function settingsChangeExtender() {
 		return EditorState.transactionExtender.of((transaction) => {
 			let addEffects: Array<StateEffect<unknown>> = [];
@@ -333,6 +302,36 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				addEffects.push(removeFold.of(removeFoldLanguages));
 			if (readdFoldLanguages.length !== 0)
 				addEffects = addEffects.concat(convertReaddFold(transaction,readdFoldLanguages));
+			return (addEffects.length !== 0)?{effects: addEffects}:null;
+		});
+	}
+	function cursorFoldExtender() {
+		return EditorState.transactionExtender.of((transaction: Transaction) => {
+			const addEffects: Array<StateEffect<unknown>> = [];
+			const foldDecorationsState = transaction.startState.field(foldDecorations,false)?.map(transaction.changes) ?? Decoration.none;
+			const hiddenDecorationsState = transaction.startState.field(hiddenDecorations,false)?.map(transaction.changes) ?? Decoration.none;
+			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
+				foldDecorationsState.between(range.from, range.to, (foldFrom, foldTo, decorationValue) => {
+					if (rangeInteraction(foldFrom,foldTo,range))
+						addEffects.push(hideFold.of({from: foldFrom, to: foldTo, value: decorationValue}));
+				});
+				for (let iter = hiddenDecorationsState.iter(); iter.value !== null; iter.next()) {
+					if (!rangeInteraction(iter.from,iter.to,range))
+						addEffects.push(unhideFold.of({from: iter.from, to: iter.to, value: iter.value}));
+				}
+			});
+			return (addEffects.length !== 0)?{effects: addEffects}:null;
+		});
+	}
+	function documentFoldExtender() {
+		return EditorState.transactionExtender.of((transaction) => {
+			let addEffects: Array<StateEffect<unknown>> = [];
+			transaction.effects.filter(effect=>effect.is(foldAll)).forEach(effect=>{
+				if (typeof effect.value?.toFold !== "undefined")
+					addEffects = addEffects.concat(documentFold(transaction.startState,effect.value.toFold)); //TODO (@mayurankv) Does this need to be state
+				else
+					addEffects = addEffects.concat(documentFold(transaction.startState));
+			});
 			return (addEffects.length !== 0)?{effects: addEffects}:null;
 		});
 	}
@@ -555,6 +554,9 @@ function unhideFoldUpdate(range: Range<Decoration>) {
 }
 function foldDecoration(language: string): Decoration {
 	return Decoration.replace({block: true, language: language});
+}
+function rangeInteraction(from: number, to: number, range: SelectionRange): boolean {
+	return (from <= range.head && range.head <= to) || (from <= range.anchor && range.anchor <= to);
 }
 
 function codeblockFoldCallback(startPosition: number, state: EditorState, foldCallback: (foldStart: Line, foldEnd: Line)=>void) {
