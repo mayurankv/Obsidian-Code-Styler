@@ -189,6 +189,17 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			decorations: (value) => value.decorations,
 		}
 	);
+	const inlineDecorations = StateField.define<DecorationSet>({
+		create(state: EditorState): DecorationSet {
+			return Decoration.none;
+		},
+		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+			return value;
+		},
+		provide(field: StateField<DecorationSet>): Extension {
+			return EditorView.decorations.from(field);
+		}
+	});
 	
 	const settingsState = StateField.define<SettingsState>({
 		create(): SettingsState {
@@ -209,7 +220,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return value;
 		}
 	});
-	const charWidthState = StateField.define<number>({
+	const charWidthState = StateField.define<number>({ //TODO (@mayurankv) Improve implementation
 		create(state: EditorState): number {
 			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
 		},
@@ -235,8 +246,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			if (editingViewIgnore(state))
 				return Decoration.none;
 			const builder = new RangeSetBuilder<Decoration>();
-			const headerDecorationsState = state.field(headerDecorations,false) ?? Decoration.none;
-			for (let iter = headerDecorationsState.iter(); iter.value !== null; iter.next()) {
+			for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 				if (!iter.value.spec.widget.codeblockParameters.fold.enabled)
 					continue;
 				codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
@@ -275,6 +285,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const sourceModeListener = EditorView.updateListener.of((update: ViewUpdate) => {
 		const ignore = editingViewIgnore(update.state);
 		if (editingViewIgnore(update.startState) !== ignore) { //TODO (@mayurankv) Can I make this startState only?
+			console.log("foo");
 			update.view.dispatch({effects: [headerCompartment.reconfigure(ignore?[]:headerDecorations),foldCompartment.reconfigure(ignore?[]:foldDecorations),hiddenCompartment.reconfigure(ignore?[]:hiddenDecorations)]});
 			if (!ignore)
 				update.view.dispatch({effects: foldAll.of({})});
@@ -459,8 +470,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
-		const headerDecorationsState = transaction.state.field(headerDecorations,false) ?? Decoration.none; //TODO (@mayurankv) Refactor: Try and make this startState
-		for (let iter = headerDecorationsState.iter(); iter.value !== null; iter.next()) {
+		for (let iter = (transaction.state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) { //TODO (@mayurankv) Refactor: Try and make this startState
 			if (!iter.value.spec.widget.codeblockParameters.fold.enabled || !readdLanguages.includes(iter.value.spec.widget.codeblockParameters.language))
 				continue;
 			codeblockFoldCallback(iter.from,transaction.state,(foldStart,foldEnd)=>{
@@ -479,8 +489,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	function documentFold(state: EditorState, toFold?: boolean): Array<StateEffect<unknown>> {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		const reset = (typeof toFold === "undefined");
-		const headerDecorationsState = state.field(headerDecorations,false) ?? Decoration.none;
-		for (let iter = headerDecorationsState.iter(); iter.value !== null; iter.next()) {
+		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 			if (iter.value.spec.widget.hidden)
 				continue;
 			const folded = iter.value.spec.widget.folded;
