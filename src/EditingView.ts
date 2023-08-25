@@ -15,6 +15,8 @@ interface SettingsState {
 }
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
+	const livePreviewCompartment = new Compartment;
+
 	const livePreviewCodeblockLines = ViewPlugin.fromClass( //TODO (@mayurankv) Update - could this be a statefield?
 		class CodeblockLines {
 			settings: CodeStylerSettings;
@@ -88,7 +90,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 								return;
 							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-								// builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({}));
 								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
 								lineNumber++;
 							}
@@ -135,7 +136,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return getCharWidth(transaction.state,value);
 		}
 	});
-	const headerCompartment = new Compartment;
 	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
 		create(state: EditorState): DecorationSet {
 			return buildHeaderDecorations(state);
@@ -147,11 +147,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		}
 	});
-	const foldCompartment = new Compartment;
 	const foldDecorations = StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet {
-			// if (livePreviewIgnore(state))
-			// 	return Decoration.none;
+		create(state: EditorState): DecorationSet { //TODO (@mayurankv) Can I change this?
 			const builder = new RangeSetBuilder<Decoration>();
 			for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 				if (!iter.value.spec.widget.codeblockParameters.fold.enabled)
@@ -173,7 +170,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		},
 	});
-	const hiddenCompartment = new Compartment;
 	const hiddenDecorations = StateField.define<DecorationSet>({
 		create(): DecorationSet {
 			return Decoration.none;
@@ -201,11 +197,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	});
 
 	const sourceModeListener = EditorView.updateListener.of((update: ViewUpdate) => {
-		const ignore = livePreviewIgnore(update.state);
-		if (livePreviewIgnore(update.startState) !== ignore) { //TODO (@mayurankv) Can I make this startState only?
+		const sourceMode = isSourceMode(update.state);
+		if (isSourceMode(update.startState) !== sourceMode) { //TODO (@mayurankv) Can I make this startState only?
 			console.log("foo");
-			update.view.dispatch({effects: [headerCompartment.reconfigure(ignore?[]:headerDecorations),foldCompartment.reconfigure(ignore?[]:foldDecorations),hiddenCompartment.reconfigure(ignore?[]:hiddenDecorations)]});
-			if (!ignore)
+			update.view.dispatch({effects: livePreviewCompartment.reconfigure(sourceMode?[]:[headerDecorations,foldDecorations,hiddenDecorations])});
+			if (!sourceMode)
 				update.view.dispatch({effects: foldAll.of({})});
 		}
 	});
@@ -329,10 +325,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			headerContainer.onclick = () => {foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);};
 			return headerContainer;
 		}
-	
-		// ignoreEvent() { //TODO (@mayurankv) Can I remove this?
-		// 	return false;
-		// }
 	}
 	class OpenerWidget extends WidgetType {
 		inlineCodeParameters: InlineCodeParameters;
@@ -387,18 +379,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		return builder.finish();
 	}
 	function buildInlineDecorations(state: EditorState): DecorationSet {
-		function addStyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: InlineCodeParameters}, text: {from: number, to: number, value: string}, section: {from: number, to: number}, sourceMode: boolean) {
-			if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to))
-				builder.add(parameters.from, parameters.to, Decoration.mark({class: "code-styler-inline-parameters"}));
-			else {
-				builder.add(parameters.from, parameters.to, Decoration.replace({}));
-				if (parameters.value?.title || (parameters.value?.icon && getLanguageIcon(parameters.value.language,languageIcons)))
-					builder.add(parameters.from, parameters.from, Decoration.replace({widget: new OpenerWidget(parameters.value,languageIcons)}));
-			}
-			if (!settings.currentTheme.settings.inline.syntaxHighlight)
-				return;
-			modeHighlight({start: parameters.to, text: text.value, language: parameters.value.language},builder);
-		}
 		const builder = new RangeSetBuilder<Decoration>();
 		const sourceMode = isSourceMode(state);
 		syntaxTree(state).iterate({
@@ -409,12 +389,24 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				const {parameters,text,section} = ranges;
 				if (parameters.value === null) {
 					if (text.value)
-						addUnstyledInlineDecorations(state,builder,parameters as {from: number, to: number, value: null},section);
+						addUnstyledInlineDecorations(state,builder,parameters as {from: number, to: number, value: null},text,section);
 				} else
 					addStyledInlineDecorations(state,builder,parameters as {from: number, to: number, value: InlineCodeParameters},text,section,sourceMode);
 			},
 		});
 		return builder.finish();
+	}
+	function addStyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: InlineCodeParameters}, text: {from: number, to: number, value: string}, section: {from: number, to: number}, sourceMode: boolean) {
+		if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to))
+			builder.add(parameters.from, parameters.to, Decoration.mark({class: "code-styler-inline-parameters"}));
+		else {
+			builder.add(parameters.from, parameters.to, Decoration.replace({}));
+			if (parameters.value?.title || (parameters.value?.icon && getLanguageIcon(parameters.value.language,languageIcons)))
+				builder.add(parameters.from, parameters.from, Decoration.replace({widget: new OpenerWidget(parameters.value,languageIcons)}));
+		}
+		if (!settings.currentTheme.settings.inline.syntaxHighlight)
+			return;
+		modeHighlight({start: parameters.to, text: text.value, language: parameters.value.language},builder);
 	}
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
@@ -455,7 +447,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	return [
 		sourceModeListener,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
-		settingsState,charWidthState,headerCompartment.of(headerDecorations),foldCompartment.of(foldDecorations),hiddenCompartment.of(hiddenDecorations),inlineDecorations,
+		settingsState,charWidthState,livePreviewCompartment.of([headerDecorations,foldDecorations,hiddenDecorations]),inlineDecorations,
 		livePreviewCodeblockLines,
 	];
 }
@@ -485,9 +477,11 @@ function getInlineDelimiterSize(syntaxNode: SyntaxNodeRef): number | null {
 		return null;
 	return previousSibling.to-previousSibling.from;
 }
-function addUnstyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: null}, section: {from: number, to: number}) {
-	if (!state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to) && !livePreviewIgnore(state))
-		builder.add(parameters.from, parameters.to, Decoration.replace({}));
+function addUnstyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: null}, text: {from: number, to: number, value: string}, section: {from: number, to: number}) {
+	if (text.value) {
+		if (!state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to) && !livePreviewIgnore(state))
+			builder.add(parameters.from, parameters.to, Decoration.replace({}));
+	}
 }
 function modeHighlight({start,text,language}: {start: number, text: string, language: string}, builder: RangeSetBuilder<Decoration>) {
 	//@ts-expect-error Undocumented Obsidian API
@@ -503,22 +497,6 @@ function modeHighlight({start,text,language}: {start: number, text: string, lang
 		}
 	}
 }
-// function modeHighlight({start,text,language}: {start: number, text: string, language: string}): Array<Range<Decoration>> {
-// 	const markDecorations: Array<Range<Decoration>> = [];
-// 	//@ts-expect-error Undocumented Obsidian API
-// 	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime);
-// 	const state = window.CodeMirror.startState(mode);
-// 	if (mode?.token) {
-// 		const stream = new window.CodeMirror.StringStream(text);
-// 		while (!stream.eol()) {
-// 			const style = mode.token(stream,state);
-// 			if (style)
-// 				markDecorations.push({from: start+stream.start, to: start+stream.pos, value: Decoration.mark({class: `cm-${style}`})});
-// 			stream.start = stream.pos;
-// 		}
-// 	}
-// 	return markDecorations;
-// }
 
 export function editingDocumentFold(view: EditorView, toFold?: boolean) {
 	view.dispatch({effects: foldAll.of((typeof toFold !== "undefined")?{toFold: toFold}:{})});
