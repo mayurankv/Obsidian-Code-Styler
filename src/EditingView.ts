@@ -37,97 +37,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			update.view.dispatch({effects: ignoreCompartment.reconfigure(fileIgnore?[]:inlineDecorations)});
 	});
 
-	const livePreviewCodeblockLines = ViewPlugin.fromClass( //TODO (@mayurankv) Update - could this be a statefield?
-		class CodeblockLines {
-			settings: CodeStylerSettings;
-			decorations: DecorationSet;
-			mutationObserver: MutationObserver;
-		
-			constructor(view: EditorView) {
-				this.settings = settings;
-				this.decorations = Decoration.none;
-				this.buildDecorations(view);
-				this.mutationObserver = new MutationObserver((mutations) => {mutations.forEach((mutation: MutationRecord) => {
-					if (mutation.type === "attributes" && mutation.attributeName === "class" && (
-						(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-begin") ||
-							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock_HyperMD-codeblock-bg") ||
-							(mutation.target as HTMLElement).classList.contains("HyperMD-codeblock-end")
-					)) {
-						this.buildDecorations(view);
-						view.requestMeasure();
-					}
-				});
-				});
-				this.mutationObserver.observe(view.contentDOM,  {
-					attributes: true,
-					childList: true,
-					subtree: true,
-					attributeFilter: ["class"],
-				});
-			}
-		
-			update(update: ViewUpdate) {
-				if (update.docChanged || update.viewportChanged || 
-					update.state.field(editorLivePreviewField) !== update.startState.field(editorLivePreviewField) ||
-					!settingsEqual(update.state.field(settingsState),update.startState.field(settingsState))
-				) {
-					this.buildDecorations(update.view);
-				}
-			}
-		
-			buildDecorations(view: EditorView) {
-				if (!view?.visibleRanges?.length || isFileIgnored(view.state) || isSourceMode(view.state)) {
-					this.decorations = Decoration.none;
-					return;
-				}
-				const builder = new RangeSetBuilder<Decoration>();
-				const codeblocks = findUnduplicatedCodeblocks(view);
-				for (const codeblock of codeblocks) {
-					let codeblockParameters: CodeblockParameters;
-					let excludedCodeblock = false;
-					let lineNumber = 0;
-					let maxLineNum = 0;
-					let lineNumberMargin: number | undefined = 0;
-					syntaxTree(view.state).iterate({from: codeblock.from, to: codeblock.to,
-						enter: (syntaxNode)=>{
-							const line = view.state.doc.lineAt(syntaxNode.from);
-							const lineText = view.state.sliceDoc(line.from,line.to);
-							const startLine = syntaxNode.type.name.includes("HyperMD-codeblock-begin");
-							const endLine = syntaxNode.type.name.includes("HyperMD-codeblock-end");
-							if (startLine) {
-								codeblockParameters = parseCodeblockParameters(trimParameterLine(lineText),this.settings.currentTheme);
-								excludedCodeblock = isExcluded(codeblockParameters.language,[this.settings.excludedCodeblocks,this.settings.excludedLanguages].join(",")) || codeblockParameters.ignore;
-								lineNumber = 0;
-								let lineNumberCount = line.number + 1;
-								const startDelimiter = testOpeningLine(lineText);
-								while (startDelimiter !== testOpeningLine(view.state.doc.line(lineNumberCount).text)) {
-									lineNumberCount += 1;
-								}
-								maxLineNum = lineNumberCount - line.number - 1 + codeblockParameters.lineNumbers.offset;
-								lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * view.state.field(charWidthState):undefined;
-							}
-							if (excludedCodeblock)
-								return;
-							if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))||startLine||endLine)?"code-styler-line":getLineClass(codeblockParameters,lineNumber,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-								builder.add(syntaxNode.from,syntaxNode.from,Decoration.widget({widget: new LineNumberWidget(lineNumber,codeblockParameters,maxLineNum,startLine||endLine)}));
-								lineNumber++;
-							}
-						}
-					});
-				}
-				this.decorations = builder.finish();
-			}
-		
-			destroy() {
-				this.mutationObserver.disconnect();
-			}
-		},
-		{
-			decorations: (value) => value.decorations,
-		}
-	);
-	
 	const settingsState = StateField.define<SettingsState>({
 		create(): SettingsState {
 			return {
@@ -170,7 +79,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		create(state: EditorState): DecorationSet {
 			return buildLineDecorations(state);
 		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet { //source mode and settings state
+		update(value: DecorationSet, transaction: Transaction): DecorationSet { //TODO (@mayurankv) Deal with source mode and settings state
+			// if (transaction.state.field(editorLivePreviewField) !== transaction.startState.field(editorLivePreviewField) || !settingsEqual(transaction.state.field(settingsState),transaction.startState.field(settingsState)))
+			// 	console.log("foo");
 			return buildLineDecorations(transaction.state);
 		},
 		provide(field: StateField<DecorationSet>): Extension {
@@ -405,12 +316,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			const startDelimiter = testOpeningLine(foldStart.text.toString());
 			const codeblockParameters = iter.value.spec.widget.codeblockParameters;
 			let foldEnd: Line | null = null;
-			//TODO (@mayurankv) Can I improve below 5 lines
-			const lineNumberCount = foldStart.number + 1;
-			// while (startDelimiter !== testOpeningLine(state.doc.line(lineNumberCount).text)) {
-			// 	lineNumberCount += 1;
-			// }
-			const maxLineNum = lineNumberCount - foldStart.number - 1 + codeblockParameters.lineNumbers.offset;
+			let maxLineNum: number = 0;
+			codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
+				maxLineNum = foldEnd.to-foldStart.from-1+codeblockParameters.lineNumbers.offset;
+			});
 			const lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * state.field(charWidthState):undefined;
 			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
 			builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
@@ -504,7 +413,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
 		settingsState,charWidthState,livePreviewCompartment.of([]),ignoreCompartment.of([]),
 		lineDecorations,
-		// livePreviewCodeblockLines,
 	];
 }
 

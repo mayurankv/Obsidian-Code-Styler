@@ -108,7 +108,7 @@ body {
 }
 
 /** Editing Mode Body */
-.code-styler .markdown-source-view [class*="code-styler-line"].HyperMD-codeblock-begin {
+body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container + [class*="code-styler-line"].HyperMD-codeblock-begin {
 	border-top: none !important;
 	border-top-left-radius: 0px !important;
 	border-top-right-radius: 0px !important;
@@ -117,14 +117,12 @@ body {
 	border-bottom-left-radius: var(--border-radius);
 	border-bottom-right-radius: var(--border-radius);
 }
-/*! Complicated */
-body:not(.code-styler-show-langicons-always):not(.code-styler-show-langnames-always) .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container + .HyperMD-codeblock-begin,
-body:not(.code-styler-show-langnames-always) .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container:not(:has( img.code-styler-icon)) + .HyperMD-codeblock-begin,
-body .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container:not(:has([class*='code-styler-header-language-tag-'])) + .HyperMD-codeblock-begin,
-body .markdown-source-view :not([class^='code-styler-header-container']) + [class*="code-styler-line"].HyperMD-codeblock-begin,
-body .markdown-source-view [class*="code-styler-line"].HyperMD-codeblock-begin:nth-of-type(1) { /*? Depending on header visibility */
+body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin {
 	border-top-left-radius: var(--border-radius) !important;
 	border-top-right-radius: var(--border-radius) !important
+}
+body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin [class^='code-styler-line-number'] {
+	border-top-left-radius: var(--border-radius) !important;
 }
 .code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'] {
 	overflow: hidden;
