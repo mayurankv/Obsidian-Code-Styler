@@ -67,11 +67,3 @@ export function getLineClass(codeblockParameters: CodeblockParameters, lineNumbe
 		classList = ["code-styler-line"];
 	return classList;
 }
-export function getLineNumberDisplay(codeblockParameters: CodeblockParameters): string {
-	let lineNumberDisplay = "";
-	if (!codeblockParameters.lineNumbers.alwaysEnabled && codeblockParameters.lineNumbers.alwaysDisabled)
-		lineNumberDisplay = "-hide";
-	else if (codeblockParameters.lineNumbers.alwaysEnabled && !codeblockParameters.lineNumbers.alwaysDisabled)
-		lineNumberDisplay = "-specific";
-	return lineNumberDisplay;
-}

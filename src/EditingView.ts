@@ -6,7 +6,7 @@ import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
-import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, getLineNumberDisplay, isHeaderHidden } from "./CodeblockDecorating";
+import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
 
 interface SettingsState {
 	excludedCodeblocks: string;
@@ -207,7 +207,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	
 		toDOM(): HTMLElement {
-			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: `code-styler-line-number${getLineNumberDisplay(this.codeblockParameters)}`, text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
+			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: "code-styler-line-number", text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
 	class HeaderWidget extends WidgetType {
@@ -309,6 +309,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			const foldStart = state.doc.lineAt(iter.from);
 			const startDelimiter = testOpeningLine(foldStart.text.toString());
 			const codeblockParameters = iter.value.spec.widget.codeblockParameters;
+			const showLineNumbers = (settings.currentTheme.settings.codeblock.lineNumbers && !codeblockParameters.lineNumbers.alwaysDisabled) || codeblockParameters.lineNumbers.alwaysEnabled;
 			let foldEnd: Line | null = null;
 			let maxLineNum: number = 0;
 			codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
@@ -316,7 +317,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			});
 			const lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * state.field(charWidthState):undefined;
 			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-			builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
+			if (showLineNumbers)
+				builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			for (let i = foldStart.number+1; i <= state.doc.lines; i++) {
 				const line = state.doc?.line(i);
 				if (!line)
@@ -327,11 +329,13 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					break;
 				}
 				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-				builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i-foldStart.number,codeblockParameters,maxLineNum,false)}));
+				if (showLineNumbers)
+					builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i-foldStart.number,codeblockParameters,maxLineNum)}));
 			}
 			if (foldEnd !== null) {
 				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-				builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
+				if (showLineNumbers)
+					builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			}
 		}
 		return builder.finish();

@@ -6,7 +6,7 @@ import { toHtml } from "hast-util-to-html";
 import CodeStylerPlugin from "./main";
 import { TRANSITION_LENGTH } from "./Settings";
 import { CodeblockParameters, InlineCodeParameters, getFileContentLines, isExcluded, parseCodeblockSource, parseInlineCode } from "./CodeblockParsing";
-import { createHeader, createInlineOpener, getLineClass as getLineClasses, getLineNumberDisplay } from "./CodeblockDecorating";
+import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
 
 export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds = false) {
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
@@ -145,7 +145,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		codeblockPreElement.parentElement.classList.add("code-styler-pre-parent");
 	
 	if (!codeblockCodeElement.querySelector("code [class*='code-styler-line']")) // Ignore styled lines
-		decorateCodeblockLines(codeblockCodeElement,codeblockParameters);
+		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,plugin.settings.currentTheme.settings.codeblock.lineNumbers);
 }
 async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStylerPlugin): Promise<void> {
 	if (inlineCodeElement.classList.contains("code-styler-inline"))
@@ -244,10 +244,10 @@ function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolea
 	}
 	return preClassList;
 }
-function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters): void {
+function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, showLineNumbers: boolean): void {
 	getCodeblockLines(codeblockCodeElement).forEach((line,index,codeblockLines) => {
 		if (index !== codeblockLines.length-1)
-			insertLineWrapper(codeblockCodeElement,codeblockParameters,index+1,line);
+			insertLineWrapper(codeblockCodeElement,codeblockParameters,index+1,line,showLineNumbers);
 	});
 }
 function getCodeblockLines(codeblockCodeElement: HTMLElement): Array<string> {
@@ -272,11 +272,12 @@ function getCodeblockLines(codeblockCodeElement: HTMLElement): Array<string> {
 	codeblockCodeElement.innerHTML = "";
 	return codeblockLines;
 }
-function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, lineNumber: number, line: string): void {
+function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, lineNumber: number, line: string, showLineNumbers: boolean): void {
 	const lineWrapper = document.createElement("div");
 	codeblockCodeElement.appendChild(lineWrapper);
 	getLineClasses(codeblockParameters,lineNumber,line).forEach((lineClass) => lineWrapper.classList.add(lineClass));
-	lineWrapper.appendChild(createDiv({cls: `code-styler-line-number${getLineNumberDisplay(codeblockParameters)}`, text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
+	if ((showLineNumbers && !codeblockParameters.lineNumbers.alwaysDisabled) || codeblockParameters.lineNumbers.alwaysEnabled)
+		lineWrapper.appendChild(createDiv({cls: "code-styler-line-number", text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 	lineWrapper.appendChild(createDiv({cls: "code-styler-line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 }
 async function getHighlightedHTML(parameters: InlineCodeParameters, text: string, plugin: CodeStylerPlugin): Promise<string> {

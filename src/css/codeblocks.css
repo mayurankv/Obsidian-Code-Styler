@@ -82,6 +82,7 @@ body {
 }
 .code-styler pre.code-styler-pre.wrapped > code {
 	--line-wrapping: pre-wrap;
+	--line-active-wrapping: pre-wrap;
 }
 .code-styler pre.code-styler-pre.unwrapped > code {
 	--line-wrapping: pre;
@@ -121,7 +122,7 @@ body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-
 	border-top-left-radius: var(--border-radius) !important;
 	border-top-right-radius: var(--border-radius) !important
 }
-body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin [class^='code-styler-line-number'] {
+body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin .code-styler-line-number {
 	border-top-left-radius: var(--border-radius) !important;
 }
 .code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'] {
@@ -133,7 +134,7 @@ body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-
 .code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'][class*='language-'] {
 	background: linear-gradient(90deg, var(--language-border-colour), var(--language-border-colour) var(--language-border-width), var(--gradient-background-colour) var(--language-border-width) var(--gradient-highlights-colour-stop), transparent 100%), var(--code-styler-codeblock-background-colour) !important;
 }
-.code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'][class*='language-'] [class^='code-styler-line-number'] {
+.code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'][class*='language-'] .code-styler-line-number {
 	margin-left: var(--language-border-width);
 }
 
@@ -261,25 +262,24 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 }
 
 /** Line numbers */
-.code-styler:not(.code-styler-show-line-numbers) .code-styler-line-number,
-.code-styler-line-number-hide,
-:not([class*="HyperMD-codeblock"]) > [class^='code-styler-line-number'] {
+.markdown-source-view :not(div):not([class*="HyperMD-codeblock"]) > .code-styler-line-number {
 	display: none;
 }
-.code-styler code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler code > div:first-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour);
 	transition: box-shadow ease-in-out var(--duration-button);
 }
-.code-styler .code-styler-folded > code > div:first-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler .code-styler-folded > code > div:first-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
 	box-shadow: 0px 0px var(--code-styler-gutter-background-colour);
 }
-.code-styler code > div:last-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler code > div:last-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
 	box-shadow: 0px var(--code-padding) var(--code-styler-gutter-background-colour);
 }
-.code-styler code > div:only-child > [class^='code-styler-line-number'] { /*? Maintain gutter colour when padded */
+.code-styler code > div:only-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
 	box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour),0px var(--code-padding) var(--code-styler-gutter-background-colour);
 }
-[class*="HyperMD-codeblock"] > [class^='code-styler-line-number'] {
+pre.code-styler-pre div > [class*='code-styler-line-number'],
+.markdown-source-view div[class*="HyperMD-codeblock"] > [class*='code-styler-line-number'] {
 	min-width: var(--line-number-gutter-min-width);
 	padding-right: 8px;
 	padding-left: calc(4px + var(--language-border-width));
@@ -290,8 +290,7 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 	text-align: right;
 	user-select: none;
 }
-.markdown-source-view .HyperMD-codeblock .code-styler-line-number,
-.markdown-source-view .HyperMD-codeblock .code-styler-line-number-specific {
+.markdown-source-view [class*="HyperMD-codeblock"] > .code-styler-line-number {
 	position: absolute;
 	left: 0;
 	display: inline-block;
@@ -303,12 +302,10 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 	overflow-x: auto;
 }
 .markdown-source-view .HyperMD-codeblock-begin .code-styler-line-number,
-.markdown-source-view .HyperMD-codeblock-begin .code-styler-line-number-specific,
-.markdown-source-view .HyperMD-codeblock-end .code-styler-line-number,
-.markdown-source-view .HyperMD-codeblock-end .code-styler-line-number-specific {
+.markdown-source-view .HyperMD-codeblock-end .code-styler-line-number {
 	width: var(--line-number-gutter-width);
 }
-pre.code-styler-pre [class^='code-styler-line-number'] {
+pre.code-styler-pre .code-styler-line-number {
 	position: sticky;
 	top: -1px;
 	left: 0;
@@ -316,22 +313,21 @@ pre.code-styler-pre [class^='code-styler-line-number'] {
 	grid-column: 1;
 	white-space: nowrap;
 }
-pre.code-styler-pre div:last-child > [class^='code-styler-line-number'] {
+pre.code-styler-pre div:last-child > .code-styler-line-number {
 	width: unset;
 }
-.code-styler-gutter-highlight pre.code-styler-pre [class*="code-styler-line-highlighted"] [class^='code-styler-line-number'] {
+.code-styler-gutter-highlight pre.code-styler-pre [class*="code-styler-line-highlighted"] .code-styler-line-number {
 	background-color: var(--gradient-background-colour);
 }
-.code-styler-active-line-highlight.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active [class^='code-styler-line-number'],
-.code-styler-active-line-highlight-codeblock.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active [class^='code-styler-line-number'],
-.code-styler-gutter-highlight [class*="code-styler-line-highlighted"] [class^='code-styler-line-number'] {
+.code-styler-active-line-highlight.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
+.code-styler-active-line-highlight-codeblock.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
+.code-styler-gutter-highlight [class*="code-styler-line-highlighted"] .code-styler-line-number {
 	background-color: rgba(0,0,0,0);
 }
-.code-styler-gutter-active-line .cm-active [class^='code-styler-line-number']{
+.code-styler-gutter-active-line .cm-active .code-styler-line-number{
 	color: var(--code-styler-gutter-active-text-colour);
 }
-.code-styler.code-styler-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.code-styler-line-number),
-.code-styler.code-styler-show-line-numbers .markdown-source-view .HyperMD-codeblock:has(.code-styler-line-number-specific) {
+.code-styler .markdown-source-view .HyperMD-codeblock:has(.code-styler-line-number) {
 	padding-left: calc(12px + var(--language-border-width) + var(--line-number-gutter-width) + var(--line-number-gutter-padding)) !important;
 }
 .code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line']::before {
