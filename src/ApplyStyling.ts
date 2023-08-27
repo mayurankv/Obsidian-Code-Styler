@@ -168,7 +168,6 @@ function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectL
 }
 
 function addThemeSettingsClasses (themeSettings: CodeStylerThemeSettings): void {
-	themeSettings.codeblock.lineNumbers ? document.body.classList.add("code-styler-show-line-numbers") : document.body.classList.remove("code-styler-show-line-numbers");
 	themeSettings.gutter.highlight ? document.body.classList.add("code-styler-gutter-highlight") : document.body.classList.remove("code-styler-gutter-highlight");
 	themeSettings.gutter.activeLine ? document.body.classList.add("code-styler-gutter-active-line") : document.body.classList.remove("code-styler-gutter-active-line");
 	

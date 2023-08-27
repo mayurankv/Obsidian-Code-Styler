@@ -19,6 +19,14 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Changed
+
+- Changed how line numbers are hidden/shown
+
+### Fixed
+
+- Fixed `wrap` parameter bug (on click would unwrap)
+
 ## [1.0.9] - 2023-08-25
 
 ### Added
@@ -26,7 +34,7 @@ See this project's [releases](/../../../releases).
 - Added ability to parse execute code codeblock parameters
 - Added automated settings updates between versions
 
-### Changes
+### Changed
 
 - Changed `ViewPlugins` to `StateFields`
 
