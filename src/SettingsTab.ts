@@ -230,6 +230,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.currentTheme.settings.codeblock.lineNumbers = value;
 					this.disableableComponents["lineNumbers"].forEach(component => {component.setDisabled(!value);});
 					(async () => {await this.plugin.saveSettings();})();         
+					this.plugin.renderReadingView();
 				}));
 		new Setting(containerEl)
 			.setName("Gutter Background Colour")
