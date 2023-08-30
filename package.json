@@ -14,9 +14,9 @@
 	"author": "Mayuran Visakan",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.5.6",
-		"@typescript-eslint/eslint-plugin": "^6.4.1",
-		"@typescript-eslint/parser": "^6.4.1",
+		"@types/node": "^20.5.7",
+		"@typescript-eslint/eslint-plugin": "^6.5.0",
+		"@typescript-eslint/parser": "^6.5.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.19.2",
 		"eslint": "^8.48.0",
@@ -41,7 +41,7 @@
 	"dependencies": {
 		"@codemirror/language": "github:lishid/cm-language",
 		"@codemirror/language-data": "^6.3.1",
-		"@codemirror/view": "^6.16.0",
+		"@codemirror/view": "^6.17.0",
 		"@lezer/common": "^1.0.4",
 		"@lezer/highlight": "^1.1.6",
 		"@simonwep/pickr": "^1.8.2",
