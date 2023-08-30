@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 See this project's [releases](/../../../releases).
 <!-- Create a new release using `npm version x.y.z`` (or increment `z` with `patch`, `y` with `minor` and `x` with `major`) -->
 <!-- Rerelease a broken release with `npm run rerelease`-->
-<!-- Revert a broken commit using `gitrev commitSHA` ()`git reset --hard commitSHA && git push --force origin commitSHA:master`) -->
+<!-- Revert a broken commit using `gitrev commitSHA` (`git reset --hard commitSHA && git push --force origin commitSHA:master`) -->
 
 <!-- Types of Changes -->
 <!-- ### Added -->
