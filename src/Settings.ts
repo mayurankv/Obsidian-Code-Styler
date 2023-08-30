@@ -311,7 +311,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	excludedLanguages: "ad-*",
 	excludedCodeblocks: "dataview, dataviewjs, math",
 	redirectLanguages: {},
-	version: "1.0.9",
+	version: "1.0.10",
 };
 
 export function convertSettings(settings: CodeStylerSettings): CodeStylerSettings {
@@ -360,6 +360,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 		delete settings.specialLanguages;
 		return settings;
 	}),
+	"1.0.10": settingsPreserve,
 };
 
 // Constants

@@ -1,6 +1,6 @@
 {
 	"name": "code-styler",
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"description": "This is a plugin for Obsidian (https://obsidian.md) which lets you style codeblocks and inline code in both editing mode and reading mode.",
 	"main": "main.js",
 	"scripts": {
