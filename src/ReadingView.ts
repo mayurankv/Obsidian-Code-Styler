@@ -145,19 +145,16 @@ async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStyl
 		return;
 	const inlineCodeText = inlineCodeElement.innerText;
 	const {parameters,text} = parseInlineCode(inlineCodeText);
-	if (parameters)
-		inlineCodeElement.innerHTML = await getHighlightedHTML(parameters,text,plugin);
-	else if (!parameters && text)
-		inlineCodeElement.innerHTML = text;
-	else
-		return;
-	
-	inlineCodeElement.classList.add("code-styler-inline");
 	if (parameters) {
+		inlineCodeElement.innerHTML = await getHighlightedHTML(parameters,text,plugin);
+		inlineCodeElement.classList.add("code-styler-inline");
 		const parameterString = inlineCodeText.substring(0,inlineCodeText.lastIndexOf(text));
 		inlineCodeElement.setAttribute("parameters",parameterString); // Store parameter string as attribute so original text can be restored on plugin removal
 		if (parameters.icon || parameters.title)
 			inlineCodeElement.insertBefore(createInlineOpener(parameters,plugin.languageIcons),inlineCodeElement.childNodes[0]);
+	} else if (!parameters && text) {
+		inlineCodeElement.innerHTML = text;
+		inlineCodeElement.classList.add("code-styler-inline");
 	}
 }
 
