@@ -9,4 +9,4 @@ fetch(url).then(r => r.text()).then(text=>{
 	writeFileSync("src/Settings.ts",settingsText.replace(/const EXECUTE_CODE_LANGUAGE_ALIASES: Array<string> = \[([\s\S]*?)\]/,`const EXECUTE_CODE_LANGUAGE_ALIASES: Array<string> = [${languageAliases}]`).replace(/const EXECUTE_CODE_CANONICAL_LANGUAGES: Array<string> = \[([\s\S]*?)\]/,`const EXECUTE_CODE_CANONICAL_LANGUAGES: Array<string> = [${canonicalLanguages}]`));
 });
 
-exec("git fetch execute-code && git show execute-code/master:src/CodeBlockArgs.ts > src/external/executeCode/CodeBlockArgs.ts && eslint --fix src/external/executeCode/CodeBlockArgs.ts",(error)=>console.log(error));
+exec("git fetch execute-code && git show execute-code/master:src/CodeBlockArgs.ts > src/External/ExecuteCode/CodeBlockArgs.ts && eslint --fix src/External/ExecuteCode/CodeBlockArgs.ts",(error)=>console.log(error));

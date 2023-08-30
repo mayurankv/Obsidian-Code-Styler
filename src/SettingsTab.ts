@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent, SliderComponent, ToggleComponent, ExtraButtonComponent } from "obsidian";
+import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent, SliderComponent, ToggleComponent, ExtraButtonComponent, MarkdownRenderer, Component } from "obsidian";
 import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
@@ -44,6 +44,14 @@ export class SettingsTab extends PluginSettingTab {
 
 		// ========== General ==========
 
+		const exampleCodeblock = `\`\`\`python
+print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")
+print("This line is highlighted.")
+\`\`\``;
+		const exampleInlineCode = "`{python icon title:foo} print(\"This is inline code\")`"
+		const temporaryRenderingContainer = containerEl.createDiv();
+		MarkdownRenderer.render(this.plugin.app,exampleCodeblock,temporaryRenderingContainer,"",new Component());
+		
 		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName("Ignore Codeblocks")

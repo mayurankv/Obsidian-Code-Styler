@@ -1,8 +1,8 @@
 import { Plugin, TFile } from "obsidian";
 
-import CodeStylerPlugin from "./main";
-import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "./Settings";
-import { CodeBlockArgs, getArgs } from "./external/executeCode/CodeBlockArgs";
+import CodeStylerPlugin from "../main";
+import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
+import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
 
 export interface CodeblockParameters {
 	language: string;
@@ -27,18 +27,11 @@ export interface CodeblockParameters {
 	},
 	ignore: boolean;
 }
-export interface InlineCodeParameters {
-	language: string;
-	title: string;
-	icon: boolean;
-}
-
 export interface Highlights {
 	lineNumbers: Array<number>;
 	plainText: Array<string>;
 	regularExpressions: Array<RegExp>;
 }
-
 interface ExternalPlugin extends Plugin {
 	supportedLanguages?: Array<string>;
 	code?: (source: string, sourcePath: string)=>Promise<{
@@ -81,17 +74,6 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 	}
 	parseCodeblockSection(codeSection);
 	return {codeblocksParameters: await parseCodeblocks(codeblocks,sourcePath,plugin,plugins), nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true};
-}
-export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
-	
-	const match = /^({} ?)?{([^}]*)} ?(.*)$/.exec(codeText);
-	
-	if (!match?.[1] && !(match?.[2] && match?.[3]))
-		return {parameters: null, text: ""};
-	else if (match?.[1])
-		return {parameters: null, text: match[0].substring(match[1].length)};
-	else
-		return {parameters: parseInlineCodeParameters(match[2]), text: match[3]};
 }
 
 async function parseCodeblocks(codeblocks: Array<Array<string>>, sourcePath: string, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>): Promise<Array<CodeblockParameters>> {
@@ -204,22 +186,6 @@ function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, pl
 			codeblockParameters.language = codeblockParameters.language.slice(4);
 	}
 	return codeblockParameters;
-}
-function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters {
-	const inlineCodeParameters: InlineCodeParameters = {
-		language: "",
-		title: "",
-		icon: false,
-	};
-	const languageBreak = parameterLine.indexOf(" ");
-	inlineCodeParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
-	if (languageBreak === -1)
-		return inlineCodeParameters;
-	const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
-	if (!parameterStrings)
-		return inlineCodeParameters;
-	parameterStrings.forEach((parameterString) => parseInlineCodeParameterString(parameterString,inlineCodeParameters));
-	return inlineCodeParameters;
 }
 
 function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
@@ -365,14 +331,6 @@ export function isExcluded(language: string, excludedLanguagesString: string): b
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,".+")}$`,"i"));
 }
-function parseInlineCodeParameterString(parameterString: string, inlineCodeParameters: InlineCodeParameters): void {
-	if (parameterString.startsWith("title:")) {
-		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
-		if (titleMatch)
-			inlineCodeParameters.title = titleMatch[2].trim();
-	} else if (parameterString === "icon" || (parameterString.startsWith("icon:") && parameterString.toLowerCase() === "icon:true"))
-		inlineCodeParameters.icon = true;
-}
 
 export function getParameterLine(codeblockLines: Array<string>): string | undefined {
 	let openingCodeblockLine = getOpeningLine(codeblockLines);
@@ -413,6 +371,6 @@ export async function getFileContentLines(sourcePath: string, plugin: CodeStyler
 	return fileContent.split(/\n/g);
 }
 
-export function arraysEqual(array1: Array<unknown>,array2: Array<unknown>): boolean {
+function arraysEqual(array1: Array<unknown>,array2: Array<unknown>): boolean {
 	return array1.length === array2.length && array1.every((el) => array2.includes(el));
 }

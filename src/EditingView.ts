@@ -5,7 +5,8 @@ import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, trimParameterLine, InlineCodeParameters, parseInlineCode } from "./CodeblockParsing";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, trimParameterLine } from "./Parsing/CodeblockParsing";
+import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
 
 interface SettingsState {

@@ -1,5 +1,6 @@
 import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER } from "./Settings";
-import { CodeblockParameters, Highlights, InlineCodeParameters } from "./CodeblockParsing";
+import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
+import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
 	const headerContainer = createDiv();

@@ -5,7 +5,8 @@ import { toHtml } from "hast-util-to-html";
 
 import CodeStylerPlugin from "./main";
 import { TRANSITION_LENGTH } from "./Settings";
-import { CodeblockParameters, InlineCodeParameters, getFileContentLines, isExcluded, parseCodeblockSource, parseInlineCode } from "./CodeblockParsing";
+import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./Parsing/CodeblockParsing";
+import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
 
 export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds = false) {
