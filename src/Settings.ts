@@ -356,11 +356,11 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.0.6": settingsClear,
 	"1.0.7": settingsPreserve,
 	"1.0.8": settingsPreserve,
-	"1.0.9": (settings)=>settingsVersionUpdate(settings,"1.0.8",(theme)=>theme,(settings)=>{//@ts-expect-error For older interface versions
+	"1.0.9": settingsPreserve,
+	"1.0.10": (settings)=>settingsVersionUpdate(settings,"1.0.11",(theme)=>theme,(settings)=>{//@ts-expect-error For older interface versions
 		delete settings.specialLanguages;
 		return settings;
 	}),
-	"1.0.10": settingsPreserve,
 };
 
 // Constants
