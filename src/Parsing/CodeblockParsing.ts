@@ -2,7 +2,7 @@ import { Plugin, TFile } from "obsidian";
 
 import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
-import { CodeBlockArgs, getArgs } from "../External/executeCode/CodeBlockArgs";
+import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
 
 export interface CodeblockParameters {
 	language: string;
