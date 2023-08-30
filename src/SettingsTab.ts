@@ -44,14 +44,14 @@ export class SettingsTab extends PluginSettingTab {
 
 		// ========== General ==========
 
-// 		const exampleCodeblock = `\`\`\`python title:foo
-// print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")
-// print("This line is highlighted.")
-// \`\`\``;
-// 		// const exampleInlineCode = "`{python icon title:foo} print(\"This is inline code\")`";
-// 		const exampleCodeblockContainer = containerEl.createDiv();
-// 		MarkdownRenderer.render(this.plugin.app,exampleCodeblock,exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+exampleCodeblock,new Component());
-// 		exampleCodeblockContainer.querySelector("pre > button.copy-code-button")?.classList?.add("code-styler-settings-button");
+		const exampleCodeblock = `\`\`\`python title:foo
+print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")
+print("This line is highlighted.")
+\`\`\``;
+		// const exampleInlineCode = "`{python icon title:foo} print(\"This is inline code\")`";
+		const exampleCodeblockContainer = containerEl.createDiv();
+		MarkdownRenderer.render(this.plugin.app,exampleCodeblock,exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+exampleCodeblock,new Component());
+		exampleCodeblockContainer.querySelector("pre > button.copy-code-button")?.classList?.add("code-styler-settings-button");
 		
 		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
