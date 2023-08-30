@@ -25,6 +25,7 @@ See this project's [releases](/../../../releases).
 ### Added
 
 - Added ability to parse codeblock rendered in settings
+- Added ability to rerelease versions if build fails
 
 ### Changed
 
