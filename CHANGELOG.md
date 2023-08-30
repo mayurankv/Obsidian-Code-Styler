@@ -21,9 +21,14 @@ See this project's [releases](/../../../releases).
 
 ## [1.0.10] - 2023-08-30
 
+### Added
+
+- Added ability to parse codeblock rendered in settings
+
 ### Changed
 
 - Changed how line numbers are hidden/shown
+- Changed how inline code syntax highlighting setting is implemented
 
 ### Fixed
 
