@@ -367,6 +367,7 @@ export const FOLD_PLACEHOLDER = "Folded Code";
 export const PARAMETERS = ["title","fold","ln","unwrap","ignore"];
 export const TRANSITION_LENGTH = 240; // 240ms
 export const SPECIAL_LANGUAGES = ["^preview$","^include$","^output$","^run-.+$"];
+export const SETTINGS_SOURCEPATH_PREFIX = "@Code-Styler-Settings:";
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names

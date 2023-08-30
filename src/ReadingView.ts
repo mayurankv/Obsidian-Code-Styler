@@ -4,7 +4,7 @@ import { fromHtml } from "hast-util-from-html";
 import { toHtml } from "hast-util-to-html";
 
 import CodeStylerPlugin from "./main";
-import { TRANSITION_LENGTH } from "./Settings";
+import { SETTINGS_SOURCEPATH_PREFIX, TRANSITION_LENGTH } from "./Settings";
 import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
@@ -27,6 +27,8 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 	const codeblockSectionInfo: MarkdownSectionInformation | null = getSectionInfo(codeblockPreElements[0]);
 	if (codeblockSectionInfo && specific && !editingEmbeds)
 		await renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
+	else if (specific && sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX))
+		await renderSettings(codeblockPreElements,sourcePath,plugin);
 	else if (specific && !printing)
 		await retriggerProcessor(element,{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds);
 	else
@@ -81,22 +83,17 @@ export function destroyReadingModeElements(): void {
 	});
 }
 
-async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin): Promise<void> {
-	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split("\n")[lineNumber]),sourcePath,plugin)).codeblocksParameters;
-	if (codeblockPreElements.length !== codeblocksParameters.length)
-		return;
-	for (const [key,codeblockPreElement] of codeblockPreElements.entries()) {
-		const codeblockParameters = codeblocksParameters[key];
-		const codeblockCodeElement = codeblockPreElement.querySelector("pre > code");
-		if (!codeblockCodeElement)
-			return;
-		if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
-			while(!codeblockCodeElement.classList.contains("is-loaded"))
-				await sleep(2);
-		if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
-			continue;
-		await remakeCodeblock(codeblockCodeElement as HTMLElement,codeblockPreElement,codeblockParameters,true,plugin);
-	}
+async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin) {
+	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split("\n")[lineNumber]),plugin,sourcePath)).codeblocksParameters;
+	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,true,false,plugin);
+}
+async function renderSettings(codeblockPreElements: Array<HTMLElement>, sourcePath: string, plugin: CodeStylerPlugin) {
+	const codeblocksParameters = (await parseCodeblockSource(sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n"),plugin)).codeblocksParameters;
+	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,true,false,plugin);
+}
+async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
+	const codeblocksParameters: Array<CodeblockParameters> = await getCodeblocksParameters(sourcePath,cache,plugin,editingEmbeds);
+	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,!printing,true,plugin);
 }
 async function retriggerProcessor(element: HTMLElement, context: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean) {
 	if (element.matchParent("div.block-language-dataviewjs") && /dataviewjs(?= |,|$)/.test(plugin.settings.excludedCodeblocks))
@@ -104,33 +101,28 @@ async function retriggerProcessor(element: HTMLElement, context: {sourcePath: st
 	await sleep(50);
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	if (editingEmbeds || !element.classList.contains("admonition-content")) {
-		const contentEl = element.matchParent(".view-content") as HTMLElement;
-		await readingViewCodeblockDecoratingPostProcessor(contentEl || (element.matchParent("div.print") as HTMLElement),context,plugin,editingEmbeds); // Re-render whole document
+		const contentEl = element.matchParent(".view-content") ?? element.matchParent("div.print");
+		if (contentEl !== null)
+			await readingViewCodeblockDecoratingPostProcessor(contentEl as HTMLElement,context,plugin,editingEmbeds); // Re-render whole document
 	}
 }
-async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
-	const codeblocksParameters: Array<CodeblockParameters> = await getCodeblocksParameters(sourcePath,cache,plugin,editingEmbeds);
-	if (codeblocksParameters.length !== codeblockPreElements.length)
-		return;
 
-	try {
-		for (const [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
-			const codeblockParameters = codeblocksParameters[key];
-			const codeblockCodeElement: HTMLPreElement | null = codeblockPreElement.querySelector("pre > code");
-			if (!codeblockCodeElement)
-				return;
-			if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
-				while(!codeblockCodeElement.classList.contains("is-loaded"))
-					await sleep(2);
-			if (codeblockCodeElement.querySelector("code [class*='code-styler-line']"))
-				continue;
-			if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
-				continue;
-			await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,!printing,plugin);
-		}
-	} catch (error) {
-		console.error(`Error rendering document: ${error.message}`);
+async function remakeCodeblocks(codeblockPreElements: Array<HTMLElement>, codeblocksParameters: Array<CodeblockParameters>, dynamic: boolean, skipStyled: boolean, plugin: CodeStylerPlugin) {
+	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
+	for (const [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
+		const codeblockParameters = codeblocksParameters[key];
+		const codeblockCodeElement: HTMLElement | null = codeblockPreElement.querySelector("pre > code");
+		if (!codeblockCodeElement)
+			return;
+		if (Array.from(codeblockCodeElement.classList).some(className => /^language-\S+/.test(className)))
+			while(!codeblockCodeElement.classList.contains("is-loaded"))
+				await sleep(2);
+		if (skipStyled && codeblockCodeElement.querySelector("code [class*='code-styler-line']"))
+			continue;
+		if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
+			continue;
+		await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,dynamic,plugin);
 	}
 }
 
@@ -149,13 +141,13 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,plugin.settings.currentTheme.settings.codeblock.lineNumbers);
 }
 async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStylerPlugin): Promise<void> {
-	if (inlineCodeElement.classList.contains("code-styler-inline"))
+	if (!plugin.settings.currentTheme.settings.inline.syntaxHighlight || inlineCodeElement.classList.contains("code-styler-inline"))
 		return;
 	const inlineCodeText = inlineCodeElement.innerText;
 	const {parameters,text} = parseInlineCode(inlineCodeText);
-	if (parameters && plugin.settings.currentTheme.settings.inline.syntaxHighlight)
+	if (parameters)
 		inlineCodeElement.innerHTML = await getHighlightedHTML(parameters,text,plugin);
-	else if ((!parameters && text) || (parameters && !plugin.settings.currentTheme.settings.inline.syntaxHighlight))
+	else if (!parameters && text)
 		inlineCodeElement.innerHTML = text;
 	else
 		return;
@@ -195,7 +187,7 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 	if (typeof cache?.sections !== "undefined") {
 		for (const section of cache.sections) {
 			if (!editingEmbeds || section.type === "code" || section.type === "callout") {
-				const parsedCodeblocksParameters = await parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1),sourcePath,plugin);
+				const parsedCodeblocksParameters = await parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1),plugin,sourcePath);
 				if (!editingEmbeds || parsedCodeblocksParameters.nested)
 					codeblocksParameters = codeblocksParameters.concat(parsedCodeblocksParameters.codeblocksParameters);
 			}

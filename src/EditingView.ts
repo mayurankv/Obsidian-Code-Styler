@@ -342,6 +342,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		return builder.finish();
 	}
 	function buildInlineDecorations(state: EditorState): DecorationSet {
+		if (!settings.currentTheme.settings.inline.syntaxHighlight)
+			return Decoration.none;
 		const builder = new RangeSetBuilder<Decoration>();
 		const sourceMode = isSourceMode(state);
 		syntaxTree(state).iterate({
@@ -366,8 +368,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			if (parameters.value?.title || (parameters.value?.icon && getLanguageIcon(parameters.value.language,languageIcons)))
 				builder.add(parameters.from, parameters.from, Decoration.replace({widget: new OpenerWidget(parameters.value,languageIcons)}));
 		}
-		if (!settings.currentTheme.settings.inline.syntaxHighlight)
-			return;
 		modeHighlight({start: parameters.to, text: text.value, language: parameters.value.language},builder);
 	}
 	

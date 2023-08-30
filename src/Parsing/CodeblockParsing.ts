@@ -2,7 +2,7 @@ import { Plugin, TFile } from "obsidian";
 
 import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
-import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
+import { CodeBlockArgs, getArgs } from "../External/executeCode/CodeBlockArgs";
 
 export interface CodeblockParameters {
 	language: string;
@@ -34,7 +34,7 @@ export interface Highlights {
 }
 interface ExternalPlugin extends Plugin {
 	supportedLanguages?: Array<string>;
-	code?: (source: string, sourcePath: string)=>Promise<{
+	code?: (source: string, sourcePath?: string)=>Promise<{
 		start: number;
 		code: string;
 		language: string;
@@ -46,7 +46,7 @@ interface ExternalPlugin extends Plugin {
 	analyzeHighLightLines?: (lines: string[], source: string | string[])=>Map<number,boolean>;
 }
 
-export async function parseCodeblockSource(codeSection: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
+export async function parseCodeblockSource(codeSection: Array<string>, plugin: CodeStylerPlugin, sourcePath?: string): Promise<{codeblocksParameters: Array<CodeblockParameters>, nested: boolean}> {
 	// @ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,ExternalPlugin> = plugin.app.plugins.plugins;
 	const admonitions: boolean = ("obsidian-admonition" in plugins);
@@ -73,24 +73,28 @@ export async function parseCodeblockSource(codeSection: Array<string>, sourcePat
 		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
 	}
 	parseCodeblockSection(codeSection);
-	return {codeblocksParameters: await parseCodeblocks(codeblocks,sourcePath,plugin,plugins), nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true};
+	return {codeblocksParameters: await (typeof sourcePath !== "undefined"?parseCodeblocks(codeblocks,plugin,plugins,sourcePath):parseCodeblocks(codeblocks,plugin,plugins)), nested: codeblocks[0]?!arraysEqual(codeSection,codeblocks[0]):true};
 }
 
-async function parseCodeblocks(codeblocks: Array<Array<string>>, sourcePath: string, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>): Promise<Array<CodeblockParameters>> {
+async function parseCodeblocks(codeblocks: Array<Array<string>>, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, sourcePath?: string): Promise<Array<CodeblockParameters>> {
 	const codeblocksParameters: Array<CodeblockParameters> = [];
 	for (const codeblockLines of codeblocks) {
-		const parameterLine = getParameterLine(codeblockLines);
-		if (!parameterLine)
-			continue;
-		let codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
-			
-		if (isExcluded(codeblockParameters.language,plugin.settings.excludedCodeblocks))
-			continue;
-		
-		codeblockParameters = await pluginAdjustParameters(codeblockParameters,plugins,codeblockLines,sourcePath);
-		codeblocksParameters.push(codeblockParameters);
+		const codeblockParameters = await (typeof sourcePath !== "undefined"?parseCodeblock(codeblockLines,plugin,plugins,sourcePath):parseCodeblock(codeblockLines,plugin,plugins));
+		if (codeblockParameters !== null)
+			codeblocksParameters.push(codeblockParameters);
 	}
 	return codeblocksParameters;
+}
+async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, sourcePath?: string): Promise<CodeblockParameters | null> {
+	const parameterLine = getParameterLine(codeblockLines);
+	if (!parameterLine)
+		return null;
+	const codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
+		
+	if (isExcluded(codeblockParameters.language,plugin.settings.excludedCodeblocks))
+		return null;
+
+	return await (typeof sourcePath !== "undefined"?pluginAdjustParameters(codeblockParameters,plugins,codeblockLines,sourcePath):pluginAdjustParameters(codeblockParameters,plugins,codeblockLines));
 }
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
 	const codeblockParameters: CodeblockParameters = {
@@ -140,9 +144,9 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }
-async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === "preview")
-		codeblockParameters = await pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines,sourcePath);
+		codeblockParameters = await (typeof sourcePath !== "undefined"?pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines,sourcePath):pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines));
 	else if (codeblockParameters.language === "include")
 		codeblockParameters = pluginAdjustFileInclude(codeblockParameters,plugins,codeblockLines);
 	else if (/run-\w*/.test(codeblockParameters.language))
@@ -150,7 +154,7 @@ async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, 
 	codeblockParameters = pluginAdjustExecuteCode(codeblockParameters,plugins,codeblockLines);
 	return codeblockParameters;
 }
-async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath: string): Promise<CodeblockParameters> {
+async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
 	if (plugins?.["obsidian-code-preview"]?.code && plugins?.["obsidian-code-preview"]?.analyzeHighLightLines) {
 		const codePreviewParams = await plugins["obsidian-code-preview"].code(codeblockLines.slice(1,-1).join("\n"),sourcePath);
 		if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {

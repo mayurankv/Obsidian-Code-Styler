@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA } from "./Settings";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX } from "./Settings";
 
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
@@ -44,13 +44,14 @@ export class SettingsTab extends PluginSettingTab {
 
 		// ========== General ==========
 
-		const exampleCodeblock = `\`\`\`python
-print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")
-print("This line is highlighted.")
-\`\`\``;
-		const exampleInlineCode = "`{python icon title:foo} print(\"This is inline code\")`"
-		const temporaryRenderingContainer = containerEl.createDiv();
-		MarkdownRenderer.render(this.plugin.app,exampleCodeblock,temporaryRenderingContainer,"",new Component());
+// 		const exampleCodeblock = `\`\`\`python title:foo
+// print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")
+// print("This line is highlighted.")
+// \`\`\``;
+// 		// const exampleInlineCode = "`{python icon title:foo} print(\"This is inline code\")`";
+// 		const exampleCodeblockContainer = containerEl.createDiv();
+// 		MarkdownRenderer.render(this.plugin.app,exampleCodeblock,exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+exampleCodeblock,new Component());
+// 		exampleCodeblockContainer.querySelector("pre > button.copy-code-button")?.classList?.add("code-styler-settings-button");
 		
 		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
@@ -63,7 +64,7 @@ print("This line is highlighted.")
 					this.plugin.settings.excludedCodeblocks = value;
 					(async () => {await this.plugin.saveSettings();})();
 					clearTimeout(ignoreTimeout);
-					ignoreTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
+					ignoreTimeout = setTimeout(()=>this.rerender(),1000);
 				}));
 		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
@@ -76,7 +77,7 @@ print("This line is highlighted.")
 					this.plugin.settings.excludedLanguages = value;
 					(async () => {await this.plugin.saveSettings();})();
 					clearTimeout(excludeTimeout);
-					excludeTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
+					excludeTimeout = setTimeout(()=>this.rerender(),1000);
 				}));
 		new Setting(containerEl)
 			.setName("Style Code on Export")
@@ -201,7 +202,7 @@ print("This line is highlighted.")
 						wrapLinesActiveToggle.setValue(false);
 					this.disableableComponents["wrapLines"].forEach(component => {component.setDisabled(!value);});
 					(async () => {await this.plugin.saveSettings();})();  
-					this.plugin.renderReadingView();
+					this.rerender();
 				}));
 		new Setting(containerEl)
 			.setName("Codeblock Curvature")
@@ -238,7 +239,7 @@ print("This line is highlighted.")
 					this.plugin.settings.currentTheme.settings.codeblock.lineNumbers = value;
 					this.disableableComponents["lineNumbers"].forEach(component => {component.setDisabled(!value);});
 					(async () => {await this.plugin.saveSettings();})();         
-					this.plugin.renderReadingView();
+					this.rerender();
 				}));
 		new Setting(containerEl)
 			.setName("Gutter Background Colour")
@@ -370,7 +371,7 @@ print("This line is highlighted.")
 					this.plugin.settings.currentTheme.settings.header.foldPlaceholder = value;
 					(async () => {await this.plugin.saveSettings();})();
 					clearTimeout(foldPlaceholderTimeout);
-					foldPlaceholderTimeout = setTimeout(()=>this.plugin.renderReadingView(),1000);
+					foldPlaceholderTimeout = setTimeout(()=>this.rerender(),1000);
 				}));
 		new Setting(containerEl)
 			.setName("Header Separator Colour")
@@ -393,7 +394,7 @@ print("This line is highlighted.")
 					this.plugin.settings.currentTheme.settings.header.languageTag.display = value;
 					this.disableableComponents["headerLanguageTags"].forEach(component => {component.setDisabled(value==="none");});
 					(async () => {await this.plugin.saveSettings();})();
-					this.plugin.renderReadingView();
+					this.rerender();
 				}));
 		new Setting(containerEl)
 			.setName("Header Language Tag Background Colour")
@@ -461,7 +462,7 @@ print("This line is highlighted.")
 					this.plugin.settings.currentTheme.settings.header.languageIcon.display = value;
 					this.disableableComponents["headerLanguageIcons"].forEach(component => {component.setDisabled(value==="none");});
 					(async () => {await this.plugin.saveSettings();})();
-					this.plugin.renderReadingView();
+					this.rerender();
 				}));
 		let languageIconsColouredToggle: ToggleComponent;
 		new Setting(containerEl)
@@ -591,7 +592,7 @@ print("This line is highlighted.")
 							this.plugin.settings.newHighlight = "";
 							newHighlightText.setValue("");
 							(async () => {await this.plugin.saveSettings();})();
-							this.plugin.renderReadingView();
+							this.rerender();
 						}
 					}
 				});
@@ -608,7 +609,7 @@ print("This line is highlighted.")
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.inline.syntaxHighlight = value;
 					(async () => {await this.plugin.saveSettings();})();    
-					this.plugin.renderReadingView();
+					this.rerender();
 				}));
 		new Setting(containerEl)
 			.setName("Inline Code Background Colour")
@@ -803,7 +804,7 @@ print("This line is highlighted.")
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
 					(async () => {await this.plugin.saveSettings();})(); 
-					this.plugin.renderReadingView();   
+					this.rerender();   
 				});
 			this.disableableComponents["wrapLines"].push(wrapLinesActiveToggle);
 			});
@@ -927,6 +928,11 @@ print("This line is highlighted.")
 		const donationButton = createEl("a", { href: "https://www.buymeacoffee.com/mayurankv2"});
 		donationButton.innerHTML = "<img src=\"https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=mayurankv2&button_colour=e3e7efa0&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=a0522d\" height=\"42px\">";
 		donationDiv.appendChild(donationButton);
+	}
+
+	//TODO Sort these
+	rerender() {
+		this.plugin.renderReadingView();
 	}
 
 	// Setting Parsing

@@ -10,3 +10,8 @@
 	width: 400px;
 	height: 220px;
 }
+button.code-styler-settings-button.copy-code-button {
+    position: absolute;
+	right: 0;
+    height: auto;
+}
