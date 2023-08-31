@@ -153,7 +153,7 @@ async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStyl
 		if (parameters.icon || parameters.title)
 			inlineCodeElement.insertBefore(createInlineOpener(parameters,plugin.languageIcons),inlineCodeElement.childNodes[0]);
 	} else if (!parameters && text) {
-		inlineCodeElement.innerHTML = text;
+		inlineCodeElement.innerText = text;
 		inlineCodeElement.classList.add("code-styler-inline");
 	}
 }
