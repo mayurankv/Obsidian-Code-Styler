@@ -212,6 +212,178 @@ export const THEME_FALLBACK_COLOURS: CodeStylerThemeModeColours = {
 	}
 };
 
+// Color Schemes
+const SOLARIZED: Record<string,Colour> = {
+	"base03": "#002b36",
+	"base02": "#073642",
+	"base01": "#586e75",
+	"base00": "#657b83",
+	"base0": "#839496",
+	"base1": "#93a1a1",
+	"base2": "#eee8d5",
+	"base3": "#fdf6e3",
+	"yellow": "#b58900",
+	"orange": "#cb4b16",
+	"red": "#dc322f",
+	"magenta": "#d33682",
+	"violet": "#6c71c4",
+	"blue": "#268bd2",
+	"cyan": "#2aa198",
+	"green": "#859900",
+};
+// const CATPUCCIN: Record<string,Colour> = {
+// 	latte: {
+// 		backgroundColor: "#eff1f5",
+// 		foregroundColor: "#4c4f69",
+// 		selectionColor: "#acb0be",
+// 		cursorColor: "#dc8a78",
+// 		cursorAccentColor: "#eff1f5",
+// 		colors: {
+// 			black: "#5c5f77",
+// 			blue: "#1e66f5",
+// 			red: "#d20f39",
+// 			green: "#40a02b",
+// 			yellow: "#df8e1d",
+// 			magenta: "#ea76cb",
+// 			cyan: "#179299",
+// 			white: "#acb0be",
+// 			lightBlack: "#6c6f85",
+// 			lightWhite: "#bcc0cc",
+// 			lightBlue: "#1e66f5",
+// 			lightRed: "#d20f39",
+// 			lightGreen: "#40a02b",
+// 			lightYellow: "#df8e1d",
+// 			lightMagenta: "#ea76cb",
+// 			lightCyan: "#179299",
+// 		},
+// 	},
+// 	frappé: {
+// 		backgroundColor: "#303446",
+// 		foregroundColor: "#c6d0f5",
+// 		selectionColor: "#626880",
+// 		cursorColor: "#f2d5cf",
+// 		cursorAccentColor: "#232634",
+// 		colors: {
+// 			black: "#51576d",
+// 			blue: "#8caaee",
+// 			red: "#e78284",
+// 			green: "#a6d189",
+// 			yellow: "#e5c890",
+// 			magenta: "#f4b8e4",
+// 			cyan: "#81c8be",
+// 			white: "#b5bfe2",
+// 			lightBlack: "#626880",
+// 			lightWhite: "#a5adce",
+// 			lightBlue: "#8caaee",
+// 			lightRed: "#e78284",
+// 			lightGreen: "#a6d189",
+// 			lightYellow: "#e5c890",
+// 			lightMagenta: "#f4b8e4",
+// 			lightCyan: "#81c8be",
+// 		},
+// 	},
+// 	macchiato: {
+// 		backgroundColor: "#24273a",
+// 		foregroundColor: "#cad3f5",
+// 		selectionColor: "#5b6078",
+// 		cursorColor: "#f4dbd6",
+// 		cursorAccentColor: "#181926",
+// 		colors: {
+// 			black: "#494d64",
+// 			blue: "#8aadf4",
+// 			red: "#ed8796",
+// 			green: "#a6da95",
+// 			yellow: "#eed49f",
+// 			magenta: "#f5bde6",
+// 			cyan: "#8bd5ca8bd5ca",
+// 			white: "#b8c0e0",
+// 			lightBlack: "#5b6078",
+// 			lightWhite: "#a5adcb",
+// 			lightBlue: "#8aadf4",
+// 			lightRed: "#ed8796",
+// 			lightGreen: "#a6da95",
+// 			lightYellow: "#eed49f",
+// 			lightMagenta: "#f5bde6",
+// 			lightCyan: "#8bd5ca",
+// 		},
+// 	},
+// 	mocha: {
+// 		backgroundColor: "#1e1e2e",
+// 		foregroundColor: "#cdd6f4",
+// 		selectionColor: "#585b70",
+// 		cursorColor: "#f5e0dc",
+// 		cursorAccentColor: "#11111b",
+// 		colors: {
+// 			black: "#45475A",
+// 			blue: "#89b4fa",
+// 			red: "#f38ba8",
+// 			green: "#a6e3a1",
+// 			yellow: "#f9e2af",
+// 			magenta: "#f5c2e7",
+// 			cyan: "#94e2d5",
+// 			white: "#bac2de",
+// 			lightBlack: "#585b70",
+// 			lightWhite: "#a6adc8",
+// 			lightBlue: "#89b4fa",
+// 			lightRed: "#f38ba8",
+// 			lightGreen: "#a6e3a1",
+// 			lightYellow: "#f9e2af",
+// 			lightMagenta: "#f5c2e7",
+// 			lightCyan: "#94e2d5",
+// 		},
+// 	},
+// };
+// const GRUVBOX: Record<string,Colour> = {
+// 	dark0_hard: "#1d2021",
+// 	dark0: "#282828",
+// 	dark0_soft: "#32302f",
+// 	dark1: "#3c3836",
+// 	dark2: "#504945",
+// 	dark3: "#665c54",
+// 	dark4: "#7c6f64",
+
+// 	gray_245: "#928374",
+// 	gray_244: "#928374",
+
+// 	light0_hard: "#f9f5d7",
+// 	light0: "#fbf1c7",
+// 	light0_soft: "#f2e5bc",
+// 	light1: "#ebdbb2",
+// 	light2: "#d5c4a1",
+// 	light3: "#bdae93",
+// 	light4: "#a89984",
+
+// 	bright_red: "#fb4934",
+// 	bright_green: "#b8bb26",
+// 	bright_yellow: "#fabd2f",
+// 	bright_blue: "#83a598",
+// 	bright_purple: "#d3869b",
+// 	bright_aqua: "#8ec07c",
+// 	bright_orange: "#fe8019",
+
+// 	neutral_red: "#cc241d",
+// 	neutral_green: "#98971a",
+// 	neutral_yellow: "#d79921",
+// 	neutral_blue: "#458588",
+// 	neutral_purple: "#b16286",
+// 	neutral_aqua: "#689d6a",
+// 	neutral_orange: "#d65d0e",
+
+// 	faded_red: "#9d0006",
+// 	faded_green: "#79740e",
+// 	faded_yellow: "#b57614",
+// 	faded_blue: "#076678",
+// 	faded_purple: "#8f3f71",
+// 	faded_aqua: "#427b58",
+// 	faded_orange: "#af3a03",
+// };
+// const NORD: Record<string,Colour> = {
+
+// };
+// const DRACULA: Record<string,Colour> = {
+
+// };
+
 // Theme Creation
 const DEFAULT_THEME: CodeStylerTheme = {
 	settings: THEME_DEFAULT_SETTINGS,
@@ -225,11 +397,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 	colours: {
 		light: {
 			codeblock: {
-				backgroundColour: "#FCF6E4",
+				backgroundColour: SOLARIZED.base3,
 				textColour: "#bababa",
 			},
 			gutter: {
-				backgroundColour: "#EDE8D6",
+				backgroundColour: SOLARIZED.base2,
 				textColour: "#6c6c6c",
 				activeTextColour: "#8c8c8c",
 			},
@@ -245,13 +417,13 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				lineColour: "#EDD489",
 			},
 			highlights: {
-				activeCodeblockLineColour: "#EDE8D6",
+				activeCodeblockLineColour: SOLARIZED.base2,
 				activeEditorLineColour: "#60460633",
 				defaultColour: "#E9DFBA",
 				alternativeHighlights: {},
 			},
 			inline: {
-				backgroundColour: "#FCF6E4",
+				backgroundColour: SOLARIZED.base3,
 				textColour: "#bababa",
 				activeTextColour: "#bababa",
 				titleTextColour: "#C25F30",
@@ -263,11 +435,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 		},
 		dark: {
 			codeblock: {
-				backgroundColour: "#002b36",
+				backgroundColour: SOLARIZED.base03,
 				textColour: "#bababa",
 			},
 			gutter: {
-				backgroundColour: "#073642",
+				backgroundColour: SOLARIZED.base02,
 				textColour: "#6c6c6c",
 				activeTextColour: "#4c4c4c",
 			},
@@ -283,13 +455,13 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				lineColour: "#46cced",
 			},
 			highlights: {
-				activeCodeblockLineColour: "#073642",
+				activeCodeblockLineColour: SOLARIZED.base02,
 				activeEditorLineColour: "#468eeb33",
 				defaultColour: "#054b5c",
 				alternativeHighlights: {},
 			},
 			inline: {
-				backgroundColour: "#002b36",
+				backgroundColour: SOLARIZED.base03,
 				textColour: "#bababa",
 				activeTextColour: "#bababa",
 				titleTextColour: "#000000",
@@ -301,6 +473,96 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 		},
 	},
 };
+// const NORD_THEME = {
+
+// };
+// const DRACULA_THEME = {
+
+// };
+// const CATPUCCIN_THEME = {
+
+// };
+// const GRUVBOX_THEME = {
+// 	settings: THEME_DEFAULT_SETTINGS,
+// 	colours: {
+// 		light: {
+// 			codeblock: {
+// 				backgroundColour: GRUVBOX.light0,
+// 				textColour: "#bababa",
+// 			},
+// 			gutter: {
+// 				backgroundColour: GRUVBOX.light1,
+// 				textColour: "#6c6c6c",
+// 				activeTextColour: "#8c8c8c",
+// 			},
+// 			header: {
+// 				backgroundColour: "#D5CCB4",
+// 				title: {
+// 					textColour: "#866704",
+// 				},
+// 				languageTag: {
+// 					backgroundColour: "#B8B5AA",
+// 					textColour: "#C25F30",
+// 				},
+// 				lineColour: "#EDD489",
+// 			},
+// 			highlights: {
+// 				activeCodeblockLineColour: GRUVBOX.light1,
+// 				activeEditorLineColour: "#60460633",
+// 				defaultColour: "#E9DFBA",
+// 				alternativeHighlights: {},
+// 			},
+// 			inline: {
+// 				backgroundColour: GRUVBOX.light0,
+// 				textColour: "#bababa",
+// 				activeTextColour: "#bababa",
+// 				titleTextColour: "#C25F30",
+// 			},
+// 			advanced: {
+// 				buttonColour: "--text-muted",
+// 				buttonActiveColour: "--text-normal",
+// 			}
+// 		},
+// 		dark: {
+// 			codeblock: {
+// 				backgroundColour: GRUVBOX.dark0,
+// 				textColour: "#bababa",
+// 			},
+// 			gutter: {
+// 				backgroundColour: GRUVBOX.dark1,
+// 				textColour: "#6c6c6c",
+// 				activeTextColour: "#4c4c4c",
+// 			},
+// 			header: {
+// 				backgroundColour: "#0a4554",
+// 				title: {
+// 					textColour: "#dadada",
+// 				},
+// 				languageTag: {
+// 					backgroundColour: "#008080",
+// 					textColour: "#000000",
+// 				},
+// 				lineColour: "#46cced",
+// 			},
+// 			highlights: {
+// 				activeCodeblockLineColour: GRUVBOX.dark1,
+// 				activeEditorLineColour: "#468eeb33",
+// 				defaultColour: "#054b5c",
+// 				alternativeHighlights: {},
+// 			},
+// 			inline: {
+// 				backgroundColour: GRUVBOX.dark0,
+// 				textColour: "#bababa",
+// 				activeTextColour: "#bababa",
+// 				titleTextColour: "#000000",
+// 			},
+// 			advanced: {
+// 				buttonColour: "--text-muted",
+// 				buttonActiveColour: "--text-normal",
+// 			}
+// 		},
+// 	},
+// };
 
 export const INBUILT_THEMES: Record<string,CodeStylerTheme> = {
 	"Default": DEFAULT_THEME,
@@ -345,14 +607,14 @@ export function convertSettings(settings: CodeStylerSettings): CodeStylerSetting
 function semverNewer(newVersion: string, oldVersion: string): boolean {
 	return newVersion.localeCompare(oldVersion, undefined, { numeric: true }) === 1;
 }
-function settingsVersionUpdate(settings: CodeStylerSettings, version: string, themeUpdater: (theme: CodeStylerTheme)=>CodeStylerTheme = (theme)=>theme, otherSettingsUpdater: (settings: CodeStylerSettings)=>CodeStylerSettings = (settings)=>settings, redirectLanguagesUpdater: (redirectLanguages: Record<string,{colour?: Colour, icon?: string}>)=>Record<string,{colour?: Colour, icon?: string}> = (redirectLanguages)=>redirectLanguages): CodeStylerSettings {
+function settingsVersionUpdate(settings: CodeStylerSettings, themeUpdater: (theme: CodeStylerTheme)=>CodeStylerTheme = (theme)=>theme, otherSettingsUpdater: (settings: CodeStylerSettings)=>CodeStylerSettings = (settings)=>settings, redirectLanguagesUpdater: (redirectLanguages: Record<string,{colour?: Colour, icon?: string}>)=>Record<string,{colour?: Colour, icon?: string}> = (redirectLanguages)=>redirectLanguages): CodeStylerSettings {
 	for (const [name, theme] of Object.entries(settings.themes)) {
 		settings.themes[name] = themeUpdater(theme);
 	}
 	settings.currentTheme = structuredClone(settings.themes[settings.selectedTheme]);
 	settings.redirectLanguages = redirectLanguagesUpdater(settings.redirectLanguages);
 	settings = otherSettingsUpdater(settings);
-	settings.version = version;
+	settings.version = Object.keys(settingsUpdaters).find((value,index,array)=>array?.[index-1]===settings.version) ?? "1.0.0";
 	return settings;
 }
 function settingsPreserve(settings: CodeStylerSettings): CodeStylerSettings {
@@ -374,7 +636,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.0.7": settingsPreserve,
 	"1.0.8": settingsPreserve,
 	"1.0.9": settingsPreserve,
-	"1.0.10": (settings)=>settingsVersionUpdate(settings,"1.0.11",(theme)=>{
+	"1.0.10": (settings)=>settingsVersionUpdate(settings,(theme)=>{
 		theme.settings.inline.style = true;
 		return theme;
 	},(settings)=>{//@ts-expect-error For older interface versions
