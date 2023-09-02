@@ -20,6 +20,21 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Setting to disable inline code styling
+- Added security file
+- Added unit testing framework
+
+### Changed
+
+- Modified settings to be more modular
+- Changed how headers are built
+
+### Fixed
+
+- Codeblocks in html comments are no longer styled
+
 ## [1.0.10] - 2023-08-30
 
 ### Added
