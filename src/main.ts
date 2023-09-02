@@ -108,7 +108,7 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({},structuredClone(DEFAULT_SETTINGS),(await this.loadData())); //TODO (@mayurankv) Add `convertSettings`
+		this.settings = Object.assign({},structuredClone(DEFAULT_SETTINGS),convertSettings(await this.loadData()));
 	}
 
 	async saveSettings() {

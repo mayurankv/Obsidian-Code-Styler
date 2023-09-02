@@ -10,8 +10,9 @@ body {
 	--code-styler-inline-background-colour: var(--code-background);
 }
 
-.code-styler .cm-s-obsidian span.cm-inline-code,
-.code-styler .markdown-rendered :not(pre) > code:not([class*="blur"]) {
+.code-styler.code-styler-style-inline .cm-s-obsidian span.cm-inline-code,
+.code-styler.code-styler-style-inline .markdown-rendered :not(pre) > code:not([class*="blur"]),
+.code-styler.code-styler-style-inline code.code-styler-settings-inline-code {
 	padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal) !important;
 	border-radius: var(--code-styler-inline-border-radius) !important;
 	margin: 0px var(--code-styler-inline-margin-horizontal) !important;
@@ -19,17 +20,17 @@ body {
 	color: var(--code-styler-inline-colour);
 	font-weight: var(--code-styler-inline-font-weight);
 }
-.code-styler .cm-s-obsidian span.cm-formatting-code { /*? Standalone backticks */
+.code-styler.code-styler-style-inline .cm-s-obsidian span.cm-formatting-code { /*? Standalone backticks */
 	display: inline !important;
 	color: var(--code-styler-inline-colour-active);
 }
-.code-styler .cm-s-obsidian span.code-styler-inline-opener ~ span.cm-inline-code:not(.cm-formatting-code) {
+.code-styler.code-styler-style-inline .cm-s-obsidian span.code-styler-inline-opener ~ span.cm-inline-code:not(.cm-formatting-code) {
 	padding-left: 0px !important;
 	border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
 	margin-left: 0px !important;
 }
-.code-styler .cm-s-obsidian span.code-styler-inline-opener,
-.code-styler .cm-s-obsidian span.cm-formatting-code:has(+ span.cm-inline-code:not(.cm-formatting-code)) {/*? First backtick */
+.code-styler.code-styler-style-inline .cm-s-obsidian span.code-styler-inline-opener,
+.code-styler.code-styler-style-inline .cm-s-obsidian span.cm-formatting-code:has(+ span.cm-inline-code:not(.cm-formatting-code)) {/*? First backtick */
 	padding-right: 0px !important;
 	padding-left: var(--code-styler-inline-padding-horizontal) !important;
 	border-radius: var(--code-styler-inline-border-radius) 0px 0px var(--code-styler-inline-border-radius) !important;
@@ -37,14 +38,14 @@ body {
 	margin-left: var(--code-styler-inline-margin-horizontal) !important;
 	color: var(--code-styler-inline-colour-active);
 }
-.code-styler .cm-s-obsidian span.cm-formatting-code + span.cm-inline-code:not(.cm-formatting-code) { /*? Inner code with backticks */
+.code-styler.code-styler-style-inline .cm-s-obsidian span.cm-formatting-code + span.cm-inline-code:not(.cm-formatting-code) { /*? Inner code with backticks */
 	padding-right: 0px !important;
 	padding-left: 0px !important;
 	border-radius: 0px !important;
 	margin: 0px 0px !important;
 	color: var(--code-styler-inline-colour-active);
 }
-.code-styler .cm-s-obsidian span.cm-inline-code:not(.cm-formatting-code) + span.cm-formatting-code {/*? Last backtick */
+.code-styler.code-styler-style-inline .cm-s-obsidian span.cm-inline-code:not(.cm-formatting-code) + span.cm-formatting-code {/*? Last backtick */
 	padding-right: var(--code-styler-inline-padding-horizontal) !important;
 	padding-left: 0px !important;
 	border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;

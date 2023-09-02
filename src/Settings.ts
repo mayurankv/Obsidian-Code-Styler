@@ -80,6 +80,7 @@ export interface CodeStylerThemeSettings {
 	},
 	inline: {
 		syntaxHighlight: boolean;
+		style: boolean;
 		fontWeight: number;
 		curvature: number;
 		paddingVertical: number;
@@ -109,6 +110,9 @@ export interface CodeStylerSettings {
 	currentTheme: CodeStylerTheme;
 	newTheme: string;
 	newHighlight: string;
+	exampleCodeblockParameters: string;
+	exampleCodeblockContent: string;
+	exampleInlineCode: string;
 	decoratePrint: boolean;
 	excludedLanguages: string;
 	excludedCodeblocks: string;
@@ -153,6 +157,7 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 	},
 	inline: {
 		syntaxHighlight: true,
+		style: true,
 		fontWeight: 4,
 		curvature: 6,
 		paddingVertical: 5,
@@ -297,6 +302,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 	},
 };
 
+// Example Codeblock Defaults
+export const EXAMPLE_CODEBLOCK_PARAMETERS = "python title:foo";
+export const EXAMPLE_CODEBLOCK_CONTENT = "print(\"This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.\")\nprint(\"This line is highlighted.\")";
+export const EXAMPLE_INLINE_CODE = "{python icon title:foo} print(\"This is inline code\")";
+
 // Plugin default settings
 export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	themes: {
@@ -307,6 +317,9 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	currentTheme: structuredClone(DEFAULT_THEME),
 	newTheme: "",
 	newHighlight: "",
+	exampleCodeblockParameters: EXAMPLE_CODEBLOCK_PARAMETERS,
+	exampleCodeblockContent: EXAMPLE_CODEBLOCK_CONTENT,
+	exampleInlineCode: EXAMPLE_INLINE_CODE,
 	decoratePrint: true,
 	excludedLanguages: "ad-*",
 	excludedCodeblocks: "dataview, dataviewjs, math",
@@ -357,7 +370,10 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.0.7": settingsPreserve,
 	"1.0.8": settingsPreserve,
 	"1.0.9": settingsPreserve,
-	"1.0.10": (settings)=>settingsVersionUpdate(settings,"1.0.11",(theme)=>theme,(settings)=>{//@ts-expect-error For older interface versions
+	"1.0.10": (settings)=>settingsVersionUpdate(settings,"1.0.11",(theme)=>{
+		theme.settings.inline.style = true;
+		return theme;
+	},(settings)=>{//@ts-expect-error For older interface versions
 		delete settings.specialLanguages;
 		return settings;
 	}),

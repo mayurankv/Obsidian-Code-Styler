@@ -76,7 +76,7 @@ body {
 	grid-template-rows: auto;
 	overflow-x: overlay;
 	transition-duration: var(--duration-button);
-	transition-property: max-height, padding, border-top;
+	transition-property: max-height, padding-top, padding-bottom, border-top;
 	transition-timing-function: ease-in-out;
 	white-space: var(--line-wrapping) !important;
 }
@@ -408,7 +408,7 @@ pre.code-styler-pre button {
 	font-family: var(--font-interface);
 	font-size: var(--font-ui-smaller);
 	opacity: 1;
-    transition: visibility var(--duration-button), opacity var(--duration-button);
+	transition: visibility var(--duration-button), opacity var(--duration-button);
 	visibility: visible;
 }
 pre.code-styler-pre.code-styler-folded button,
@@ -435,7 +435,7 @@ pre.code-styler-pre:not(.code-styler-folded):not(:hover) .code-styler-header-con
 	mask-repeat: no-repeat;
 	opacity: 1;
 	scale: 0.8;
-    transition: transform var(--duration-button) ease-out, visibility var(--duration-button), opacity var(--duration-button), scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
+	transition: transform var(--duration-button) ease-out, visibility var(--duration-button), opacity var(--duration-button), scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
 	visibility: visible;
 }
 pre.code-styler-pre.code-styler-folded .code-styler-header-container::after,

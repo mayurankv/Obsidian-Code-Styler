@@ -10,8 +10,22 @@
 	width: 400px;
 	height: 220px;
 }
+.code-styler-setting-text-wide {
+	width: 100%;
+}
 button.code-styler-settings-button.copy-code-button {
-    position: absolute;
+	position: absolute;
 	right: 0;
-    height: auto;
+	height: auto;
+}
+code.code-styler-settings-inline-code {
+	padding: 0.1em 0.25em;
+	border-radius: var(--code-radius);
+	background-color: var(--code-background);
+	color: var(--code-normal);
+	font-family: var(--font-monospace);
+	font-size: var(--code-size);
+}
+p:has(> code.code-styler-settings-inline-code) {
+	text-align: center;
 }

@@ -3,8 +3,22 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX } from "./Settings";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT } from "./Settings";
 
+const SETTINGS_PAGES: Record<string,string> = {
+	"main": "Core Settings",
+	"codeblock": "Codeblock Styling",
+	"inline": "Inline Code Styling",
+};
+const CODEBLOCK_PAGES: Record<string,string> = {
+	"body": "Codeblock Body",
+	"gutter": "Codeblock Gutter",
+	"header": "Codeblock Header",
+	"highlight": "Codeblock Highlighting",
+	"languages": "Codeblock Languages",
+	// "plugins": "Plugin Compatibility",
+	"example": "Example Codeblock Content",
+};
 const DISPLAY_OPTIONS: Record<Display,string> = {
 	"none": "Never",
 	"if_header_shown": "If Header Shown",
@@ -14,12 +28,25 @@ const DISPLAY_OPTIONS: Record<Display,string> = {
 export class SettingsTab extends PluginSettingTab {
 	plugin: CodeStylerPlugin;
 	pickrs: Record<string,PickrResettable>;
+	page: string;
+	codeblockPage: string;
+	codeblockSettingEl: HTMLElement;
+	alternativeHighlightsContainer: HTMLElement;
+	exampleCodeblockContainer: HTMLElement;
+	exampleInlineCodeContainer: HTMLElement;
+	wrapLinesContainer: HTMLElement;
+	lineNumbersContainer: HTMLElement;
+	headerTagsContainer: HTMLElement;
+	headerIconsContainer: HTMLElement;
+	inlineCodeStylesContainer: HTMLElement;
 	disableableComponents: Record<string,Array<ToggleComponent | SliderComponent | TextComponent | ExtraButtonComponent>>;
 
 	constructor(app: App, plugin: CodeStylerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.pickrs = {};
+		this.page = "main";
+		this.codeblockPage = "body";
 		this.disableableComponents = {};
 	}
 
@@ -27,58 +54,103 @@ export class SettingsTab extends PluginSettingTab {
 	 *  Builds the html page that is showed in the settings.
 	 */
 	display() {
-		const {containerEl} = this;
-		containerEl.empty();
-		containerEl.createEl("h2", {text: "Settings for the Code Styler Plugin."});
-
 		this.disableableComponents = {
-			"lineNumbers": [],
-			"wrapLines": [],
-			"headerLanguageTags": [],
-			"headerLanguageIcons": [],
 			"editorActiveLineHighlight": [],
 			"codeblockActiveLineHighlight": [],
 			"gradientHighlighting": [],
 			"languageBorderColour": [],
 		};
+		this.generateSettings(this.containerEl);
+	}
 
-		// ========== General ==========
+	// Create Settings Pages
+	displayMainSettings(containerEl: HTMLElement) {
+		this.emptySettings(containerEl);
+		this.generateSettingsSwitcher(containerEl);
+		this.generateThemeSettings(containerEl);
+		this.generateCoreSettings(containerEl);
+		this.generateAdvancedSettings(containerEl);
+		this.generatePluginCompatibilitySettings(containerEl);
+		this.generateDonationFooter(containerEl);
+	}
+	displayCodeblockSettings(containerEl: HTMLElement) {
+		this.emptySettings(containerEl);
+		this.generateSettingsSwitcher(containerEl);
+		this.generateThemeSettings(containerEl);
+		containerEl.createEl("hr");
+		this.exampleCodeblockContainer = containerEl.createDiv();
+		this.generateExampleCodeblock();
+		this.generateCodeblockStylingSwitcher(containerEl);
+		this.codeblockSettingEl = containerEl.createDiv();
+		this.generateCodeblockSetting();
 
-// 		const exampleCodeblock = `\`\`\`python title:foo
-// print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")
-// print("This line is highlighted.")
-// \`\`\``;
-// 		// const exampleInlineCode = "`{python icon title:foo} print(\"This is inline code\")`";
-// 		const exampleCodeblockContainer = containerEl.createDiv();
-// 		MarkdownRenderer.render(this.plugin.app,exampleCodeblock,exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+exampleCodeblock,new Component());
-// 		exampleCodeblockContainer.querySelector("pre > button.copy-code-button")?.classList?.add("code-styler-settings-button");
-		
-		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
+	}
+	displayInlineCodeSettings(containerEl: HTMLElement) {
+		this.emptySettings(containerEl);
+		this.generateSettingsSwitcher(containerEl);
+		this.generateThemeSettings(containerEl);
+		containerEl.createEl("hr");
+		this.exampleInlineCodeContainer = containerEl.createDiv();
+		this.generateExampleInlineCode();
+		this.generateExampleInlineCodeSettings(containerEl);
+		this.generateInlineCodeSettings(containerEl);
+	}
+
+	// Create Settings Groups
+	emptySettings(containerEl: HTMLElement) {
+		containerEl.empty();
+		containerEl.createEl("h1", {text: "Settings for the Code Styler Plugin."});
+	}
+	generateSettingsSwitcher(containerEl: HTMLElement) {
 		new Setting(containerEl)
-			.setName("Ignore Codeblocks")
-			.setDesc("Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
-			.addText(text => text
-				.setPlaceholder("e.g. dataview, dataviewjs etc.")
-				.setValue(this.plugin.settings.excludedCodeblocks)
-				.onChange((value) => {
-					this.plugin.settings.excludedCodeblocks = value;
-					(async () => {await this.plugin.saveSettings();})();
-					clearTimeout(ignoreTimeout);
-					ignoreTimeout = setTimeout(()=>this.rerender(),1000);
+			.setName("Choose Settings Page")
+			.setDesc("Change dropdown to modify different groups of settings")
+			.addDropdown((dropdown) => dropdown
+				.addOptions(SETTINGS_PAGES)
+				.setValue(this.page)
+				.onChange((value: string) => {
+					this.page = value;
+					this.generateSettings(containerEl);
 				}));
-		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
+	}
+	generateSettings(containerEl: HTMLElement) {
+		if (this.page === "main")
+			this.displayMainSettings(containerEl);
+		else if (this.page === "codeblock")
+			this.displayCodeblockSettings(containerEl);
+		else if (this.page === "inline")
+			this.displayInlineCodeSettings(containerEl);
+	}
+	generateCodeblockStylingSwitcher(containerEl: HTMLElement) {
 		new Setting(containerEl)
-			.setName("Exclude Languages")
-			.setDesc("Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
-			.addText(text => text
-				.setPlaceholder("e.g. ad-*, python etc.")
-				.setValue(this.plugin.settings.excludedLanguages)
-				.onChange((value) => {
-					this.plugin.settings.excludedLanguages = value;
-					(async () => {await this.plugin.saveSettings();})();
-					clearTimeout(excludeTimeout);
-					excludeTimeout = setTimeout(()=>this.rerender(),1000);
+			.setName("Choose Codeblock Settings")
+			.setDesc("Change dropdown to modify styles and settings of different codeblock sections")
+			.addDropdown((dropdown) => dropdown
+				.addOptions(CODEBLOCK_PAGES)
+				.setValue(this.codeblockPage)
+				.onChange((value: string) => {
+					this.codeblockPage = value;
+					this.generateCodeblockSetting();
 				}));
+	}
+	generateCodeblockSetting() {
+		this.codeblockSettingEl.empty();
+		if (this.codeblockPage === "body")
+			this.generateCodeblockBodySettings(this.codeblockSettingEl);
+		else if (this.codeblockPage === "gutter")
+			this.generateCodeblockGutterSettings(this.codeblockSettingEl);
+		else if (this.codeblockPage === "header")
+			this.generateCodeblockHeaderSettings(this.codeblockSettingEl);
+		else if (this.codeblockPage === "highlight")
+			this.generateCodeblockHighlightSettings(this.codeblockSettingEl);
+		else if (this.codeblockPage === "languages")
+			this.generateCodeblockLanguageSettings(this.codeblockSettingEl);
+		else if (this.codeblockPage === "plugins")
+			this.generatePluginCompatibilitySettings(this.codeblockSettingEl);
+		else if (this.codeblockPage === "example")
+			this.generateExampleCodeblockSettings(this.codeblockSettingEl);
+	}
+	generateCoreSettings(containerEl: HTMLElement) {
 		new Setting(containerEl)
 			.setName("Style Code on Export")
 			.setDesc("If enabled, styling will be applied when exporting to PDF.")
@@ -86,12 +158,11 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.decoratePrint)
 				.onChange((value) => {
 					this.plugin.settings.decoratePrint = value;
-					(async () => {await this.plugin.saveSettings();})();         
+					this.saveSettings();         
 				}));
-
-		// ========== Themes ==========
-		containerEl.createEl("h3", {text: "Theme Settings"});
-
+	}
+	generateThemeSettings(containerEl: HTMLElement) {
+		containerEl.createEl("h2", {text: "Theme Settings"});
 		let themeDropdown: DropdownComponent;
 		new Setting(containerEl)
 			.setName("Select Theme")
@@ -101,8 +172,8 @@ export class SettingsTab extends PluginSettingTab {
 				themeDropdown.onChange((value) => {
 					this.plugin.settings.selectedTheme = value;
 					this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme]);
+					this.saveSettings();
 					this.display();
-					(async () => {await this.plugin.saveSettings();})();
 				});
 			})
 			.addExtraButton(button => {
@@ -110,9 +181,9 @@ export class SettingsTab extends PluginSettingTab {
 				button.setIcon("save");
 				button.onClick(() => {
 					this.plugin.settings.themes[this.plugin.settings.selectedTheme] = structuredClone(this.plugin.settings.currentTheme);
-					this.updateAlternativeHighlights(alternativeHighlightsContainer);
+					this.updateAlternativeHighlights();
 					new Notice(`${this.plugin.settings.selectedTheme} theme saved successfully!`); //NOSONAR
-					(async () => {await this.plugin.saveSettings();})();
+					this.saveSettings();
 				});
 			})
 			.addExtraButton(button => {
@@ -129,8 +200,8 @@ export class SettingsTab extends PluginSettingTab {
 						this.plugin.settings.selectedTheme = "Default";
 						this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme]);
 						this.updateDropdown(themeDropdown,this.plugin.settings);
+						this.saveSettings();
 						this.display();
-						(async () => {await this.plugin.saveSettings();})();
 					}
 				});
 			});
@@ -165,16 +236,17 @@ export class SettingsTab extends PluginSettingTab {
 						}
 						this.plugin.settings.selectedTheme = this.plugin.settings.newTheme;
 						this.updateDropdown(themeDropdown,this.plugin.settings);
-						this.updateAlternativeHighlights(alternativeHighlightsContainer);
+						this.updateAlternativeHighlights();
 						this.plugin.settings.newTheme = "";
 						newThemeName.setValue("");
 						newThemeDefault.setValue(false);
-						(async () => {await this.plugin.saveSettings();})();
+						this.saveSettings();
 					}
 				});
 			});
-		
-		containerEl.createEl("h4", {text: "Codeblock Appearance"});
+	}
+	generateCodeblockBodySettings(containerEl: HTMLElement) {
+		containerEl.createEl("h3", {text: "Codeblock Appearance"});
 		new Setting(containerEl)
 			.setName("Codeblock Background Colour")
 			.then((setting) => {this.createPickr(
@@ -192,19 +264,6 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].codeblock.textColour = saveColour;},
 			);});
 		new Setting(containerEl)
-			.setName("Unwrap codeblock lines")
-			.setDesc("Choose whether to unwrap lines in reading mode")
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.codeblock.unwrapLines = value;
-					if (!value)
-						wrapLinesActiveToggle.setValue(false);
-					this.disableableComponents["wrapLines"].forEach(component => {component.setDisabled(!value);});
-					(async () => {await this.plugin.saveSettings();})();  
-					this.rerender();
-				}));
-		new Setting(containerEl)
 			.setName("Codeblock Curvature")
 			.setDesc("Determines how rounded the codeblocks appear in pixels.")
 			.then((setting) => {
@@ -215,7 +274,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.codeblock.curvature = value;
-						(async () => {await this.plugin.saveSettings();})();    
+						this.saveSettings();    
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -224,12 +283,76 @@ export class SettingsTab extends PluginSettingTab {
 					.onClick(() => {
 						this.plugin.settings.currentTheme.settings.codeblock.curvature = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.codeblock.curvature;
 						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.codeblock.curvature);
-						(async () => {await this.plugin.saveSettings();})();
+						this.saveSettings();
 					});
 				});
 			});
-			
-		containerEl.createEl("h4", {text: "Gutter Appearance"});
+		new Setting(containerEl)
+			.setName("Language Coloured Borders")
+			.setDesc("If enabled, languages with icons display a left border with the colour of the icon. The slider sets the width of the border.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.advanced.languageBorderColour = value;
+					this.disableableComponents["languageBorderColour"].forEach(component => {component.setDisabled(!value);});
+					this.saveSettings();
+				}))
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,20,1)
+					.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth)
+					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = value;
+						this.saveSettings();    
+					});
+				this.disableableComponents["languageBorderColour"].push(resettableSlider);
+				});
+				let resetButton: ExtraButtonComponent;
+				setting.addExtraButton((button) => {resetButton = button
+					.setIcon("reset")
+					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
+					.setTooltip("Restore default colour stop")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.languageBorderWidth;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth);
+						this.saveSettings();
+					});
+				this.disableableComponents["languageBorderColour"].push(resetButton);
+				});
+			});
+		new Setting(containerEl)
+			.setName("Unwrap codeblock lines")
+			.setDesc("Choose whether to unwrap lines in reading mode")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.codeblock.unwrapLines = value;
+					this.generateWrapLineSettings();
+					this.saveSettings(true);  
+				}));
+		this.wrapLinesContainer = containerEl.createDiv();
+		this.generateWrapLineSettings();
+	}
+	generateWrapLineSettings() {
+		this.wrapLinesContainer.empty();
+		if (!this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
+			return;
+		new Setting(this.wrapLinesContainer)
+			.setName("Wrap Lines on Click")
+			.setDesc("If enabled, in reading mode, holding click on a codeblock will wrap the lines for better visibility.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive)
+				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
+					this.saveSettings(true); 
+				}));
+	}
+	generateCodeblockGutterSettings(containerEl: HTMLElement) {
+		containerEl.createEl("h3", {text: "Gutter Appearance"});
 		new Setting(containerEl)
 			.setName("Enable Line Numbers")
 			.setDesc("If disabled, the below settings are disabled too.")
@@ -237,64 +360,63 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.lineNumbers = value;
-					this.disableableComponents["lineNumbers"].forEach(component => {component.setDisabled(!value);});
-					(async () => {await this.plugin.saveSettings();})();         
-					this.rerender();
+					this.generateCodeblockLineNumberSettings();
+					this.saveSettings(true);         
 				}));
-		new Setting(containerEl)
+		this.lineNumbersContainer = containerEl.createDiv();
+		this.generateCodeblockLineNumberSettings();
+	}
+	generateCodeblockLineNumberSettings() {
+		this.lineNumbersContainer.empty();
+		if (!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
+			return;
+		new Setting(this.lineNumbersContainer)
 			.setName("Gutter Background Colour")
 			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
+				this.plugin,this.lineNumbersContainer,setting,
 				"gutter_background",
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].gutter.backgroundColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].gutter.backgroundColour = saveColour;},
-				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			);});
-		this.disableableComponents["lineNumbers"].push(this.pickrs["gutter_background"].resetButton);
-		new Setting(containerEl)
+		new Setting(this.lineNumbersContainer)
 			.setName("Line Number Colour")
 			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
+				this.plugin,this.lineNumbersContainer,setting,
 				"line_number",
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].gutter.textColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].gutter.textColour = saveColour;},
-				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			);});
-		this.disableableComponents["lineNumbers"].push(this.pickrs["line_number"].resetButton);
-		new Setting(containerEl)
+		new Setting(this.lineNumbersContainer)
 			.setName("Highlight Line Numbers")
 			.setDesc("If enabled, highlights will also highlight the line numbers.")
-			.addToggle(toggle => {const highlightLineNumbersToggle = toggle
+			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.highlight)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.gutter.highlight = value;
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			this.disableableComponents["lineNumbers"].push(highlightLineNumbersToggle);
-			});
-		new Setting(containerEl)
+					this.saveSettings();
+				}));
+		new Setting(this.lineNumbersContainer)
 			.setName("Indicate Current Line Number")
 			.setDesc("If enabled, the current line number in codeblocks will be indicated with a separate colour.")
 			.setClass("code-styler-spaced")
-			.addToggle(toggle => {const indicateCurrentLineNumberToggle = toggle
+			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.currentTheme.settings.gutter.activeLine)
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.lineNumbers)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.gutter.activeLine = value;
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			this.disableableComponents["lineNumbers"].push(indicateCurrentLineNumberToggle);
-			})
+					this.saveSettings();
+				})
+			)
 			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
+				this.plugin,this.lineNumbersContainer,setting,
 				"active_line_number",
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].gutter.activeTextColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].gutter.activeTextColour = saveColour;},
-				() => !this.plugin.settings.currentTheme.settings.codeblock.lineNumbers,
 			);});
-		
-		containerEl.createEl("h4", {text: "Header Appearance"});
+	}
+	generateCodeblockHeaderSettings(containerEl: HTMLElement) {
+		containerEl.createEl("h3", {text: "Header Appearance"});
 		new Setting(containerEl)
 			.setName("Header Background Colour")
 			.then((setting) => {this.createPickr(
@@ -314,7 +436,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.header.fontSize = value;
-						(async () => {await this.plugin.saveSettings();})();    
+						this.saveSettings();    
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -323,7 +445,7 @@ export class SettingsTab extends PluginSettingTab {
 					.onClick(() => {
 						this.plugin.settings.currentTheme.settings.header.fontSize = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.header.fontSize;
 						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.header.fontSize);
-						(async () => {await this.plugin.saveSettings();})();
+						this.saveSettings();
 					});
 				});
 			});
@@ -335,7 +457,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.header.title.textBold)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.title.textBold = value;
-					(async () => {await this.plugin.saveSettings();})();
+					this.saveSettings();
 				});
 			})
 			.addToggle(toggle => {toggle
@@ -343,7 +465,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.header.title.textItalic)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.title.textItalic = value;
-					(async () => {await this.plugin.saveSettings();})();
+					this.saveSettings();
 				});
 			})
 			.addText(text => {text
@@ -351,7 +473,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.header.title.textFont)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.title.textFont = value;
-					(async () => {await this.plugin.saveSettings();})();
+					this.saveSettings();
 				});
 			})
 			.then((setting) => {this.createPickr(
@@ -369,7 +491,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.header.foldPlaceholder)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.foldPlaceholder = value;
-					(async () => {await this.plugin.saveSettings();})();
+					this.saveSettings();
 					clearTimeout(foldPlaceholderTimeout);
 					foldPlaceholderTimeout = setTimeout(()=>this.rerender(),1000);
 				}));
@@ -386,98 +508,94 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.createEl("h5", {text: "Header Language Tag Appearance"});
 		new Setting(containerEl)
 			.setName("Display Header Language Tags")
-			.setDesc("Determine when to show language tags in the header. \"Title Only\" will only show language tags when the title parameter is set. If set to \"None\", the below settings are disabled too.")
+			.setDesc("Determine when to show language tags in the header. \"Title Only\" will only show language tags when the title parameter is set.")
 			.addDropdown((dropdown) => dropdown
 				.addOptions(DISPLAY_OPTIONS)
 				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.display)
 				.onChange((value: Display) => {
 					this.plugin.settings.currentTheme.settings.header.languageTag.display = value;
-					this.disableableComponents["headerLanguageTags"].forEach(component => {component.setDisabled(value==="none");});
-					(async () => {await this.plugin.saveSettings();})();
-					this.rerender();
+					this.generateHeaderTagSettings();
+					this.saveSettings(true);
 				}));
-		new Setting(containerEl)
-			.setName("Header Language Tag Background Colour")
-			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
-				"header_language_tag_background",
-				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.languageTag.backgroundColour,
-				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.backgroundColour = saveColour;},
-				() => this.plugin.settings.currentTheme.settings.header.languageTag.display === "none",
-			);});
-		this.disableableComponents["headerLanguageTags"].push(this.pickrs["header_language_tag_background"].resetButton);
-		let languageTagsBoldToggle: ToggleComponent;
-		let languageTagsItalicToggle: ToggleComponent;
-		let languageIconsFontText: TextComponent;
-		new Setting(containerEl)
-			.setName("Header Language Tag Text Styling")
-			.setDesc("Style the header language tag text using bold and italic toggles, by setting a font or by setting a text colour.")
-			.addToggle(toggle => {languageTagsBoldToggle = toggle
-				.setTooltip("Toggle bold language tag text")
-				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textBold)
-				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageTag.display==="none")
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.header.languageTag.textBold = value;
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			this.disableableComponents["headerLanguageTags"].push(languageTagsBoldToggle);
-			})
-			.addToggle(toggle => {languageTagsItalicToggle = toggle
-				.setTooltip("Toggle italic language tag text")
-				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textItalic)
-				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageTag.display==="none")
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.header.languageTag.textItalic = value;
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			this.disableableComponents["headerLanguageTags"].push(languageTagsItalicToggle);
-			})
-			.addText(text => {languageIconsFontText = text
-				.setPlaceholder("Font")
-				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textFont)
-				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageTag.display==="none")
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.header.languageTag.textFont = value;
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			this.disableableComponents["headerLanguageTags"].push(languageIconsFontText);
-			})
-			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
-				"header_language_tag_text",
-				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.languageTag.textColour,
-				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.textColour = saveColour;},
-				() => this.plugin.settings.currentTheme.settings.header.languageTag.display === "none",
-			);});
-		this.disableableComponents["headerLanguageTags"].push(this.pickrs["header_language_tag_text"].resetButton);
+		this.headerTagsContainer = containerEl.createDiv();
+		this.generateHeaderTagSettings();
 		
 		containerEl.createEl("h5", {text: "Header Language Icon Appearance"});
 		new Setting(containerEl)
 			.setName("Display Header Language Icons")
-			.setDesc("Determine when to show language icons where available. \"Title Only\" will only show language tags when the title parameter is set. If set to \"None\", the below settings are disabled too.")
+			.setDesc("Determine when to show language icons where available. \"Title Only\" will only show language tags when the title parameter is set.")
 			.addDropdown((dropdown) => dropdown
 				.addOptions(DISPLAY_OPTIONS)
 				.setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.display)
 				.onChange((value: Display) => {
 					this.plugin.settings.currentTheme.settings.header.languageIcon.display = value;
-					this.disableableComponents["headerLanguageIcons"].forEach(component => {component.setDisabled(value==="none");});
-					(async () => {await this.plugin.saveSettings();})();
-					this.rerender();
+					this.generateHeaderIconSettings();
+					this.saveSettings(true);
 				}));
-		let languageIconsColouredToggle: ToggleComponent;
-		new Setting(containerEl)
+		this.headerIconsContainer = containerEl.createDiv();
+		this.generateHeaderIconSettings();
+	}
+	generateHeaderTagSettings() {
+		this.headerTagsContainer.empty();
+		if (this.plugin.settings.currentTheme.settings.header.languageTag.display === "none")
+			return;
+		new Setting(this.headerTagsContainer)
+			.setName("Header Language Tag Background Colour")
+			.then((setting) => {this.createPickr(
+				this.plugin,this.headerTagsContainer,setting,
+				"header_language_tag_background",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.languageTag.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.backgroundColour = saveColour;},
+			);});
+		new Setting(this.headerTagsContainer)
+			.setName("Header Language Tag Text Styling")
+			.setDesc("Style the header language tag text using bold and italic toggles, by setting a font or by setting a text colour.")
+			.addToggle(toggle => toggle
+				.setTooltip("Toggle bold language tag text")
+				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textBold)
+				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageTag.display==="none")
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.header.languageTag.textBold = value;
+					this.saveSettings();
+				}))
+			.addToggle(toggle => toggle
+				.setTooltip("Toggle italic language tag text")
+				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textItalic)
+				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageTag.display==="none")
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.header.languageTag.textItalic = value;
+					this.saveSettings();
+				}))
+			.addText(text => text
+				.setPlaceholder("Font")
+				.setValue(this.plugin.settings.currentTheme.settings.header.languageTag.textFont)
+				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageTag.display==="none")
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.header.languageTag.textFont = value;
+					this.saveSettings();
+				}))
+			.then((setting) => {this.createPickr(
+				this.plugin,this.headerTagsContainer,setting,
+				"header_language_tag_text",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.languageTag.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.textColour = saveColour;},
+			);});
+	}
+	generateHeaderIconSettings() {
+		this.headerIconsContainer.empty();
+		if (this.plugin.settings.currentTheme.settings.header.languageIcon.display === "none")
+			return;
+		new Setting(this.headerIconsContainer)
 			.setName("Language Icons Coloured")
 			.setDesc("If disabled, language icons will be black and white.")
-			.addToggle(toggle => {languageIconsColouredToggle = toggle
+			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.displayColour)
 				.setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.header.languageIcon.displayColour = value;
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			this.disableableComponents["headerLanguageIcons"].push(languageIconsColouredToggle);
-			});
-		new Setting(containerEl)
+					this.saveSettings();
+				}));
+		new Setting(this.headerIconsContainer)
 			.setName("Language Icon Size")
 			.setDesc("Set the size of the displayed language icons.")
 			.then((setting) => {
@@ -489,46 +607,22 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.advanced.iconSize = value;
-						(async () => {await this.plugin.saveSettings();})();    
+						this.saveSettings();    
 					});
-				this.disableableComponents["headerLanguageIcons"].push(resettableSlider);
 				});
-				let resetButton: ExtraButtonComponent;
-				setting.addExtraButton((button) => {resetButton = button
+				setting.addExtraButton((button) => button
 					.setIcon("reset")
 					.setDisabled(this.plugin.settings.currentTheme.settings.header.languageIcon.display==="none")
 					.setTooltip("Restore default icon size")
 					.onClick(() => {
 						this.plugin.settings.currentTheme.settings.advanced.iconSize = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.iconSize;
 						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.iconSize);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				this.disableableComponents["headerLanguageIcons"].push(resetButton);
-				});
+						this.saveSettings();
+					}));
 			});
-		
-		containerEl.createEl("h4", {text: "Highlighting Appearance"});
-		new Setting(containerEl)
-			.setName("Editor Active Line Highlight")
-			.setDesc("If enabled, highlights the active line outside codeblocks.")
-			.setClass("code-styler-spaced")
-			.addToggle(toggle => {return toggle
-				.setTooltip("Toggle editor active line highlighting")
-				.setValue(this.plugin.settings.currentTheme.settings.highlights.activeEditorLine)
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.highlights.activeEditorLine = value;
-					this.disableableComponents["editorActiveLineHighlight"].forEach(component => {component.setDisabled(!value);});
-					(async () => {await this.plugin.saveSettings();})();
-				});
-			})
-			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
-				"editor_active_line_highlight",
-				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour,
-				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour = saveColour;},
-				() => !this.plugin.settings.currentTheme.settings.highlights.activeEditorLine,
-			);});
-		this.disableableComponents["editorActiveLineHighlight"].push(this.pickrs["editor_active_line_highlight"].resetButton);
+	}
+	generateCodeblockHighlightSettings(containerEl: HTMLElement) {
+		containerEl.createEl("h3", {text: "Highlighting Appearance"});
 		new Setting(containerEl)
 			.setName("Codeblock Active Line Highlight")
 			.setDesc("If enabled, highlights the active line inside codeblocks.")
@@ -538,7 +632,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine = value; 
 					this.disableableComponents["codeblockActiveLineHighlight"].forEach(component => {component.setDisabled(!value);});
-					(async () => {await this.plugin.saveSettings();})();
+					this.saveSettings();
 				});
 			})
 			.then((setting) => {this.createPickr(
@@ -579,28 +673,112 @@ export class SettingsTab extends PluginSettingTab {
 						new Notice("Cannot override the default highlight parameter."); //NOSONAR
 					else if (PARAMETERS.includes(this.plugin.settings.newHighlight.trim().toLowerCase()))
 						new Notice("Cannot use other default parameters."); //NOSONAR
+					else if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights)
+						new Notice(`A highlight with the name "${this.plugin.settings.newHighlight}" already exists.`); //NOSONAR
+						//TODO (@mayurankv) Future: Focus on existing highlighter - `renderMatches`
 					else {
-						if (this.plugin.settings.newHighlight in this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights)
-							new Notice(`A highlight with the name "${this.plugin.settings.newHighlight}" already exists.`); //NOSONAR
-							//TODO (@mayurankv) Future: Focus on existing highlighter - `renderMatches`
-						else {
-							const newColour = getRandomColour();
-							this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
-							this.plugin.settings.currentTheme.colours.dark.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
-							this.updateAlternativeHighlights(alternativeHighlightsContainer);
-							new Notice(`Added highlight "${this.plugin.settings.newHighlight}".`); //NOSONAR
-							this.plugin.settings.newHighlight = "";
-							newHighlightText.setValue("");
-							(async () => {await this.plugin.saveSettings();})();
-							this.rerender();
-						}
+						const newColour = getRandomColour();
+						this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
+						this.plugin.settings.currentTheme.colours.dark.highlights.alternativeHighlights[this.plugin.settings.newHighlight] = newColour;
+						this.updateAlternativeHighlights();
+						new Notice(`Added highlight "${this.plugin.settings.newHighlight}".`); //NOSONAR
+						this.plugin.settings.newHighlight = "";
+						newHighlightText.setValue("");
+						this.saveSettings(true);
 					}
 				});
 			});
-		const alternativeHighlightsContainer = containerEl.createDiv();
-		this.updateAlternativeHighlights(alternativeHighlightsContainer);
-
-		containerEl.createEl("h4", {text: "Inline Code Appearance"});
+		this.alternativeHighlightsContainer = containerEl.createDiv();
+		this.updateAlternativeHighlights();
+		new Setting(containerEl)
+			.setName("Gradient Highlighting")
+			.setDesc("If enabled, highlights fade away to the right. The slider sets the gradient colour stop as a percentage.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.advanced.gradientHighlights = value;
+					this.disableableComponents["gradientHighlighting"].forEach(component => {component.setDisabled(!value);});
+					this.saveSettings();
+				}))
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,100,1)
+					.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop.slice(0,-1))
+					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = `${value}%`;
+						this.saveSettings();    
+					});
+				this.disableableComponents["gradientHighlighting"].push(resettableSlider);
+				});
+				let resetButton: ExtraButtonComponent;
+				setting.addExtraButton((button) => {resetButton = button
+					.setIcon("reset")
+					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
+					.setTooltip("Restore default colour stop")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.gradientHighlightsColourStop;
+						resettableSlider.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop.slice(0,-1));
+						this.saveSettings();
+					});
+				this.disableableComponents["gradientHighlighting"].push(resetButton);
+				});
+			});
+	}
+	generateCodeblockLanguageSettings(containerEl: HTMLElement) {
+		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
+		new Setting(containerEl)
+			.setName("Ignore Codeblocks")
+			.setDesc("Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
+			.addText(text => text
+				.setPlaceholder("e.g. dataview, dataviewjs etc.")
+				.setValue(this.plugin.settings.excludedCodeblocks)
+				.onChange((value) => {
+					this.plugin.settings.excludedCodeblocks = value;
+					this.saveSettings();
+					clearTimeout(ignoreTimeout);
+					ignoreTimeout = setTimeout(()=>this.rerender(),1000);
+				}));
+		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
+		new Setting(containerEl)
+			.setName("Exclude Languages")
+			.setDesc("Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
+			.addText(text => text
+				.setPlaceholder("e.g. ad-*, python etc.")
+				.setValue(this.plugin.settings.excludedLanguages)
+				.onChange((value) => {
+					this.plugin.settings.excludedLanguages = value;
+					this.saveSettings();
+					clearTimeout(excludeTimeout);
+					excludeTimeout = setTimeout(()=>this.rerender(),1000);
+				}));
+		new Setting(containerEl)
+			.setName("Redirect Language Settings")
+			.setDesc("Use this textbox to redirect specific language colours and icons as a JSON with language names as keys and either a colour key, an icon key or both as the value for a given language. Colours should be passed as CSS colours and icons should be passed as a string of the inside of an svg element. This setting is theme independent.")
+			.setClass("code-styler-setting-text-area")
+			.addTextArea(textArea => textArea
+				.setValue(JSON.stringify(this.plugin.settings.redirectLanguages)==="{}"?"":JSON.stringify(this.plugin.settings.redirectLanguages,null,4))
+				.setPlaceholder(JSON.stringify({toml: {colour: "#012345", icon: LANGUAGE_ICONS_DATA["APL"]}},null,4))
+				.onChange((value)=>{
+					if (value === "") {
+						this.plugin.settings.redirectLanguages = {};
+						this.saveSettings();
+					} else {
+						try {
+							this.plugin.settings.redirectLanguages = JSON.parse(value);
+							this.redirectLanguages();
+							this.saveSettings();
+						} catch {
+							new Notice("Invalid JSON"); //NOSONAR
+						}
+					}
+					//TODO (@mayurankv) Re-render (Test)
+				}));
+	}
+	generateInlineCodeSettings(containerEl: HTMLElement) {
+		containerEl.createEl("h3", {text: "Inline Code Appearance"});
 		new Setting(containerEl)
 			.setName("Syntax Highlight Inline Code")
 			.setDesc("If enabled, in reading mode, inline code will be syntax highlighted based on a language set with `{language} highlighted_inline_code`. See the README for more information.")
@@ -608,164 +786,30 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.inline.syntaxHighlight)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.inline.syntaxHighlight = value;
-					(async () => {await this.plugin.saveSettings();})();    
-					this.rerender();
+					this.saveSettings(true);    
 				}));
 		new Setting(containerEl)
-			.setName("Inline Code Background Colour")
-			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
-				"inline_background",
-				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.backgroundColour,
-				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.backgroundColour = saveColour;},
-			);});
-		new Setting(containerEl)
-			.setName("Inline Code Text Colour")
-			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
-				"inline_text",
-				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.textColour,
-				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.textColour = saveColour;},
-			);});
-		new Setting(containerEl)
-			.setName("Inline Code Active Text Colour")
-			.setDesc("The text colour when editing inline code.")
-			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
-				"inline_active_text",
-				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.activeTextColour,
-				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.activeTextColour = saveColour;},
-			);});
-		new Setting(containerEl)
-			.setName("Inline Code Font Weight")
-			.setDesc("Determines how bold inline code appears.")
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(1,9,1)
-					.setValue(this.plugin.settings.currentTheme.settings.inline.fontWeight)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.inline.fontWeight = value;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				});
-				setting.addExtraButton((button) => {button
-					.setIcon("reset")
-					.setTooltip("Restore default font weight")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.inline.fontWeight = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.fontWeight;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.fontWeight);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				});
-			});
-		new Setting(containerEl)
-			.setName("Inline Code Curvature")
-			.setDesc("Determines how rounded inline code appear in pixels.")
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(0,12,1)
-					.setValue(this.plugin.settings.currentTheme.settings.inline.curvature)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.inline.curvature = value;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				});
-				setting.addExtraButton((button) => {button
-					.setIcon("reset")
-					.setTooltip("Restore default curvature")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.inline.curvature = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.curvature;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.curvature);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				});
-			});
-		new Setting(containerEl)
-			.setName("Inline Code Vertical Padding")
-			.setDesc("Determines how much vertical inner padding in pixels inline code has.")
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(0,10,1)
-					.setValue(this.plugin.settings.currentTheme.settings.inline.paddingVertical)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.inline.paddingVertical = value;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				});
-				setting.addExtraButton((button) => {button
-					.setIcon("reset")
-					.setTooltip("Restore default vertical padding")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.inline.paddingVertical = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.paddingVertical;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.paddingVertical);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				});
-			});
-		new Setting(containerEl)
-			.setName("Inline Code Horizontal Padding")
-			.setDesc("Determines how much horizontal inner padding in pixels inline code has.")
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(0,10,1)
-					.setValue(this.plugin.settings.currentTheme.settings.inline.paddingHorizontal)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = value;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				});
-				setting.addExtraButton((button) => {button
-					.setIcon("reset")
-					.setTooltip("Restore default horizontal padding")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.paddingHorizontal;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.paddingHorizontal);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				});
-			});
-		new Setting(containerEl)
-			.setName("Inline Code Horizontal Margin")
-			.setDesc("Determines how much horizontal outer margin is added to the inline code in pixels.")
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(0,8,1)
-					.setValue(this.plugin.settings.currentTheme.settings.inline.marginHorizontal)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = value;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				});
-				setting.addExtraButton((button) => {button
-					.setIcon("reset")
-					.setTooltip("Restore default horizontal margin")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.marginHorizontal;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.marginHorizontal);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				});
-			});
-		new Setting(containerEl)
+			.setName("Style Inline Code")
+			.setDesc("If enabled, inline code will be styled.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.currentTheme.settings.inline.style)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.inline.style = value;
+					this.generateInlineCodeStyleSettings();
+					this.saveSettings();    
+				}));
+		this.inlineCodeStylesContainer = containerEl.createDiv();
+		this.generateInlineCodeStyleSettings();
+		new Setting(this.inlineCodeStylesContainer)
 			.setName("Inline Code Title Colour")
 			.setDesc("The text colour of inline code titles.")
 			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
+				this.plugin,this.inlineCodeStylesContainer,setting,
 				"title_text",
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.titleTextColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.titleTextColour = saveColour;},
 			);});
-		new Setting(containerEl)
+		new Setting(this.inlineCodeStylesContainer)
 			.setName("Inline Code Title Font Weight")
 			.setDesc("Determines how bold inline code titles appear.")
 			.then((setting) => {
@@ -776,7 +820,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.titleFontWeight = value;
-						(async () => {await this.plugin.saveSettings();})();    
+						this.saveSettings();    
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -785,29 +829,186 @@ export class SettingsTab extends PluginSettingTab {
 					.onClick(() => {
 						this.plugin.settings.currentTheme.settings.inline.titleFontWeight = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.titleFontWeight;
 						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.titleFontWeight);
-						(async () => {await this.plugin.saveSettings();})();
+						this.saveSettings();
 					});
 				});
 			});
-
-		// ========== Advanced ==========
-		containerEl.createEl("h3", {text: "Advanced Settings"});
-		
-
-		let wrapLinesActiveToggle: ToggleComponent;
-		new Setting(containerEl)
-			.setName("Wrap Lines on Click")
-			.setDesc("If enabled, in reading mode, holding click on a codeblock will wrap the lines for better visibility. This can only be used if the \"Unwrap Lines\" setting is enabled.")
-			.addToggle(toggle => {wrapLinesActiveToggle = toggle
-				.setValue(this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive)
-				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
-					(async () => {await this.plugin.saveSettings();})(); 
-					this.rerender();   
+	}
+	generateInlineCodeStyleSettings() {
+		this.inlineCodeStylesContainer.empty();
+		if (!this.plugin.settings.currentTheme.settings.inline.style)
+			return;
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Background Colour")
+			.then((setting) => {this.createPickr(
+				this.plugin,this.inlineCodeStylesContainer,setting,
+				"inline_background",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.backgroundColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.backgroundColour = saveColour;},
+			);});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Text Colour")
+			.then((setting) => {this.createPickr(
+				this.plugin,this.inlineCodeStylesContainer,setting,
+				"inline_text",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.textColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.textColour = saveColour;},
+			);});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Active Text Colour")
+			.setDesc("The text colour when editing inline code.")
+			.then((setting) => {this.createPickr(
+				this.plugin,this.inlineCodeStylesContainer,setting,
+				"inline_active_text",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].inline.activeTextColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].inline.activeTextColour = saveColour;},
+			);});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Font Weight")
+			.setDesc("Determines how bold inline code appears.")
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(1,9,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.fontWeight)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.fontWeight = value;
+						this.saveSettings();    
+					});
 				});
-			this.disableableComponents["wrapLines"].push(wrapLinesActiveToggle);
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip("Restore default font weight")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.fontWeight = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.fontWeight;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.fontWeight);
+						this.saveSettings();
+					});
+				});
 			});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Curvature")
+			.setDesc("Determines how rounded inline code appear in pixels.")
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,12,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.curvature)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.curvature = value;
+						this.saveSettings();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip("Restore default curvature")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.curvature = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.curvature;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.curvature);
+						this.saveSettings();
+					});
+				});
+			});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Vertical Padding")
+			.setDesc("Determines how much vertical inner padding in pixels inline code has.")
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,10,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.paddingVertical)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.paddingVertical = value;
+						this.saveSettings();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip("Restore default vertical padding")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.paddingVertical = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.paddingVertical;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.paddingVertical);
+						this.saveSettings();
+					});
+				});
+			});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Horizontal Padding")
+			.setDesc("Determines how much horizontal inner padding in pixels inline code has.")
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,10,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.paddingHorizontal)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = value;
+						this.saveSettings();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip("Restore default horizontal padding")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.paddingHorizontal;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.paddingHorizontal);
+						this.saveSettings();
+					});
+				});
+			});
+		new Setting(this.inlineCodeStylesContainer)
+			.setName("Inline Code Horizontal Margin")
+			.setDesc("Determines how much horizontal outer margin is added to the inline code in pixels.")
+			.then((setting) => {
+				let resettableSlider: SliderComponent;
+				setting.addSlider((slider) => {resettableSlider = slider
+					.setLimits(0,8,1)
+					.setValue(this.plugin.settings.currentTheme.settings.inline.marginHorizontal)
+					.setDynamicTooltip()
+					.onChange((value) => {
+						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = value;
+						this.saveSettings();    
+					});
+				});
+				setting.addExtraButton((button) => {button
+					.setIcon("reset")
+					.setTooltip("Restore default horizontal margin")
+					.onClick(() => {
+						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.inline.marginHorizontal;
+						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.inline.marginHorizontal);
+						this.saveSettings();
+					});
+				});
+			});
+	}
+	generateAdvancedSettings(containerEl: HTMLElement) {
+		containerEl.createEl("h2", {text: "Advanced Settings"});
+		this.generateInterfaceSettings(containerEl);
+		new Setting(containerEl)
+			.setName("Editor Active Line Highlight")
+			.setDesc("If enabled, highlights the active line outside codeblocks.")
+			.setClass("code-styler-spaced")
+			.addToggle(toggle => toggle
+				.setTooltip("Toggle editor active line highlighting")
+				.setValue(this.plugin.settings.currentTheme.settings.highlights.activeEditorLine)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.highlights.activeEditorLine = value;
+					this.disableableComponents["editorActiveLineHighlight"].forEach(component => {component.setDisabled(!value);});
+					this.saveSettings();
+				}))
+			.then((setting) => {this.createPickr(
+				this.plugin,containerEl,setting,
+				"editor_active_line_highlight",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour = saveColour;},
+				() => !this.plugin.settings.currentTheme.settings.highlights.activeEditorLine,
+			);});
+		this.disableableComponents["editorActiveLineHighlight"].push(this.pickrs["editor_active_line_highlight"].resetButton);
+	}
+	generateInterfaceSettings(containerEl: HTMLElement) {
 		new Setting(containerEl)
 			.setName("Button Colour")
 			.setDesc("Used for UI buttons like the copy code button.")
@@ -826,102 +1027,63 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].advanced.buttonActiveColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].advanced.buttonActiveColour = saveColour;},
 			);});
+	}
+	generatePluginCompatibilitySettings(containerEl: HTMLElement) {
+		containerEl.createSpan("Needs completing"); //TODO (@mayurankv) Complete
+		// Execute Code Settings
+	}
+	generateExampleCodeblockSettings(containerEl: HTMLElement) {
 		new Setting(containerEl)
-			.setName("Gradient Highlighting")
-			.setDesc("If enabled, highlights fade away to the right. The slider sets the gradient colour stop as a percentage.")
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
+			.setName("Example Codeblock Parameter String")
+			.setDesc("Parameters and language which would follow codeblock delimiter.")
+			.setClass("code-styler-setting-text-wide")
+			.addText(text => text
+				.setPlaceholder(EXAMPLE_CODEBLOCK_PARAMETERS)
+				.setValue(this.plugin.settings.exampleCodeblockParameters)
 				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.advanced.gradientHighlights = value;
-					this.disableableComponents["gradientHighlighting"].forEach(component => {component.setDisabled(!value);});
-					(async () => {await this.plugin.saveSettings();})();
-				}))
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(0,100,1)
-					.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop.slice(0,-1))
-					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = `${value}%`;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				this.disableableComponents["gradientHighlighting"].push(resettableSlider);
-				});
-				let resetButton: ExtraButtonComponent;
-				setting.addExtraButton((button) => {resetButton = button
-					.setIcon("reset")
-					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.gradientHighlights)
-					.setTooltip("Restore default colour stop")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.gradientHighlightsColourStop;
-						resettableSlider.setValue(+this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop.slice(0,-1));
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				this.disableableComponents["gradientHighlighting"].push(resetButton);
-				});
-			});
+					this.plugin.settings.exampleCodeblockParameters = value;
+					this.saveSettings();
+					this.generateExampleCodeblock();
+				}));
 		new Setting(containerEl)
-			.setName("Language Coloured Borders")
-			.setDesc("If enabled, languages with icons display a left border with the colour of the icon. The slider sets the width of the border.")
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
-				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.advanced.languageBorderColour = value;
-					this.disableableComponents["languageBorderColour"].forEach(component => {component.setDisabled(!value);});
-					(async () => {await this.plugin.saveSettings();})();
-				}))
-			.then((setting) => {
-				let resettableSlider: SliderComponent;
-				setting.addSlider((slider) => {resettableSlider = slider
-					.setLimits(0,20,1)
-					.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth)
-					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
-					.setDynamicTooltip()
-					.onChange((value) => {
-						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = value;
-						(async () => {await this.plugin.saveSettings();})();    
-					});
-				this.disableableComponents["languageBorderColour"].push(resettableSlider);
-				});
-				let resetButton: ExtraButtonComponent;
-				setting.addExtraButton((button) => {resetButton = button
-					.setIcon("reset")
-					.setDisabled(!this.plugin.settings.currentTheme.settings.advanced.languageBorderColour)
-					.setTooltip("Restore default colour stop")
-					.onClick(() => {
-						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = this.plugin.settings.themes[this.plugin.settings.selectedTheme].settings.advanced.languageBorderWidth;
-						resettableSlider.setValue(this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth);
-						(async () => {await this.plugin.saveSettings();})();
-					});
-				this.disableableComponents["languageBorderColour"].push(resetButton);
-				});
-			});
-		//TODO (@mayurankv) Re-render (Test)
-		new Setting(containerEl)
-			.setName("Redirect Language Settings")
-			.setDesc("Use this textbox to redirect specific language colours and icons as a JSON with language names as keys and either a colour key, an icon key or both as the value for a given language. Colours should be passed as CSS colours and icons should be passed as a string of the inside of an svg element. This setting is theme independent.")
+			.setName("Example Codeblock Parameter String")
+			.setDesc("Content for example codeblock.")
 			.setClass("code-styler-setting-text-area")
 			.addTextArea(textArea => textArea
-				.setValue(JSON.stringify(this.plugin.settings.redirectLanguages)==="{}"?"":JSON.stringify(this.plugin.settings.redirectLanguages,null,4))
-				.setPlaceholder(JSON.stringify({toml: {colour: "#012345", icon: LANGUAGE_ICONS_DATA["APL"]}},null,4))
+				.setValue(this.plugin.settings.exampleCodeblockContent)
+				.setPlaceholder(EXAMPLE_CODEBLOCK_CONTENT)
 				.onChange((value)=>{
-					if (value === "") {
-						this.plugin.settings.redirectLanguages = {};
-						(async () => {await this.plugin.saveSettings();})();
-					} else {
-						try {
-							this.plugin.settings.redirectLanguages = JSON.parse(value);
-							this.redirectLanguages();
-							(async () => {await this.plugin.saveSettings();})();
-						} catch {
-							new Notice("Invalid JSON"); //NOSONAR
-						}
-					}
+					this.plugin.settings.exampleCodeblockContent = value;
+					this.saveSettings();
+					this.generateExampleCodeblock();
 				}));
-
-		// ========== Donation ==========
+	}
+	generateExampleCodeblock() {
+		this.exampleCodeblockContainer.empty();
+		const codeblockString = "```````"+this.plugin.settings.exampleCodeblockParameters+"\n"+this.plugin.settings.exampleCodeblockContent+"\n```````";
+		MarkdownRenderer.render(this.plugin.app,codeblockString,this.exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+codeblockString,new Component());
+		this.exampleCodeblockContainer.querySelector("pre > button.copy-code-button")?.classList?.add("code-styler-settings-button");
+	}
+	generateExampleInlineCodeSettings(containerEl: HTMLElement) {
+		new Setting(containerEl)
+			.setName("Inline Code Example")
+			.setDesc("Text to render as example inside code delimiters.")
+			.setClass("code-styler-setting-text-wide")
+			.addText(text => text
+				.setPlaceholder(EXAMPLE_INLINE_CODE)
+				.setValue(this.plugin.settings.exampleInlineCode)
+				.onChange((value) => {
+					this.plugin.settings.exampleInlineCode = value;
+					this.saveSettings();
+					this.generateExampleInlineCode();
+				}));
+	}
+	generateExampleInlineCode() {
+		this.exampleInlineCodeContainer.empty();
+		MarkdownRenderer.render(this.plugin.app,"`"+this.plugin.settings.exampleInlineCode+"`",this.exampleInlineCodeContainer,SETTINGS_SOURCEPATH_PREFIX,new Component());
+		this.exampleInlineCodeContainer.querySelector("code")?.classList?.add("code-styler-settings-inline-code");
+	}
+	generateDonationFooter(containerEl: HTMLElement) {
 		const donationDiv = containerEl.createEl("div", { cls: "code-styler-donation", });    
 		const donationText = createEl("p", {text: "If you like this plugin, and would like to help support continued development, use the button below!"});
 		donationDiv.appendChild(donationText);
@@ -930,23 +1092,7 @@ export class SettingsTab extends PluginSettingTab {
 		donationDiv.appendChild(donationButton);
 	}
 
-	//TODO Sort these
-	rerender() {
-		this.plugin.renderReadingView();
-	}
-
-	// Setting Parsing
-	redirectLanguages() {
-		Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {colour?: Colour, icon?: string}])=>{
-			if ("icon" in languageSettings) {
-				if (LANGUAGE_NAMES[languageName] in this.plugin.languageIcons)
-					URL.revokeObjectURL(this.plugin.languageIcons[LANGUAGE_NAMES[languageName]]);
-				this.plugin.languageIcons[LANGUAGE_NAMES[languageName]] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${languageSettings.icon}</svg>`], { type: "image/svg+xml" }));
-			}
-		});
-	}
-
-	// Setting Creation
+	// Create Settings
 	createPickr(plugin: CodeStylerPlugin, containerEl: HTMLElement, setting: Setting, id: string, getRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours)=>Colour, saveRelevantThemeColour: (relevantThemeColours: CodeStylerThemeColours, saveColour: Colour)=>void, disabled?: ()=>boolean) {
 		const pickr: PickrResettable = new PickrResettable(plugin,containerEl,setting,getRelevantThemeColour,saveRelevantThemeColour);
 		pickr
@@ -971,7 +1117,19 @@ export class SettingsTab extends PluginSettingTab {
 		this.pickrs[id]=pickr;
 	}
 	
-	// Setting Tab Updates
+	// Update Settings
+	saveSettings(rerender: boolean=false) {
+		(async () => {await this.plugin.saveSettings();})();
+		if (rerender)
+			this.rerender();
+	}
+	rerender() {
+		this.plugin.renderReadingView();
+		if (this.page === "codeblock")
+			this.generateExampleCodeblock();
+		else if (this.page === "inline")
+			this.generateExampleInlineCode();
+	}
 	updateDropdown(dropdown: DropdownComponent, settings: CodeStylerSettings) {
 		dropdown.selectEl.empty();
 		Object.keys(settings.themes).forEach((theme_name: string) => {
@@ -979,15 +1137,17 @@ export class SettingsTab extends PluginSettingTab {
 		});
 		dropdown.setValue(settings.selectedTheme);
 	}
-	updateAlternativeHighlights(alternativeHighlightsContainer: HTMLDivElement) {
-		alternativeHighlightsContainer.empty();
+	updateAlternativeHighlights() {
+		if (this.page !== "codeblock")
+			return;
+		this.alternativeHighlightsContainer.empty();
 		Object.keys(this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights).forEach((alternativeHighlightName) => {
-			new Setting(alternativeHighlightsContainer)
+			new Setting(this.alternativeHighlightsContainer)
 				.setName(alternativeHighlightName)
 				.setDesc(`To highlight lines with this highlight, use the ${alternativeHighlightName} parameter.`)
 				.then((setting) => {
 					this.createPickr(
-						this.plugin,alternativeHighlightsContainer,setting,
+						this.plugin,this.alternativeHighlightsContainer,setting,
 						`alternative_highlight_${alternativeHighlightName}`,
 						(relevantThemeColours: CodeStylerThemeColours) => alternativeHighlightName in relevantThemeColours.light.highlights.alternativeHighlights?relevantThemeColours[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName]:this.plugin.settings.currentTheme.colours[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName],
 						(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.alternativeHighlights[alternativeHighlightName] = saveColour;},
@@ -999,15 +1159,25 @@ export class SettingsTab extends PluginSettingTab {
 							delete this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights[alternativeHighlightName];
 							delete this.plugin.settings.currentTheme.colours.dark.highlights.alternativeHighlights[alternativeHighlightName];
 							new Notice(`Removed highlight "${alternativeHighlightName}".`); //NOSONAR
-							this.updateAlternativeHighlights(alternativeHighlightsContainer);
-							(async () => {await this.plugin.saveSettings();})();
+							this.updateAlternativeHighlights();
+							this.saveSettings();
 						});
 					});
 				});
 		});
 	}
+	redirectLanguages() {
+		Object.entries(this.plugin.settings.redirectLanguages).forEach(([languageName, languageSettings]: [string, {colour?: Colour, icon?: string}])=>{
+			if ("icon" in languageSettings) {
+				if (LANGUAGE_NAMES[languageName] in this.plugin.languageIcons)
+					URL.revokeObjectURL(this.plugin.languageIcons[LANGUAGE_NAMES[languageName]]);
+				this.plugin.languageIcons[LANGUAGE_NAMES[languageName]] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${languageSettings.icon}</svg>`], { type: "image/svg+xml" }));
+			}
+		});
+	}
 }
 
+// Extend Pickr Class
 class PickrResettable extends Pickr {
 	saveColour: (saveColour: Colour)=>void;
 	resetColour: ()=>void;
@@ -1096,6 +1266,7 @@ function calc(calcString: string): string {
 	return calcString;
 }
 
+// Fetch Settings
 function getCurrentMode() {
 	const body = document.querySelector("body");
 	if (body !== null){
