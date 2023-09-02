@@ -13,20 +13,17 @@ This is a plugin for [Obsidian.md](https://obsidian.md) which lets you style cod
 
 ## Settings
 
-### Excluded Codeblocks
-
-The plugin can be set to ignore certain codeblocks completely (for example if another plugin uses them like the `dataview` codeblocks). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions.
-
-This setting is used to tell the plugin which codeblocks it can ignore completely as opposed to just not decorating the codeblock. To not decorate a codeblock, use the [excluded languages setting](#excluded-languages).
-
-> **Note**  
-> Setting excluded codeblocks for codeblocks used by other plugins you use is important as otherwise, the plugin does not know which codeblocks to ignore in certain cases.
+The settings page is split into three sections which are selected via a dropdown. A core settings page, a codeblock settings page and an inline code settings page.
+Themes can be changed or created on any of the pages. A single theme holds the settings for both the codeblock styles and the inline code styles.
+Within the codeblock settings page, further settings pages can be selected via a dropdown.
 
 ### Excluded Languages
 
 The plugin can be set to ignore certain languages (for example if you want `python` codeblocks to not be decorated). These are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'ad-*' to match admonitions.
 
-This setting is used to tell the plugin to not decorate certain languages. To completely ignore a codeblock (i.e. a codeblock which doesn't generate a rendered codeblock in reading mode as a result of a plugin), use the [excluded codeblocks setting](#excluded-codeblocks).
+### Whitelisted Proceesed Codeblocks
+
+The plugin does not style any codeblocks with processors (i.e. those manipulated by other plugins) by default, to style such codeblocks, they need to be added to a whitelist. These whitelisted languages are set in settings as a comma separated list. The wildcard \* operator can also be used to match languages such as 'run-*' to match code runners from the [execute code plugin](https://github.com/twibiral/obsidian-execute-code).
 
 ### Themes
 
@@ -279,6 +276,14 @@ Example:
 
 `{python title:'Inline If' icon} 'result if true'.method() if 1 else result_if_false.property`
 ![Inline Code Highlighted Title Icon](images/InlineCodeHighlightedTitleIcon.png)
+
+## Commands
+
+The plugin exposes 3 commands:
+
+- `Fold all codeblocks` - folds all codeblocks
+- `Unfold all codeblocks` - unfolds all codeblocks
+- `Reset fold state for all codeblocks` - returns all codeblock folding to the state defined in each of their parameter strings
 
 ## Plugin Compatibility
 

@@ -148,6 +148,7 @@ See this project's [releases](/../../../releases).
 
 - Round up heights to prevent rounding error scrollbars from appearing
 - Convert transitions so `max-height` is only applied temporarily for animations
+- Codeblock processor languages do not get styled by default and must be whitelisted for styling
 
 ### Fixed
 
