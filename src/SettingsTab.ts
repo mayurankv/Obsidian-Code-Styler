@@ -30,7 +30,9 @@ export class SettingsTab extends PluginSettingTab {
 	pickrs: Record<string,PickrResettable>;
 	page: string;
 	codeblockPage: string;
+	hideAdvanced: boolean;
 	codeblockSettingEl: HTMLElement;
+	advancedSettingsContainer: HTMLElement;
 	alternativeHighlightsContainer: HTMLElement;
 	exampleCodeblockContainer: HTMLElement;
 	exampleInlineCodeContainer: HTMLElement;
@@ -47,6 +49,7 @@ export class SettingsTab extends PluginSettingTab {
 		this.pickrs = {};
 		this.page = "main";
 		this.codeblockPage = "body";
+		this.hideAdvanced = true;
 		this.disableableComponents = {};
 	}
 
@@ -60,6 +63,7 @@ export class SettingsTab extends PluginSettingTab {
 			"gradientHighlighting": [],
 			"languageBorderColour": [],
 		};
+		this.hideAdvanced = true;
 		this.generateSettings(this.containerEl);
 	}
 
@@ -69,8 +73,9 @@ export class SettingsTab extends PluginSettingTab {
 		this.generateSettingsSwitcher(containerEl);
 		this.generateThemeSettings(containerEl);
 		this.generateCoreSettings(containerEl);
-		this.generateAdvancedSettings(containerEl);
-		this.generatePluginCompatibilitySettings(containerEl);
+		this.generateAdvancedHeading(containerEl);
+		this.advancedSettingsContainer = containerEl.createDiv();
+		this.generateAdvancedSettings();
 		this.generateDonationFooter(containerEl);
 	}
 	displayCodeblockSettings(containerEl: HTMLElement) {
@@ -984,10 +989,20 @@ export class SettingsTab extends PluginSettingTab {
 				});
 			});
 	}
-	generateAdvancedSettings(containerEl: HTMLElement) {
-		containerEl.createEl("h2", {text: "Advanced Settings"});
-		this.generateInterfaceSettings(containerEl);
-		new Setting(containerEl)
+	generateAdvancedHeading(containerEl: HTMLElement) {
+		const advancedSettingsHeading = containerEl.createEl("h2", {text: "Advanced Settings", cls: `advanced-settings-header${this.hideAdvanced?" header-folded":""}`});
+		advancedSettingsHeading.addEventListener("click",()=>{
+			this.hideAdvanced = !this.hideAdvanced;
+			advancedSettingsHeading.classList.toggle("header-folded",this.hideAdvanced);
+			this.generateAdvancedSettings();
+		});
+	}
+	generateAdvancedSettings() {
+		this.advancedSettingsContainer.empty();
+		if (this.hideAdvanced)
+			return;
+		this.generateInterfaceSettings(this.advancedSettingsContainer);
+		new Setting(this.advancedSettingsContainer)
 			.setName("Editor Active Line Highlight")
 			.setDesc("If enabled, highlights the active line outside codeblocks.")
 			.setClass("code-styler-spaced")
@@ -1000,7 +1015,7 @@ export class SettingsTab extends PluginSettingTab {
 					this.saveSettings();
 				}))
 			.then((setting) => {this.createPickr(
-				this.plugin,containerEl,setting,
+				this.plugin,this.advancedSettingsContainer,setting,
 				"editor_active_line_highlight",
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour = saveColour;},
@@ -1084,6 +1099,7 @@ export class SettingsTab extends PluginSettingTab {
 		this.exampleInlineCodeContainer.querySelector("code")?.classList?.add("code-styler-settings-inline-code");
 	}
 	generateDonationFooter(containerEl: HTMLElement) {
+		containerEl.createEl("hr");
 		const donationDiv = containerEl.createEl("div", { cls: "code-styler-donation", });    
 		const donationText = createEl("p", {text: "If you like this plugin, and would like to help support continued development, use the button below!"});
 		donationDiv.appendChild(donationText);
