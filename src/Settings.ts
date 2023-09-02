@@ -639,7 +639,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.0.10": (settings)=>settingsVersionUpdate(settings,(theme)=>{
 		theme.settings.inline.style = true;
 		return theme;
-	},(settings)=>{//@ts-expect-error For older interface versions
+	},(settings)=>{//@ts-expect-error Older interface versions
 		delete settings.specialLanguages;
 		return settings;
 	}),
