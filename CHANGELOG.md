@@ -20,6 +20,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.0.11] - 2023-09-02
+
 ### Added
 
 - Setting to disable inline code styling
@@ -242,7 +244,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.10...HEAD
+[Unreleased]: /../../compare/1.0.11...HEAD
+[1.0.11]: /../../compare/1.0.10...1.0.11
 [1.0.10]: /../../compare/1.0.9...1.0.10
 [1.0.9]: /../../compare/1.0.8...1.0.9
 [1.0.8]: /../../compare/1.0.7...1.0.8

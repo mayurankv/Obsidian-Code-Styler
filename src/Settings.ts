@@ -590,7 +590,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	excludedLanguages: EXCLUDED_LANGUAGES,
 	processedCodeblocksWhitelist: WHITELIST_CODEBLOCKS,
 	redirectLanguages: {},
-	version: "1.0.10",
+	version: "1.0.11",
 };
 
 export function convertSettings(settings: CodeStylerSettings): CodeStylerSettings {
@@ -643,6 +643,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 		delete settings.specialLanguages;
 		return settings;
 	}),
+	"1.0.11": settingsPreserve,
 };
 
 // Constants
