@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, INBUILT_THEMES, CodeStylerTheme } from "./Settings";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, EXCLUDED_LANGUAGES, WHITELIST_CODEBLOCKS, INBUILT_THEMES, CodeStylerTheme } from "./Settings";
 
 const SETTINGS_PAGES: Record<string,string> = {
 	"main": "Core Settings",
@@ -733,31 +733,31 @@ export class SettingsTab extends PluginSettingTab {
 			});
 	}
 	generateCodeblockLanguageSettings(containerEl: HTMLElement) {
-		let ignoreTimeout: NodeJS.Timeout = setTimeout(()=>{});
-		new Setting(containerEl)
-			.setName("Ignore Codeblocks")
-			.setDesc("Define languages in a comma separated list which the plugin should completely ignore. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
-			.addText(text => text
-				.setPlaceholder("e.g. dataview, dataviewjs etc.")
-				.setValue(this.plugin.settings.excludedCodeblocks)
-				.onChange((value) => {
-					this.plugin.settings.excludedCodeblocks = value;
-					this.saveSettings();
-					clearTimeout(ignoreTimeout);
-					ignoreTimeout = setTimeout(()=>this.rerender(),1000);
-				}));
 		let excludeTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		new Setting(containerEl)
 			.setName("Exclude Languages")
 			.setDesc("Define languages in a comma separated list which the plugin should not decorate. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
 			.addText(text => text
-				.setPlaceholder("e.g. ad-*, python etc.")
+				.setPlaceholder(`e.g. ${EXCLUDED_LANGUAGES} etc.`)
 				.setValue(this.plugin.settings.excludedLanguages)
 				.onChange((value) => {
 					this.plugin.settings.excludedLanguages = value;
 					this.saveSettings();
 					clearTimeout(excludeTimeout);
 					excludeTimeout = setTimeout(()=>this.rerender(),1000);
+				}));
+		let whitelistTimeout: NodeJS.Timeout = setTimeout(()=>{});
+		new Setting(containerEl)
+			.setName("Whitelisted Processed Codeblocks")
+			.setDesc("Define languages in a comma separated list which the plugin should style despite being processed by another plugin. You can use a wildcard (*) either at the beginning, or at the end. For example: ad-* will exclude codeblocks where the language starts with ad- e.g.: ad-info, ad-error etc.")
+			.addText(text => text
+				.setPlaceholder(`e.g. ${WHITELIST_CODEBLOCKS} etc.`)
+				.setValue(this.plugin.settings.processedCodeblocksWhitelist)
+				.onChange((value) => {
+					this.plugin.settings.processedCodeblocksWhitelist = value;
+					this.saveSettings();
+					clearTimeout(whitelistTimeout);
+					whitelistTimeout = setTimeout(()=>this.rerender(),1000);
 				}));
 		new Setting(containerEl)
 			.setName("Redirect Language Settings")

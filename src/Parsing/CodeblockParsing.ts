@@ -1,4 +1,4 @@
-import { Plugin, TFile } from "obsidian";
+import { MarkdownPreviewRenderer, Plugin, TFile } from "obsidian";
 
 import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
@@ -91,10 +91,10 @@ async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerP
 		return null;
 	const codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
 		
-	if (isExcluded(codeblockParameters.language,plugin.settings.excludedCodeblocks))
+	if (isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist))
 		return null;
 
-	return await (typeof sourcePath !== "undefined"?pluginAdjustParameters(codeblockParameters,plugins,codeblockLines,sourcePath):pluginAdjustParameters(codeblockParameters,plugins,codeblockLines));
+	return await (typeof sourcePath !== "undefined"?pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines,sourcePath):pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines));
 }
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
 	const codeblockParameters: CodeblockParameters = {
@@ -144,13 +144,13 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }
-async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
+async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === "preview")
 		codeblockParameters = await (typeof sourcePath !== "undefined"?pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines,sourcePath):pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines));
 	else if (codeblockParameters.language === "include")
 		codeblockParameters = pluginAdjustFileInclude(codeblockParameters,plugins,codeblockLines);
 	else if (/run-\w*/.test(codeblockParameters.language))
-		codeblockParameters = pluginAdjustExecuteCodeRun(codeblockParameters,plugins);
+		codeblockParameters = pluginAdjustExecuteCodeRun(codeblockParameters,plugin,plugins);
 	codeblockParameters = pluginAdjustExecuteCode(codeblockParameters,plugins,codeblockLines);
 	return codeblockParameters;
 }
@@ -180,13 +180,13 @@ function pluginAdjustFileInclude(codeblockParameters: CodeblockParameters, plugi
 function pluginAdjustExecuteCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>): CodeblockParameters {
 	if ("execute-code" in plugins) {
 		const codeblockArgs: CodeBlockArgs = getArgs(codeblockLines[0]);
-		codeblockParameters.title = codeblockParameters.title || codeblockArgs?.label || "";
+		codeblockParameters.title = codeblockParameters.title ?? codeblockArgs?.label ?? "";
 	}
 	return codeblockParameters;
 }
-function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>): CodeblockParameters {
+function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>): CodeblockParameters {
 	if ("execute-code" in plugins) {
-		if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(codeblockParameters.language.slice(4)))
+		if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(codeblockParameters.language.slice(4)) && !isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist))
 			codeblockParameters.language = codeblockParameters.language.slice(4);
 	}
 	return codeblockParameters;
@@ -291,10 +291,8 @@ function addHighlights(parameterString: string, codeblockParameters: CodeblockPa
 		const highlights = parseHighlightedLines(highlightMatch[2]);
 		if (highlightMatch[1] === "hl")
 			codeblockParameters.highlights.default = highlights;
-		else {
-			if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
-				codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
-		}
+		else if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
+			codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
 	}
 }
 function parseHighlightedLines(highlightedLinesString: string): Highlights {
@@ -329,8 +327,12 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 		regularExpressions: [...regularExpressions],
 	};
 }
-export function isExcluded(language: string, excludedLanguagesString: string): boolean {
+export function isLanguageIgnored(language: string, excludedLanguagesString: string): boolean {
 	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage=>regexExcludedLanguage.test(language));
+}
+export function isCodeblockIgnored(language: string, whitelistedCodeblocksString: string): boolean {
+	//@ts-expect-error Undocumented Obsidian API
+	return (language in MarkdownPreviewRenderer.codeBlockPostProcessors) && !parseRegexExcludedLanguages(whitelistedCodeblocksString).some(regexExcludedLanguage=>regexExcludedLanguage.test(language));
 }
 function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,".+")}$`,"i"));

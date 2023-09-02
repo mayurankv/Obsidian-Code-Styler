@@ -5,7 +5,7 @@ import { toHtml } from "hast-util-to-html";
 
 import CodeStylerPlugin from "./main";
 import { SETTINGS_SOURCEPATH_PREFIX, TRANSITION_LENGTH } from "./Settings";
-import { CodeblockParameters, getFileContentLines, isExcluded, parseCodeblockSource } from "./Parsing/CodeblockParsing";
+import { CodeblockParameters, getFileContentLines, isCodeblockIgnored, isLanguageIgnored, parseCodeblockSource } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
 
@@ -96,7 +96,7 @@ async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePa
 	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,!printing,true,plugin);
 }
 async function retriggerProcessor(element: HTMLElement, context: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean) {
-	if (element.matchParent("div.block-language-dataviewjs") && /dataviewjs(?= |,|$)/.test(plugin.settings.excludedCodeblocks))
+	if (element.matchParent("div.block-language-dataviewjs") && isCodeblockIgnored("dataviewjs",plugin.settings.processedCodeblocksWhitelist))
 		return;
 	await sleep(50);
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
@@ -120,7 +120,7 @@ async function remakeCodeblocks(codeblockPreElements: Array<HTMLElement>, codebl
 				await sleep(2);
 		if (skipStyled && codeblockCodeElement.querySelector("code [class*='code-styler-line']"))
 			continue;
-		if (isExcluded(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
+		if (isLanguageIgnored(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 			continue;
 		await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,dynamic,plugin);
 	}

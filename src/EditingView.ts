@@ -5,13 +5,13 @@ import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, isExcluded, trimParameterLine } from "./Parsing/CodeblockParsing";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, trimParameterLine, isCodeblockIgnored, isLanguageIgnored } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
 
 interface SettingsState {
-	excludedCodeblocks: string;
 	excludedLanguages: string;
+	processedCodeblocksWhitelist: string;
 }
 
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
@@ -40,15 +40,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const settingsState = StateField.define<SettingsState>({
 		create(): SettingsState {
 			return {
-				excludedCodeblocks: settings.excludedCodeblocks,
 				excludedLanguages: settings.excludedLanguages,
+				processedCodeblocksWhitelist: settings.processedCodeblocksWhitelist,
 			};
 		},
 		update(value: SettingsState): SettingsState {
-			if (value.excludedCodeblocks !== settings.excludedCodeblocks || value.excludedLanguages !== settings.excludedLanguages)
+			if (value.processedCodeblocksWhitelist !== settings.processedCodeblocksWhitelist || value.excludedLanguages !== settings.excludedLanguages)
 				return {
-					excludedCodeblocks: settings.excludedCodeblocks,
 					excludedLanguages: settings.excludedLanguages,
+					processedCodeblocksWhitelist: settings.processedCodeblocksWhitelist,
 				};
 			return value;
 		}
@@ -138,9 +138,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			const initialSettings = transaction.startState.field(settingsState);
 			let readdFoldLanguages: Array<string> = [];
 			let removeFoldLanguages: Array<string> = [];
-			if (initialSettings.excludedCodeblocks !== settings.excludedCodeblocks) {
-				const initialExcludedCodeblocks = initialSettings.excludedCodeblocks.split(",").map(lang=>lang.trim());
-				const currentExcludedCodeblocks = settings.excludedCodeblocks.split(",").map(lang=>lang.trim());
+			if (initialSettings.processedCodeblocksWhitelist !== settings.processedCodeblocksWhitelist) {
+				//@ts-expect-error Undocumented Obsidian API
+				const codeblockProcessors = Object.keys(MarkdownPreviewRenderer.codeBlockPostProcessors);
+				const initialExcludedCodeblocks = codeblockProcessors.filter(lang=>!initialSettings.processedCodeblocksWhitelist.split(",").map(lang=>lang.trim()).includes(lang));
+				const currentExcludedCodeblocks = codeblockProcessors.filter(lang=>!settings.processedCodeblocksWhitelist.split(",").map(lang=>lang.trim()).includes(lang));
 				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedCodeblocks,initialExcludedCodeblocks) as Array<string>);
 				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedCodeblocks,currentExcludedCodeblocks) as Array<string>);
 			}
@@ -285,7 +287,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
 					const startLine = state.doc.lineAt(syntaxNode.from);
 					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
-					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
+					if (!isLanguageIgnored(codeblockParameters.language,settings.excludedLanguages) && !isCodeblockIgnored(codeblockParameters.language,settings.processedCodeblocksWhitelist) && !codeblockParameters.ignore) {
 						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
 					}

@@ -115,7 +115,7 @@ export interface CodeStylerSettings {
 	exampleInlineCode: string;
 	decoratePrint: boolean;
 	excludedLanguages: string;
-	excludedCodeblocks: string;
+	processedCodeblocksWhitelist: string;
 	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>;
 	version: string;
 }
@@ -307,10 +307,12 @@ export const INBUILT_THEMES: Record<string,CodeStylerTheme> = {
 	"Solarized": SOLARIZED_THEME,
 };
 
-// Example Codeblock Defaults
+// Default Values
 export const EXAMPLE_CODEBLOCK_PARAMETERS = "python title:foo";
 export const EXAMPLE_CODEBLOCK_CONTENT = "print(\"This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.\")\nprint(\"This line is highlighted.\")";
 export const EXAMPLE_INLINE_CODE = "{python icon title:foo} print(\"This is inline code\")";
+export const EXCLUDED_LANGUAGES = "ad-*";
+export const WHITELIST_CODEBLOCKS = "run-*, include, preview";
 
 // Plugin default settings
 export const DEFAULT_SETTINGS: CodeStylerSettings = {
@@ -323,8 +325,8 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	exampleCodeblockContent: EXAMPLE_CODEBLOCK_CONTENT,
 	exampleInlineCode: EXAMPLE_INLINE_CODE,
 	decoratePrint: true,
-	excludedLanguages: "ad-*",
-	excludedCodeblocks: "dataview, dataviewjs, math",
+	excludedLanguages: EXCLUDED_LANGUAGES,
+	processedCodeblocksWhitelist: WHITELIST_CODEBLOCKS,
 	redirectLanguages: {},
 	version: "1.0.10",
 };
@@ -383,7 +385,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 
 // Constants
 export const FOLD_PLACEHOLDER = "Folded Code";
-export const PARAMETERS = ["title","fold","ln","unwrap","ignore"];
+export const PARAMETERS = ["title","fold","ln","wrap","unwrap","ignore"];
 export const TRANSITION_LENGTH = 240; // 240ms
 export const SPECIAL_LANGUAGES = ["^preview$","^include$","^output$","^run-.+$"];
 export const SETTINGS_SOURCEPATH_PREFIX = "@Code-Styler-Settings:";
