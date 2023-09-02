@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT } from "./Settings";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, INBUILT_THEMES, CodeStylerTheme } from "./Settings";
 
 const SETTINGS_PAGES: Record<string,string> = {
 	"main": "Core Settings",
@@ -1022,6 +1022,17 @@ export class SettingsTab extends PluginSettingTab {
 				() => !this.plugin.settings.currentTheme.settings.highlights.activeEditorLine,
 			);});
 		this.disableableComponents["editorActiveLineHighlight"].push(this.pickrs["editor_active_line_highlight"].resetButton);
+		new Setting(this.advancedSettingsContainer)
+			.setName("Reset inbuilt themes")
+			.setDesc("This will return all inbuilt themes to the plugin defaults")
+			.addButton(button => button
+				.setButtonText("Reset")
+				.onClick(()=>{
+					Object.entries(INBUILT_THEMES).forEach(([themeName,theme]: [string,CodeStylerTheme]) => this.plugin.settings.themes[themeName] = structuredClone(theme));
+					if (this.plugin.settings.selectedTheme in INBUILT_THEMES)
+						this.plugin.settings.currentTheme = structuredClone(this.plugin.settings.themes[this.plugin.settings.selectedTheme]);
+					this.saveSettings(true);
+				}));
 	}
 	generateInterfaceSettings(containerEl: HTMLElement) {
 		new Setting(containerEl)

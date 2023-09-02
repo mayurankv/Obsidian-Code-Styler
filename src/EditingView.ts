@@ -277,7 +277,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 
-	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold): DecorationSet {
+	function oldBuildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
 		let startLine: Line | null = null;
 		let startDelimiter: string = "```";
@@ -300,6 +300,23 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				}
 			}
 		}
+		return builder.finish();
+	}
+	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold) {
+		const builder = new RangeSetBuilder<Decoration>();
+		let codeblockParameters: CodeblockParameters;
+		syntaxTree(state).iterate({
+			enter: (syntaxNode) => {
+				if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
+					const startLine = state.doc.lineAt(syntaxNode.from);
+					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
+					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
+						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
+							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
+					}
+				}
+			}
+		});
 		return builder.finish();
 	}
 	function buildLineDecorations(state: EditorState): DecorationSet {
