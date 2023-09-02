@@ -277,31 +277,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 	}
 
-	function oldBuildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold): DecorationSet {
-		const builder = new RangeSetBuilder<Decoration>();
-		let startLine: Line | null = null;
-		let startDelimiter: string = "```";
-		let codeblockParameters: CodeblockParameters;
-		for (let i = 1; i < state.doc.lines; i++) {
-			const line = state.doc.line(i);
-			const lineText = line.text.toString();
-			const currentDelimiter = testOpeningLine(lineText);
-			if (currentDelimiter) {
-				if (startLine === null) {
-					startLine = line;
-					startDelimiter = currentDelimiter;
-				} else if (currentDelimiter === startDelimiter) {
-					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
-					if (!isExcluded(codeblockParameters.language,[settings.excludedCodeblocks,settings.excludedLanguages].join(",")) && !codeblockParameters.ignore) {
-						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
-					}
-					startLine = null;
-				}
-			}
-		}
-		return builder.finish();
-	}
 	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold) {
 		const builder = new RangeSetBuilder<Decoration>();
 		let codeblockParameters: CodeblockParameters;
