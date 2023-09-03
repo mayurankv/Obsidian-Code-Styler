@@ -331,8 +331,6 @@ Please try to create bug reports/issues that are:
 
 *Made with [contrib.rocks](https://contrib.rocks).*
 
-This plugin is based on the [Codeblock Customizer Plugin](https://github.com/mugiwara85/CodeblockCustomizer) by [@mugiwara85](https://github.com/mugiwara85).
-
 ## Support
 
 If you like this plugin, and would like to help support continued development, use the button below!
