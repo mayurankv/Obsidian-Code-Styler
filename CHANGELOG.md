@@ -20,6 +20,11 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Added swapping `:` with `=` for parameter setting for compatibility with similar plugins
+- Added utilising `{1,3,5-7}` syntax for default highlighting line numbers - note this has no ability to highlight with regex or by word
+
 ## [1.0.11] - 2023-09-02
 
 ### Added
