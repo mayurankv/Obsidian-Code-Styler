@@ -2038,6 +2038,24 @@ var THEME_FALLBACK_COLOURS = {
     buttonActiveColour: "--text-normal"
   }
 };
+var SOLARIZED = {
+  "base03": "#002b36",
+  "base02": "#073642",
+  "base01": "#586e75",
+  "base00": "#657b83",
+  "base0": "#839496",
+  "base1": "#93a1a1",
+  "base2": "#eee8d5",
+  "base3": "#fdf6e3",
+  "yellow": "#b58900",
+  "orange": "#cb4b16",
+  "red": "#dc322f",
+  "magenta": "#d33682",
+  "violet": "#6c71c4",
+  "blue": "#268bd2",
+  "cyan": "#2aa198",
+  "green": "#859900"
+};
 var DEFAULT_THEME = {
   settings: THEME_DEFAULT_SETTINGS,
   colours: {
@@ -2050,11 +2068,11 @@ var SOLARIZED_THEME = {
   colours: {
     light: {
       codeblock: {
-        backgroundColour: "#FCF6E4",
+        backgroundColour: SOLARIZED.base3,
         textColour: "#bababa"
       },
       gutter: {
-        backgroundColour: "#EDE8D6",
+        backgroundColour: SOLARIZED.base2,
         textColour: "#6c6c6c",
         activeTextColour: "#8c8c8c"
       },
@@ -2070,13 +2088,13 @@ var SOLARIZED_THEME = {
         lineColour: "#EDD489"
       },
       highlights: {
-        activeCodeblockLineColour: "#EDE8D6",
+        activeCodeblockLineColour: SOLARIZED.base2,
         activeEditorLineColour: "#60460633",
         defaultColour: "#E9DFBA",
         alternativeHighlights: {}
       },
       inline: {
-        backgroundColour: "#FCF6E4",
+        backgroundColour: SOLARIZED.base3,
         textColour: "#bababa",
         activeTextColour: "#bababa",
         titleTextColour: "#C25F30"
@@ -2088,11 +2106,11 @@ var SOLARIZED_THEME = {
     },
     dark: {
       codeblock: {
-        backgroundColour: "#002b36",
+        backgroundColour: SOLARIZED.base03,
         textColour: "#bababa"
       },
       gutter: {
-        backgroundColour: "#073642",
+        backgroundColour: SOLARIZED.base02,
         textColour: "#6c6c6c",
         activeTextColour: "#4c4c4c"
       },
@@ -2108,13 +2126,13 @@ var SOLARIZED_THEME = {
         lineColour: "#46cced"
       },
       highlights: {
-        activeCodeblockLineColour: "#073642",
+        activeCodeblockLineColour: SOLARIZED.base02,
         activeEditorLineColour: "#468eeb33",
         defaultColour: "#054b5c",
         alternativeHighlights: {}
       },
       inline: {
-        backgroundColour: "#002b36",
+        backgroundColour: SOLARIZED.base03,
         textColour: "#bababa",
         activeTextColour: "#bababa",
         titleTextColour: "#000000"
@@ -2134,7 +2152,7 @@ var EXAMPLE_CODEBLOCK_PARAMETERS = "python title:foo";
 var EXAMPLE_CODEBLOCK_CONTENT = 'print("This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.")\nprint("This line is highlighted.")';
 var EXAMPLE_INLINE_CODE = '{python icon title:foo} print("This is inline code")';
 var EXCLUDED_LANGUAGES = "ad-*";
-var WHITELIST_CODEBLOCKS = "run-*, include, preview";
+var WHITELIST_CODEBLOCKS = "run-*";
 var DEFAULT_SETTINGS = {
   themes: structuredClone(INBUILT_THEMES),
   selectedTheme: "Default",
@@ -2148,7 +2166,7 @@ var DEFAULT_SETTINGS = {
   excludedLanguages: EXCLUDED_LANGUAGES,
   processedCodeblocksWhitelist: WHITELIST_CODEBLOCKS,
   redirectLanguages: {},
-  version: "1.0.10"
+  version: "1.0.11"
 };
 function convertSettings(settings) {
   if (typeof (settings == null ? void 0 : settings.version) === "undefined")
@@ -2164,14 +2182,15 @@ function convertSettings(settings) {
 function semverNewer(newVersion, oldVersion) {
   return newVersion.localeCompare(oldVersion, void 0, { numeric: true }) === 1;
 }
-function settingsVersionUpdate(settings, version, themeUpdater = (theme) => theme, otherSettingsUpdater = (settings2) => settings2, redirectLanguagesUpdater = (redirectLanguages) => redirectLanguages) {
+function settingsVersionUpdate(settings, themeUpdater = (theme) => theme, otherSettingsUpdater = (settings2) => settings2, redirectLanguagesUpdater = (redirectLanguages) => redirectLanguages) {
+  var _a2;
   for (const [name, theme] of Object.entries(settings.themes)) {
     settings.themes[name] = themeUpdater(theme);
   }
   settings.currentTheme = structuredClone(settings.themes[settings.selectedTheme]);
   settings.redirectLanguages = redirectLanguagesUpdater(settings.redirectLanguages);
   settings = otherSettingsUpdater(settings);
-  settings.version = version;
+  settings.version = (_a2 = Object.keys(settingsUpdaters).find((value, index2, array) => (array == null ? void 0 : array[index2 - 1]) === settings.version)) != null ? _a2 : "1.0.0";
   return settings;
 }
 function settingsPreserve(settings) {
@@ -2193,13 +2212,14 @@ var settingsUpdaters = {
   "1.0.7": settingsPreserve,
   "1.0.8": settingsPreserve,
   "1.0.9": settingsPreserve,
-  "1.0.10": (settings) => settingsVersionUpdate(settings, "1.0.11", (theme) => {
+  "1.0.10": (settings) => settingsVersionUpdate(settings, (theme) => {
     theme.settings.inline.style = true;
     return theme;
   }, (settings2) => {
     delete settings2.specialLanguages;
     return settings2;
-  })
+  }),
+  "1.0.11": settingsPreserve
 };
 var FOLD_PLACEHOLDER = "Folded Code";
 var PARAMETERS = ["title", "fold", "ln", "wrap", "unwrap", "ignore"];
@@ -5398,13 +5418,13 @@ function pluginAdjustExecuteCodeRun(codeblockParameters, plugin, plugins) {
 function parseCodeblockParameterString(parameterString, codeblockParameters, theme) {
   if (parameterString === "ignore")
     codeblockParameters.ignore = true;
-  else if (parameterString.startsWith("title:"))
+  else if (/^title[:=]/.test(parameterString))
     manageTitle(parameterString, codeblockParameters);
-  else if (parameterString.startsWith("fold:") || parameterString === "fold")
+  else if (/^fold[:=]?/.test(parameterString))
     manageFolding(parameterString, codeblockParameters);
-  else if (parameterString.startsWith("ln:"))
+  else if (/^ln[:=]/.test(parameterString))
     manageLineNumbering(parameterString, codeblockParameters);
-  else if (parameterString === "wrap" || parameterString === "unwrap" || parameterString.startsWith("unwrap:"))
+  else if (/^unwrap[:=]?/.test(parameterString) || parameterString === "wrap")
     manageWrapping(parameterString, codeblockParameters);
   else
     addHighlights(parameterString, codeblockParameters, theme);
@@ -5415,7 +5435,12 @@ function manageTitle(parameterString, codeblockParameters) {
     codeblockParameters.title = titleMatch[2].trim();
 }
 function manageFolding(parameterString, codeblockParameters) {
-  if (parameterString.startsWith("fold:")) {
+  if (parameterString === "fold") {
+    codeblockParameters.fold = {
+      enabled: true,
+      placeholder: ""
+    };
+  } else {
     const foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("fold:".length));
     if (foldPlaceholderMatch) {
       codeblockParameters.fold = {
@@ -5423,11 +5448,6 @@ function manageFolding(parameterString, codeblockParameters) {
         placeholder: foldPlaceholderMatch[2].trim()
       };
     }
-  } else if (parameterString === "fold") {
-    codeblockParameters.fold = {
-      enabled: true,
-      placeholder: ""
-    };
   }
 }
 function manageLineNumbering(parameterString, codeblockParameters) {
@@ -5465,7 +5485,7 @@ function manageWrapping(parameterString, codeblockParameters) {
       alwaysDisabled: false,
       activeWrap: false
     };
-  } else if (parameterString.startsWith("unwrap:")) {
+  } else {
     parameterString = parameterString.slice("unwrap:".length);
     if (parameterString.toLowerCase() === "inactive") {
       codeblockParameters.lineUnwrap = {
@@ -5489,14 +5509,14 @@ function manageWrapping(parameterString, codeblockParameters) {
   }
 }
 function addHighlights(parameterString, codeblockParameters, theme) {
-  const highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
+  const highlightMatch = /^(\w+)[:=](.+)$/.exec(parameterString);
   if (highlightMatch) {
-    const highlights = parseHighlightedLines(highlightMatch[2]);
     if (highlightMatch[1] === "hl")
-      codeblockParameters.highlights.default = highlights;
+      codeblockParameters.highlights.default = parseHighlightedLines(highlightMatch[2]);
     else if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
-      codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
-  }
+      codeblockParameters.highlights.alternative[highlightMatch[1]] = parseHighlightedLines(highlightMatch[2]);
+  } else if (/^{[\d-,]+}$/.test(parameterString))
+    codeblockParameters.highlights.default = parseHighlightedLines(parameterString.slice(1, -1));
 }
 function parseHighlightedLines(highlightedLinesString) {
   const highlightRules = highlightedLinesString.split(",");
@@ -5809,8 +5829,9 @@ function createCodeblockCodeMirrorExtensions(settings, languageIcons) {
       let readdFoldLanguages = [];
       let removeFoldLanguages2 = [];
       if (initialSettings.processedCodeblocksWhitelist !== settings.processedCodeblocksWhitelist) {
-        const initialExcludedCodeblocks = [];
-        const currentExcludedCodeblocks = [];
+        const codeblockProcessors = Object.keys(MarkdownPreviewRenderer.codeBlockPostProcessors);
+        const initialExcludedCodeblocks = codeblockProcessors.filter((lang) => !initialSettings.processedCodeblocksWhitelist.split(",").map((lang2) => lang2.trim()).includes(lang));
+        const currentExcludedCodeblocks = codeblockProcessors.filter((lang) => !settings.processedCodeblocksWhitelist.split(",").map((lang2) => lang2.trim()).includes(lang));
         removeFoldLanguages2 = removeFoldLanguages2.concat(setDifference(currentExcludedCodeblocks, initialExcludedCodeblocks));
         readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedCodeblocks, currentExcludedCodeblocks));
       }

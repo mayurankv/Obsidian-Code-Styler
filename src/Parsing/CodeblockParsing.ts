@@ -195,13 +195,13 @@ function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, pl
 function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
 	if (parameterString === "ignore")
 		codeblockParameters.ignore = true;
-	else if (parameterString.startsWith("title:"))
+	else if (/^title[:=]/.test(parameterString))
 		manageTitle(parameterString,codeblockParameters);
-	else if (parameterString.startsWith("fold:") || parameterString === "fold")
+	else if (/^fold[:=]?/.test(parameterString))
 		manageFolding(parameterString,codeblockParameters);
-	else if (parameterString.startsWith("ln:"))
+	else if (/^ln[:=]/.test(parameterString))
 		manageLineNumbering(parameterString,codeblockParameters);
-	else if (parameterString === "wrap" || parameterString === "unwrap" || parameterString.startsWith("unwrap:"))
+	else if (/^unwrap[:=]?/.test(parameterString) || parameterString === "wrap")
 		manageWrapping(parameterString,codeblockParameters);
 	else
 		addHighlights(parameterString,codeblockParameters,theme);
@@ -212,7 +212,12 @@ function manageTitle(parameterString: string, codeblockParameters: CodeblockPara
 		codeblockParameters.title = titleMatch[2].trim();
 }
 function manageFolding(parameterString: string, codeblockParameters: CodeblockParameters) {
-	if (parameterString.startsWith("fold:")) {
+	if (parameterString === "fold") {
+		codeblockParameters.fold = {
+			enabled: true,
+			placeholder: "",
+		};
+	} else {
 		const foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("fold:".length));
 		if (foldPlaceholderMatch) {
 			codeblockParameters.fold = {
@@ -220,11 +225,6 @@ function manageFolding(parameterString: string, codeblockParameters: CodeblockPa
 				placeholder: foldPlaceholderMatch[2].trim(),
 			};
 		}
-	} else if (parameterString === "fold") {
-		codeblockParameters.fold = {
-			enabled: true,
-			placeholder: "",
-		};
 	}
 }
 function manageLineNumbering(parameterString: string, codeblockParameters: CodeblockParameters) {
@@ -262,7 +262,7 @@ function manageWrapping(parameterString: string, codeblockParameters: CodeblockP
 			alwaysDisabled: false,
 			activeWrap: false,
 		};
-	} else if (parameterString.startsWith("unwrap:")) {
+	} else {
 		parameterString = parameterString.slice("unwrap:".length);
 		if (parameterString.toLowerCase() === "inactive") {
 			codeblockParameters.lineUnwrap = {
@@ -286,14 +286,14 @@ function manageWrapping(parameterString: string, codeblockParameters: CodeblockP
 	}
 }
 function addHighlights(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme) {
-	const highlightMatch = /^(\w+):(.+)$/.exec(parameterString);
+	const highlightMatch = /^(\w+)[:=](.+)$/.exec(parameterString);
 	if (highlightMatch) {
-		const highlights = parseHighlightedLines(highlightMatch[2]);
 		if (highlightMatch[1] === "hl")
-			codeblockParameters.highlights.default = highlights;
+			codeblockParameters.highlights.default = parseHighlightedLines(highlightMatch[2]);
 		else if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
-			codeblockParameters.highlights.alternative[highlightMatch[1]] = highlights;
-	}
+			codeblockParameters.highlights.alternative[highlightMatch[1]] = parseHighlightedLines(highlightMatch[2]);
+	} else if (/^{[\d-,]+}$/.test(parameterString))
+		codeblockParameters.highlights.default = parseHighlightedLines(parameterString.slice(1,-1));
 }
 function parseHighlightedLines(highlightedLinesString: string): Highlights {
 	const highlightRules = highlightedLinesString.split(",");
