@@ -70,12 +70,12 @@ The different component colours that can be set within a theme are:
 
 ## Codeblock Parameters
 
-Codeblock parameters are added to the first line of the codeblock following the language. They can be added in any order. If no language is set, a space should be left after the codeblock delimiter ` ``` ` to indicate that the first parameter is NOT the language of the codeblock.
+Codeblock parameters are added to the first line of the codeblock following the language. They can be added in any order. If no language is set, a space should be left after the codeblock delimiter ` ``` ` to indicate that the first parameter is NOT the language of the codeblock. Also note that all parameters can be set with either `:` or `=`.
 
 Example:
 
 - ` ```cpp fold title:example_title`
-- ` ```cpp title:example_title fold` (same effect as above line)
+- ` ```cpp title=example_title fold` (same effect as above line)
 - ` ``` fold title:example_title` (if no language set)
 
 ### Line Numbers
@@ -147,6 +147,13 @@ Highlights created by the default highlight parameter or alternative highlight p
 
 Example:
 ![Default Highlight Gradient](images/DefaultHighlightGradient.png)
+
+You can also highlight using the `{line numbers here}` syntax for compatibility with other tools however this cannot highlight via regex or words.
+
+Example:
+` ```cpp {1,3-4,6-9,11}`
+
+![Default Highlight](images/DefaultHighlight.png)
 
 #### Alternative Highlights
 
