@@ -1,6 +1,7 @@
 import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
+import { Component, MarkdownRenderer } from "obsidian";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
 	const headerContainer = createDiv();
@@ -13,7 +14,13 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 			if (isLanguageTagShown(codeblockParameters,themeSettings))
 				headerContainer.appendChild(createDiv({cls: "code-styler-header-language-tag", text: getLanguageTag(codeblockParameters.language)})); //TODO (@mayurankv) Can I remove the language? Is this info elsewhere?
 		}
-		headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"")}));   
+		// headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"")}));
+		const titleContainer = createDiv({cls: "code-styler-header-text"});
+		const title = codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"");
+		if (codeblockParameters.reference === "")
+			titleContainer.innerText = title;
+		else
+			MarkdownRenderer.render(app,`[[${title}|${codeblockParameters.reference}]]`,titleContainer,"",new Component()); 
 	} else
 		headerContainer.classList.add("code-styler-header-container-hidden");
 	return headerContainer;

@@ -246,7 +246,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 			
 		toDOM(view: EditorView): HTMLElement {
-			const headerContainer = createHeader(this.codeblockParameters,this.themeSettings,this.languageIcons);
+			const headerContainer = createHeader(this.codeblockParameters,this.themeSettings,this.languageIcons,);
 			if (this.codeblockParameters.language!=="")
 				headerContainer.classList.add(`language-${this.codeblockParameters.language}`);
 			if (this.folded)

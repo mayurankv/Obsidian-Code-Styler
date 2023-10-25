@@ -7,6 +7,7 @@ import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
 export interface CodeblockParameters {
 	language: string;
 	title: string;
+	reference: string;
 	fold: {
 		enabled: boolean;
 		placeholder: string;
@@ -100,6 +101,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	const codeblockParameters: CodeblockParameters = {
 		language: "",
 		title: "",
+		reference: "",
 		fold: {
 			enabled: false,
 			placeholder: "",
@@ -197,6 +199,8 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 		codeblockParameters.ignore = true;
 	else if (/^title[:=]/.test(parameterString))
 		manageTitle(parameterString,codeblockParameters);
+	else if (/^ref[:=]/.test(parameterString))
+		manageReference(parameterString,codeblockParameters);
 	else if (/^fold[:=]?/.test(parameterString))
 		manageFolding(parameterString,codeblockParameters);
 	else if (/^ln[:=]/.test(parameterString))
@@ -210,6 +214,21 @@ function manageTitle(parameterString: string, codeblockParameters: CodeblockPara
 	const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
 	if (titleMatch)
 		codeblockParameters.title = titleMatch[2].trim();
+	const refTitleMatch = /\[\[([^|]*?)\|?([^|]*?)\]\]/.exec(parameterString.slice("title:".length));
+	if (refTitleMatch) {
+		if (refTitleMatch[2] === "") {
+			codeblockParameters.title = refTitleMatch[1].trim();
+			codeblockParameters.reference = refTitleMatch[1].trim();
+		} else {
+			codeblockParameters.title = refTitleMatch[2].trim();
+			codeblockParameters.reference = refTitleMatch[1].trim();
+		}
+	}
+}
+function manageReference(parameterString: string, codeblockParameters: CodeblockParameters) {
+	const refMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("ref:".length));
+	if (refMatch)
+		codeblockParameters.reference = refMatch[2].trim();
 }
 function manageFolding(parameterString: string, codeblockParameters: CodeblockParameters) {
 	if (parameterString === "fold") {
