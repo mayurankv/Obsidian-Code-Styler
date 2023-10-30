@@ -16,7 +16,7 @@
 	"author": "Mayuran Visakan",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.8.8",
+		"@types/node": "^20.8.9",
 		"@typescript-eslint/eslint-plugin": "^6.9.0",
 		"@typescript-eslint/parser": "^6.9.0",
 		"builtin-modules": "3.3.0",
@@ -34,7 +34,7 @@
 		"stylelint-no-nested-media": "^0.1.0",
 		"stylelint-no-unsupported-browser-features": "^7.0.0",
 		"stylelint-order": "^6.0.3",
-		"stylelint-plugin-defensive-css": "^0.9.2",
+		"stylelint-plugin-defensive-css": "^0.10.2",
 		"stylelint-stylistic": "^0.4.3",
 		"stylelint-use-logical-spec": "^5.0.0",
 		"tslib": "2.6.2",

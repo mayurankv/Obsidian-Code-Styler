@@ -1687,7 +1687,7 @@ export const LANGUAGE_COLOURS : {[key: string]: string} = {
 	"Zig": "#f7a41d"
 };
 
-const EXECUTE_CODE_LANGUAGE_ALIASES: Array<string> = ["javascript","typescript","bash","csharp","wolfram","nb","wl","hs","py"];
-const EXECUTE_CODE_CANONICAL_LANGUAGES: Array<string> = ["js","ts","cs","lean","lua","python","cpp","prolog","shell","groovy","r","go","rust","java","powershell","kotlin","mathematica","haskell","scala","racket","fsharp","c","dart","ruby","batch","sql","octave","maxima"];
+const EXECUTE_CODE_LANGUAGE_ALIASES: Array<string> = ["javascript","typescript","bash","csharp","wolfram","nb","wl","hs","py","scpt"];
+const EXECUTE_CODE_CANONICAL_LANGUAGES: Array<string> = ["js","ts","cs","lean","lua","python","cpp","prolog","shell","groovy","r","go","rust","java","powershell","kotlin","mathematica","haskell","scala","racket","fsharp","c","dart","ruby","batch","sql","octave","maxima","applescript"];
 
 export const EXECUTE_CODE_SUPPORTED_LANGUAGES = [...EXECUTE_CODE_LANGUAGE_ALIASES,...EXECUTE_CODE_CANONICAL_LANGUAGES];
