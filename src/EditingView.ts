@@ -55,10 +55,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	});
 	const charWidthState = StateField.define<number>({ //TODO (@mayurankv) Improve implementation
 		create(state: EditorState): number {
-			return getCharWidth(state,state.field(editorEditorField).defaultCharacterWidth);
+			return(state.field(editorEditorField).defaultCharacterWidth * 1.1);
 		},
 		update(value: number, transaction: Transaction): number {
-			return getCharWidth(transaction.state,value);
+			return(transaction.state.field(editorEditorField).defaultCharacterWidth * 1.1);
 		}
 	});
 	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
@@ -508,22 +508,6 @@ function isFileIgnored(state: EditorState): boolean {
 }
 function isSourceMode(state: EditorState): boolean {
 	return !state.field(editorLivePreviewField);
-}
-function getCharWidth(state: EditorState, default_value: number): number {
-	const charWidths = Array.from(state.field(editorEditorField).contentDOM.querySelectorAll(".HyperMD-codeblock-end")).reduce((result: Array<number>,beginningElement: HTMLElement): Array<number> => {
-		const nextElement = beginningElement.previousElementSibling as HTMLElement;
-		if (!nextElement)
-			return result;
-		const lineNumberElement = nextElement.querySelector("[class^='code-styler-line-number']") as HTMLElement;
-		if (!lineNumberElement || lineNumberElement.innerText.length <= 2)
-			return result;
-		const computedStyles = window.getComputedStyle(lineNumberElement, null);
-		result.push((lineNumberElement.getBoundingClientRect().width - parseFloat(computedStyles.paddingLeft) - parseFloat(computedStyles.paddingRight)) / lineNumberElement.innerText.length);
-		return result;
-	},[]);
-	if (charWidths.length === 0)
-		return default_value;
-	return charWidths.reduce((result,value)=>result+value,0) / charWidths.length;
 }
 function setDifference(array1: Array<unknown>, array2: Array<unknown>) {
 	return array1.filter(element => !array2.includes(element));
