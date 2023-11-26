@@ -78,6 +78,8 @@ Example:
 - ` ```cpp title=example_title fold` (same effect as above line)
 - ` ``` fold title:example_title` (if no language set)
 
+The plugin can also parse rmarkdown style codeblock parameters so ` ```{r title, hl=5}` is a recognised opening codeblock line.
+
 ### Line Numbers
 
 Line numbers can be enabled/disabled within a specific theme in the settings of that theme. In addition to this, whether line numbering is applied can be additionally specified in a codeblock itself using the `ln` parameter.
@@ -97,6 +99,12 @@ Example:
 ` ```cpp title:"long filename.cpp"`
 
 ![Title Long](images/TitleLong.png)
+
+### References
+
+To display the title as a link to another page which can be clicked or hovered over, add the `ref:` or `reference:` parameter followed by a wikilink. The title will then show as a link to the referenced note. If no `title:` parameter is given, then the wikilink note name (or alias if given) will be used as the title.
+
+Note that these links will not show up on the Graph or in Backlinks - this is an upstream issue with Obsidian.
 
 ### Folding
 

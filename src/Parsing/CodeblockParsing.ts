@@ -206,7 +206,7 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 		codeblockParameters.ignore = true;
 	else if (/^title[:=]/.test(parameterString))
 		manageTitle(parameterString,codeblockParameters);
-	else if (/^ref[:=]/.test(parameterString))
+	else if (/^ref[:=]/.test(parameterString) || /^reference[:=]/.test(parameterString))
 		manageReference(parameterString,codeblockParameters);
 	else if (/^fold[:=]?/.test(parameterString))
 		manageFolding(parameterString,codeblockParameters);
@@ -233,7 +233,12 @@ function manageTitle(parameterString: string, codeblockParameters: CodeblockPara
 	}
 }
 function manageReference(parameterString: string, codeblockParameters: CodeblockParameters) {
-	const refMatch = /\[\[([^|]*?)(?:\|[^|]*?)?\]\]/.exec(parameterString.slice("ref:".length));
+	if (/^ref[:=]/.test(parameterString))
+		parameterString.slice("ref:".length);
+	else
+		parameterString.slice("reference:".length);
+	
+	const refMatch = /\[\[([^|]*?)(?:\|[^|]*?)?\]\]/.exec(parameterString);
 	if (refMatch) {
 		codeblockParameters.reference = refMatch[1].trim();
 		if (codeblockParameters.title === "")
