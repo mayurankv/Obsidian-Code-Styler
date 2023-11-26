@@ -2,28 +2,34 @@ import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER } from "./Set
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { Component, MarkdownRenderer } from "obsidian";
+import CodeStylerPlugin from "./main";
 
-export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>): HTMLElement {
+export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	const headerContainer = createDiv();
-	const iconURL = codeblockParameters.language?getLanguageIcon(codeblockParameters.language,languageIcons):undefined;
+	const iconURL = codeblockParameters.language?getLanguageIcon(codeblockParameters.language,plugin.languageIcons):undefined;
 	if (!isHeaderHidden(codeblockParameters,themeSettings,iconURL)) {
 		headerContainer.classList.add("code-styler-header-container");
 		if (codeblockParameters.language !== "") {
 			if (isLanguageIconShown(codeblockParameters,themeSettings,iconURL))
 				headerContainer.appendChild(createImageWrapper(iconURL as string,createDiv()));
 			if (isLanguageTagShown(codeblockParameters,themeSettings))
-				headerContainer.appendChild(createDiv({cls: "code-styler-header-language-tag", text: getLanguageTag(codeblockParameters.language)})); //TODO (@mayurankv) Can I remove the language? Is this info elsewhere?
+				headerContainer.appendChild(createDiv({cls: "code-styler-header-language-tag", text: getLanguageTag(codeblockParameters.language)}));
 		}
-		// headerContainer.appendChild(createDiv({cls: "code-styler-header-text", text: codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"")}));
-		const titleContainer = createDiv({cls: "code-styler-header-text"});
-		const title = codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"");
-		if (codeblockParameters.reference === "")
-			titleContainer.innerText = title;
-		else
-			MarkdownRenderer.render(app,`[[${title}|${codeblockParameters.reference}]]`,titleContainer,"",new Component()); 
+		const titleContainer = createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin);
+		headerContainer.appendChild(titleContainer);
 	} else
 		headerContainer.classList.add("code-styler-header-container-hidden");
 	return headerContainer;
+}
+function createTitleContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
+	const titleContainer = createDiv({cls: "code-styler-header-text"});
+	const title = codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"");
+	if (codeblockParameters.reference === "")
+		titleContainer.innerText = title;
+	else {
+		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,new Component()); //TODO (@mayurankv) Add links to metadata cache properly
+	}
+	return titleContainer;
 }
 export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>, containerClasses: Array<string> = ["code-styler-inline-opener"]): HTMLElement {
 	const openerContainer = createSpan({cls: containerClasses.join(" ")});

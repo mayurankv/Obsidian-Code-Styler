@@ -134,12 +134,19 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	else
 		return codeblockParameters;
 
+	const rmdMatch = /^\{(.+)\} *$/.exec(parameterLine);
+	if (rmdMatch)
+		parameterLine = rmdMatch[1];
+
 	const languageBreak = parameterLine.indexOf(" ");
-	codeblockParameters.language = parameterLine.slice(0,languageBreak !== -1?languageBreak:parameterLine.length).toLowerCase();
+	codeblockParameters.language = parameterLine.slice(0,(languageBreak !== -1)?languageBreak:parameterLine.length).toLowerCase();
 	if (languageBreak === -1)
 		return codeblockParameters;
+	parameterLine = parameterLine.slice(languageBreak+1);
+	if (rmdMatch)
+		parameterLine = "title:" + parameterLine;
 
-	const parameterStrings = parameterLine.slice(languageBreak+1).match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+	const parameterStrings = parameterLine.match(/(?:[^\s,"']+|"[^"]*"|'[^']*')+/g);
 	if (!parameterStrings)
 		return codeblockParameters;
 	
@@ -216,9 +223,9 @@ function manageTitle(parameterString: string, codeblockParameters: CodeblockPara
 		codeblockParameters.title = titleMatch[2].trim();
 	const refTitleMatch = /\[\[([^|]*?)\|?([^|]*?)\]\]/.exec(parameterString.slice("title:".length));
 	if (refTitleMatch) {
-		if (refTitleMatch[2] === "") {
-			codeblockParameters.title = refTitleMatch[1].trim();
-			codeblockParameters.reference = refTitleMatch[1].trim();
+		if (refTitleMatch[1] === "") {
+			codeblockParameters.title = refTitleMatch[2].trim();
+			codeblockParameters.reference = refTitleMatch[2].trim();
 		} else {
 			codeblockParameters.title = refTitleMatch[2].trim();
 			codeblockParameters.reference = refTitleMatch[1].trim();
@@ -226,9 +233,12 @@ function manageTitle(parameterString: string, codeblockParameters: CodeblockPara
 	}
 }
 function manageReference(parameterString: string, codeblockParameters: CodeblockParameters) {
-	const refMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("ref:".length));
-	if (refMatch)
-		codeblockParameters.reference = refMatch[2].trim();
+	const refMatch = /\[\[([^|]*?)(?:\|[^|]*?)?\]\]/.exec(parameterString.slice("ref:".length));
+	if (refMatch) {
+		codeblockParameters.reference = refMatch[1].trim();
+		if (codeblockParameters.title === "")
+			codeblockParameters.title = refMatch[1].trim();
+	}
 }
 function manageFolding(parameterString: string, codeblockParameters: CodeblockParameters) {
 	if (parameterString === "fold") {

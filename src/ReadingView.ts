@@ -85,15 +85,15 @@ export function destroyReadingModeElements(): void {
 
 async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin) {
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split("\n")[lineNumber]),plugin,sourcePath)).codeblocksParameters;
-	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,true,false,plugin);
+	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,true,false,plugin);
 }
 async function renderSettings(codeblockPreElements: Array<HTMLElement>, sourcePath: string, plugin: CodeStylerPlugin) {
 	const codeblocksParameters = (await parseCodeblockSource(sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n"),plugin)).codeblocksParameters;
-	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,true,false,plugin);
+	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,true,false,plugin);
 }
 async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
 	const codeblocksParameters: Array<CodeblockParameters> = await getCodeblocksParameters(sourcePath,cache,plugin,editingEmbeds);
-	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,!printing,true,plugin);
+	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,!printing,true,plugin);
 }
 async function retriggerProcessor(element: HTMLElement, context: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean) {
 	if (element.matchParent("div.block-language-dataviewjs") && isCodeblockIgnored("dataviewjs",plugin.settings.processedCodeblocksWhitelist))
@@ -107,7 +107,7 @@ async function retriggerProcessor(element: HTMLElement, context: {sourcePath: st
 	}
 }
 
-async function remakeCodeblocks(codeblockPreElements: Array<HTMLElement>, codeblocksParameters: Array<CodeblockParameters>, dynamic: boolean, skipStyled: boolean, plugin: CodeStylerPlugin) {
+async function remakeCodeblocks(codeblockPreElements: Array<HTMLElement>, codeblocksParameters: Array<CodeblockParameters>, sourcePath: string, dynamic: boolean, skipStyled: boolean, plugin: CodeStylerPlugin) {
 	if (codeblockPreElements.length !== codeblocksParameters.length)
 		return;
 	for (const [key,codeblockPreElement] of Array.from(codeblockPreElements).entries()) {
@@ -122,15 +122,15 @@ async function remakeCodeblocks(codeblockPreElements: Array<HTMLElement>, codebl
 			continue;
 		if (isLanguageIgnored(codeblockParameters.language,plugin.settings.excludedLanguages) || codeblockParameters.ignore)
 			continue;
-		await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,dynamic,plugin);
+		await remakeCodeblock(codeblockCodeElement,codeblockPreElement,codeblockParameters,sourcePath,dynamic,plugin);
 	}
 }
 
-async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, dynamic: boolean, plugin: CodeStylerPlugin) {
+async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, dynamic: boolean, plugin: CodeStylerPlugin) {
 	if (dynamic)
 		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{childList: true,subtree: true,attributes: true,characterData: true}); // Add Execute Code Observer
 	
-	insertHeader(codeblockPreElement,codeblockParameters,plugin,dynamic);
+	insertHeader(codeblockPreElement,codeblockParameters,sourcePath,plugin,dynamic);
 	
 	codeblockPreElement.classList.add(...getPreClasses(codeblockParameters,dynamic));
 	codeblockPreElement.setAttribute("defaultFold",codeblockParameters.fold.enabled.toString());
@@ -193,8 +193,8 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 		console.error(`Metadata cache not found for file: ${sourcePath}`);
 	return codeblocksParameters;
 }
-function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, dynamic: boolean): void {
-	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings,plugin.languageIcons);
+function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin, dynamic: boolean): void {
+	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings, sourcePath, plugin);
 	if (dynamic)
 		headerContainer.addEventListener("click",()=>{toggleFold(codeblockPreElement);}); // Add listener for header folding on click
 	codeblockPreElement.insertBefore(headerContainer,codeblockPreElement.childNodes[0]);

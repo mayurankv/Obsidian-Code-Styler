@@ -1165,7 +1165,7 @@ export class SettingsTab extends PluginSettingTab {
 		dropdown.setValue(settings.selectedTheme);
 	}
 	updateAlternativeHighlights() {
-		if (this.page !== "codeblock")
+		if (this.page !== "codeblock" || this.codeblockPage !== "highlight")
 			return;
 		this.alternativeHighlightsContainer.empty();
 		Object.keys(this.plugin.settings.currentTheme.colours.light.highlights.alternativeHighlights).forEach((alternativeHighlightName) => {

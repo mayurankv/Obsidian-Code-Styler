@@ -37,7 +37,7 @@ export default class CodeStylerPlugin extends Plugin {
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this);}); // Add codeblock decorating markdownPostProcessor
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewInlineDecoratingPostProcessor(el,ctx,this);}); // Add inline code decorating markdownPostProcessor
 
-		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this.languageIcons)); // Add codemirror extensions
+		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this)); // Add codemirror extensions
 
 		let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{});
 		this.registerEvent(this.app.workspace.on("css-change",()=>{
@@ -108,7 +108,7 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({},structuredClone(DEFAULT_SETTINGS),convertSettings(await this.loadData()));
+		this.settings = {...structuredClone(DEFAULT_SETTINGS), ...convertSettings(await this.loadData())};
 	}
 
 	async saveSettings() {

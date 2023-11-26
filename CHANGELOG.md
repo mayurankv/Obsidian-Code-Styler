@@ -24,6 +24,20 @@ See this project's [releases](/../../../releases).
 
 - Added swapping `:` with `=` for parameter setting for compatibility with similar plugins
 - Added utilising `{1,3,5-7}` syntax for default highlighting line numbers - note this has no ability to highlight with regex or by word
+- Added parsing of rmarkdown codeblock formats
+- Added links to codeblock headers via the `ref` parameter or using a wikilink in the `title` parameter
+
+### Changed
+
+- Changed how `charWidth` is calculated
+
+### Fixed
+
+- Scrolling long codeblocks no longer glitches the margin due to `charWidth` changes
+
+### Notes
+
+- Links do not show up in metadata (i.e. graphs or backlinks), this is an upstream issue with adding links via plugins
 
 ## [1.0.11] - 2023-09-02
 

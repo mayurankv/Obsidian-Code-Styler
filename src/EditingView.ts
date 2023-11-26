@@ -8,13 +8,14 @@ import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, trimParameterLine, isCodeblockIgnored, isLanguageIgnored } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
+import CodeStylerPlugin from "./main";
 
 interface SettingsState {
 	excludedLanguages: string;
 	processedCodeblocksWhitelist: string;
 }
 
-export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, languageIcons: Record<string,string>) {
+export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, plugin: CodeStylerPlugin) {
 	const livePreviewCompartment = new Compartment;
 	const ignoreCompartment = new Compartment;
 
@@ -55,10 +56,10 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	});
 	const charWidthState = StateField.define<number>({ //TODO (@mayurankv) Improve implementation
 		create(state: EditorState): number {
-			return(state.field(editorEditorField).defaultCharacterWidth * 1.1);
+			return(state.field(editorEditorField).defaultCharacterWidth * 1.105);
 		},
 		update(value: number, transaction: Transaction): number {
-			return(transaction.state.field(editorEditorField).defaultCharacterWidth * 1.1);
+			return(transaction.state.field(editorEditorField).defaultCharacterWidth * 1.105);
 		}
 	});
 	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
@@ -216,17 +217,19 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	class HeaderWidget extends WidgetType {
 		codeblockParameters: CodeblockParameters;
 		themeSettings: CodeStylerThemeSettings;
-		languageIcons: Record<string,string>;
+		sourcePath: string;
+		plugin: CodeStylerPlugin;
 		iconURL: string | undefined;
 		folded: boolean;
 		hidden: boolean;
 	
-		constructor(codeblockParameters: CodeblockParameters, folded: boolean, themeSettings: CodeStylerThemeSettings, languageIcons: Record<string,string>) {
+		constructor(codeblockParameters: CodeblockParameters, folded: boolean, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin) {
 			super();
 			this.codeblockParameters = structuredClone(codeblockParameters);
 			this.themeSettings = structuredClone(themeSettings);
-			this.languageIcons = languageIcons;
-			this.iconURL = getLanguageIcon(this.codeblockParameters.language,languageIcons);
+			this.sourcePath = sourcePath;
+			this.plugin = plugin;
+			this.iconURL = getLanguageIcon(this.codeblockParameters.language,this.plugin.languageIcons);
 			this.folded = folded;
 			this.hidden = isHeaderHidden(this.codeblockParameters,this.themeSettings,this.iconURL);
 		}
@@ -235,6 +238,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return (
 				this.codeblockParameters.language === other.codeblockParameters.language &&
 				this.codeblockParameters.title === other.codeblockParameters.title &&
+				this.codeblockParameters.reference === other.codeblockParameters.reference &&
 				this.codeblockParameters.fold.enabled === other.codeblockParameters.fold.enabled &&
 				this.codeblockParameters.fold.placeholder === other.codeblockParameters.fold.placeholder &&
 				this.themeSettings.header.foldPlaceholder === other.themeSettings.header.foldPlaceholder &&
@@ -246,23 +250,26 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 			
 		toDOM(view: EditorView): HTMLElement {
-			const headerContainer = createHeader(this.codeblockParameters,this.themeSettings,this.languageIcons,);
+			const headerContainer = createHeader(this.codeblockParameters,this.themeSettings,this.sourcePath,this.plugin);
 			if (this.codeblockParameters.language!=="")
 				headerContainer.classList.add(`language-${this.codeblockParameters.language}`);
 			if (this.folded)
 				headerContainer.classList.add("code-styler-header-folded");
-			headerContainer.onclick = () => {foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);};
+			headerContainer.onclick = (event) => {
+				if (!(event.target as HTMLElement)?.classList?.contains("internal-link"))
+					foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);
+			};
 			return headerContainer;
 		}
 	}
 	class OpenerWidget extends WidgetType {
 		inlineCodeParameters: InlineCodeParameters;
-		languageIcons: Record<string,string>;
+		plugin: CodeStylerPlugin;
 
-		constructor (inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>) {
+		constructor (inlineCodeParameters: InlineCodeParameters, plugin: CodeStylerPlugin) {
 			super();
 			this.inlineCodeParameters = inlineCodeParameters;
-			this.languageIcons = languageIcons;
+			this.plugin = plugin;
 		}
 
 		eq(other: OpenerWidget): boolean {
@@ -270,17 +277,18 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
 				this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
 				this.inlineCodeParameters.icon == other.inlineCodeParameters.icon &&
-				getLanguageIcon(this.inlineCodeParameters.language,this.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.languageIcons)
+				getLanguageIcon(this.inlineCodeParameters.language,this.plugin.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.plugin.languageIcons)
 			);
 		}
 
 		toDOM(): HTMLElement {
-			return createInlineOpener(this.inlineCodeParameters,this.languageIcons,["code-styler-inline-opener","cm-inline-code"]);
+			return createInlineOpener(this.inlineCodeParameters,this.plugin.languageIcons,["code-styler-inline-opener","cm-inline-code"]);
 		}
 	}
 
 	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold) {
 		const builder = new RangeSetBuilder<Decoration>();
+		const sourcePath = state.field(editorInfoField)?.file?.path ?? "";
 		let codeblockParameters: CodeblockParameters;
 		syntaxTree(state).iterate({
 			enter: (syntaxNode) => {
@@ -289,7 +297,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
 					if (!isLanguageIgnored(codeblockParameters.language,settings.excludedLanguages) && !isCodeblockIgnored(codeblockParameters.language,settings.processedCodeblocksWhitelist) && !codeblockParameters.ignore) {
 						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,languageIcons), block: true, side: -1}));
+							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,sourcePath,plugin), block: true, side: -1}));
 					}
 				}
 			}
@@ -357,8 +365,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			builder.add(parameters.from, parameters.to, Decoration.mark({class: "code-styler-inline-parameters"}));
 		else {
 			builder.add(parameters.from, parameters.to, Decoration.replace({}));
-			if (parameters.value?.title || (parameters.value?.icon && getLanguageIcon(parameters.value.language,languageIcons)))
-				builder.add(parameters.from, parameters.from, Decoration.replace({widget: new OpenerWidget(parameters.value,languageIcons)}));
+			if (parameters.value?.title || (parameters.value?.icon && getLanguageIcon(parameters.value.language,plugin.languageIcons)))
+				builder.add(parameters.from, parameters.from, Decoration.replace({widget: new OpenerWidget(parameters.value,plugin)}));
 		}
 		modeHighlight({start: parameters.to, text: text.value, language: parameters.value.language},builder);
 	}
