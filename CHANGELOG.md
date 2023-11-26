@@ -20,6 +20,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.1.0] - 2023-11-26
+
 ### Added
 
 - Added swapping `:` with `=` for parameter setting for compatibility with similar plugins
@@ -263,7 +265,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.0.11...HEAD
+[Unreleased]: /../../compare/1.1.0...HEAD
+[1.1.0]: /../../compare/1.0.11...1.1.0
 [1.0.11]: /../../compare/1.0.10...1.0.11
 [1.0.10]: /../../compare/1.0.9...1.0.10
 [1.0.9]: /../../compare/1.0.8...1.0.9
