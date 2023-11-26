@@ -323,10 +323,10 @@ pre.code-styler-pre div:last-child > .code-styler-line-number {
 .code-styler-active-line-highlight.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
 .code-styler-active-line-highlight-codeblock.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
 .code-styler-gutter-highlight [class*="code-styler-line-highlighted"] .code-styler-line-number {
-	background-color: rgba(0,0,0,0);
+	background-color: rgba(0,0,0,0) !important;
 }
 .code-styler-gutter-active-line .cm-active .code-styler-line-number{
-	color: var(--code-styler-gutter-active-text-colour);
+	color: var(--code-styler-gutter-active-text-colour) !important;
 }
 .code-styler .markdown-source-view .HyperMD-codeblock:has(.code-styler-line-number) {
 	padding-left: calc(12px + var(--language-border-width) + var(--line-number-gutter-width) + var(--line-number-gutter-padding)) !important;
