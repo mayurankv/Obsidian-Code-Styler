@@ -266,6 +266,7 @@ See this project's [releases](/../../../releases).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
 [Unreleased]: /../../compare/1.1.0...HEAD
+[1.1.0]: /../../compare/1.1.0...1.1.0
 [1.1.0]: /../../compare/1.0.11...1.1.0
 [1.0.11]: /../../compare/1.0.10...1.0.11
 [1.0.10]: /../../compare/1.0.9...1.0.10

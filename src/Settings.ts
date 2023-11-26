@@ -644,7 +644,6 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 		return settings;
 	}),
 	"1.0.11": settingsPreserve,
-	"1.0.12": settingsPreserve,
 	"1.1.0": settingsPreserve,
 };
 
