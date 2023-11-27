@@ -146,7 +146,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	if (rmdMatch)
 		parameterLine = "title:" + parameterLine;
 
-	const parameterStrings = parameterLine.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+	const parameterStrings = parameterLine.match(/(?:ref(erence)?:\[\[.*?\]\]|[^\s"']+|"[^"]*"|'[^']*')+/g);
 	if (!parameterStrings)
 		return codeblockParameters;
 	
