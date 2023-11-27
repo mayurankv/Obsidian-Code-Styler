@@ -23,7 +23,7 @@ See this project's [releases](/../../../releases).
 ### Fixed
 
 - Fixed CSS issues
-- Fixed Regex Parsing
+- Fixed Regex Parsing and complexity issues
 
 ## [1.1.0] - 2023-11-26
 
@@ -272,7 +272,6 @@ See this project's [releases](/../../../releases).
 
 [Unreleased]: /../../compare/1.1.0...HEAD
 [1.1.0]: /../../compare/1.1.0...1.1.0
-[1.1.0]: /../../compare/1.0.11...1.1.0
 [1.0.11]: /../../compare/1.0.10...1.0.11
 [1.0.10]: /../../compare/1.0.9...1.0.10
 [1.0.9]: /../../compare/1.0.8...1.0.9
