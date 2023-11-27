@@ -1,7 +1,7 @@
 import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
-import { Component, MarkdownRenderer } from "obsidian";
+import { MarkdownRenderer } from "obsidian";
 import CodeStylerPlugin from "./main";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
@@ -27,7 +27,7 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 	if (codeblockParameters.reference === "")
 		titleContainer.innerText = title;
 	else {
-		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,new Component()); //TODO (@mayurankv) Add links to metadata cache properly
+		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,plugin); //TODO (@mayurankv) Add links to metadata cache properly
 	}
 	return titleContainer;
 }

@@ -530,3 +530,11 @@ pre.code-styler-pre button.copy-code-button::before,
 .markdown-source-view.mod-cm6 .HyperMD-codeblock-begin.code-styler-line {
 	overflow: visible;
 }
+
+/** Links */
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line .code-styler-comment-link {
+	display: inline;
+}
+.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line .code-styler-comment-link > p {
+	display: inline;
+}

@@ -20,6 +20,11 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Changed
+
+- Made `MarkdownRenderer.render` to use `plugin` as component
+- Changed Language information to single dictionary
+
 ## [1.1.3] - 2023-11-27
 
 ### Fixed

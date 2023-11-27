@@ -1,4 +1,4 @@
-import { editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
+import { MarkdownRenderer, editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
 import { EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
 import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, Line, SelectionRange, Compartment } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
@@ -214,6 +214,26 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: "code-styler-line-number", text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
 	}
+	class CommentLinkWidget extends WidgetType {
+		linkText: string;
+		sourcePath: string;
+
+		constructor(linkText: string, sourcePath: string) {
+			super();
+			this.linkText = linkText;
+			this.sourcePath = sourcePath;
+		}
+
+		eq(other: CommentLinkWidget): boolean {
+			return this.linkText === other.linkText && this.sourcePath === other.sourcePath;
+		}
+
+		toDOM(): HTMLElement {
+			const linkParentElement = createDiv({attr: {class: "code-styler-comment-link"}});
+			MarkdownRenderer.render(plugin.app,this.linkText,linkParentElement,this.sourcePath,plugin);
+			return linkParentElement;
+		}
+	}
 	class HeaderWidget extends WidgetType {
 		codeblockParameters: CodeblockParameters;
 		themeSettings: CodeStylerThemeSettings;
@@ -306,6 +326,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 	function buildLineDecorations(state: EditorState): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
+		const sourcePath = state.field(editorInfoField)?.file?.path ?? "";
+		const sourceMode = isSourceMode(state);
 		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 			const foldStart = state.doc.lineAt(iter.from);
 			const startDelimiter = testOpeningLine(foldStart.text.toString());
@@ -331,7 +353,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				}
 				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
 				if (showLineNumbers)
-					builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i-foldStart.number,codeblockParameters,maxLineNum)}));
+					builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
+				addInlineCommentLinks(state, lineText, line.from, sourcePath, builder, sourceMode);
 			}
 			if (foldEnd !== null) {
 				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
@@ -340,6 +363,27 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			}
 		}
 		return builder.finish();
+	}
+	function addInlineCommentLinks(state: EditorState, lineText: string, lineStart: number, sourcePath: string, builder: RangeSetBuilder<Decoration>, sourceMode: boolean) {
+		const inlineComment = /#([\s\S]*)$/.exec(lineText)?.[1];
+		if (inlineComment) {
+			const linkMatches: Array<RegExpMatchArray > = [...inlineComment.matchAll(/(?:\[\[[\s\S]*?\]\]|\[[\s\S]*?\]\([\s\S]*?\))/g)];
+			for (const linkMatch of linkMatches) {
+				const from = lineStart + lineText.indexOf(linkMatch[0]);
+				const to = from + linkMatch[0].length;
+				if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>rangeInteraction(from,to,range))) {
+					const wikiBreak = linkMatch[0].indexOf("](");
+					//TODO (@mayurankv) Add editor wide viewer to allow clicking on files with cursor inside
+					if (wikiBreak === -1) {
+						builder.add(from+2,to-2,Decoration.mark({class: "cm-hmd-internal-link code-styler-source-link"}));
+					} else {
+						builder.add(from+1,from+wikiBreak,Decoration.mark({class: "cm-link code-styler-source-link"}));
+						builder.add(from+wikiBreak+2,to-1,Decoration.mark({class: "cm-string cm-url"}));
+					}
+				} else
+					builder.add(from,to,Decoration.replace({widget: new CommentLinkWidget(linkMatch[0], sourcePath)}));
+			}
+		}
 	}
 	function buildInlineDecorations(state: EditorState): DecorationSet {
 		if (!settings.currentTheme.settings.inline.syntaxHighlight)
@@ -361,7 +405,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		return builder.finish();
 	}
 	function addStyledInlineDecorations(state: EditorState, builder: RangeSetBuilder<Decoration>, parameters: {from: number, to: number, value: InlineCodeParameters}, text: {from: number, to: number, value: string}, section: {from: number, to: number}, sourceMode: boolean) {
-		if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>range.to >= section.from && range.from <= section.to))
+		if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>rangeInteraction(section.from,section.to,range)))
 			builder.add(parameters.from, parameters.to, Decoration.mark({class: "code-styler-inline-parameters"}));
 		else {
 			builder.add(parameters.from, parameters.to, Decoration.replace({}));

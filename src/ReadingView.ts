@@ -1,7 +1,8 @@
-import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, Component } from "obsidian";
+import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer } from "obsidian";
 import { visitParents } from "unist-util-visit-parents";
 import { fromHtml } from "hast-util-from-html";
 import { toHtml } from "hast-util-to-html";
+import { ElementContent, Element } from "hast";
 
 import CodeStylerPlugin from "./main";
 import { SETTINGS_SOURCEPATH_PREFIX, TRANSITION_LENGTH } from "./Settings";
@@ -138,7 +139,7 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		codeblockPreElement.parentElement.classList.add("code-styler-pre-parent");
 	
 	if (!codeblockCodeElement.querySelector("code [class*='code-styler-line']")) // Ignore styled lines
-		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,plugin.settings.currentTheme.settings.codeblock.lineNumbers);
+		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,sourcePath,plugin);
 }
 async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStylerPlugin): Promise<void> {
 	if (!plugin.settings.currentTheme.settings.inline.syntaxHighlight || inlineCodeElement.classList.contains("code-styler-inline"))
@@ -235,13 +236,13 @@ function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolea
 	}
 	return preClassList;
 }
-function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, showLineNumbers: boolean): void {
-	getCodeblockLines(codeblockCodeElement).forEach((line,index,codeblockLines) => {
+function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin): void {
+	getCodeblockLines(codeblockCodeElement,sourcePath,plugin).forEach((line,index,codeblockLines) => {
 		if (index !== codeblockLines.length-1)
-			insertLineWrapper(codeblockCodeElement,codeblockParameters,index+1,line,showLineNumbers);
+			insertLineWrapper(codeblockCodeElement,codeblockParameters,index+1,line,plugin.settings.currentTheme.settings.codeblock.lineNumbers);
 	});
 }
-function getCodeblockLines(codeblockCodeElement: HTMLElement): Array<string> {
+function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string, plugin: CodeStylerPlugin): Array<string> {
 	const htmlTree = fromHtml(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"),{fragment: true});
 	let codeblockHTML = codeblockCodeElement.innerHTML;
 	visitParents(htmlTree,["text","element"],(node,ancestors)=>{
@@ -257,11 +258,43 @@ function getCodeblockLines(codeblockCodeElement: HTMLElement): Array<string> {
 				codeblockHTML = codeblockHTML.replace(/\n/,"<br>");
 		}
 	});
+	const splitHtmlTree = fromHtml(codeblockHTML,{fragment: true});
+	visitParents(splitHtmlTree,["element"],(node)=>{
+		if (node.type === "element" && Array.isArray(node.properties.className) && node.properties?.className?.includes("comment")) {
+			node.children = node.children.reduce((result: Array<ElementContent>, child: ElementContent): Array<ElementContent> => {
+				if (child.type !== "text")
+					result.push(child);
+				else
+					result = convertCommentLinks(result,child.value,sourcePath,plugin);
+				console.log(child);
+				return result;
+			},[]);
+		}
+	});
+	codeblockHTML = toHtml(splitHtmlTree);
 	let codeblockLines = codeblockHTML.split("<br>");
 	if (codeblockLines.length === 1)
 		codeblockLines = ["",""];
 	codeblockCodeElement.innerHTML = "";
 	return codeblockLines;
+}
+function convertCommentLinks(result: Array<ElementContent>, commentText: string, sourcePath: string, plugin: CodeStylerPlugin): Array<ElementContent> {
+	const linkMatches = [...commentText.matchAll(/(?:\[\[.*?\]\]|\[.*?\]\(.*?\))/g)].reverse();
+	const newChildren = linkMatches.reduce((result: Array<ElementContent>, linkMatch: RegExpMatchArray): Array<ElementContent> => {
+		console.log(linkMatch);
+		if (linkMatch?.index === undefined)
+			return result;
+		const ending = commentText.slice(linkMatch.index + linkMatch[0].length);
+		result.push({type: "text",value: ending});
+		const linkText = commentText.slice(linkMatch.index, linkMatch.index + linkMatch[0].length);
+		const linkContainer = createDiv();
+		MarkdownRenderer.render(plugin.app,linkText,linkContainer,sourcePath,plugin);
+		const linkChild = (fromHtml(linkContainer.innerHTML,{fragment: true})?.children?.[0] as Element)?.children?.[0];
+		result.push(linkChild);
+		commentText = commentText.slice(0, linkMatch.index);
+		return result;
+	},[]).reverse();
+	return [...result, ...[{type: "text",value: commentText} as ElementContent,...newChildren]];
 }
 function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, lineNumber: number, line: string, showLineNumbers: boolean): void {
 	const lineWrapper = document.createElement("div");
@@ -273,7 +306,7 @@ function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameter
 }
 async function getHighlightedHTML(parameters: InlineCodeParameters, text: string, plugin: CodeStylerPlugin): Promise<string> {
 	const temporaryRenderingContainer = createDiv();
-	MarkdownRenderer.render(plugin.app,["```",parameters.language,"\n",text,"\n","```"].join(""),temporaryRenderingContainer,"",new Component());
+	MarkdownRenderer.render(plugin.app,["```",parameters.language,"\n",text,"\n","```"].join(""),temporaryRenderingContainer,"",plugin);
 	const renderedCodeElement = temporaryRenderingContainer.querySelector("code");
 	if (!renderedCodeElement)
 		return "ERROR: Could not render highlighted code";

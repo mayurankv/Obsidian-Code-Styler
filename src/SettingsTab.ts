@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent, SliderComponent, ToggleComponent, ExtraButtonComponent, MarkdownRenderer, Component } from "obsidian";
+import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent, SliderComponent, ToggleComponent, ExtraButtonComponent, MarkdownRenderer } from "obsidian";
 import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
@@ -1087,7 +1087,7 @@ export class SettingsTab extends PluginSettingTab {
 	generateExampleCodeblock() {
 		this.exampleCodeblockContainer.empty();
 		const codeblockString = "```````"+this.plugin.settings.exampleCodeblockParameters+"\n"+this.plugin.settings.exampleCodeblockContent+"\n```````";
-		MarkdownRenderer.render(this.plugin.app,codeblockString,this.exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+codeblockString,new Component());
+		MarkdownRenderer.render(this.plugin.app,codeblockString,this.exampleCodeblockContainer,SETTINGS_SOURCEPATH_PREFIX+codeblockString,this.plugin);
 		this.exampleCodeblockContainer.querySelector("pre > button.copy-code-button")?.classList?.add("code-styler-settings-button");
 	}
 	generateExampleInlineCodeSettings(containerEl: HTMLElement) {
@@ -1106,7 +1106,7 @@ export class SettingsTab extends PluginSettingTab {
 	}
 	generateExampleInlineCode() {
 		this.exampleInlineCodeContainer.empty();
-		MarkdownRenderer.render(this.plugin.app,"`"+this.plugin.settings.exampleInlineCode+"`",this.exampleInlineCodeContainer,SETTINGS_SOURCEPATH_PREFIX,new Component());
+		MarkdownRenderer.render(this.plugin.app,"`"+this.plugin.settings.exampleInlineCode+"`",this.exampleInlineCodeContainer,SETTINGS_SOURCEPATH_PREFIX,this.plugin);
 		this.exampleInlineCodeContainer.querySelector("code")?.classList?.add("code-styler-settings-inline-code");
 	}
 	generateDonationFooter(containerEl: HTMLElement) {
