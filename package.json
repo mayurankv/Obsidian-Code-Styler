@@ -44,7 +44,7 @@
 	"dependencies": {
 		"@codemirror/language": "github:lishid/cm-language",
 		"@codemirror/language-data": "^6.3.1",
-		"@codemirror/view": "^6.22.0",
+		"@codemirror/view": "^6.22.1",
 		"@lezer/common": "^1.1.1",
 		"@lezer/highlight": "^1.2.0",
 		"@simonwep/pickr": "^1.9.0",
