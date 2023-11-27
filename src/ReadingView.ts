@@ -147,6 +147,7 @@ async function remakeInlineCode(inlineCodeElement: HTMLElement, plugin: CodeStyl
 	const {parameters,text} = parseInlineCode(inlineCodeText);
 	if (parameters) {
 		inlineCodeElement.innerHTML = await getHighlightedHTML(parameters,text,plugin);
+		inlineCodeElement.innerHTML = inlineCodeElement.innerHTML + "&ZeroWidthSpace;";
 		inlineCodeElement.classList.add("code-styler-inline");
 		const parameterString = inlineCodeText.substring(0,inlineCodeText.lastIndexOf(text));
 		inlineCodeElement.setAttribute("parameters",parameterString); // Store parameter string as attribute so original text can be restored on plugin removal
