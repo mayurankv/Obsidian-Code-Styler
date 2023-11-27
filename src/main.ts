@@ -1,6 +1,6 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { convertSettings, DEFAULT_SETTINGS, LANGUAGE_ICONS_DATA, CodeStylerSettings } from "./Settings";
+import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings } from "./Settings";
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
@@ -23,8 +23,9 @@ export default class CodeStylerPlugin extends Plugin {
 		document.body.classList.add("code-styler"); // Load Styles
 		updateStyling(this.settings,this.app);
 
-		this.languageIcons = Object.keys(LANGUAGE_ICONS_DATA).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
-			result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGE_ICONS_DATA[key]}</svg>`], { type: "image/svg+xml" }));
+		this.languageIcons = Object.keys(LANGUAGES).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
+			if (LANGUAGES[key]?.colour)
+				result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGES[key].colour}</svg>`], { type: "image/svg+xml" }));
 			return result;
 		},{});
 		this.sizes = {

@@ -3,7 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
 import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGE_ICONS_DATA, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, EXCLUDED_LANGUAGES, WHITELIST_CODEBLOCKS, INBUILT_THEMES, CodeStylerTheme } from "./Settings";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGES, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, EXCLUDED_LANGUAGES, WHITELIST_CODEBLOCKS, INBUILT_THEMES, CodeStylerTheme } from "./Settings";
 
 const SETTINGS_PAGES: Record<string,string> = {
 	"main": "Core Settings",
@@ -765,7 +765,7 @@ export class SettingsTab extends PluginSettingTab {
 			.setClass("code-styler-setting-text-area")
 			.addTextArea(textArea => textArea
 				.setValue(JSON.stringify(this.plugin.settings.redirectLanguages)==="{}"?"":JSON.stringify(this.plugin.settings.redirectLanguages,null,4))
-				.setPlaceholder(JSON.stringify({toml: {colour: "#012345", icon: LANGUAGE_ICONS_DATA["APL"]}},null,4))
+				.setPlaceholder(JSON.stringify({toml: {colour: "#012345", icon: LANGUAGES["APL"].colour}},null,4))
 				.onChange((value)=>{
 					if (value === "") {
 						this.plugin.settings.redirectLanguages = {};

@@ -1,6 +1,6 @@
 import { App } from "obsidian";
 
-import { CodeStylerSettings, CodeStylerThemeColours, CodeStylerThemeModeColours, CodeStylerThemeSettings, Colour, LANGUAGE_NAMES, LANGUAGE_COLOURS } from "./Settings";
+import { CodeStylerSettings, CodeStylerThemeColours, CodeStylerThemeModeColours, CodeStylerThemeSettings, Colour, LANGUAGE_NAMES, LANGUAGES } from "./Settings";
 import { isCss } from "./SettingsTab";
 
 interface ThemeStyle {
@@ -148,10 +148,10 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 
 function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectLanguages: Record<string,{colour?: Colour, icon?: string}>, currentTheme: string): string {
 	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
-		if (languageDisplayName in LANGUAGE_COLOURS || (languageName in redirectLanguages && "colour" in redirectLanguages[languageName])) {
+		if (LANGUAGES?.[languageDisplayName]?.colour || (languageName in redirectLanguages && "colour" in redirectLanguages[languageName])) {
 			result += `
 				.language-${languageName} {
-					--language-border-colour: ${redirectLanguages?.[languageName]?.["colour"] ?? LANGUAGE_COLOURS[languageDisplayName]};
+					--language-border-colour: ${redirectLanguages?.[languageName]?.["colour"] ?? LANGUAGES[languageDisplayName].colour};
 					--language-border-width: ${themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth:0}px;
 				}
 			`;
