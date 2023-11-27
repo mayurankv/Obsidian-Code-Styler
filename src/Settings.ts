@@ -127,7 +127,8 @@ export interface Language {
 	blockComment?: Array<{
 		open: string;
 		close: string;
-		continuation?: string;
+		continuation?: string; // Default: None
+		multiline?: string; // Default: true
 	}>;
 }	
 

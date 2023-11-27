@@ -24,8 +24,8 @@ export default class CodeStylerPlugin extends Plugin {
 		updateStyling(this.settings,this.app);
 
 		this.languageIcons = Object.keys(LANGUAGES).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
-			if (LANGUAGES[key]?.colour)
-				result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGES[key].colour}</svg>`], { type: "image/svg+xml" }));
+			if (LANGUAGES[key]?.icon)
+				result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGES[key].icon}</svg>`], { type: "image/svg+xml" }));
 			return result;
 		},{});
 		this.sizes = {
