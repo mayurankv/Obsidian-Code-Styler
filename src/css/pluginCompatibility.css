@@ -14,13 +14,13 @@ pre.code-styler-pre:hover code ~ code.language-output {
 	margin-bottom: 0;
 }
 pre.code-styler-pre code ~ code.language-output input.interactive-stdin {
-    padding: 2px 8px;
+	padding: 2px 8px;
 	border-width: 1px;
 	border-style: solid;
-    border-color: var(--code-comment);
+	border-color: var(--code-comment);
 	border-radius: 5px;
-    background-color: var(--code-styler-codeblock-background-colour);
-    color: var(--text-normal);
+	background-color: var(--code-styler-codeblock-background-colour);
+	color: var(--text-normal);
 }
 pre.code-styler-pre code ~ code.language-output hr {
 	display: none;
@@ -131,7 +131,7 @@ pre.code-styler-pre div.code-block-highlight-wrap {
 	clip-path: var(--polygon-in);
 	opacity: 1;
 	transform: translateY(-50%);
-    transition: visibility var(--duration-button), opacity var(--duration-button);
+	transition: visibility var(--duration-button), opacity var(--duration-button);
 	visibility: visible;
 	will-change: margin-right, clip-path;
 }
@@ -157,4 +157,19 @@ div.block-language-include pre.code-styler-pre button.copy-code-button {
 }
 div.block-language-include pre.code-styler-pre button.copy-code-button:hover {
 	margin-right: var(--copy-code-header-right-margin);
+}
+
+/** Core Slides Plugin */
+.slides button.copy-code-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: auto;
+	padding: 6px 8px;
+	margin: 6px;
+	background-color: transparent;
+	box-shadow: none;
+	color: var(--text-muted);
+	font-family: var(--font-interface);
+	font-size: var(--font-ui-smaller);
 }

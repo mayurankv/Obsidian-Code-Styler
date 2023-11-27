@@ -12,6 +12,7 @@ body {
 
 .code-styler.code-styler-style-inline .cm-s-obsidian span.cm-inline-code,
 .code-styler.code-styler-style-inline .markdown-rendered :not(pre) > code:not([class*="blur"]),
+.code-styler.code-styler-style-inline .reveal :not(pre) > code:not([class*="blur"]),
 .code-styler.code-styler-style-inline code.code-styler-settings-inline-code {
 	padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal) !important;
 	border-radius: var(--code-styler-inline-border-radius) !important;
@@ -72,4 +73,8 @@ body.code-styler span.code-styler-inline-opener > span > img.code-styler-inline-
 }
 .code-styler .cm-s-obsidian span.cm-inline-code .code-styler-inline-parameters {
 	color: var(--code-comment);
+}
+
+.reveal img.code-styler-inline-icon {
+	margin: inherit;
 }

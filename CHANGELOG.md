@@ -20,6 +20,14 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Fixed
+
+- Inline Code right spacing bug fixed
+
+### Added
+
+- Compatibility with slides core plugin
+
 ## [1.1.1] - 2023-11-27
 
 ### Fixed

@@ -15,8 +15,9 @@ export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLE
 		return;
 
 	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
+	console.log(element);
 	const specific = !element.querySelector(".view-content > *");
-	const printing = Boolean(element.querySelector("div.print > *"));
+	const printing = Boolean(element.querySelector("div.print > *")) || Boolean(element.querySelector("div.slides > *"));
 	if (printing && !plugin.settings.decoratePrint)
 		return;
 
