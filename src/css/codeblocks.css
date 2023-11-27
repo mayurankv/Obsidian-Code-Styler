@@ -318,7 +318,7 @@ pre.code-styler-pre div:last-child > .code-styler-line-number {
 	width: unset;
 }
 .code-styler-gutter-highlight pre.code-styler-pre [class*="code-styler-line-highlighted"] .code-styler-line-number {
-	background-color: var(--gradient-background-colour);
+	background-color: var(--gradient-background-colour) !important;
 }
 .code-styler-active-line-highlight.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
 .code-styler-active-line-highlight-codeblock.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,

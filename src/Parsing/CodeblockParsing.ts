@@ -146,11 +146,11 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	if (rmdMatch)
 		parameterLine = "title:" + parameterLine;
 
-	const parameterStrings = parameterLine.match(/(?:[^\s,"']+|"[^"]*"|'[^']*')+/g);
+	const parameterStrings = parameterLine.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
 	if (!parameterStrings)
 		return codeblockParameters;
 	
-	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
+	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString.replace(/(?:^,|,$)/g, ""),codeblockParameters,theme));
 	return codeblockParameters;
 }
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
