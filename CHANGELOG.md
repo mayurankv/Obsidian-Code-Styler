@@ -20,6 +20,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix reference parsing and added markdown links
+
 ## [1.1.2] - 2023-11-27
 
 ### Fixed
