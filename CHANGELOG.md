@@ -20,6 +20,11 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed CSS issues
+- Fixed Regex Parsing
+
 ## [1.1.0] - 2023-11-26
 
 ### Added
