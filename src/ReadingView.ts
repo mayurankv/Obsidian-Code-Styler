@@ -237,7 +237,19 @@ function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolea
 	return preClassList;
 }
 function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin): void {
+	let indentation = 0;
 	getCodeblockLines(codeblockCodeElement,sourcePath,plugin).forEach((line,index,codeblockLines) => {
+		const currentIndentation = countTabs(line);
+		if (currentIndentation > indentation) {
+			//TODO (@mayurankv) Add fold to previous point
+			indentation = currentIndentation;
+		} else if (currentIndentation < indentation) {
+			//TODO (@mayurankv) Close all folds to level of currentIndenation
+			indentation = currentIndentation;
+		}
+		if (currentIndentation > 0) {
+			//TODO (@mayurankv) Add indentation line
+		}
 		if (index !== codeblockLines.length-1)
 			insertLineWrapper(codeblockCodeElement,codeblockParameters,index+1,line,plugin.settings.currentTheme.settings.codeblock.lineNumbers);
 	});
@@ -301,6 +313,13 @@ function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameter
 	if ((showLineNumbers && !codeblockParameters.lineNumbers.alwaysDisabled) || codeblockParameters.lineNumbers.alwaysEnabled)
 		lineWrapper.appendChild(createDiv({cls: "code-styler-line-number", text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 	lineWrapper.appendChild(createDiv({cls: "code-styler-line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
+}
+function countTabs(text: string): number {
+	let count = 0;
+	let index = 0;
+	while (text.charAt(index++) === "\t")
+		count++;
+	return count;
 }
 async function getHighlightedHTML(parameters: InlineCodeParameters, text: string, plugin: CodeStylerPlugin): Promise<string> {
 	const temporaryRenderingContainer = createDiv();
