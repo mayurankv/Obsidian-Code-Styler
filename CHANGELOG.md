@@ -20,6 +20,10 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+### Added
+
+- Added markdown links and wikilinks in comments
+
 ### Changed
 
 - Made `MarkdownRenderer.render` to use `plugin` as component

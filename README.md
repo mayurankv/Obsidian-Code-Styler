@@ -68,6 +68,10 @@ The different component colours that can be set within a theme are:
 
 ![Solarized Default Dark Colours](images/SolarizedDefaultDarkColours.png)
 
+### Codeblock Comment Links
+
+You can type markdown links (both internal and external) as well as wikilinks in comments inside codeblocks and they will be rendered as links. This can help reference other files. Embeds are not supported.
+
 ## Codeblock Parameters
 
 Codeblock parameters are added to the first line of the codeblock following the language. They can be added in any order. If no language is set, a space should be left after the codeblock delimiter ` ``` ` to indicate that the first parameter is NOT the language of the codeblock. Also note that all parameters can be set with either `:` or `=`.

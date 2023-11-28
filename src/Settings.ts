@@ -2129,12 +2129,6 @@ export const LANGUAGES: {[key: string]: Language} = {
 	}
 };
 
-const LANGUAGE_COMMENT_REGEXES: Record<string,RegExp> = {
-	"#": /(?<!\\)#(.*?)(?=\n|$)/,
-	"//": /(?<!\\)#(.*?)(?=\n|$)/,
-	"--": /--(.*?)(?=\n|$)/,
-};
-
 const EXECUTE_CODE_LANGUAGE_ALIASES: Array<string> = ["javascript","typescript","bash","csharp","wolfram","nb","wl","hs","py","scpt"];
 const EXECUTE_CODE_CANONICAL_LANGUAGES: Array<string> = ["js","ts","cs","lean","lua","python","cpp","prolog","shell","groovy","r","go","rust","java","powershell","kotlin","mathematica","haskell","scala","racket","fsharp","c","dart","ruby","batch","sql","octave","maxima","applescript"];
 
