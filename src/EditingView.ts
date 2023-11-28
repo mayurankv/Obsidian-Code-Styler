@@ -1,5 +1,5 @@
 import { MarkdownRenderer, editorEditorField, editorInfoField, editorLivePreviewField } from "obsidian";
-import { EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType } from "@codemirror/view";
+import { EditorView, ViewUpdate, Decoration, DecorationSet, WidgetType, ViewPlugin, PluginValue } from "@codemirror/view";
 import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range, RangeSetBuilder, Transaction, Line, SelectionRange, Compartment } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
@@ -18,6 +18,26 @@ interface SettingsState {
 export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, plugin: CodeStylerPlugin) {
 	const livePreviewCompartment = new Compartment;
 	const ignoreCompartment = new Compartment;
+
+	const interaction = ViewPlugin.fromClass(
+		class ExamplePlugin implements PluginValue {
+			constructor() {} // view: EditorView
+			update() {} // update: ViewUpdate
+			destroy() {}
+		},
+		{
+			eventHandlers: {
+				click: function(event: MouseEvent, view: EditorView) {
+					if ((event.target as HTMLElement).classList.contains("code-styler-source-link") && event.metaKey === true) {
+						const sourcePath = view.state.field(editorInfoField)?.file?.path ?? "";
+						const destination = (event.target as HTMLElement).getAttribute("destination");
+						if (destination)
+							plugin.app.workspace.openLinkText(destination, sourcePath, true);
+					}
+				}
+			}
+		}
+	);
 
 	const ignoreListener = EditorView.updateListener.of((update: ViewUpdate) => { //TODO (@mayurankv) Can I make this startState only? Does it need to be?
 		const livePreviewExtensions = livePreviewCompartment.get(update.state);
@@ -354,7 +374,9 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
 				if (showLineNumbers)
 					builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
-				addInlineCommentLinks(state, lineText, line.from, sourcePath, builder, sourceMode);
+				if (codeblockParameters.language === "markdown")
+					continue;
+				convertCommentLinks(state, line, sourcePath, builder, sourceMode);
 			}
 			if (foldEnd !== null) {
 				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
@@ -364,26 +386,35 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 		return builder.finish();
 	}
-	function addInlineCommentLinks(state: EditorState, lineText: string, lineStart: number, sourcePath: string, builder: RangeSetBuilder<Decoration>, sourceMode: boolean) {
-		const inlineComment = /#([\s\S]*)$/.exec(lineText)?.[1];
-		if (inlineComment) {
-			const linkMatches: Array<RegExpMatchArray > = [...inlineComment.matchAll(/(?:\[\[[\s\S]*?\]\]|\[[\s\S]*?\]\([\s\S]*?\))/g)];
-			for (const linkMatch of linkMatches) {
-				const from = lineStart + lineText.indexOf(linkMatch[0]);
-				const to = from + linkMatch[0].length;
-				if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>rangeInteraction(from,to,range))) {
-					const wikiBreak = linkMatch[0].indexOf("](");
-					//TODO (@mayurankv) Add editor wide viewer to allow clicking on files with cursor inside
-					if (wikiBreak === -1) {
-						builder.add(from+2,to-2,Decoration.mark({class: "cm-hmd-internal-link code-styler-source-link"}));
-					} else {
-						builder.add(from+1,from+wikiBreak,Decoration.mark({class: "cm-link code-styler-source-link"}));
-						builder.add(from+wikiBreak+2,to-1,Decoration.mark({class: "cm-string cm-url"}));
-					}
-				} else
-					builder.add(from,to,Decoration.replace({widget: new CommentLinkWidget(linkMatch[0], sourcePath)}));
-			}
-		}
+	function convertCommentLinks(state: EditorState, line: Line, sourcePath: string, builder: RangeSetBuilder<Decoration>, sourceMode: boolean) {
+		syntaxTree(state).iterate({
+			enter: (syntaxNode) => {
+				if (syntaxNode.type.name.includes("comment_hmd-codeblock")) {
+					const commentText = state.sliceDoc(syntaxNode.from,syntaxNode.to);
+					const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)];
+					linkMatches.forEach((linkMatch: RegExpMatchArray) => {
+						if (linkMatch?.index === undefined)
+							return;
+						const from = syntaxNode.from + linkMatch.index;
+						const to = from + linkMatch[0].length;
+						if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>rangeInteraction(from,to,range))) {
+							const mdBreak = linkMatch[0].indexOf("](");
+							//TODO (@mayurankv) Add editor wide viewer to allow clicking on files with cursor inside
+							if (mdBreak === -1) {
+								const wikilinkSeparator = linkMatch[0].indexOf("|");
+								builder.add(from+2,to-2,Decoration.mark({class: "cm-hmd-internal-link code-styler-source-link", attributes: {destination: linkMatch[0].slice(2,wikilinkSeparator!==-1?wikilinkSeparator:-2)}}));
+							} else {
+								builder.add(from+1,from+mdBreak,Decoration.mark({class: "cm-link code-styler-source-link", attributes: {destination: linkMatch[0].slice(mdBreak+2,-1)}}));
+								builder.add(from+mdBreak+2,to-1,Decoration.mark({class: "cm-string cm-url"}));
+							}
+						} else
+							builder.add(from,to,Decoration.replace({widget: new CommentLinkWidget(linkMatch[0], sourcePath)}));
+					});
+				}
+			},
+			from: line.from,
+			to: line.to
+		});
 	}
 	function buildInlineDecorations(state: EditorState): DecorationSet {
 		if (!settings.currentTheme.settings.inline.syntaxHighlight)
@@ -452,6 +483,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 
 	return [
+		interaction,
 		ignoreListener,ignoreFileListener,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
 		settingsState,charWidthState,livePreviewCompartment.of([]),ignoreCompartment.of([]),

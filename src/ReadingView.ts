@@ -266,7 +266,6 @@ function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string
 					result.push(child);
 				else
 					result = convertCommentLinks(result,child.value,sourcePath,plugin);
-				console.log(child);
 				return result;
 			},[]);
 		}
@@ -279,9 +278,8 @@ function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string
 	return codeblockLines;
 }
 function convertCommentLinks(result: Array<ElementContent>, commentText: string, sourcePath: string, plugin: CodeStylerPlugin): Array<ElementContent> {
-	const linkMatches = [...commentText.matchAll(/(?:\[\[.*?\]\]|\[.*?\]\(.*?\))/g)].reverse();
+	const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)].reverse();
 	const newChildren = linkMatches.reduce((result: Array<ElementContent>, linkMatch: RegExpMatchArray): Array<ElementContent> => {
-		console.log(linkMatch);
 		if (linkMatch?.index === undefined)
 			return result;
 		const ending = commentText.slice(linkMatch.index + linkMatch[0].length);
