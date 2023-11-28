@@ -72,6 +72,8 @@ The different component colours that can be set within a theme are:
 
 You can type markdown links (both internal and external) as well as wikilinks in comments inside codeblocks and they will be rendered as links. This can help reference other files. Embeds are not supported.
 
+Note that these links will not show up on the Graph or in Backlinks - this is an upstream issue with Obsidian. To get this resolved, please support the forum issue [here](https://forum.obsidian.md/t/api-method-to-add-link-and-have-it-parsed-into-metadatacache/72046).
+
 ## Codeblock Parameters
 
 Codeblock parameters are added to the first line of the codeblock following the language. They can be added in any order. If no language is set, a space should be left after the codeblock delimiter ` ``` ` to indicate that the first parameter is NOT the language of the codeblock. Also note that all parameters can be set with either `:` or `=`.
@@ -108,7 +110,7 @@ Example:
 
 To display the title as a link to another page which can be clicked or hovered over, add the `ref:` or `reference:` parameter followed by a wikilink. The title will then show as a link to the referenced note. If no `title:` parameter is given, then the wikilink note name (or alias if given) will be used as the title.
 
-Note that these links will not show up on the Graph or in Backlinks - this is an upstream issue with Obsidian.
+Note that these links will not show up on the Graph or in Backlinks - this is an upstream issue with Obsidian. To get this resolved, please support the forum issue [here](https://forum.obsidian.md/t/api-method-to-add-link-and-have-it-parsed-into-metadatacache/72046).
 
 ### Folding
 
