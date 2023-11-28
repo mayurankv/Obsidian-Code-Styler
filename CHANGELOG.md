@@ -20,6 +20,8 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
+## [1.1.4] - 2023-11-28
+
 ### Added
 
 - Added markdown links and wikilinks in comments
@@ -297,7 +299,8 @@ See this project's [releases](/../../../releases).
 - Updated [README](README.md).
 - Removed `none` language from supported languages since it is used by obsidian for codeblocks without a language
 
-[Unreleased]: /../../compare/1.1.3...HEAD
+[Unreleased]: /../../compare/1.1.4...HEAD
+[1.1.4]: /../../compare/1.1.3...1.1.4
 [1.1.3]: /../../compare/1.1.2...1.1.3
 [1.1.2]: /../../compare/1.1.1...1.1.2
 [1.1.1]: /../../compare/1.1.0...1.1.1
