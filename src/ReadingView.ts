@@ -315,6 +315,7 @@ function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameter
 	lineWrapper.appendChild(createDiv({cls: "code-styler-line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));
 }
 function countTabs(text: string): number {
+	//TODO (@mayurankv) Make work with space indentation too
 	let count = 0;
 	let index = 0;
 	while (text.charAt(index++) === "\t")
