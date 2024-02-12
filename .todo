@@ -1,16 +1,70 @@
 Features:
 	Code Referencing:
 		☐ Github/Gitlab/Bitbucket code reference functionality
-			☐ https://forum.obsidian.md/t/reference-a-git-repo/73697/5?u=mayurankv (Do 3rd implementation)
+			☐ https://forum.obsidian.md/t/reference-a-git-repo/73697 (Do 3rd implementation)
 			☐ `site` and `tree path` or just `file path`
 			☐ `lines`
 		☐ Local file reference functionality
 			☐ Replace dependence on
 
-	Prettification:
-		☐ Change token colours
-			☐ Match in both live preview and reading mode?
-		☐ Fade folding
+	Codeblocks:
+		Implementation:
+			☐ Fade Folding
+			☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
+			☐ List codeblocks not indented properly #13
+			☐ Edit Mode Line Wrapping #12
 
-Major Bugs:
-	☐ Inline code regex parsing
+		Prettification:
+			☐ Change token colours
+				☐ Match in both live preview and reading mode?
+			☐ Codeblock Shadow #25
+			☐ Codeblock Border #24
+
+			Long Term:
+				☐ Edit Mode Folding Transitions #11
+				☐ Terminal Appearance #9
+
+	Inline Code:
+		☐ Add copy button via settings and parameter #88
+
+	General:
+		Improvements:
+			☐ Error Handling
+				☐ Colors #210
+
+		Additional Settings:
+			☐ Always display inline code #35
+
+		Plugin Compatibility:
+			Execute Code:
+				☐ `run-*` codeblocks not styled #27
+			Dataview:
+				☐ Dataview created codeblocks #10
+
+Bugs:
+	Major Bugs:
+		☐ Inline code regex parsing #208 #212
+
+	Minor Bugs:
+		☐ Hovering over copy button in specific position causes it to glitch in and out
+		☐ Imperfect gutter margins #17
+		☐ Copy and Paste in Reading Mode retains line numbers, header and icons #23
+		☐ In reading mode, folding from uncollapsed to collapsed, but interrupting the fold by unfolding causes a non-smooth transition
+
+Testing:
+	☐ Set up unit Tests #120
+
+Documentation:
+	☐ Proper documentation #14
+	☐ Use docstrings and better commenting #119
+	☐ Add test vault #15
+		☐ Notes for each feature
+
+Device Compatibility:
+	Phone:
+		☐ Phone version working badly #20 #99 #151
+
+Upstream:
+	☐ Links don't show up in metadata #203
+	☐ High DPI Flicker on Collapse #18
+	☐ Instant Reading Mode Updates #16
