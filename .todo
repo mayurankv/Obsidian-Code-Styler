@@ -1,11 +1,13 @@
 Features:
 	Code Referencing:
+		☐ Local file reference functionality
+			☐ Replace dependence on
 		☐ Github/Gitlab/Bitbucket code reference functionality
 			☐ https://forum.obsidian.md/t/reference-a-git-repo/73697 (Do 3rd implementation)
 			☐ `site` and `tree path` or just `file path`
 			☐ `lines`
-		☐ Local file reference functionality
-			☐ Replace dependence on
+		☐ LaTeX Functionality
+			☐ Compiling and Previewing
 
 	Codeblocks:
 		Implementation:
@@ -13,12 +15,16 @@ Features:
 			☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
 			☐ List codeblocks not indented properly #13
 			☐ Edit Mode Line Wrapping #12
+			☐ Command to select all text in codeblock #75
+			☐ Hanging Indents #109
+			☐ Reading Mode Section Code Folding #110
 
 		Prettification:
 			☐ Change token colours
 				☐ Match in both live preview and reading mode?
 			☐ Codeblock Shadow #25
 			☐ Codeblock Border #24
+			☐ Retain some styling in source mode #74
 
 			Long Term:
 				☐ Edit Mode Folding Transitions #11
@@ -32,24 +38,31 @@ Features:
 			☐ Error Handling
 				☐ Colors #210
 
-		Additional Settings:
+		Settings:
 			☐ Always display inline code #35
+			☐ Settings Improvements #124
 
 		Plugin Compatibility:
 			Execute Code:
 				☐ `run-*` codeblocks not styled #27
+				☐ Better Compatibility with Execute Code Parameters #98
 			Dataview:
 				☐ Dataview created codeblocks #10
+			Tasks:
+				☐ Check if conflict
 
 Bugs:
 	Major Bugs:
 		☐ Inline code regex parsing #208 #212
+		☐ Active Line Highlight not working #207
+		☐ Performance Issues #91
 
 	Minor Bugs:
 		☐ Hovering over copy button in specific position causes it to glitch in and out
 		☐ Imperfect gutter margins #17
 		☐ Copy and Paste in Reading Mode retains line numbers, header and icons #23
-		☐ In reading mode, folding from uncollapsed to collapsed, but interrupting the fold by unfolding causes a non-smooth transition
+		☐ In reading mode, folding from uncollapsed to collapsed, but interrupting the fold by unfolding causes a non-smooth transition #65
+		☐ Editing Mode Folded Codeblock Issues #67
 
 Testing:
 	☐ Set up unit Tests #120
