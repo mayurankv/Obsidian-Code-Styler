@@ -1,0 +1,16 @@
+Features:
+	Code Referencing:
+		☐ Github/Gitlab/Bitbucket code reference functionality
+			☐ https://forum.obsidian.md/t/reference-a-git-repo/73697/5?u=mayurankv (Do 3rd implementation)
+			☐ `site` and `tree path` or just `file path`
+			☐ `lines`
+		☐ Local file reference functionality
+			☐ Replace dependence on
+
+	Prettification:
+		☐ Change token colours
+			☐ Match in both live preview and reading mode?
+		☐ Fade folding
+
+Major Bugs:
+	☐ Inline code regex parsing
