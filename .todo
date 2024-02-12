@@ -11,13 +11,16 @@ Features:
 
 	Codeblocks:
 		Implementation:
-			☐ Fade Folding
+			☐ Folding Fade #128
 			☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
 			☐ List codeblocks not indented properly #13
 			☐ Edit Mode Line Wrapping #12
 			☐ Command to select all text in codeblock #75
 			☐ Hanging Indents #109
 			☐ Reading Mode Section Code Folding #110
+			☐ Automatic Link Updating #204
+			☐ Alternative Fold Toggler Button at bottom of Codeblock #129
+			☐ Remember and Sync Fold State #126
 
 		Prettification:
 			☐ Change token colours
@@ -55,6 +58,7 @@ Bugs:
 	Major Bugs:
 		☐ Inline code regex parsing #208 #212
 		☐ Active Line Highlight not working #207
+		☐ Editing Source Mode Issue? #198
 		☐ Performance Issues #91
 
 	Minor Bugs:

@@ -171,7 +171,7 @@ function addThemeSettingsClasses (themeSettings: CodeStylerThemeSettings): void 
 	themeSettings.inline.style ? document.body.classList.add("code-styler-style-inline") : document.body.classList.remove("code-styler-style-inline");
 	themeSettings.gutter.highlight ? document.body.classList.add("code-styler-gutter-highlight") : document.body.classList.remove("code-styler-gutter-highlight");
 	themeSettings.gutter.activeLine ? document.body.classList.add("code-styler-gutter-active-line") : document.body.classList.remove("code-styler-gutter-active-line");
-	
+
 	document.body.classList.remove("code-styler-active-line-highlight","code-styler-active-line-highlight-codeblock","code-styler-active-line-highlight-editor"); //TODO (@mayurankv) Is this section necessary? Is this function necessary?
 	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colours
 		document.body.classList.add("code-styler-active-line-highlight");
