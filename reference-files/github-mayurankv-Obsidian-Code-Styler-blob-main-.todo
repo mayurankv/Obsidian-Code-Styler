@@ -1,0 +1,98 @@
+Features:
+	Code Referencing:
+		☐ Codeblock syntax highlighting
+		☐ Local reference
+			☐ Prevent clicking links causing fold
+			☐ Regex finding lines
+			☐ File watcher?
+		☐ External Referencing
+			☐ Update button
+				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
+				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)
+			☐ Add colours to settings
+				☐ Update settings converter to reflect
+			☐ Non github compatibility
+			☐ Allow iframe
+		☐ LaTeX Functionality
+			☐ Compiling and Previewing
+		☐ Me
+			☐ Ligatures
+			☐ Nerdfonts
+
+	Codeblocks:
+		Implementation:
+			☐ Folding Fade #128
+			☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
+			☐ List codeblocks not indented properly #13
+			☐ Edit Mode Line Wrapping #12
+			☐ Command to select all text in codeblock #75
+			☐ Hanging Indents #109
+			☐ Reading Mode Section Code Folding #110
+			☐ Automatic Link Updating #204
+			☐ Alternative Fold Toggler Button at bottom of Codeblock #129
+			☐ Remember and Sync Fold State #126
+
+		Prettification:
+			☐ Change token colours
+				☐ Match in both live preview and reading mode?
+			☐ Codeblock Shadow #25
+			☐ Codeblock Border #24
+			☐ Retain some styling in source mode #74
+
+			Long Term:
+				☐ Edit Mode Folding Transitions #11
+				☐ Terminal Appearance #9
+
+	Inline Code:
+		☐ Add copy button via settings and parameter #88
+
+	General:
+		Improvements:
+			☐ Error Handling
+				☐ Colors #210
+
+		Settings:
+			☐ Always display inline code #35
+			☐ Settings Improvements #124
+
+		Plugin Compatibility:
+			Execute Code:
+				☐ `run-*` codeblocks not styled #27
+				☐ Better Compatibility with Execute Code Parameters #98
+			Dataview:
+				☐ Dataview created codeblocks #10
+			Tasks:
+				☐ Check if conflict
+
+Bugs:
+	Major Bugs:
+		☐ Inline code regex parsing #208 #212
+		☐ Active Line Highlight not working #207
+		☐ Editing Source Mode Issue? #198
+		☐ Performance Issues #91
+
+	Minor Bugs:
+		☐ Hovering over copy button in specific position causes it to glitch in and out
+		☐ Imperfect gutter margins #17
+		☐ Copy and Paste in Reading Mode retains line numbers, header and icons #23
+		☐ In reading mode, folding from uncollapsed to collapsed, but interrupting the fold by unfolding causes a non-smooth transition #65
+		☐ Editing Mode Folded Codeblock Issues #67
+
+Testing:
+	☐ Set up unit Tests #120
+
+Documentation:
+	☐ Proper documentation #14
+	☐ `throw Error` s instead of `return`
+	☐ Use docstrings and better commenting #119
+	☐ Add test vault #15
+		☐ Notes for each feature
+
+Device Compatibility:
+	Phone:
+		☐ Phone version working badly #20 #99 #151
+
+Upstream:
+	☐ Links don't show up in metadata #203
+	☐ High DPI Flicker on Collapse #18
+	☐ Instant Reading Mode Updates #16

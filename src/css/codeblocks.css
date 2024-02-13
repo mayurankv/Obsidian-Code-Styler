@@ -44,6 +44,11 @@ body {
 	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
 }
 
+@font-face {
+	font-family: code-styler-nerdfont;
+	src: url('https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf') format('truetype');
+}
+
 /** Pre elements */
 .code-styler-pre-parent{
 	margin-bottom: 16px;
@@ -238,7 +243,7 @@ body .code-styler-header-container:not(:has( .code-styler-header-language-tag)) 
 }
 .code-styler-header-external-reference > div {
 	padding-left: 6px;
-	font-size: var(--font-adaptive-smallest, xx-small);
+	font-size: var(--font-smallest, xx-small);
 }
 div.external-reference-repo {
 	color: var(--code-styler-external-reference-repo-color, cyan);
@@ -246,6 +251,7 @@ div.external-reference-repo {
 div.external-reference-ref,
 div.external-reference-ref-icon {
 	color: var(--code-styler-external-reference-ref-color, pink);
+	font-family: code-styler-nerdfont, menlo, var(--font-monospace);
 }
 div:has(> img.code-styler-icon) {
 	display: inline-flex;

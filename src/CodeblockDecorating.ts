@@ -1,9 +1,8 @@
-import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, BRANCH_ICON, COMMIT_ICON } from "./Settings";
+import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { MarkdownRenderer } from "obsidian";
 import CodeStylerPlugin from "./main";
-import { ExternalReferenceInfo } from "./Parsing/ReferenceParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	const headerContainer = createDiv();
@@ -18,7 +17,7 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 		}
 		headerContainer.appendChild(createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin));
 		if (codeblockParameters?.externalReference) //TODO (@mayurankv) Add settings toggle
-			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, themeSettings, plugin));
+			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, themeSettings));
 		if (false) //TODO (@mayurankv) Add settings toggle
 			headerContainer.appendChild(createExecuteCodeContainer(codeblockParameters, themeSettings, plugin));
 	} else
@@ -36,17 +35,28 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,plugin); //TODO (@mayurankv) Add links to metadata cache properly
 	return titleContainer;
 }
-function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, plugin: CodeStylerPlugin): HTMLElement {
+function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings): HTMLElement {
 	//TODO (@mayurankv) Add theme settings to conditionally set sections
 	const externalReferenceContainer = createDiv({ cls: "code-styler-header-external-reference" });
 	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-repo", text: codeblockParameters?.externalReference?.author+"/"+codeblockParameters?.externalReference?.repository}));
 	const refIcon = createDiv({ cls: "external-reference-ref-icon" });
 	if (codeblockParameters?.externalReference?.refInfo?.type === "branch")
-		refIcon.innerHTML = plugin.gitIcons["branch"];
+		refIcon.innerHTML = GIT_ICONS["branch"];
 	else if (codeblockParameters?.externalReference?.refInfo?.type === "tree")
-		refIcon.innerHTML = plugin.gitIcons["commit"];
+		refIcon.innerHTML = GIT_ICONS["commit"];
 	else
-		refIcon.innerHTML = plugin.gitIcons["branch"];
+		refIcon.innerHTML = GIT_ICONS["branch"];
+	// refIcon.innerHTML = "<svgxmlns=\"http://www.w3.org/2000/svg\"viewBox=\"00100100\"><style>svg{font-family:'code-styler-nerdfon';font-size:50px;fill:black;}</style>&#xe0a0;</svg>";
+	// refIcon.innerHTML = `<svgxmlns="http://www.w3.org/2000/svg><style>
+	// 	@font-face{
+	// 		font-family:'MesloLGLDZNerdFont-Regular';
+	// 		src:url('https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Meslo/L-DZ/Regular/MesloLGLDZNerdFont-Regular.ttf') format('ttf');
+	// 	}
+	// 	text{
+	// 		font-family:'MesloLGLDZNerdFont-Regular';
+	// 		font-size:50px;
+	// 	}
+	// </style>&#xe0a0;</svg>`;
 	externalReferenceContainer.appendChild(refIcon);
 	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-ref", text: codeblockParameters?.externalReference?.refInfo?.ref as string}));
 	return externalReferenceContainer;
