@@ -3,6 +3,7 @@ import { MarkdownPreviewRenderer, Plugin, TFile } from "obsidian";
 import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
 import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
+import { getReference } from "src/Referencing";
 
 export interface CodeblockParameters {
 	language: string;
@@ -92,7 +93,7 @@ async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerP
 		return null;
 	const codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
 
-	if (isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist))
+	if (isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist) && codeblockParameters.language !== "reference")
 		return null;
 
 	return await (typeof sourcePath !== "undefined"?pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines,sourcePath):pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines));
@@ -154,13 +155,32 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	return codeblockParameters;
 }
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
-	if (codeblockParameters.language === "preview")
+	if (codeblockParameters.language === "reference") {
+		if (sourcePath === undefined)
+			throw Error("Reference block has undefined sourcePath");
+		codeblockParameters = await adjustReference(codeblockParameters, codeblockLines, sourcePath, plugin);
+	}  else if (codeblockParameters.language === "preview")
 		codeblockParameters = await (typeof sourcePath !== "undefined"?pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines,sourcePath):pluginAdjustPreviewCode(codeblockParameters,plugins,codeblockLines));
 	else if (codeblockParameters.language === "include")
 		codeblockParameters = pluginAdjustFileInclude(codeblockParameters,plugins,codeblockLines);
 	else if (/run-\w*/.test(codeblockParameters.language))
 		codeblockParameters = pluginAdjustExecuteCodeRun(codeblockParameters,plugin,plugins);
 	codeblockParameters = pluginAdjustExecuteCode(codeblockParameters,plugins,codeblockLines);
+	return codeblockParameters;
+}
+async function adjustReference(codeblockParameters: CodeblockParameters, codeblockLines: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<CodeblockParameters> {
+	const reference = await getReference(codeblockLines, sourcePath, plugin);
+	if (!codeblockParameters.lineNumbers.alwaysDisabled && !codeblockParameters.lineNumbers.alwaysEnabled) {
+		codeblockParameters.lineNumbers.offset = reference.startLine - 1;
+		codeblockParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
+	}
+	if (codeblockParameters.title === "")
+		//TODO (@mayurankv) Set Local Title
+		codeblockParameters.title = reference.external?.info?.title ?? "file title";
+	if (codeblockParameters.reference === "")
+		//TODO (@mayurankv) Set Local Link
+		codeblockParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? "file uri";
+	codeblockParameters.language = reference.language;
 	return codeblockParameters;
 }
 async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {

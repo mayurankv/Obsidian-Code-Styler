@@ -1,3 +1,5 @@
+import { normalizePath } from "obsidian";
+
 // Typing
 export type HEX = `#${string}`;
 export type CSS = `--${string}`;
@@ -585,8 +587,8 @@ export const INBUILT_THEMES: Record<string,CodeStylerTheme> = {
 export const EXAMPLE_CODEBLOCK_PARAMETERS = "python title:foo";
 export const EXAMPLE_CODEBLOCK_CONTENT = "print(\"This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.\")\nprint(\"This line is highlighted.\")";
 export const EXAMPLE_INLINE_CODE = "{python icon title:foo} print(\"This is inline code\")";
-export const EXCLUDED_LANGUAGES = "ad-*";
-export const WHITELIST_CODEBLOCKS = "run-*, reference, include";
+export const EXCLUDED_LANGUAGES = "ad-*, reference";
+export const WHITELIST_CODEBLOCKS = "run-*, include";
 
 // Plugin default settings
 export const DEFAULT_SETTINGS: CodeStylerSettings = {
@@ -671,6 +673,8 @@ export const SPECIAL_LANGUAGES = ["^reference$","^preview$","^include$","^output
 export const SETTINGS_SOURCEPATH_PREFIX = "@Code-Styler-Settings:";
 export const LOCAL_PREFIX = "@/";
 export const REFERENCE_CODEBLOCK = "reference";
+export const EXTERNAL_REFERENCE_PATH = ".obsidian/plugins/code-styler/reference-files/";
+export const EXTERNAL_REFERENCE_INFO_SUFFIX = "-info.json";
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names

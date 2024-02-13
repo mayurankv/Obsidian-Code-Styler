@@ -1,19 +1,21 @@
 Features:
 	Code Referencing:
-		☐ Local file reference functionality `file`
-			☐ Replace dependence on
+		☐ Local reference
 			☐ Regex finding lines
-			☐ Path by markdown links
-			☐ Adjust line number in codeblock parsing for this codeblock as with other plugins
-				☐ Return line number at start of file for this
-			☐ Also keep repository for title
+			☐ Allow links to external sites in titles
 			☐ File watcher?
-		☐ Github/Gitlab/Bitbucket code reference functionality `repository`
-			☐ https://forum.obsidian.md/t/reference-a-git-repo/73697 (Do 3rd implementation)
-			☐ `site` and `tree path` or just `file path`
-			☐ `lines`
+		☐ External Referencing
+			☐ Update button
+				☐ Automatic updating
+				☐ Remove old files?
+			☐ Show more info like commit, branch etc.
+			☐ Non github compatibility
+			☐ Allow iframe
 		☐ LaTeX Functionality
 			☐ Compiling and Previewing
+		☐ Me
+			☐ Ligatures
+			☐ Nerdfonts
 
 	Codeblocks:
 		Implementation:

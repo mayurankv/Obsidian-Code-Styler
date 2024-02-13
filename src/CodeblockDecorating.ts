@@ -26,9 +26,8 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 	const title = codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"");
 	if (codeblockParameters.reference === "")
 		titleContainer.innerText = title;
-	else {
+	else
 		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,plugin); //TODO (@mayurankv) Add links to metadata cache properly
-	}
 	return titleContainer;
 }
 export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>, containerClasses: Array<string> = ["code-styler-inline-opener"]): HTMLElement {

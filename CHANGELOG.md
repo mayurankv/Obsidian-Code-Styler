@@ -25,6 +25,8 @@ See this project's [releases](/../../../releases).
 ### Added
 
 - Added markdown links and wikilinks in comments
+- Reference codeblocks for referencing local and external files
+  - Markdown links, local links and html links
 
 ### Changed
 

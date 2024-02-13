@@ -108,7 +108,7 @@ Example:
 
 ### References
 
-To display the title as a link to another page which can be clicked or hovered over, add the `ref:` or `reference:` parameter followed by a wikilink. The title will then show as a link to the referenced note. If no `title:` parameter is given, then the wikilink note name (or alias if given) will be used as the title.
+To display the title as a link to another page which can be clicked or hovered over, add the `ref:` or `reference:` parameter followed by a wikilink or markdown link. The title will then show as a link to the referenced note or website. If no `title:` parameter is given, then the wikilink note name (or alias if given) will be used as the title.
 
 Note that these links will not show up on the Graph or in Backlinks - this is an upstream issue with Obsidian. To get this resolved, please support the forum issue [here](https://forum.obsidian.md/t/api-method-to-add-link-and-have-it-parsed-into-metadatacache/72046).
 

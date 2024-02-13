@@ -84,9 +84,9 @@ export function destroyReadingModeElements(): void {
 	});
 }
 
-async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin) {
+export async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin) {
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split("\n")[lineNumber]),plugin,sourcePath)).codeblocksParameters;
-	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,true,false,plugin);
+	await remakeCodeblocks(codeblockPreElements, codeblocksParameters, sourcePath, true, false, plugin);
 }
 async function renderSettings(codeblockPreElements: Array<HTMLElement>, sourcePath: string, plugin: CodeStylerPlugin) {
 	const codeblocksParameters = (await parseCodeblockSource(sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n"),plugin)).codeblocksParameters;
@@ -187,7 +187,7 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 		for (const section of cache.sections) {
 			if (!editingEmbeds || section.type === "code" || section.type === "callout") {
 				const parsedCodeblocksParameters = await parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1),plugin,sourcePath);
-				if (!editingEmbeds || (editingEmbeds && parsedCodeblocksParameters?.codeblocksParameters?.[0]?.language === "reference") || parsedCodeblocksParameters.nested)
+				if (!editingEmbeds || parsedCodeblocksParameters.nested)
 					codeblocksParameters = codeblocksParameters.concat(parsedCodeblocksParameters.codeblocksParameters);
 			}
 		}

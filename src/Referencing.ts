@@ -1,41 +1,168 @@
-import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, TFile, normalizePath } from "obsidian";
-import { ReferenceParameters, parseReferenceParameters } from "src/Parsing/ReferenceParsing";
-import { LOCAL_PREFIX, REFERENCE_CODEBLOCK } from "src/Settings";
+import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, normalizePath, requestUrl, request } from "obsidian";
+import { parseReferenceParameters } from "src/Parsing/ReferenceParsing";
+import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK } from "src/Settings";
 import CodeStylerPlugin from "src/main";
+import { renderSpecificReadingSection } from "./ReadingView";
+
+export interface Reference {
+	startLine: number;
+	code: string;
+	language: string;
+	path: string;
+	external?: {
+		storePath: string,
+		website: string,
+		info: ExternalReferenceInfo;
+	}
+}
+
+interface ExternalReferenceInfo {
+	title: string,
+	url: string,
+	site: string,
+	datetime: string,
+	rawUrl: string,
+	displayUrl?: string,
+	author?: string,
+	repository?: string,
+	path?: string,
+	fileName?: string,
+	refInfo?: {
+		ref: string,
+		type: string,
+		hash: string
+	}
+}
 
 export async function referenceCodeblockProcessor(source: string, codeblockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeStylerPlugin) {
 	const codeblockSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(codeblockElement);
 	if (codeblockSectionInfo === null)
 		throw Error("Could not retrieve codeblock information");
-	const referenceParameters = parseReferenceParameters(source);
-	if (referenceParameters?.repository !== undefined) {
-		// Get github file
-		// Store in settings folder
-		const storePath = "";
 
-		referenceParameters.filePath = storePath;
-	}
-	renderLocalFile(referenceParameters, codeblockElement, context, codeblockSectionInfo, plugin);
+	const codeblockLines = [codeblockSectionInfo.text.split("\n")[codeblockSectionInfo.lineStart], ...source.split("\n")];
+	if (codeblockLines[codeblockLines.length - 1] !== "")
+		codeblockLines.push("");
+	const reference = await getReference(codeblockLines, context.sourcePath, plugin);
+	renderFile(reference, codeblockElement, context, plugin);
+	renderSpecificReadingSection(Array.from(codeblockElement.querySelectorAll("pre:not(.frontmatter)")), context.sourcePath, codeblockSectionInfo, plugin);
 }
 
-export async function renderLocalFile(referenceParameters: ReferenceParameters, codeblockElement: HTMLElement, context: MarkdownPostProcessorContext, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin) {
-	let codeblockContent: string;
+function renderFile(reference: Reference, codeblockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeStylerPlugin) {
+	MarkdownRenderer.render(plugin.app, reference.code, codeblockElement, context.sourcePath, plugin);
+}
+
+export async function getReference(codeblockLines: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<Reference> {
+	const referenceParameters = parseReferenceParameters(codeblockLines.slice(1,-1).join("\n"));
+	const reference: Reference = {
+		code: "",
+		language: referenceParameters.language,
+		startLine: 1,
+		path: referenceParameters.filePath,
+	};
+
 	try {
-		const vaultPath = getPath(normalizePath(referenceParameters.filePath), context.sourcePath);
-		const vaultFile = this.app.vault.getAbstractFileByPath(vaultPath);
-		if (!(vaultFile instanceof TFile))
-			throw Error(`${vaultPath} is not a file`);
-		const codeContent = (await this.app.vault.read(vaultFile)).trim();
-		const parameterLine = codeblockSectionInfo.text.split("\n")[codeblockSectionInfo.lineStart].substring(REFERENCE_CODEBLOCK.length).trim();
-		codeblockContent = ["```", referenceParameters.language," ",parameterLine, "\n", codeContent, "\n", "```"].join("");
+		if (/^https?:\/\//.test(referenceParameters.filePath)) {
+			const externalReferenceId = idExternalReference(reference.path);
+			reference.external = {
+				website: externalReferenceId.website,
+				storePath: EXTERNAL_REFERENCE_PATH + externalReferenceId.id,
+				info: {title: "", url: reference.path, site: externalReferenceId.website, datetime: String(new Date()), rawUrl: reference.path},
+			};
+			referenceParameters.filePath = await accessExternalReference(reference, plugin);
+			reference.external.info = { ...reference.external.info, ...JSON.parse(await plugin.app.vault.adapter.read(reference.external.storePath + EXTERNAL_REFERENCE_INFO_SUFFIX)) };
+		}
+		const vaultPath = getPath(referenceParameters.filePath, sourcePath, plugin);
+		if (!(await plugin.app.vault.adapter.exists(vaultPath)))
+			throw Error(`Local File does not exist at ${vaultPath}`);
+		const codeContent = (await plugin.app.vault.adapter.read(vaultPath)).trim();
+		//TODO (@mayurankv) Get starting line number
+		reference.code = ["```", referenceParameters.language," ",codeblockLines[0].substring(REFERENCE_CODEBLOCK.length).trim(), "\n", codeContent, "\n", "```"].join("");
 	} catch (error) {
-		codeblockContent = `> [!error] ${(error instanceof Error) ? error.message : String(error)}`;
+		reference.code = `> [!error] ${(error instanceof Error) ? error.message : String(error)}`;
 	}
-	MarkdownRenderer.render(plugin.app, codeblockContent, codeblockElement, context.sourcePath, plugin);
+	return reference;
 }
 
-function getPath(filePath: string, sourcePath: string): string {
-	filePath = filePath.trim().replace("\\", "/");
+async function accessExternalReference(reference: Reference, plugin: CodeStylerPlugin): Promise<string> {
+	try {
+		if (!(await plugin.app.vault.adapter.exists(reference?.external?.storePath as string)))
+			await updateExternalReference(reference, plugin);
+		return reference?.external?.storePath as string;
+	} catch (error) {
+		throw Error(error);
+	}
+}
+
+async function updateExternalReference(reference: Reference, plugin: CodeStylerPlugin) {
+	try {
+		const sourceInfo = await parseExternalReference(reference);
+		const content = await request(sourceInfo.rawUrl ?? reference.path);
+		await plugin.app.vault.adapter.write(reference?.external?.storePath as string, content);
+		await plugin.app.vault.adapter.write(reference?.external?.storePath as string + EXTERNAL_REFERENCE_INFO_SUFFIX, JSON.stringify(sourceInfo));
+	} catch(error) {
+		throw Error(`Could not download file: ${error}`);
+	}
+}
+
+export async function parseExternalReference(reference: Reference): Promise<Partial<ExternalReferenceInfo>> {
+	try {
+		if (reference.external?.website === "github") {
+			reference.path = (reference.path.split("?")[0]).replace(/(?<=github.com\/.*\/.*\/)raw(?=\/)/,"/blob/");
+			const info = (await requestUrl({ url: reference.path, method: "GET", headers: { "Accept": "application/json", "Content-Type": "application/json" } })).json;
+			return {
+				title: info.title,
+				rawUrl: info.payload.blob.rawBlobUrl,
+				displayUrl: reference.path,
+				author: info.payload.repo.ownerLogin,
+				repository: info.payload.repo.name,
+				path: info.payload.path,
+				fileName: info.payload.blob.displayName,
+				refInfo: {
+					ref: info.payload.refInfo.name,
+					type: info.payload.refInfo.refType,
+					hash: info.payload.refInfo.currentOid
+				}
+			};
+		} else if (reference.external?.website === "gitlab")
+			//TODO (@mayurankv) Update
+			return {
+				title: "",
+				rawUrl: "",
+			};
+		else if (reference.external?.website === "bitbucket")
+			//TODO (@mayurankv) Update
+			return {
+				title: "",
+				rawUrl: "",
+			};
+		else if (reference.external?.website === "sourceforge")
+			//TODO (@mayurankv) Update
+			return {
+				title: "",
+				rawUrl: "",
+			};
+		else
+			//TODO (@mayurankv) Update
+			return {
+				title: "",
+			};
+	} catch (error) {
+		throw Error(`Could not parse external URL: ${error}`);
+	}
+}
+
+function idExternalReference(fileLink: string): {id: string, website: string} {
+	const linkInfo = /^https?:\/\/(.+)\.com\/(.+)$/.exec(fileLink);
+	if (!linkInfo?.[1] || !linkInfo?.[2])
+		throw Error("No such repository could be found");
+	return {id: [linkInfo[1], ...linkInfo[2].split("/")].join("-"), website: linkInfo[1]};
+}
+
+function getPath(filePath: string, sourcePath: string, plugin: CodeStylerPlugin): string {
+	filePath = filePath.trim();
+	if (filePath.startsWith("[[") && filePath.endsWith("]]"))
+		return plugin.app.metadataCache.getFirstLinkpathDest(filePath.slice(2,-2), sourcePath)?.path ?? filePath;
+	filePath = filePath.replace("\\", "/");
 	if (filePath.startsWith(LOCAL_PREFIX))
 		return filePath.substring(2);
 	else if (filePath.startsWith("./") || /^[^<:"/\\>?|*]/.test(filePath)) {

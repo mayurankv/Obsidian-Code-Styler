@@ -3,7 +3,6 @@ import { parseYaml } from "obsidian";
 export interface ReferenceParameters {
 	filePath: string;
 	language: string;
-	repository?: string;
 	start?: string | number | RegExp;
 	end?: string | number | RegExp;
 }
@@ -13,8 +12,6 @@ interface PassedParameters {
 	file?: string;
 	path?: string;
 	link?: string;
-	repository?: string;
-	repo?: string;
 	language?: string;
 	lang?: string;
 	start?: string | number;
@@ -22,17 +19,15 @@ interface PassedParameters {
 }
 
 export function parseReferenceParameters(source: string): ReferenceParameters {
-	source = source.replace(/^([^:]+):(.+)\n/, "$1: $2\n");
-	const passedParameters: PassedParameters = parseYaml(source);
-	if (passedParameters === source)
+	source = source.replace(/^([^:]+):(.+)\n/, "$1: $2\n").replace(/(?<!")\[\[(.*?)\]\](?!")/, "\"[[$1]]\"");
+	let passedParameters: PassedParameters | string | null = parseYaml(source);
+	if (passedParameters as string === source || passedParameters === null)
 		throw Error("YAML Parse Error");
+	passedParameters = passedParameters as PassedParameters;
 	const filePath = passedParameters?.filePath ?? passedParameters?.file ?? passedParameters?.path ?? passedParameters?.link;
 	if (filePath === undefined)
 		throw Error("No file specified");
 	const referenceParameters: ReferenceParameters = {filePath: filePath, language: passedParameters?.language ?? passedParameters?.lang ?? getLanguage(filePath)};
-	const repository = passedParameters?.repository ?? passedParameters?.repo;
-	if (repository !== undefined)
-		referenceParameters.repository = repository;
 	const start = getLineIdentifier(String(passedParameters.start));
 	if (start !== undefined)
 		referenceParameters.start = start;
@@ -62,5 +57,7 @@ function getLineIdentifier(lineIdentifier: string | undefined): RegExp | string 
 }
 
 function getLanguage(filePath: string): string {
+	if (filePath.startsWith("[[") && filePath.endsWith("]]"))
+		filePath = filePath.slice(2, -2);
 	return filePath.slice((filePath.lastIndexOf(".") - 1 >>> 0) + 2);
 }

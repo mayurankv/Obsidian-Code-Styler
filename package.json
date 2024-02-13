@@ -52,6 +52,7 @@
 		"hast": "^1.0.0",
 		"hast-util-from-html": "^2.0.1",
 		"hast-util-to-html": "^9.0.0",
+		"request": "^2.88.2",
 		"unist-util-visit-parents": "^6.0.1"
 	},
 	"contributors": [

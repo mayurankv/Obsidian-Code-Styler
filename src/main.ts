@@ -1,6 +1,6 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK } from "./Settings";
+import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH } from "./Settings";
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
@@ -33,6 +33,9 @@ export default class CodeStylerPlugin extends Plugin {
 			font: document.body.getCssPropertyValue("--font-text-size"),
 			zoom: document.body.getCssPropertyValue("--zoom-factor"),
 		};
+
+		if (!(await this.app.vault.adapter.exists(EXTERNAL_REFERENCE_PATH))) // Create folder for external references
+			await this.app.vault.adapter.mkdir(EXTERNAL_REFERENCE_PATH);
 
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 
