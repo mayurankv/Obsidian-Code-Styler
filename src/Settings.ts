@@ -675,8 +675,16 @@ export const EXTERNAL_REFERENCE_PATH = ".obsidian/plugins/code-styler/reference-
 export const EXTERNAL_REFERENCE_INFO_SUFFIX = "-info.json";
 export const GIT_ICONS: { [key: string]: string } = {
 	"branch": "&#xe0a0;",
-	"commit": "&#xeafc",
+	"commit": "&#xeafc;",
 };
+export const SITE_ICONS: { [key: string]: string } = {
+	"github": "&#xf09b;",
+	"gitlab": "&#xe65c;",
+	"bitbucket": "&#xe703;",
+	"sourceforge": "&#xf0238;",
+	"generic": "&#xf059f;",
+};
+export const STAMP_ICON = "&#xf00f0;";
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names

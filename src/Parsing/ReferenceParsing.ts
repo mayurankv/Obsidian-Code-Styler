@@ -75,6 +75,7 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 			return {
 				title: info.payload.blob.displayName, // title: info.title,
 				rawUrl: info.payload.blob.rawBlobUrl,
+				datetime: timeStamp(),
 				displayUrl: reference.path,
 				author: info.payload.repo.ownerLogin,
 				repository: info.payload.repo.name,
@@ -91,23 +92,27 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 			return {
 				title: "",
 				rawUrl: "",
+				datetime: timeStamp(),
 			};
 		else if (reference.external?.website === "bitbucket")
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
 				rawUrl: "",
+				datetime: timeStamp(),
 			};
 		else if (reference.external?.website === "sourceforge")
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
 				rawUrl: "",
+				datetime: timeStamp(),
 			};
 		else
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
+				datetime: timeStamp(),
 			};
 	} catch (error) {
 		throw Error(`Could not parse external URL: ${error}`);
@@ -137,4 +142,16 @@ function getLanguage(filePath: string): string {
 	if (filePath.startsWith("[[") && filePath.endsWith("]]"))
 		filePath = filePath.slice(2, -2);
 	return filePath.slice((filePath.lastIndexOf(".") - 1 >>> 0) + 2);
+}
+
+export function timeStamp(): string {
+	const date = new Date();
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	const hour = String(date.getHours()).padStart(2, "0");
+	const minute = String(date.getMinutes()).padStart(2, "0");
+	// const second = String(date.getSeconds()).padStart(2, "0");
+
+	return `${year}-${month}-${day} ${hour}:${minute}`;
 }

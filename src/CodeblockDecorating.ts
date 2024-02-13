@@ -1,4 +1,4 @@
-import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS } from "./Settings";
+import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS, STAMP_ICON, SITE_ICONS } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { MarkdownRenderer } from "obsidian";
@@ -38,7 +38,10 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings): HTMLElement {
 	//TODO (@mayurankv) Add theme settings to conditionally set sections
 	const externalReferenceContainer = createDiv({ cls: "code-styler-header-external-reference" });
-	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-repo", text: codeblockParameters?.externalReference?.author+"/"+codeblockParameters?.externalReference?.repository}));
+	const siteIcon = createDiv({ cls: "external-reference-repo-icon" });
+	siteIcon.innerHTML = SITE_ICONS?.[codeblockParameters?.externalReference?.site as string] ?? SITE_ICONS["generic"];
+	externalReferenceContainer.appendChild(siteIcon);
+	externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-repo", text: codeblockParameters?.externalReference?.author + "/" + codeblockParameters?.externalReference?.repository }));
 	const refIcon = createDiv({ cls: "external-reference-ref-icon" });
 	if (codeblockParameters?.externalReference?.refInfo?.type === "branch")
 		refIcon.innerHTML = GIT_ICONS["branch"];
@@ -46,19 +49,12 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 		refIcon.innerHTML = GIT_ICONS["commit"];
 	else
 		refIcon.innerHTML = GIT_ICONS["branch"];
-	// refIcon.innerHTML = "<svgxmlns=\"http://www.w3.org/2000/svg\"viewBox=\"00100100\"><style>svg{font-family:'code-styler-nerdfon';font-size:50px;fill:black;}</style>&#xe0a0;</svg>";
-	// refIcon.innerHTML = `<svgxmlns="http://www.w3.org/2000/svg><style>
-	// 	@font-face{
-	// 		font-family:'MesloLGLDZNerdFont-Regular';
-	// 		src:url('https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Meslo/L-DZ/Regular/MesloLGLDZNerdFont-Regular.ttf') format('ttf');
-	// 	}
-	// 	text{
-	// 		font-family:'MesloLGLDZNerdFont-Regular';
-	// 		font-size:50px;
-	// 	}
-	// </style>&#xe0a0;</svg>`;
 	externalReferenceContainer.appendChild(refIcon);
 	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-ref", text: codeblockParameters?.externalReference?.refInfo?.ref as string}));
+	const stampIcon = createDiv({ cls: "external-reference-timestamp-icon" });
+	stampIcon.innerHTML = STAMP_ICON;
+	externalReferenceContainer.appendChild(stampIcon);
+	externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-timestamp", text: codeblockParameters?.externalReference?.datetime as string }));
 	return externalReferenceContainer;
 }
 function createExecuteCodeContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, plugin: CodeStylerPlugin): HTMLElement {

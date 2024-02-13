@@ -6,6 +6,7 @@ Features:
 			☐ Regex finding lines
 			☐ File watcher?
 		☐ External Referencing
+			☐ base64 encode and bundle font (check license)
 			☐ Update button
 				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
 				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)

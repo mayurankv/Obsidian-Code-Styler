@@ -243,15 +243,23 @@ body .code-styler-header-container:not(:has( .code-styler-header-language-tag)) 
 }
 .code-styler-header-external-reference > div {
 	padding-left: 6px;
-	font-size: var(--font-smallest, xx-small);
+	font-family: code-styler-nerdfont, menlo, var(--font-monospace);
+	font-size: var(--code-styler-external-reference-text-size,xx-small);
 }
-div.external-reference-repo {
+.code-styler-header-external-reference > div[class$=icon] {
+	font-size: var(--code-styler-external-reference-icon-size,x-small);
+}
+div.external-reference-repo,
+div.external-reference-repo-icon {
 	color: var(--code-styler-external-reference-repo-color, cyan);
 }
 div.external-reference-ref,
 div.external-reference-ref-icon {
 	color: var(--code-styler-external-reference-ref-color, pink);
-	font-family: code-styler-nerdfont, menlo, var(--font-monospace);
+}
+div.external-reference-timestamp,
+div.external-reference-timestamp-icon {
+	color: var(--code-styler-external-reference-timestamp-color, yellow);
 }
 div:has(> img.code-styler-icon) {
 	display: inline-flex;
