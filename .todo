@@ -1,8 +1,14 @@
 Features:
 	Code Referencing:
-		☐ Local file reference functionality
+		☐ Local file reference functionality `file`
 			☐ Replace dependence on
-		☐ Github/Gitlab/Bitbucket code reference functionality
+			☐ Regex finding lines
+			☐ Path by markdown links
+			☐ Adjust line number in codeblock parsing for this codeblock as with other plugins
+				☐ Return line number at start of file for this
+			☐ Also keep repository for title
+			☐ File watcher?
+		☐ Github/Gitlab/Bitbucket code reference functionality `repository`
 			☐ https://forum.obsidian.md/t/reference-a-git-repo/73697 (Do 3rd implementation)
 			☐ `site` and `tree path` or just `file path`
 			☐ `lines`
@@ -73,6 +79,7 @@ Testing:
 
 Documentation:
 	☐ Proper documentation #14
+	☐ `throw Error` s instead of `return`
 	☐ Use docstrings and better commenting #119
 	☐ Add test vault #15
 		☐ Notes for each feature

@@ -55,11 +55,11 @@ export async function parseCodeblockSource(codeSection: Array<string>, plugin: C
 	function parseCodeblockSection(codeSection: Array<string>): void {
 		if (codeSection.length === 0)
 			return;
-		
+
 		const openingCodeblockLine = getOpeningLine(codeSection);
 		if (!openingCodeblockLine)
 			return;
-		
+
 		const openDelimiter = /^\s*(?:>\s*)*((?:```+|~~~+)).*$/.exec(openingCodeblockLine)?.[1];
 		if (!openDelimiter)
 			return;
@@ -70,7 +70,7 @@ export async function parseCodeblockSource(codeSection: Array<string>, plugin: C
 			codeblocks.push(codeSection.slice(0,openDelimiterIndex+2+closeDelimiterIndex));
 		else
 			parseCodeblockSection(codeSection.slice(openDelimiterIndex+1,openDelimiterIndex+1+closeDelimiterIndex));
-        
+
 		parseCodeblockSection(codeSection.slice(openDelimiterIndex+1+closeDelimiterIndex+1));
 	}
 	parseCodeblockSection(codeSection);
@@ -91,7 +91,7 @@ async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerP
 	if (!parameterLine)
 		return null;
 	const codeblockParameters = parseCodeblockParameters(parameterLine,plugin.settings.currentTheme);
-		
+
 	if (isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist))
 		return null;
 
@@ -149,7 +149,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	const parameterStrings = parameterLine.match(/(?:(?:ref|reference|title):(?:\[\[.*?\]\]|\[.*?\]\(.+\))|[^\s"']+|"[^"]*"|'[^']*')+/g);
 	if (!parameterStrings)
 		return codeblockParameters;
-	
+
 	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString.replace(/(?:^,|,$)/g, ""),codeblockParameters,theme));
 	return codeblockParameters;
 }
@@ -348,19 +348,18 @@ function parseHighlightedLines(highlightedLinesString: string): Highlights {
 				Array.from({length:end-start+1}, (_,num) => num + start).forEach(lineNumber => lineNumbers.add(lineNumber));
 		} else if (/^\/(.*)\/$/.test(highlightRule)) { // Regex
 			try {
-				regularExpressions.add(new RegExp(highlightRule.replace(/^\/(.*)\/$/,"$1")));
+				regularExpressions.add(new RegExp(highlightRule.replace(/^\/(.*)\/$/, "$1")));
 			} catch {
 				//pass
 			}
-		} else if (/".*"/.test(highlightRule)) { // Plain Text
+		}  else if (/".*"/.test(highlightRule)) // Plain Text
 			plainText.add(highlightRule.substring(1,highlightRule.length-1));
-		} else if (/'.*'/.test(highlightRule)) { // Plain Text
+		else if (/'.*'/.test(highlightRule)) // Plain Text
 			plainText.add(highlightRule.substring(1,highlightRule.length-1));
-		} else if (/\D/.test(highlightRule)) { // Plain Text
+		else if (/\D/.test(highlightRule)) // Plain Text //TODO (@mayurankv) Should this be \D+ ??
 			plainText.add(highlightRule);
-		} else if (/\d+/.test(highlightRule)) { // Plain Number
+		else if (/\d+/.test(highlightRule)) // Plain Number
 			lineNumbers.add(parseInt(highlightRule));
-		}
 	});
 	return {
 		lineNumbers: [...lineNumbers],
@@ -379,7 +378,7 @@ function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<Reg
 	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,".+")}$`,"i"));
 }
 
-export function getParameterLine(codeblockLines: Array<string>): string | undefined {
+function getParameterLine(codeblockLines: Array<string>): string | undefined {
 	let openingCodeblockLine = getOpeningLine(codeblockLines);
 	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*(?:[`~])/.test(openingCodeblockLine)))
 		openingCodeblockLine = cleanParameterLine(openingCodeblockLine);

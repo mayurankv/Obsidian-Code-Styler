@@ -130,7 +130,7 @@ export interface Language {
 		continuation?: string; // Default: None
 		multiline?: string; // Default: true
 	}>;
-}	
+}
 
 // Theme Defaults
 const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
@@ -586,7 +586,7 @@ export const EXAMPLE_CODEBLOCK_PARAMETERS = "python title:foo";
 export const EXAMPLE_CODEBLOCK_CONTENT = "print(\"This line is very long and should be used as an example for how the plugin deals with wrapping and unwrapping very long lines given the choice of codeblock parameters and settings.\")\nprint(\"This line is highlighted.\")";
 export const EXAMPLE_INLINE_CODE = "{python icon title:foo} print(\"This is inline code\")";
 export const EXCLUDED_LANGUAGES = "ad-*";
-export const WHITELIST_CODEBLOCKS = "run-*";
+export const WHITELIST_CODEBLOCKS = "run-*, reference, include";
 
 // Plugin default settings
 export const DEFAULT_SETTINGS: CodeStylerSettings = {
@@ -667,8 +667,10 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 export const FOLD_PLACEHOLDER = "Folded Code";
 export const PARAMETERS = ["title","fold","ln","wrap","unwrap","ignore"];
 export const TRANSITION_LENGTH = 240; // 240ms
-export const SPECIAL_LANGUAGES = ["^preview$","^include$","^output$","^run-.+$"];
+export const SPECIAL_LANGUAGES = ["^reference$","^preview$","^include$","^output$","^run-.+$"];
 export const SETTINGS_SOURCEPATH_PREFIX = "@Code-Styler-Settings:";
+export const LOCAL_PREFIX = "@/";
+export const REFERENCE_CODEBLOCK = "reference";
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names
@@ -945,7 +947,7 @@ const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://p
 	"yaml": "YAML",
 	"yml": "YAML",
 	"yang": "YANG",
-}; 
+};
 const MANUAL_PRISM_LANGUAGES: {[key: string]: string} = { // Manually generated list from https://prismjs.com/  -  297 languages
 	"css":"CSS",
 	"clike":"C-like",

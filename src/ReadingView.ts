@@ -130,14 +130,14 @@ async function remakeCodeblocks(codeblockPreElements: Array<HTMLElement>, codebl
 async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, dynamic: boolean, plugin: CodeStylerPlugin) {
 	if (dynamic)
 		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{childList: true,subtree: true,attributes: true,characterData: true}); // Add Execute Code Observer
-	
+
 	insertHeader(codeblockPreElement,codeblockParameters,sourcePath,plugin,dynamic);
-	
+
 	codeblockPreElement.classList.add(...getPreClasses(codeblockParameters,dynamic));
 	codeblockPreElement.setAttribute("defaultFold",codeblockParameters.fold.enabled.toString());
 	if (codeblockPreElement.parentElement)
 		codeblockPreElement.parentElement.classList.add("code-styler-pre-parent");
-	
+
 	if (!codeblockCodeElement.querySelector("code [class*='code-styler-line']")) // Ignore styled lines
 		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,sourcePath,plugin);
 }
@@ -187,7 +187,7 @@ async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata
 		for (const section of cache.sections) {
 			if (!editingEmbeds || section.type === "code" || section.type === "callout") {
 				const parsedCodeblocksParameters = await parseCodeblockSource(fileContentLines.slice(section.position.start.line,section.position.end.line+1),plugin,sourcePath);
-				if (!editingEmbeds || parsedCodeblocksParameters.nested)
+				if (!editingEmbeds || (editingEmbeds && parsedCodeblocksParameters?.codeblocksParameters?.[0]?.language === "reference") || parsedCodeblocksParameters.nested)
 					codeblocksParameters = codeblocksParameters.concat(parsedCodeblocksParameters.codeblocksParameters);
 			}
 		}
@@ -244,7 +244,7 @@ function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockPara
 			//TODO (@mayurankv) Add fold to previous point
 			indentation = currentIndentation;
 		} else if (currentIndentation < indentation) {
-			//TODO (@mayurankv) Close all folds to level of currentIndenation
+			//TODO (@mayurankv) Close all folds to level of current indentation
 			indentation = currentIndentation;
 		}
 		if (currentIndentation > 0) {
@@ -298,7 +298,7 @@ function convertCommentLinks(result: Array<ElementContent>, commentText: string,
 		result.push({type: "text",value: ending});
 		const linkText = commentText.slice(linkMatch.index, linkMatch.index + linkMatch[0].length);
 		const linkContainer = createDiv();
-		MarkdownRenderer.render(plugin.app,linkText,linkContainer,sourcePath,plugin);
+		MarkdownRenderer.render(plugin.app, linkText, linkContainer, sourcePath, plugin);
 		const linkChild = (fromHtml(linkContainer.innerHTML,{fragment: true})?.children?.[0] as Element)?.children?.[0];
 		result.push(linkChild);
 		commentText = commentText.slice(0, linkMatch.index);

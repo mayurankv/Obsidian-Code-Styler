@@ -105,7 +105,8 @@ body {
 	content: none !important;
 }
 .markdown-source-view.mod-cm6 .cm-embed-block pre.code-styler-pre {
-	margin: 1em 0px;
+	margin: 0em 0px;
+	/* margin: 1em 0px; */
 }
 
 /** Editing Mode Body */
@@ -142,7 +143,7 @@ body.code-styler .markdown-source-view :not(pre.code-styler-pre) > .code-styler-
 body .code-styler-header-container-hidden {
 	display: none !important;
 }
-.code-styler-header-container {  
+.code-styler-header-container {
 	display: flex !important;
 	overflow: visible;
 	height: var(--container-height);

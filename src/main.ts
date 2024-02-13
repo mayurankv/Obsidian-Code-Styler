@@ -1,10 +1,11 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings } from "./Settings";
+import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK } from "./Settings";
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
 import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
+import { referenceCodeblockProcessor } from "./Referencing";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -14,7 +15,7 @@ export default class CodeStylerPlugin extends Plugin {
 		font: string;
 		zoom: string;
 	};
-	
+
 	async onload() {
 		await this.loadSettings(); // Load Settings
 		const settingsTab = new SettingsTab(this.app,this);
@@ -34,7 +35,9 @@ export default class CodeStylerPlugin extends Plugin {
 		};
 
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
-		
+
+		this.registerMarkdownCodeBlockProcessor(REFERENCE_CODEBLOCK, async (source, el, ctx) => { await referenceCodeblockProcessor(source, el, ctx, this);});
+
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this);}); // Add codeblock decorating markdownPostProcessor
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewInlineDecoratingPostProcessor(el,ctx,this);}); // Add inline code decorating markdownPostProcessor
 
@@ -98,7 +101,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 		console.log("Loaded plugin: Code Styler");
 	}
-	
+
 	onunload() {
 		this.executeCodeMutationObserver.disconnect();
 		removeStylesAndClasses();
