@@ -20,20 +20,13 @@ See this project's [releases](/../../../releases).
 
 ## [Unreleased]
 
-### Added
-
-- Reference codeblocks for referencing local and external files
-  - Markdown links, local links and html links
-
-### Changed
-
-- URLs can now be linked in codeblock title references
-
 ## [1.1.4] - 2023-11-28
 
 ### Added
 
 - Added markdown links and wikilinks in comments
+- Reference codeblocks for referencing local and external files
+  - Markdown links, local links and html links
 
 ### Changed
 

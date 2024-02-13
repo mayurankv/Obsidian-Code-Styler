@@ -1,14 +1,16 @@
 Features:
 	Code Referencing:
+		☐ Codeblock syntax highlighting
 		☐ Local reference
+			☐ Prevent clicking links causing fold
 			☐ Regex finding lines
-			☐ Allow links to external sites in titles
 			☐ File watcher?
 		☐ External Referencing
 			☐ Update button
-				☐ Automatic updating
-				☐ Remove old files?
-			☐ Show more info like commit, branch etc.
+				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
+				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)
+			☐ Add colours to settings
+				☐ Update settings converter to reflect
 			☐ Non github compatibility
 			☐ Allow iframe
 		☐ LaTeX Functionality

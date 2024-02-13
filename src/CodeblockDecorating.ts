@@ -1,8 +1,9 @@
-import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER } from "./Settings";
+import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, BRANCH_ICON, COMMIT_ICON } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { MarkdownRenderer } from "obsidian";
 import CodeStylerPlugin from "./main";
+import { ExternalReferenceInfo } from "./Parsing/ReferenceParsing";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	const headerContainer = createDiv();
@@ -15,8 +16,11 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 			if (isLanguageTagShown(codeblockParameters,themeSettings))
 				headerContainer.appendChild(createDiv({cls: "code-styler-header-language-tag", text: getLanguageTag(codeblockParameters.language)}));
 		}
-		const titleContainer = createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin);
-		headerContainer.appendChild(titleContainer);
+		headerContainer.appendChild(createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin));
+		if (codeblockParameters?.externalReference) //TODO (@mayurankv) Add settings toggle
+			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, themeSettings, plugin));
+		if (false) //TODO (@mayurankv) Add settings toggle
+			headerContainer.appendChild(createExecuteCodeContainer(codeblockParameters, themeSettings, plugin));
 	} else
 		headerContainer.classList.add("code-styler-header-container-hidden");
 	return headerContainer;
@@ -26,9 +30,31 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 	const title = codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"");
 	if (codeblockParameters.reference === "")
 		titleContainer.innerText = title;
+	else if (/^(?:https?|file):\/\//.test(codeblockParameters.reference))
+		MarkdownRenderer.render(plugin.app,`[${title}](${codeblockParameters.reference})`,titleContainer,sourcePath,plugin);
 	else
 		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,plugin); //TODO (@mayurankv) Add links to metadata cache properly
 	return titleContainer;
+}
+function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, plugin: CodeStylerPlugin): HTMLElement {
+	//TODO (@mayurankv) Add theme settings to conditionally set sections
+	const externalReferenceContainer = createDiv({ cls: "code-styler-header-external-reference" });
+	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-repo", text: codeblockParameters?.externalReference?.author+"/"+codeblockParameters?.externalReference?.repository}));
+	const refIcon = createDiv({ cls: "external-reference-ref-icon" });
+	if (codeblockParameters?.externalReference?.refInfo?.type === "branch")
+		refIcon.innerHTML = plugin.gitIcons["branch"];
+	else if (codeblockParameters?.externalReference?.refInfo?.type === "tree")
+		refIcon.innerHTML = plugin.gitIcons["commit"];
+	else
+		refIcon.innerHTML = plugin.gitIcons["branch"];
+	externalReferenceContainer.appendChild(refIcon);
+	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-ref", text: codeblockParameters?.externalReference?.refInfo?.ref as string}));
+	return externalReferenceContainer;
+}
+function createExecuteCodeContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, plugin: CodeStylerPlugin): HTMLElement {
+	const executeCodeContainer = createDiv({cls: "code-styler-header-execute-code"});
+	//TODO (@mayurankv) Finish
+	return executeCodeContainer;
 }
 export function createInlineOpener(inlineCodeParameters: InlineCodeParameters, languageIcons: Record<string,string>, containerClasses: Array<string> = ["code-styler-inline-opener"]): HTMLElement {
 	const openerContainer = createSpan({cls: containerClasses.join(" ")});

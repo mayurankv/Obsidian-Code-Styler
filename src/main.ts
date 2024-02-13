@@ -1,6 +1,6 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH } from "./Settings";
+import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH, GIT_ICONS } from "./Settings";
 import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
@@ -11,6 +11,7 @@ export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
 	executeCodeMutationObserver: MutationObserver;
 	languageIcons: Record<string,string>;
+	gitIcons: Record<string,string>;
 	sizes: {
 		font: string;
 		zoom: string;
@@ -28,7 +29,11 @@ export default class CodeStylerPlugin extends Plugin {
 			if (LANGUAGES[key]?.icon)
 				result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGES[key].icon}</svg>`], { type: "image/svg+xml" }));
 			return result;
-		},{});
+		}, {});
+		this.gitIcons = Object.keys(GIT_ICONS).reduce((result: { [key: string]: string }, key: string) => {
+			result[key] = URL.createObjectURL(new Blob([GIT_ICONS[key]], { type: "image/svg+xml" }));
+			return result;
+		}, {});
 		this.sizes = {
 			font: document.body.getCssPropertyValue("--font-text-size"),
 			zoom: document.body.getCssPropertyValue("--zoom-factor"),
@@ -110,6 +115,8 @@ export default class CodeStylerPlugin extends Plugin {
 		removeStylesAndClasses();
 		destroyReadingModeElements();
 		for (const url of Object.values(this.languageIcons)) // Unload icons
+			URL.revokeObjectURL(url);
+		for (const url of Object.values(this.gitIcons)) // Unload icons
 			URL.revokeObjectURL(url);
 		console.log("Unloaded plugin: Code Styler");
 	}

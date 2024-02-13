@@ -4,6 +4,8 @@ import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
 import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
 import { getReference } from "src/Referencing";
+import { ExternalReferenceInfo } from "./ReferenceParsing";
+import { basename } from "path";
 
 export interface CodeblockParameters {
 	language: string;
@@ -28,6 +30,7 @@ export interface CodeblockParameters {
 		alternative: Record<string,Highlights>
 	},
 	ignore: boolean;
+	externalReference?: ExternalReferenceInfo;
 }
 export interface Highlights {
 	lineNumbers: Array<number>;
@@ -175,12 +178,13 @@ async function adjustReference(codeblockParameters: CodeblockParameters, codeblo
 		codeblockParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
 	}
 	if (codeblockParameters.title === "")
-		//TODO (@mayurankv) Set Local Title
-		codeblockParameters.title = reference.external?.info?.title ?? "file title";
+		codeblockParameters.title = reference.external?.info?.title ?? basename(reference.path);
 	if (codeblockParameters.reference === "")
-		//TODO (@mayurankv) Set Local Link
-		codeblockParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? "file uri";
+		//@ts-expect-error Undocumented Obsidian API
+		codeblockParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
 	codeblockParameters.language = reference.language;
+	if (reference.external)
+		codeblockParameters.externalReference = reference.external.info;
 	return codeblockParameters;
 }
 async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
@@ -260,6 +264,7 @@ function manageReference(parameterString: string, codeblockParameters: Codeblock
 export function manageLink(parameterString: string): {title: string, reference: string} | undefined {
 	const refWikiMatch = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/.exec(parameterString);
 	const refMdMatch = /\[(.*?)\]\((.+)\)/.exec(parameterString);
+	const urlMatch = /^(["']?)(https?:\/\/.*)\1$/.exec(parameterString);
 	let title = "";
 	let reference = "";
 	if (refWikiMatch) {
@@ -268,7 +273,10 @@ export function manageLink(parameterString: string): {title: string, reference: 
 	} else if (refMdMatch) {
 		title = refMdMatch[1].trim();
 		reference = refMdMatch[2].trim();
-	} else
+	} else if (urlMatch) {
+		title = "URL";
+		reference = urlMatch[2].trim();
+	}  else
 		return;
 	return {title: title, reference: reference};
 }

@@ -48,6 +48,9 @@ body {
 .code-styler-pre-parent{
 	margin-bottom: 16px;
 }
+.markdown-source-view.mod-cm6 .code-styler-pre-parent{
+	margin-bottom: 0px;
+}
 .code-styler pre.code-styler-pre {
 	overflow: hidden !important;
 	min-height: unset;
@@ -204,7 +207,8 @@ pre.code-styler-pre.code-styler-folded .code-styler-header-container {
 pre.code-styler-pre.code-styler-folded .code-styler-header-container .code-styler-header-language-tag {
 	border-radius: var(--border-radius);
 }
-.code-styler-header-text {
+.code-styler-header-text,
+.code-styler-header-external-reference > div {
 	display: flex;
 	flex-direction: column;
 	align-content: center;
@@ -224,6 +228,24 @@ body .code-styler-header-container:not(:has( div > img.code-styler-icon)) .code-
 }
 body .code-styler-header-container:not(:has( .code-styler-header-language-tag)) .code-styler-header-text {
 	padding-left: var(--header-spacing);
+}
+.code-styler-header-external-reference {
+	display: contents;
+	margin-left: var(--header-spacing);
+}
+.code-styler-header-external-reference > div:first-child {
+	padding-left: var(--header-spacing) !important;
+}
+.code-styler-header-external-reference > div {
+	padding-left: 6px;
+	font-size: var(--font-adaptive-smallest, xx-small);
+}
+div.external-reference-repo {
+	color: var(--code-styler-external-reference-repo-color, cyan);
+}
+div.external-reference-ref,
+div.external-reference-ref-icon {
+	color: var(--code-styler-external-reference-ref-color, pink);
 }
 div:has(> img.code-styler-icon) {
 	display: inline-flex;

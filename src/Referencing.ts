@@ -1,38 +1,8 @@
-import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, normalizePath, requestUrl, request } from "obsidian";
-import { parseReferenceParameters } from "src/Parsing/ReferenceParsing";
+import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, normalizePath, request } from "obsidian";
+import { Reference, parseExternalReference, parseReferenceParameters } from "src/Parsing/ReferenceParsing";
 import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK } from "src/Settings";
 import CodeStylerPlugin from "src/main";
 import { renderSpecificReadingSection } from "./ReadingView";
-
-export interface Reference {
-	startLine: number;
-	code: string;
-	language: string;
-	path: string;
-	external?: {
-		storePath: string,
-		website: string,
-		info: ExternalReferenceInfo;
-	}
-}
-
-interface ExternalReferenceInfo {
-	title: string,
-	url: string,
-	site: string,
-	datetime: string,
-	rawUrl: string,
-	displayUrl?: string,
-	author?: string,
-	repository?: string,
-	path?: string,
-	fileName?: string,
-	refInfo?: {
-		ref: string,
-		type: string,
-		hash: string
-	}
-}
 
 export async function referenceCodeblockProcessor(source: string, codeblockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeStylerPlugin) {
 	const codeblockSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(codeblockElement);
@@ -72,6 +42,8 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 			reference.external.info = { ...reference.external.info, ...JSON.parse(await plugin.app.vault.adapter.read(reference.external.storePath + EXTERNAL_REFERENCE_INFO_SUFFIX)) };
 		}
 		const vaultPath = getPath(referenceParameters.filePath, sourcePath, plugin);
+		if (referenceParameters.filePath.startsWith("[[") && referenceParameters.filePath.endsWith("]]"))
+			reference.path = vaultPath;
 		if (!(await plugin.app.vault.adapter.exists(vaultPath)))
 			throw Error(`Local File does not exist at ${vaultPath}`);
 		const codeContent = (await plugin.app.vault.adapter.read(vaultPath)).trim();
@@ -101,53 +73,6 @@ async function updateExternalReference(reference: Reference, plugin: CodeStylerP
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string + EXTERNAL_REFERENCE_INFO_SUFFIX, JSON.stringify(sourceInfo));
 	} catch(error) {
 		throw Error(`Could not download file: ${error}`);
-	}
-}
-
-export async function parseExternalReference(reference: Reference): Promise<Partial<ExternalReferenceInfo>> {
-	try {
-		if (reference.external?.website === "github") {
-			reference.path = (reference.path.split("?")[0]).replace(/(?<=github.com\/.*\/.*\/)raw(?=\/)/,"/blob/");
-			const info = (await requestUrl({ url: reference.path, method: "GET", headers: { "Accept": "application/json", "Content-Type": "application/json" } })).json;
-			return {
-				title: info.title,
-				rawUrl: info.payload.blob.rawBlobUrl,
-				displayUrl: reference.path,
-				author: info.payload.repo.ownerLogin,
-				repository: info.payload.repo.name,
-				path: info.payload.path,
-				fileName: info.payload.blob.displayName,
-				refInfo: {
-					ref: info.payload.refInfo.name,
-					type: info.payload.refInfo.refType,
-					hash: info.payload.refInfo.currentOid
-				}
-			};
-		} else if (reference.external?.website === "gitlab")
-			//TODO (@mayurankv) Update
-			return {
-				title: "",
-				rawUrl: "",
-			};
-		else if (reference.external?.website === "bitbucket")
-			//TODO (@mayurankv) Update
-			return {
-				title: "",
-				rawUrl: "",
-			};
-		else if (reference.external?.website === "sourceforge")
-			//TODO (@mayurankv) Update
-			return {
-				title: "",
-				rawUrl: "",
-			};
-		else
-			//TODO (@mayurankv) Update
-			return {
-				title: "",
-			};
-	} catch (error) {
-		throw Error(`Could not parse external URL: ${error}`);
 	}
 }
 
