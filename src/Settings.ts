@@ -667,11 +667,11 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 export const FOLD_PLACEHOLDER = "Folded Code";
 export const PARAMETERS = ["title","fold","ln","wrap","unwrap","ignore"];
 export const TRANSITION_LENGTH = 240; // 240ms
-export const SPECIAL_LANGUAGES = ["^reference$","^preview$","^include$","^output$","^run-.+$"];
+export const SPECIAL_LANGUAGES = ["^reference$","^foofoo","^preview$","^include$","^output$","^run-.+$"];
 export const SETTINGS_SOURCEPATH_PREFIX = "@Code-Styler-Settings:";
 export const LOCAL_PREFIX = "@/";
 export const REFERENCE_CODEBLOCK = "reference";
-export const EXTERNAL_REFERENCE_PATH = ".obsidian/plugins/code-styler/reference-files/";
+export const EXTERNAL_REFERENCE_PATH = "/plugins/code-styler/reference-files/";
 export const EXTERNAL_REFERENCE_INFO_SUFFIX = "-info.json";
 export const GIT_ICONS: { [key: string]: string } = {
 	"branch": "&#xe0a0;",

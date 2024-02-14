@@ -1,4 +1,8 @@
 Features:
+	Other:
+		☐ YAML Frontmatter Highlighting
+			☐ https://raw.githubusercontent.com/deathau/cm-editor-syntax-highlight-obsidian/main/mode/yaml-frontmatter/yaml-frontmatter.js
+
 	Code Referencing:
 		☐ reference codeblock syntax highlighting
 		☐ Local reference

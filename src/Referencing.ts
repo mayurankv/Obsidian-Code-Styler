@@ -37,7 +37,7 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 			const externalReferenceId = idExternalReference(reference.path);
 			reference.external = {
 				website: externalReferenceId.website,
-				storePath: EXTERNAL_REFERENCE_PATH + externalReferenceId.id,
+				storePath: plugin.app.vault.configDir + EXTERNAL_REFERENCE_PATH + externalReferenceId.id,
 				info: {title: "", url: reference.path, site: externalReferenceId.website, datetime: "", rawUrl: reference.path},
 			};
 			referenceParameters.filePath = await accessExternalReference(reference, plugin);
