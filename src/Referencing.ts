@@ -36,7 +36,7 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 			reference.external = {
 				website: externalReferenceId.website,
 				storePath: EXTERNAL_REFERENCE_PATH + externalReferenceId.id,
-				info: {title: "", url: reference.path, site: externalReferenceId.website, rawUrl: reference.path},
+				info: {title: "", url: reference.path, site: externalReferenceId.website, datetime: "", rawUrl: reference.path},
 			};
 			referenceParameters.filePath = await accessExternalReference(reference, plugin);
 			reference.external.info = { ...reference.external.info, ...JSON.parse(await plugin.app.vault.adapter.read(reference.external.storePath + EXTERNAL_REFERENCE_INFO_SUFFIX)) };

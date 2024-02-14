@@ -68,10 +68,11 @@ export function parseReferenceParameters(source: string): ReferenceParameters {
 }
 
 export async function parseExternalReference(reference: Reference): Promise<Partial<ExternalReferenceInfo>> {
+	const HEADERS = { "Accept": "application/json", "Content-Type": "application/json" };
 	try {
 		if (reference.external?.website === "github") {
-			reference.path = (reference.path.split("?")[0]).replace(/(?<=github.com\/.*\/.*\/)raw(?=\/)/,"/blob/");
-			const info = (await requestUrl({ url: reference.path, method: "GET", headers: { "Accept": "application/json", "Content-Type": "application/json" } })).json;
+			reference.path = (reference.path.split("?")[0]).replace(/(?<=github.com\/.*\/.*\/)raw(?=\/)/,"blob");
+			const info = (await requestUrl({url: reference.path, method: "GET", headers: HEADERS})).json;
 			return {
 				title: info.payload.blob.displayName, // title: info.title,
 				rawUrl: info.payload.blob.rawBlobUrl,
@@ -87,33 +88,46 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 					hash: info.payload.refInfo.currentOid
 				}
 			};
-		} else if (reference.external?.website === "gitlab")
+		} else if (reference.external?.website === "gitlab") {
+			reference.path = (reference.path.split("?")[0]).replace(/(?<=gitlab.com\/.*\/.*\/)raw(?=\/)/, "blob");
+			const info = (await requestUrl({ url: reference.path, method: "GET", headers: HEADERS })).json;
+			//TODO (@mayurankv) Update
+			return {
+				title: info.name,
+				rawUrl: info.raw_path,
+				datetime: timeStamp(),
+				displayUrl: reference.path,
+				author: reference.path.match(/(?<=^https?:\/\/gitlab.com\/).*?(?=\/)/)?.[0] ?? "",
+				repository: reference.path.match(/(?<=^https?:\/\/gitlab.com\/.*?\/).*?(?=\/)/)?.[0] ?? "",
+				path: info.path,
+				fileName: info.name,
+				refInfo: {
+					ref: "", //TODO (@mayurankv) Parse from url
+					type: "",  //TODO (@mayurankv) Parse from url
+					hash: info.last_commit_sha
+				}
+			};
+		}  else if (reference.external?.website === "bitbucket") {
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
 				rawUrl: "",
 				datetime: timeStamp(),
 			};
-		else if (reference.external?.website === "bitbucket")
+		} else if (reference.external?.website === "sourceforge") {
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
 				rawUrl: "",
 				datetime: timeStamp(),
 			};
-		else if (reference.external?.website === "sourceforge")
-			//TODO (@mayurankv) Update
-			return {
-				title: "",
-				rawUrl: "",
-				datetime: timeStamp(),
-			};
-		else
+		} else {
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
 				datetime: timeStamp(),
 			};
+		}
 	} catch (error) {
 		throw Error(`Could not parse external URL: ${error}`);
 	}

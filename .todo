@@ -2,23 +2,23 @@ Features:
 	Code Referencing:
 		☐ Codeblock syntax highlighting
 		☐ Local reference
-			☐ Prevent clicking links causing fold
-			☐ Regex finding lines
-			☐ File watcher?
+			☐ Prevent clicking links causing fold (@low)
+			☐ Regex finding lines (@high)
+			☐ File watcher? (@low)
 		☐ External Referencing
-			☐ base64 encode and bundle font (check license)
-			☐ Update button
+			☐ base64 encode and bundle font (check license) (@low)
+			☐ Update button (@medium)
 				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
 				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)
-			☐ Add colours to settings
+			☐ Add colours to settings (@medium)
 				☐ Update settings converter to reflect
-			☐ Non github compatibility
-			☐ Allow iframe
-		☐ LaTeX Functionality
+			☐ Non github compatibility (@low)
+			☐ Allow iframe (@low)
+		☐ LaTeX Functionality (@low)
 			☐ Compiling and Previewing
 		☐ Me
-			☐ Ligatures
-			☐ Nerdfonts
+			☐ Ligatures (@low)
+			☐ Nerdfonts (@low)
 
 	Codeblocks:
 		Implementation:
