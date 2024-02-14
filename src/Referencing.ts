@@ -1,5 +1,5 @@
 import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, normalizePath, request } from "obsidian";
-import { Reference, parseExternalReference, parseReferenceParameters } from "src/Parsing/ReferenceParsing";
+import { Reference, getLineLimits, parseExternalReference, parseReferenceParameters } from "src/Parsing/ReferenceParsing";
 import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK } from "src/Settings";
 import CodeStylerPlugin from "src/main";
 import { renderSpecificReadingSection } from "./ReadingView";
@@ -22,15 +22,17 @@ function renderFile(reference: Reference, codeblockElement: HTMLElement, context
 }
 
 export async function getReference(codeblockLines: Array<string>, sourcePath: string, plugin: CodeStylerPlugin): Promise<Reference> {
-	const referenceParameters = parseReferenceParameters(codeblockLines.slice(1,-1).join("\n"));
 	const reference: Reference = {
 		code: "",
-		language: referenceParameters.language,
+		language: "",
 		startLine: 1,
-		path: referenceParameters.filePath,
+		path: "",
 	};
 
 	try {
+		const referenceParameters = parseReferenceParameters(codeblockLines.slice(1, -1).join("\n"));
+		reference.language = referenceParameters.language;
+		reference.path = referenceParameters.filePath;
 		if (/^https?:\/\//.test(referenceParameters.filePath)) {
 			const externalReferenceId = idExternalReference(reference.path);
 			reference.external = {
@@ -47,10 +49,11 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 		if (!(await plugin.app.vault.adapter.exists(vaultPath)))
 			throw Error(`Local File does not exist at ${vaultPath}`);
 		const codeContent = (await plugin.app.vault.adapter.read(vaultPath)).trim();
-		//TODO (@mayurankv) Get starting line number
-		reference.code = ["```", referenceParameters.language," ",codeblockLines[0].substring(REFERENCE_CODEBLOCK.length).trim(), "\n", codeContent, "\n", "```"].join("");
+		const codeSectionInfo = getLineLimits(codeContent, referenceParameters);
+		reference.startLine = codeSectionInfo.startLine;
+		reference.code = ["```", referenceParameters.language," ",codeblockLines[0].substring(REFERENCE_CODEBLOCK.length).trim(), "\n", codeSectionInfo.codeSection, "\n", "```"].join("");
 	} catch (error) {
-		reference.code = `> [!error] ${(error instanceof Error) ? error.message : String(error)}`;
+		reference.code = `> [!error] ${((error instanceof Error) ? error.message : String(error)).replace(/\n/g,"\n>")}`;
 	}
 	return reference;
 }
@@ -68,6 +71,7 @@ async function accessExternalReference(reference: Reference, plugin: CodeStylerP
 async function updateExternalReference(reference: Reference, plugin: CodeStylerPlugin) {
 	try {
 		const sourceInfo = await parseExternalReference(reference);
+		console.log(sourceInfo.rawUrl ?? reference.path);
 		const content = await request(sourceInfo.rawUrl ?? reference.path);
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string, content);
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string + EXTERNAL_REFERENCE_INFO_SUFFIX, JSON.stringify(sourceInfo));
@@ -78,6 +82,8 @@ async function updateExternalReference(reference: Reference, plugin: CodeStylerP
 
 function idExternalReference(fileLink: string): {id: string, website: string} {
 	const linkInfo = /^https?:\/\/(.+)\.com\/(.+)$/.exec(fileLink);
+	console.log(fileLink);
+	console.log(linkInfo);
 	if (!linkInfo?.[1] || !linkInfo?.[2])
 		throw Error("No such repository could be found");
 	return {id: [linkInfo[1], ...linkInfo[2].split("/")].join("-"), website: linkInfo[1]};

@@ -217,7 +217,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		codeblockParameters: CodeblockParameters;
 		maxLineNum: number;
 		empty: boolean;
-	
+
 		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, maxLineNum: number, empty: boolean = false) {
 			super();
 			this.lineNumber = lineNumber;
@@ -225,11 +225,11 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			this.maxLineNum = maxLineNum;
 			this.empty = empty;
 		}
-	
+
 		eq(other: LineNumberWidget): boolean {
 			return this.lineNumber === other.lineNumber && this.codeblockParameters.lineNumbers.alwaysEnabled === other.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled === other.codeblockParameters.lineNumbers.alwaysDisabled && this.codeblockParameters.lineNumbers.offset === other.codeblockParameters.lineNumbers.offset && this.maxLineNum === other.maxLineNum && this.empty === other.empty;
 		}
-	
+
 		toDOM(): HTMLElement {
 			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: "code-styler-line-number", text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
 		}
@@ -262,7 +262,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		iconURL: string | undefined;
 		folded: boolean;
 		hidden: boolean;
-	
+
 		constructor(codeblockParameters: CodeblockParameters, folded: boolean, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin) {
 			super();
 			this.codeblockParameters = structuredClone(codeblockParameters);
@@ -273,7 +273,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			this.folded = folded;
 			this.hidden = isHeaderHidden(this.codeblockParameters,this.themeSettings,this.iconURL);
 		}
-			
+
 		eq(other: HeaderWidget): boolean {
 			return (
 				this.codeblockParameters.language === other.codeblockParameters.language &&
@@ -288,7 +288,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				this.iconURL === other.iconURL
 			);
 		}
-			
+
 		toDOM(view: EditorView): HTMLElement {
 			const headerContainer = createHeader(this.codeblockParameters,this.themeSettings,this.sourcePath,this.plugin);
 			if (this.codeblockParameters.language!=="")
@@ -296,7 +296,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			if (this.folded)
 				headerContainer.classList.add("code-styler-header-folded");
 			headerContainer.onclick = (event) => {
-				if (!(event.target as HTMLElement)?.classList?.contains("internal-link"))
+				if (!(event.target as HTMLElement)?.classList?.contains("internal-link") && !(event.target as HTMLElement)?.classList?.contains("external-link"))
 					foldOnClick(view,headerContainer,this.folded,this.codeblockParameters.language);
 			};
 			return headerContainer;
@@ -393,7 +393,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					const commentText = state.sliceDoc(syntaxNode.from,syntaxNode.to);
 					const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)];
 					linkMatches.forEach((linkMatch: RegExpMatchArray) => {
-						if (linkMatch?.index === undefined)
+						if (typeof linkMatch?.index === "undefined")
 							return;
 						const from = syntaxNode.from + linkMatch.index;
 						const to = from + linkMatch[0].length;
@@ -445,7 +445,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 		modeHighlight({start: parameters.to, text: text.value, language: parameters.value.language},builder);
 	}
-	
+
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		for (let iter = (transaction.state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) { //TODO (@mayurankv) Refactor: Try and make this startState

@@ -1,4 +1,4 @@
-import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS, STAMP_ICON, SITE_ICONS } from "./Settings";
+import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS, STAMP_ICON, SITE_ICONS, UPDATE_ICON } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { MarkdownRenderer } from "obsidian";
@@ -43,18 +43,21 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 	externalReferenceContainer.appendChild(siteIcon);
 	externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-repo", text: codeblockParameters?.externalReference?.author + "/" + codeblockParameters?.externalReference?.repository }));
 	const refIcon = createDiv({ cls: "external-reference-ref-icon" });
-	if (codeblockParameters?.externalReference?.refInfo?.type === "branch")
-		refIcon.innerHTML = GIT_ICONS["branch"];
-	else if (codeblockParameters?.externalReference?.refInfo?.type === "tree")
-		refIcon.innerHTML = GIT_ICONS["commit"];
-	else
-		refIcon.innerHTML = GIT_ICONS["branch"];
+	refIcon.innerHTML = GIT_ICONS?.[codeblockParameters?.externalReference?.refInfo?.type as string] ?? GIT_ICONS["branch"];
 	externalReferenceContainer.appendChild(refIcon);
 	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-ref", text: codeblockParameters?.externalReference?.refInfo?.ref as string}));
 	const stampIcon = createDiv({ cls: "external-reference-timestamp-icon" });
 	stampIcon.innerHTML = STAMP_ICON;
 	externalReferenceContainer.appendChild(stampIcon);
 	externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-timestamp", text: codeblockParameters?.externalReference?.datetime as string }));
+	const updateIcon = createEl("button", { cls: "external-reference-update-icon"});
+	updateIcon.innerHTML = UPDATE_ICON;
+	updateIcon.title = "Update Reference";
+	updateIcon.addEventListener("click", (event) => {
+		// TODO (@mayurankv) Update codeblock
+		event.stopPropagation();
+	});
+	externalReferenceContainer.appendChild(updateIcon);
 	return externalReferenceContainer;
 }
 function createExecuteCodeContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, plugin: CodeStylerPlugin): HTMLElement {

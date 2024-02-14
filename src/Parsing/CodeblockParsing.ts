@@ -159,7 +159,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 }
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === "reference") {
-		if (sourcePath === undefined)
+		if (typeof sourcePath === "undefined")
 			throw Error("Reference block has undefined sourcePath");
 		codeblockParameters = await adjustReference(codeblockParameters, codeblockLines, sourcePath, plugin);
 	}  else if (codeblockParameters.language === "preview")

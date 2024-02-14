@@ -213,7 +213,8 @@ pre.code-styler-pre.code-styler-folded .code-styler-header-container .code-style
 	border-radius: var(--border-radius);
 }
 .code-styler-header-text,
-.code-styler-header-external-reference > div {
+.code-styler-header-external-reference > div,
+pre.code-styler-pre .code-styler-header-external-reference > button {
 	display: flex;
 	flex-direction: column;
 	align-content: center;
@@ -226,6 +227,17 @@ pre.code-styler-pre.code-styler-folded .code-styler-header-container .code-style
 	font-style: var(--code-styler-header-title-text-italic, normal);
 	font-weight: var(--code-styler-header-title-text-bold, normal);
 	transition: padding ease-in-out var(--duration-button);
+}
+pre.code-styler-pre .code-styler-header-external-reference > button {
+	display: inline-flex !important;
+	height: auto;
+	padding-top: calc(1em * var(--header-inner-vertical-padding)) !important;
+	padding-bottom: calc(1em * var(--header-inner-vertical-padding)) !important;
+	padding-left: 6px !important;
+	transition:  padding ease-in-out var(--duration-button), scale ease-in-out var(--duration-button), visibility var(--duration-button), opacity var(--duration-button) !important;
+}
+pre.code-styler-pre .code-styler-header-external-reference > button:hover {
+	scale: 1.4;
 }
 body .code-styler-header-container:not(:has( div > img.code-styler-icon)) .code-styler-header-language-tag {
 	border-bottom-left-radius: 0 !important;
@@ -241,7 +253,8 @@ body .code-styler-header-container:not(:has( .code-styler-header-language-tag)) 
 .code-styler-header-external-reference > div:first-child {
 	padding-left: var(--header-spacing) !important;
 }
-.code-styler-header-external-reference > div {
+.code-styler-header-external-reference > div,
+pre.code-styler-pre .code-styler-header-external-reference > button {
 	padding-left: 6px;
 	font-family: code-styler-nerdfont, menlo, var(--font-monospace);
 	font-size: var(--code-styler-external-reference-text-size,xx-small);

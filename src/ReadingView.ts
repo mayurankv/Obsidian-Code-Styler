@@ -292,7 +292,7 @@ function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string
 function convertCommentLinks(result: Array<ElementContent>, commentText: string, sourcePath: string, plugin: CodeStylerPlugin): Array<ElementContent> {
 	const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)].reverse();
 	const newChildren = linkMatches.reduce((result: Array<ElementContent>, linkMatch: RegExpMatchArray): Array<ElementContent> => {
-		if (linkMatch?.index === undefined)
+		if (typeof linkMatch?.index === "undefined")
 			return result;
 		const ending = commentText.slice(linkMatch.index + linkMatch[0].length);
 		result.push({type: "text",value: ending});

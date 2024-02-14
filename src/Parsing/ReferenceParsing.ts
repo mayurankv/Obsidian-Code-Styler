@@ -12,11 +12,13 @@ export interface Reference {
 	}
 }
 
+type LineIdentifier = null | string | number | RegExp;
+
 export interface ReferenceParameters {
 	filePath: string;
 	language: string;
-	start?: string | number | RegExp;
-	end?: string | number | RegExp;
+	start: LineIdentifier;
+	end: LineIdentifier;
 }
 
 export interface ExternalReferenceInfo {
@@ -55,15 +57,11 @@ export function parseReferenceParameters(source: string): ReferenceParameters {
 		throw Error("YAML Parse Error");
 	passedParameters = passedParameters as PassedParameters;
 	const filePath = passedParameters?.filePath ?? passedParameters?.file ?? passedParameters?.path ?? passedParameters?.link;
-	if (filePath === undefined)
+	if (typeof filePath === "undefined")
 		throw Error("No file specified");
-	const referenceParameters: ReferenceParameters = {filePath: filePath, language: passedParameters?.language ?? passedParameters?.lang ?? getLanguage(filePath)};
-	const start = getLineIdentifier(String(passedParameters.start));
-	if (start !== undefined)
-		referenceParameters.start = start;
-	const end = getLineIdentifier(String(passedParameters.end));
-	if (end !== undefined)
-		referenceParameters.end = end;
+	const referenceParameters: ReferenceParameters = {filePath: filePath, language: passedParameters?.language ?? passedParameters?.lang ?? getLanguage(filePath), start: null, end: null};
+	referenceParameters.start = getLineIdentifier(passedParameters.start);
+	referenceParameters.end = getLineIdentifier(passedParameters.end);
 	return referenceParameters;
 }
 
@@ -94,7 +92,7 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 			//TODO (@mayurankv) Update
 			return {
 				title: info.name,
-				rawUrl: info.raw_path,
+				rawUrl: "https://gitlab.com" + info.raw_path,
 				datetime: timeStamp(),
 				displayUrl: reference.path,
 				author: reference.path.match(/(?<=^https?:\/\/gitlab.com\/).*?(?=\/)/)?.[0] ?? "",
@@ -125,6 +123,7 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 			//TODO (@mayurankv) Update
 			return {
 				title: "",
+				rawUrl: reference.path,
 				datetime: timeStamp(),
 			};
 		}
@@ -133,9 +132,54 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 	}
 }
 
-function getLineIdentifier(lineIdentifier: string | undefined): RegExp | string | number | undefined {
-	if (lineIdentifier === undefined)
-		return undefined;
+function getLanguage(filePath: string): string {
+	if (filePath.startsWith("[[") && filePath.endsWith("]]"))
+		filePath = filePath.slice(2, -2);
+	return filePath.slice((filePath.lastIndexOf(".") - 1 >>> 0) + 2);
+}
+
+export function getLineLimits(codeContent: string, referenceParameters: ReferenceParameters): { codeSection: string, startLine: number } {
+	try {
+		const lines = codeContent.split("\n");
+		let startIndex: number;
+		let endIndex: number;
+		if (referenceParameters.start === null)
+			startIndex = 0;
+		else if (typeof referenceParameters.start === "number")
+			startIndex = referenceParameters.start - 1;
+		else if ((referenceParameters.start as string)?.startsWith("/") && (referenceParameters.start as string)?.endsWith("/")) {
+			const startRegex = new RegExp((referenceParameters.start as string).replace(/^\/(.*)\/$/, "$1"));
+			startIndex = lines.findIndex((line) => startRegex.test(line));
+		} else
+			startIndex = lines.findIndex((line) => line.indexOf(referenceParameters.start as string) > -1);
+		if (referenceParameters.end === null)
+			endIndex = lines.length - 1;
+		else if (typeof referenceParameters.end === "number")
+			endIndex = referenceParameters.end - 1;
+		else if ((referenceParameters.end as string)?.startsWith("/") && (referenceParameters.end as string)?.endsWith("/")) {
+			const endRegex = new RegExp((referenceParameters.end as string).replace(/^\/(.*)\/$/, "$1"));
+			endIndex = lines.findIndex((line) => endRegex.test(line));
+		} else if ((referenceParameters.end as string)?.startsWith("+"))
+			endIndex = startIndex + Number((referenceParameters.end as string).slice(1));
+		else
+			endIndex = lines.findIndex((line) => line.indexOf(referenceParameters.end as string) > -1);
+		if (startIndex > endIndex)
+			throw Error("Specified Start line is afterthe specified End line");
+		else if (startIndex === -1)
+			throw Error("Start line could not be found");
+		else if (endIndex === -1)
+			throw Error("End line could not be found");
+		return { codeSection: lines.slice(startIndex, endIndex + 1).join("\n"), startLine: startIndex + 1 };
+	} catch (error) {
+		throw Error(error);
+	}
+}
+
+function getLineIdentifier(lineIdentifier: string | number | undefined): LineIdentifier {
+	if (typeof lineIdentifier === "undefined")
+		return null;
+	else if (typeof lineIdentifier === "number")
+		return lineIdentifier;
 	else if (/^\/(.*)\/$/.test(lineIdentifier)) { // Regex
 		try {
 			return new RegExp(lineIdentifier.replace(/^\/(.*)\/$/, "$1"));
@@ -150,12 +194,7 @@ function getLineIdentifier(lineIdentifier: string | undefined): RegExp | string 
 		return lineIdentifier;
 	else if (/\d+/.test(lineIdentifier)) // Plain Number
 		return parseInt(lineIdentifier);
-}
-
-function getLanguage(filePath: string): string {
-	if (filePath.startsWith("[[") && filePath.endsWith("]]"))
-		filePath = filePath.slice(2, -2);
-	return filePath.slice((filePath.lastIndexOf(".") - 1 >>> 0) + 2);
+	return null;
 }
 
 export function timeStamp(): string {
