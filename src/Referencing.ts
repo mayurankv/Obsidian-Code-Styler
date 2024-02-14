@@ -71,7 +71,6 @@ async function accessExternalReference(reference: Reference, plugin: CodeStylerP
 async function updateExternalReference(reference: Reference, plugin: CodeStylerPlugin) {
 	try {
 		const sourceInfo = await parseExternalReference(reference);
-		console.log(sourceInfo.rawUrl ?? reference.path);
 		const content = await request(sourceInfo.rawUrl ?? reference.path);
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string, content);
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string + EXTERNAL_REFERENCE_INFO_SUFFIX, JSON.stringify(sourceInfo));
@@ -82,8 +81,6 @@ async function updateExternalReference(reference: Reference, plugin: CodeStylerP
 
 function idExternalReference(fileLink: string): {id: string, website: string} {
 	const linkInfo = /^https?:\/\/(.+)\.com\/(.+)$/.exec(fileLink);
-	console.log(fileLink);
-	console.log(linkInfo);
 	if (!linkInfo?.[1] || !linkInfo?.[2])
 		throw Error("No such repository could be found");
 	return {id: [linkInfo[1], ...linkInfo[2].split("/")].join("-"), website: linkInfo[1]};

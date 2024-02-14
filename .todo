@@ -1,12 +1,13 @@
 Features:
 	Code Referencing:
-		☐ Codeblock syntax highlighting
+		☐ reference codeblock syntax highlighting
 		☐ Local reference
 			☐ Prevent clicking reading mode external links causing fold (@low)
 			☐ File watcher? (@low)
 		☐ External Referencing
 			☐ base64 encode and bundle font (check license) (@low)
 			☐ Update button (@medium)
+				☐ Update inplace
 				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
 				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)
 			☐ Add colours to settings (@medium)
