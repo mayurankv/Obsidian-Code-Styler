@@ -6,9 +6,11 @@ export interface InlineCodeParameters {
 }
 
 export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
-	const match = /^{((?:[^"'{}\\]|\\.|"([^"\\]|\\.)*"|'([^'\\]|\\.)*')*)} *?([^ ].*)$/.exec(codeText);
+	const match = /^{((?:[^"'{}\\]|\\.|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')*)} *?([^ ].*)$/.exec(codeText);
 
+	console.log(match);
 	if (typeof match?.[1] !== "undefined" && typeof match?.[2] !== "undefined") {
+		console.log(match);
 		if (match[1] === "")
 			return {parameters: null, text: match[2]};
 		else

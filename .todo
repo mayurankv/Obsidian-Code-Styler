@@ -56,6 +56,7 @@ Features:
 	Inline Code:
 		☐ Add copy button via settings and parameter #88
 		☐ Add optional pandoc style marking
+		☐ Empty backticks followed by new line "``\n" disappear
 
 	General:
 		Improvements:
