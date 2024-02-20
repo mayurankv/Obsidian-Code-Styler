@@ -6,6 +6,7 @@ import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
 import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
 import { referenceCodeblockProcessor } from "./Referencing";
+import { addModes, removeModes } from "./SyntaxHighlighting";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -39,13 +40,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 
-		//@ts-expect-error Undocumented Obsidian API
-		window.CodeMirror.modeInfo.push({
-			name: "reference",
-			mime: "text/reference",
-			mode: "reference",
-			ext: ["reference"]
-		});
+		addModes();
 		this.registerMarkdownCodeBlockProcessor(REFERENCE_CODEBLOCK, async (source, el, ctx) => { await referenceCodeblockProcessor(source, el, ctx, this);});
 
 		this.registerMarkdownPostProcessor(async (el,ctx) => {await readingViewCodeblockDecoratingPostProcessor(el,ctx,this);}); // Add codeblock decorating markdownPostProcessor
@@ -113,11 +108,7 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	onunload() {
-		//@ts-expect-error Undocumented Obsidian API
-		const referenceModeIndex = window.CodeMirror.modeInfo.findIndex((mode) => mode.mode === "reference");
-		if (referenceModeIndex !== -1)
-			//@ts-expect-error Undocumented Obsidian API
-			window.CodeMirror.modeInfo.splice(referenceModeIndex, 1);
+		removeModes();
 		this.executeCodeMutationObserver.disconnect();
 		removeStylesAndClasses();
 		destroyReadingModeElements();

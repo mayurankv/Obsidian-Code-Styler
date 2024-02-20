@@ -9,7 +9,6 @@ export function parseInlineCode(codeText: string): {parameters: InlineCodeParame
 	const match = /^{((?:[^"'{}\\]|\\.|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')*)} *?([^ ].*)$/.exec(codeText);
 
 	if (typeof match?.[1] !== "undefined" && typeof match?.[2] !== "undefined") {
-		console.log(match);
 		if (match[1] === "")
 			return {parameters: null, text: match[2]};
 		else
