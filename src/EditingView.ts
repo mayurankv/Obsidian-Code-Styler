@@ -23,8 +23,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const interaction = ViewPlugin.fromClass(
 		class ExamplePlugin implements PluginValue {
 			constructor() {
-				addReferenceSyntaxHighlight();
-				addYamlFrontmatterSyntaxHighlighting();
+				addReferenceSyntaxHighlight(window.CodeMirror);
+				addYamlFrontmatterSyntaxHighlighting(window.CodeMirror);
 			} // view: EditorView
 			update() {} // update: ViewUpdate
 			destroy() {}

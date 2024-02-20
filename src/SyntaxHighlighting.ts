@@ -26,8 +26,8 @@ function removeMode(modeName: string) {
 		window.CodeMirror.modeInfo.splice(modeIndex, 1);
 }
 
-export function addReferenceSyntaxHighlight() {
-	window.CodeMirror.defineMode("reference", function(config, parserConfig) {
+export function addReferenceSyntaxHighlight(CodeMirror: typeof window.CodeMirror) {
+	CodeMirror.defineMode("reference", function(config, parserConfig) {
 		const keyPattern = /^([a-zA-Z0-9_-]+)\s*(?=:)/;
 		const valuePattern = /^(:?(\s*(?:"(?:\\.|[^"])*"|\S+))?)/;
 		return {
@@ -72,14 +72,13 @@ export function addReferenceSyntaxHighlight() {
 			}
 		};
 	});
-	window.CodeMirror.defineMIME("text/reference", "reference");
+	CodeMirror.defineMIME("text/reference", "reference");
 }
-export function addYamlFrontmatterSyntaxHighlighting() {
+export function addYamlFrontmatterSyntaxHighlighting(CodeMirror: typeof window.CodeMirror) {
 	const START = 0, FRONTMATTER = 1, BODY = 2;
-	window.CodeMirror.defineMode("yaml-frontmatter", function(config, parserConfig) {
-		const yamlMode = window.CodeMirror.getMode(config, "yaml");
-		const innerMode = window.CodeMirror.getMode(config, parserConfig?.base ?? "markdown");
-		console.log(parserConfig?.base);
+	CodeMirror.defineMode("yaml-frontmatter", function(config, parserConfig) {
+		const yamlMode = CodeMirror.getMode(config, "yaml");
+		const innerMode = CodeMirror.getMode(config, parserConfig?.base ?? "markdown");
 
 		function curMode(state) {
 			return state.state == BODY ? innerMode : yamlMode;
@@ -89,14 +88,14 @@ export function addYamlFrontmatterSyntaxHighlighting() {
 			startState: () => {
 				return {
 					state: START,
-					inner: window.CodeMirror.startState(yamlMode)
+					inner: CodeMirror.startState(yamlMode)
 				};
 			},
 			copyState: (state) => {
 				return {
 					state: state.state,
 					// @ts-expect-error Hidden Method
-					inner: window.CodeMirror.copyState(curMode(state), state.inner)
+					inner: CodeMirror.copyState(curMode(state), state.inner)
 				};
 			},
 			token: (stream, state) => {
@@ -106,7 +105,7 @@ export function addYamlFrontmatterSyntaxHighlighting() {
 						return yamlMode.token(stream, state.inner);
 					} else {
 						state.state = BODY;
-						state.inner = window.CodeMirror.startState(innerMode);
+						state.inner = CodeMirror.startState(innerMode);
 						return innerMode.token(stream, state.inner);
 					}
 				} else if (state.state == FRONTMATTER) {
@@ -114,21 +113,21 @@ export function addYamlFrontmatterSyntaxHighlighting() {
 					const style = yamlMode.token(stream, state.inner);
 					if (end) {
 						state.state = BODY;
-						state.inner = window.CodeMirror.startState(innerMode);
+						state.inner = CodeMirror.startState(innerMode);
 					}
 					return style;
 				} else {
 					return innerMode.token(stream, state.inner);
 				}
 			},
-			// innerMode: (state) => {
-			// 	return {mode: curMode(state), state: state.inner};
-			// },
+			innerMode: (state) => {
+				return {mode: curMode(state), state: state.inner};
+			},
 			blankLine: (state) => {
 				const mode = curMode(state);
 				if (mode.blankLine) return mode.blankLine(state.inner);
 			}
 		};
 	});
-	window.CodeMirror.defineMIME("text/yaml-frontmatter", "yaml-frontmatter");
+	CodeMirror.defineMIME("text/yaml-frontmatter", "yaml-frontmatter");
 }
