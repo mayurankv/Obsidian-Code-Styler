@@ -136,6 +136,8 @@ export async function updateExternalReference(reference: Reference, plugin: Code
 	try {
 		const sourceInfo = await parseExternalReference(reference);
 		const content = await request(sourceInfo.rawUrl ?? reference.path);
+		console.log(reference?.external?.storePath);
+		console.log(plugin.app.vault);
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string, content);
 		await plugin.app.vault.adapter.write(reference?.external?.storePath as string + EXTERNAL_REFERENCE_INFO_SUFFIX, JSON.stringify(sourceInfo));
 	} catch(error) {

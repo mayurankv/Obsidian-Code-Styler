@@ -19,7 +19,7 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 		}
 		headerContainer.appendChild(createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin));
 		if (true && codeblockParameters?.externalReference) //TODO (@mayurankv) Add settings toggle
-			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, themeSettings));
+			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, plugin));
 		if (false) //TODO (@mayurankv) Add settings toggle
 			headerContainer.appendChild(createExecuteCodeContainer(codeblockParameters, themeSettings, plugin));
 	} else
@@ -55,8 +55,10 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 	const updateIcon = createEl("button", { cls: "external-reference-update-icon"});
 	updateIcon.innerHTML = UPDATE_ICON;
 	updateIcon.title = "Update Reference";
-	updateIcon.addEventListener("click", async (_event) => {
+	updateIcon.addEventListener("click", async (event) => {
+		console.log("foo");
 		await updateExternalReference(codeblockParameters?.externalReference as Reference, plugin);
+		event.stopPropagation();
 	});
 	externalReferenceContainer.appendChild(updateIcon);
 	return externalReferenceContainer;
