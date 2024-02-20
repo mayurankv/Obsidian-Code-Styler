@@ -1,7 +1,7 @@
 import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS, STAMP_ICON, SITE_ICONS, UPDATE_ICON } from "./Settings";
 import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
-import { MarkdownRenderer } from "obsidian";
+import { MarkdownRenderer, MarkdownView } from "obsidian";
 import CodeStylerPlugin from "./main";
 import { updateExternalReference } from "./Referencing";
 import { Reference } from "./Parsing/ReferenceParsing";
@@ -19,7 +19,7 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 		}
 		headerContainer.appendChild(createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin));
 		if (true && codeblockParameters?.externalReference) //TODO (@mayurankv) Add settings toggle
-			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, plugin));
+			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, sourcePath, plugin));
 		if (false) //TODO (@mayurankv) Add settings toggle
 			headerContainer.appendChild(createExecuteCodeContainer(codeblockParameters, themeSettings, plugin));
 	} else
@@ -37,7 +37,7 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,plugin); //TODO (@mayurankv) Add links to metadata cache properly
 	return titleContainer;
 }
-function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin): HTMLElement {
+function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	//TODO (@mayurankv) Add theme settings to conditionally set sections
 	const externalReferenceContainer = createDiv({ cls: "code-styler-header-external-reference" });
 	const siteIcon = createDiv({ cls: "external-reference-repo-icon" });
@@ -56,9 +56,19 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 	updateIcon.innerHTML = UPDATE_ICON;
 	updateIcon.title = "Update Reference";
 	updateIcon.addEventListener("click", async (event) => {
-		console.log("foo");
+		event.stopImmediatePropagation();
 		await updateExternalReference(codeblockParameters?.externalReference as Reference, plugin);
-		event.stopPropagation();
+		const codeblockElement = (event.target as HTMLElement).parentElement?.parentElement?.parentElement?.querySelector("code");
+		if (!codeblockElement)
+			return;
+		codeblockElement.innerHTML = "";
+		MarkdownRenderer.render(plugin.app, codeblockParameters?.externalReference?.code as string, codeblockElement, sourcePath, plugin);
+		referenceCodeblockProcessor()
+		// const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+		// if (view && view?.getMode() === "preview")
+		// 	view?.previewMode.rerender(true);
+		// else if (view)
+		// 	console.log("oh no");
 	});
 	externalReferenceContainer.appendChild(updateIcon);
 	return externalReferenceContainer;
