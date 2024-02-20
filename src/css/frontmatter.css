@@ -1,0 +1,47 @@
+.cm-hmd-frontmatter.cm-inline-code,
+.cm-hmd-frontmatter.cm-math {
+	color: var(--code-normal);
+}
+.cm-hmd-frontmatter.cm-hmd-frontmatter.cm-def.cm-def,
+.cm-hmd-frontmatter.cm-comment,
+.cm-hmd-frontmatter.cm-meta {
+	color: var(--code-comment);
+}
+.cm-hmd-frontmatter.cm-tag {
+	color: var(--code-tag);
+}
+.cm-hmd-frontmatter.cm-punctuation,
+.cm-hmd-frontmatter.cm-bracket,
+.cm-hmd-frontmatter.cm-hr {
+	color: var(--code-punctuation);
+}
+.cm-hmd-frontmatter.cm-number {
+	color: var(--code-value);
+}
+.cm-hmd-frontmatter.cm-qualifier,
+.cm-hmd-frontmatter.cm-string,
+.cm-hmd-frontmatter.cm-string-2 {
+	color: var(--code-string);
+}
+.cm-hmd-frontmatter.cm-operator {
+	color: var(--code-operator);
+}
+.cm-hmd-frontmatter.cm-link,
+.cm-hmd-frontmatter.cm-variable,
+.cm-hmd-frontmatter.cm-variable-2,
+.cm-hmd-frontmatter.cm-variable-3 {
+	color: var(--code-property);
+}
+.cm-hmd-frontmatter,
+.cm-hmd-frontmatter.cm-builtin,
+.cm-hmd-frontmatter.cm-property,
+.cm-hmd-frontmatter.cm-attribute,
+.cm-hmd-frontmatter.cm-type {
+	color: var(--code-function);
+}
+.cm-hmd-frontmatter.cm-keyword {
+	color: var(--code-keyword);
+}
+.cm-hmd-frontmatter.cm-atom {
+	color: var(--code-important)
+}

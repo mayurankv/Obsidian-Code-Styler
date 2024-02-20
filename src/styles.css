@@ -1,6 +1,7 @@
 /** Import stylesheets */
 @import url("./css/codeblocks.css");
 @import url("./css/inlineCode.css");
+@import url("./css/frontmatter.css");
 @import url("./css/pdfExport.css");
 @import url("./css/pickr.css");
 @import url("./css/settings.css");
