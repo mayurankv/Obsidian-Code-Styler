@@ -1,20 +1,18 @@
 Features:
-	Other:
-		☐ Embed other online markdown files?
-
 	Code Referencing:
-		☐ Local reference
+		☐ Embed other online markdown files? (@low)
+		☐ Local reference  (@low)
 			☐ Prevent clicking reading mode external links causing fold (@low)
-			☐ File watcher? (@low)
+			☐ File watcher? Or refresh button? (@low)
 		☐ External Referencing
-			☐ base64 encode and bundle font (check license) (@low)
+			☐ base64 encode and bundle font (check license)
 			☐ Update button (@medium)
 				☐ Update inplace
 				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
 				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)
 			☐ Add colours to settings (@medium)
 				☐ Update settings converter to reflect
-			☐ Non github compatibility (@low)
+			☐ Non github compatibility
 				☐ finish gitlab
 				☐ gitlab based things
 					☐ https://foss.heptapod.net/mercurial/tortoisehg/thg/-/blob/branch/stable/COPYING.txt?ref_type=heads
@@ -22,8 +20,8 @@ Features:
 				☐ sourceforge
 			☐ Allow iframe (@low)
 		☐ LaTeX Functionality (@low)
-			☐ Compiling and Previewing
-		☐ Me
+			☐ Compiling and Previewing (@low)
+		☐ Me (@low)
 			☐ Ligatures (@low)
 			☐ Nerdfonts (@low)
 
@@ -76,7 +74,6 @@ Features:
 
 Bugs:
 	Major Bugs:
-		☐ Inline code regex parsing #208 #212
 		☐ Active Line Highlight not working #207
 		☐ Editing Source Mode Issue? #198
 		☐ Performance Issues #91
@@ -100,7 +97,7 @@ Documentation:
 
 Device Compatibility:
 	Phone:
-		☐ Phone version working badly #20 #99 #151
+		☐ Phone version working badly #20 #151
 
 Upstream:
 	☐ Links don't show up in metadata #203

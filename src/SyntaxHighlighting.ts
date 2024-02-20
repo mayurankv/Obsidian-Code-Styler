@@ -27,7 +27,7 @@ function removeMode(modeName: string) {
 }
 
 export function addReferenceSyntaxHighlight(CodeMirror: typeof window.CodeMirror) {
-	CodeMirror.defineMode("reference", function(config, parserConfig) {
+	CodeMirror.defineMode("reference", function(config, _parserConfig) {
 		const keyPattern = /^([a-zA-Z0-9_-]+)\s*(?=:)/;
 		const valuePattern = /^(:?(\s*(?:"(?:\\.|[^"])*"|\S+))?)/;
 		return {
@@ -73,62 +73,4 @@ export function addReferenceSyntaxHighlight(CodeMirror: typeof window.CodeMirror
 		};
 	});
 	CodeMirror.defineMIME("text/reference", "reference");
-}
-export function addYamlFrontmatterSyntaxHighlighting(CodeMirror: typeof window.CodeMirror) {
-	const START = 0, FRONTMATTER = 1, BODY = 2;
-	CodeMirror.defineMode("yaml-frontmatter", function(config, parserConfig) {
-		const yamlMode = CodeMirror.getMode(config, "yaml");
-		console.log(yamlMode);
-		const innerMode = CodeMirror.getMode(config, parserConfig?.base ?? "markdown");
-
-		function curMode(state) {
-			return state.state == BODY ? innerMode : yamlMode;
-		}
-
-		return {
-			startState: () => {
-				return {
-					state: START,
-					inner: CodeMirror.startState(yamlMode)
-				};
-			},
-			copyState: (state) => {
-				return {
-					state: state.state,
-					// @ts-expect-error Hidden Method
-					inner: CodeMirror.copyState(curMode(state), state.inner)
-				};
-			},
-			token: (stream, state) => {
-				if (state.state == START) {
-					if (stream.match(/---/, false)) {
-						state.state = FRONTMATTER;
-						return yamlMode.token(stream, state.inner);
-					} else {
-						state.state = BODY;
-						state.inner = CodeMirror.startState(innerMode);
-						return innerMode.token(stream, state.inner);
-					}
-				} else if (state.state == FRONTMATTER) {
-					const end = stream.sol() && stream.match(/(---|\.\.\.)/, false);
-					const style = yamlMode.token(stream, state.inner);
-					if (end) {
-						state.state = BODY;
-						state.inner = CodeMirror.startState(innerMode);
-					}
-					return style;
-				} else {
-					return innerMode.token(stream, state.inner);
-				}
-			},
-			innerMode: (state) => {
-				return {mode: curMode(state), state: state.inner};
-			},
-			blankLine: (state) => {
-				const mode = curMode(state);
-				if (mode.blankLine) return mode.blankLine(state.inner);
-			}
-		};
-	});
-	CodeMirror.defineMIME("text/yaml-frontmatter", "yaml-frontmatter");
 }

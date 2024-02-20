@@ -1,6 +1,6 @@
 import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, normalizePath, request } from "obsidian";
 import { Reference, getLineLimits, parseExternalReference, parseReferenceParameters } from "src/Parsing/ReferenceParsing";
-import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK } from "src/Settings";
+import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_CACHE } from "src/Settings";
 import CodeStylerPlugin from "src/main";
 import { renderSpecificReadingSection } from "./ReadingView";
 
@@ -40,8 +40,8 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 				storePath: plugin.app.vault.configDir + EXTERNAL_REFERENCE_PATH + externalReferenceId.id,
 				info: {title: "", url: reference.path, site: externalReferenceId.website, datetime: "", rawUrl: reference.path},
 			};
-			referenceParameters.filePath = await accessExternalReference(reference, plugin);
-			reference.external.info = { ...reference.external.info, ...JSON.parse(await plugin.app.vault.adapter.read(reference.external.storePath + EXTERNAL_REFERENCE_INFO_SUFFIX)) };
+			referenceParameters.filePath = await accessExternalReference(reference, externalReferenceId.id, sourcePath, plugin);
+			reference.external.info = {...reference.external.info, ...JSON.parse(await plugin.app.vault.adapter.read(reference.external.storePath + EXTERNAL_REFERENCE_INFO_SUFFIX))};
 		}
 		const vaultPath = getPath(referenceParameters.filePath, sourcePath, plugin);
 		if (referenceParameters.filePath.startsWith("[[") && referenceParameters.filePath.endsWith("]]"))
@@ -58,10 +58,18 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 	return reference;
 }
 
-async function accessExternalReference(reference: Reference, plugin: CodeStylerPlugin): Promise<string> {
+async function accessExternalReference(reference: Reference, id: string, sourcePath: string, plugin: CodeStylerPlugin): Promise<string> {
 	try {
 		if (!(await plugin.app.vault.adapter.exists(reference?.external?.storePath as string)))
 			await updateExternalReference(reference, plugin);
+		const cache = JSON.parse(await plugin.app.vault.adapter.read(plugin.app.vault.configDir + EXTERNAL_REFERENCE_CACHE));
+		if (!cache[id].sourcePaths.includes(sourcePath)) {
+			if (!cache?.[id])
+				cache[id] = {sourcePaths: [sourcePath]};
+			else
+				cache[id].sourcePaths.push(sourcePath);
+			await plugin.app.vault.adapter.write(plugin.app.vault.configDir + EXTERNAL_REFERENCE_CACHE, JSON.stringify(cache));
+		}
 		return reference?.external?.storePath as string;
 	} catch (error) {
 		throw Error(error);

@@ -1,5 +1,5 @@
 # VSCode
-.vscode 
+.vscode
 
 # Intellij
 *.iml
@@ -22,3 +22,6 @@ data.json
 
 # Local Content
 local
+
+# Plugin Downloaded Files
+reference-files

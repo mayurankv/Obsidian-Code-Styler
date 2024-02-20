@@ -9,7 +9,7 @@ import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, trimPar
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
 import CodeStylerPlugin from "./main";
-import { addReferenceSyntaxHighlight, addYamlFrontmatterSyntaxHighlighting } from "./SyntaxHighlighting";
+import { addReferenceSyntaxHighlight } from "./SyntaxHighlighting";
 
 interface SettingsState {
 	excludedLanguages: string;

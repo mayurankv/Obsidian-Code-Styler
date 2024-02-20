@@ -24,6 +24,8 @@ See this project's [releases](/../../../releases).
 
 - Reference codeblocks for referencing local and external files
   - Markdown links, local links and html links
+  - Syntax Highlighting
+- YAML frontmatter Syntax Highlighting in source mode
 
 ### Changed
 

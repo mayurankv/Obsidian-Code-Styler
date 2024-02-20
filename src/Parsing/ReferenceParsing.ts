@@ -36,7 +36,7 @@ export interface ExternalReferenceInfo {
 		ref: string;
 		type: string;
 		hash: string;
-	}
+	};
 }
 
 interface PassedParameters {
@@ -84,7 +84,7 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 					ref: info.payload.refInfo.name,
 					type: info.payload.refInfo.refType,
 					hash: info.payload.refInfo.currentOid
-				}
+				},
 			};
 		} else if (reference.external?.website === "gitlab") {
 			reference.path = (reference.path.split("?")[0]).replace(/(?<=gitlab.com\/.*\/.*\/)raw(?=\/)/, "blob");
@@ -103,7 +103,7 @@ export async function parseExternalReference(reference: Reference): Promise<Part
 					ref: "", //TODO (@mayurankv) Parse from url
 					type: "",  //TODO (@mayurankv) Parse from url
 					hash: info.last_commit_sha
-				}
+				},
 			};
 		}  else if (reference.external?.website === "bitbucket") {
 			//TODO (@mayurankv) Update
