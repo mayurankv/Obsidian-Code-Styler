@@ -61,20 +61,21 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 		const codeblockElement = (event.target as HTMLElement).parentElement?.parentElement?.parentElement?.querySelector("code");
 		if (!codeblockElement)
 			return;
-		// MASSIVE credits to depose/dp0z for the implementation
 		const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view)
 			return;
+		codeblockElement.addClass("RERENDER-CODE-STYLER");
 		//@ts-expect-error Undocumented Obsidian API
-		for (const section of view.previewMode.renderer.sections.filter(s => s.el === codeblockElement)) {
-			// This code flags the section containing your element as an element that has to be rerendered
+		for (const section of view.previewMode.renderer.sections.filter(s => (s.el as HTMLElement).querySelector("RERENDER-CODE-STYLER"))) {
 			section.rendered = false;
 			section.html = "";
+			console.log("cool");
 		}
-		//@ts-expect-error Undocumented Obsidian API
-		view.previewMode.renderer.queueRender();
+		console.log("or not");
+		view?.previewMode.rerender(true);
+		// // @ts-expect-error Undocumented Obsidian API
+		// view.previewMode.renderer.queueRender();
 		// if (view && view?.getMode() === "preview")
-		// 	view?.previewMode.rerender(true);
 		// else if (view)
 		// 	console.log("oh no");
 	});
