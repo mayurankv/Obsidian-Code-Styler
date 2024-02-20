@@ -61,10 +61,18 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 		const codeblockElement = (event.target as HTMLElement).parentElement?.parentElement?.parentElement?.querySelector("code");
 		if (!codeblockElement)
 			return;
-		codeblockElement.innerHTML = "";
-		MarkdownRenderer.render(plugin.app, codeblockParameters?.externalReference?.code as string, codeblockElement, sourcePath, plugin);
-		referenceCodeblockProcessor()
-		// const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+		// MASSIVE credits to depose/dp0z for the implementation
+		const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view)
+			return;
+		//@ts-expect-error Undocumented Obsidian API
+		for (const section of view.previewMode.renderer.sections.filter(s => s.el === codeblockElement)) {
+			// This code flags the section containing your element as an element that has to be rerendered
+			section.rendered = false;
+			section.html = "";
+		}
+		//@ts-expect-error Undocumented Obsidian API
+		view.previewMode.renderer.queueRender();
 		// if (view && view?.getMode() === "preview")
 		// 	view?.previewMode.rerender(true);
 		// else if (view)

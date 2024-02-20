@@ -5,6 +5,7 @@ For Next Release:
 			☐ External codeblock colours
 		☐ Update frequency: "Never": false, "On Load": true
 		☐ Update settings converter to reflect
+		☐ Update settings tab
 	☐ Gitlab compatibility
 	☐ base64 encode and bundle font (check license) (@last)
 

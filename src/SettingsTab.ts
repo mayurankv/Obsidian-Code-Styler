@@ -70,8 +70,8 @@ export class SettingsTab extends PluginSettingTab {
 	// Create Settings Pages
 	displayMainSettings(containerEl: HTMLElement) {
 		this.emptySettings(containerEl);
-		this.generateSettingsSwitcher(containerEl);
 		this.generateThemeSettings(containerEl);
+		this.generateSettingsSwitcher(containerEl);
 		this.generateCoreSettings(containerEl);
 		this.generateAdvancedHeading(containerEl);
 		this.advancedSettingsContainer = containerEl.createDiv();
@@ -80,8 +80,8 @@ export class SettingsTab extends PluginSettingTab {
 	}
 	displayCodeblockSettings(containerEl: HTMLElement) {
 		this.emptySettings(containerEl);
-		this.generateSettingsSwitcher(containerEl);
 		this.generateThemeSettings(containerEl);
+		this.generateSettingsSwitcher(containerEl);
 		containerEl.createEl("hr");
 		this.exampleCodeblockContainer = containerEl.createDiv();
 		this.generateExampleCodeblock();
@@ -92,8 +92,8 @@ export class SettingsTab extends PluginSettingTab {
 	}
 	displayInlineCodeSettings(containerEl: HTMLElement) {
 		this.emptySettings(containerEl);
-		this.generateSettingsSwitcher(containerEl);
 		this.generateThemeSettings(containerEl);
+		this.generateSettingsSwitcher(containerEl);
 		containerEl.createEl("hr");
 		this.exampleInlineCodeContainer = containerEl.createDiv();
 		this.generateExampleInlineCode();
@@ -163,7 +163,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.decoratePrint)
 				.onChange((value) => {
 					this.plugin.settings.decoratePrint = value;
-					this.saveSettings();         
+					this.saveSettings();
 				}));
 	}
 	generateThemeSettings(containerEl: HTMLElement) {
@@ -279,7 +279,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.codeblock.curvature = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -311,7 +311,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.advanced.languageBorderWidth = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				this.disableableComponents["languageBorderColour"].push(resettableSlider);
 				});
@@ -336,7 +336,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.unwrapLines = value;
 					this.generateWrapLineSettings();
-					this.saveSettings(true);  
+					this.saveSettings(true);
 				}));
 		this.wrapLinesContainer = containerEl.createDiv();
 		this.generateWrapLineSettings();
@@ -353,7 +353,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setDisabled(!this.plugin.settings.currentTheme.settings.codeblock.unwrapLines)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.wrapLinesActive = value;
-					this.saveSettings(true); 
+					this.saveSettings(true);
 				}));
 	}
 	generateCodeblockGutterSettings(containerEl: HTMLElement) {
@@ -366,7 +366,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.codeblock.lineNumbers = value;
 					this.generateCodeblockLineNumberSettings();
-					this.saveSettings(true);         
+					this.saveSettings(true);
 				}));
 		this.lineNumbersContainer = containerEl.createDiv();
 		this.generateCodeblockLineNumberSettings();
@@ -441,7 +441,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.header.fontSize = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -509,7 +509,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.lineColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.lineColour = saveColour;},
 			);});
-			
+
 		containerEl.createEl("h5", {text: "Header Language Tag Appearance"});
 		new Setting(containerEl)
 			.setName("Display Header Language Tags")
@@ -524,7 +524,7 @@ export class SettingsTab extends PluginSettingTab {
 				}));
 		this.headerTagsContainer = containerEl.createDiv();
 		this.generateHeaderTagSettings();
-		
+
 		containerEl.createEl("h5", {text: "Header Language Icon Appearance"});
 		new Setting(containerEl)
 			.setName("Display Header Language Icons")
@@ -612,7 +612,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.advanced.iconSize = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => button
@@ -635,7 +635,7 @@ export class SettingsTab extends PluginSettingTab {
 			.addToggle(toggle => {return toggle
 				.setValue(this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine)
 				.onChange((value) => {
-					this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine = value; 
+					this.plugin.settings.currentTheme.settings.highlights.activeCodeblockLine = value;
 					this.disableableComponents["codeblockActiveLineHighlight"].forEach(component => {component.setDisabled(!value);});
 					this.saveSettings();
 				});
@@ -714,7 +714,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.advanced.gradientHighlightsColourStop = `${value}%`;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				this.disableableComponents["gradientHighlighting"].push(resettableSlider);
 				});
@@ -791,7 +791,7 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.inline.syntaxHighlight)
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.inline.syntaxHighlight = value;
-					this.saveSettings(true);    
+					this.saveSettings(true);
 				}));
 		new Setting(containerEl)
 			.setName("Style Inline Code")
@@ -801,7 +801,7 @@ export class SettingsTab extends PluginSettingTab {
 				.onChange((value) => {
 					this.plugin.settings.currentTheme.settings.inline.style = value;
 					this.generateInlineCodeStyleSettings();
-					this.saveSettings();    
+					this.saveSettings();
 				}));
 		this.inlineCodeStylesContainer = containerEl.createDiv();
 		this.generateInlineCodeStyleSettings();
@@ -825,7 +825,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.titleFontWeight = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -879,7 +879,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.fontWeight = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -903,7 +903,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.curvature = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -927,7 +927,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.paddingVertical = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -951,7 +951,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.paddingHorizontal = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -975,7 +975,7 @@ export class SettingsTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange((value) => {
 						this.plugin.settings.currentTheme.settings.inline.marginHorizontal = value;
-						this.saveSettings();    
+						this.saveSettings();
 					});
 				});
 				setting.addExtraButton((button) => {button
@@ -1111,7 +1111,7 @@ export class SettingsTab extends PluginSettingTab {
 	}
 	generateDonationFooter(containerEl: HTMLElement) {
 		containerEl.createEl("hr");
-		const donationDiv = containerEl.createEl("div", { cls: "code-styler-donation", });    
+		const donationDiv = containerEl.createEl("div", { cls: "code-styler-donation", });
 		const donationText = createEl("p", {text: "If you like this plugin, and would like to help support continued development, use the button below!"});
 		donationDiv.appendChild(donationText);
 		const donationButton = createEl("a", { href: "https://www.buymeacoffee.com/mayurankv2"});
@@ -1143,7 +1143,7 @@ export class SettingsTab extends PluginSettingTab {
 		});
 		this.pickrs[id]=pickr;
 	}
-	
+
 	// Update Settings
 	saveSettings(rerender: boolean=false) {
 		(async () => {await this.plugin.saveSettings();})();
@@ -1160,7 +1160,7 @@ export class SettingsTab extends PluginSettingTab {
 	updateDropdown(dropdown: DropdownComponent, settings: CodeStylerSettings) {
 		dropdown.selectEl.empty();
 		Object.keys(settings.themes).forEach((theme_name: string) => {
-			dropdown.addOption(theme_name, theme_name);            
+			dropdown.addOption(theme_name, theme_name);
 		});
 		dropdown.setValue(settings.selectedTheme);
 	}
@@ -1288,7 +1288,7 @@ function calc(calcString: string): string {
 	if (splitString.length === 3)
 		if (splitString[1] in operators)
 			return `${operators[splitString[1]](parseFloat(splitString[0]),parseFloat(splitString[2]))}%`;
-	
+
 	console.warn("Warning: Couldn't parse calc string");
 	return calcString;
 }
