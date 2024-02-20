@@ -8,7 +8,6 @@ export interface InlineCodeParameters {
 export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
 	const match = /^{((?:[^"'{}\\]|\\.|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')*)} *?([^ ].*)$/.exec(codeText);
 
-	console.log(match);
 	if (typeof match?.[1] !== "undefined" && typeof match?.[2] !== "undefined") {
 		console.log(match);
 		if (match[1] === "")
@@ -35,7 +34,7 @@ function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters 
 	return inlineCodeParameters;
 }
 function parseInlineCodeParameterString(parameterString: string, inlineCodeParameters: InlineCodeParameters): void {
-	if (parameterString.startsWith("title:")) {
+	if (parameterString.startsWith("title:") || parameterString.startsWith("title=")) {
 		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
 		if (titleMatch)
 			inlineCodeParameters.title = titleMatch[2].trim().replace(/\\{/g, "{");
