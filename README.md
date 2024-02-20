@@ -4,12 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/mayurankv/Obsidian-Code-Styler?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1naXQtbWVyZ2UiPjxjaXJjbGUgY3g9IjE4IiBjeT0iMTgiIHI9IjMiLz48Y2lyY2xlIGN4PSI2IiBjeT0iNiIgcj0iMyIvPjxwYXRoIGQ9Ik02IDIxVjlhOSA5IDAgMCAwIDkgOSIvPjwvc3ZnPg==)](https://github.com/mayurankv/Obsidian-Code-Styler/releases/latest)
 [![Latest Release](https://img.shields.io/github/release-date/mayurankv/Obsidian-Code-Styler?style=for-the-badge&label=Latest%20Release&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1jYWxlbmRhci1jaGVjay0yIj48cGF0aCBkPSJNMjEgMTRWNmEyIDIgMCAwIDAtMi0ySDVhMiAyIDAgMCAwLTIgMnYxNGEyIDIgMCAwIDAgMiAyaDgiLz48bGluZSB4MT0iMTYiIHgyPSIxNiIgeTE9IjIiIHkyPSI2Ii8+PGxpbmUgeDE9IjgiIHgyPSI4IiB5MT0iMiIgeTI9IjYiLz48bGluZSB4MT0iMyIgeDI9IjIxIiB5MT0iMTAiIHkyPSIxMCIvPjxwYXRoIGQ9Im0xNiAyMCAyIDIgNC00Ii8+PC9zdmc+)](https://github.com/mayurankv/Obsidian-Code-Styler/releases/latest)
 
-This is a plugin for [Obsidian.md](https://obsidian.md) which lets you style codeblocks and inline code in both editing mode and reading mode.
-
-<!--
-> [!important]
-> If you used version 1.0.x or below, then you must delete the `data.json` file from `VaultFolder/.obsidian/plugins/code-styler/`. This only needs to happen once but is necessary as the file does not contain a few entries which are required by version x.y.z or above. After that, everything should work fine.
--->
+This is a plugin for [Obsidian.md](https://obsidian.md) which lets you style codeblocks and inline code in both editing mode and reading mode. It works straight out of the box and looks pretty as well! The Latest Release badge should indicate that the plugin is up-to-date and not obsolete unlike some other code block modifying plugins.
 
 ## Settings
 
