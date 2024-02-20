@@ -78,6 +78,7 @@ export function addYamlFrontmatterSyntaxHighlighting(CodeMirror: typeof window.C
 	const START = 0, FRONTMATTER = 1, BODY = 2;
 	CodeMirror.defineMode("yaml-frontmatter", function(config, parserConfig) {
 		const yamlMode = CodeMirror.getMode(config, "yaml");
+		console.log(yamlMode);
 		const innerMode = CodeMirror.getMode(config, parserConfig?.base ?? "markdown");
 
 		function curMode(state) {

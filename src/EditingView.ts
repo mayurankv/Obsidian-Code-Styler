@@ -24,7 +24,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		class ExamplePlugin implements PluginValue {
 			constructor() {
 				addReferenceSyntaxHighlight(window.CodeMirror);
-				addYamlFrontmatterSyntaxHighlighting(window.CodeMirror);
 			} // view: EditorView
 			update() {} // update: ViewUpdate
 			destroy() {}
