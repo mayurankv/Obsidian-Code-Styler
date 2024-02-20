@@ -132,7 +132,7 @@ async function getFileReferences(sourcePath: string, plugin: CodeStylerPlugin): 
 	return fileReference;
 }
 
-async function updateExternalReference(reference: Reference, plugin: CodeStylerPlugin) {
+export async function updateExternalReference(reference: Reference, plugin: CodeStylerPlugin) {
 	try {
 		const sourceInfo = await parseExternalReference(reference);
 		const content = await request(sourceInfo.rawUrl ?? reference.path);

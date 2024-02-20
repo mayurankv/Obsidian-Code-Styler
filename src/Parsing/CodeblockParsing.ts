@@ -4,7 +4,7 @@ import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
 import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
 import { getReference } from "src/Referencing";
-import { ExternalReferenceInfo } from "./ReferenceParsing";
+import { Reference } from "./ReferenceParsing";
 import { basename } from "path";
 
 export interface CodeblockParameters {
@@ -30,7 +30,7 @@ export interface CodeblockParameters {
 		alternative: Record<string,Highlights>
 	},
 	ignore: boolean;
-	externalReference?: ExternalReferenceInfo;
+	externalReference?: Reference;
 }
 export interface Highlights {
 	lineNumbers: Array<number>;
@@ -184,7 +184,7 @@ async function adjustReference(codeblockParameters: CodeblockParameters, codeblo
 		codeblockParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
 	codeblockParameters.language = reference.language;
 	if (reference.external)
-		codeblockParameters.externalReference = reference.external.info;
+		codeblockParameters.externalReference = reference;
 	return codeblockParameters;
 }
 async function pluginAdjustPreviewCode(codeblockParameters: CodeblockParameters, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
