@@ -1,0 +1,8 @@
+{python} 'result if true'.method() if 1 else result_if_false.property
+{}{text here not styled}
+{python icon} 'result if true'.method() if 1 else result_if_false.property
+{python title:'Inline If'} 'result if true'.method() if 1 else result_if_false.property
+{python title:'Inline If' icon} 'result if true'.method() if 1 else result_if_false.property
+{js icon title:foo} javascript:(function(){alert('你好')})()
+{python} import pypy; print("code" + 'g' + aaa[23]); def bfs(): return None; False #test
+{ import pypy; print("code" + 'g' + aaa[23]); def bfs(): return None; False #test

@@ -6,14 +6,14 @@ export interface InlineCodeParameters {
 }
 
 export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
-	const match = /^{( *(?:\w+(?: +(?:(?:[^\s"']+|"[^"]*"|'[^']*')+))*)? *)} *?([^ ].*?)$/.exec(codeText);
+	const match = /^{((?:[^"'{}\\]|\\.|"([^"\\]|\\.)*"|'([^'\\]|\\.)*')*)} *?([^ ].*?)$/.exec(codeText);
 
 	if (typeof match?.[1] !== "undefined" && typeof match?.[2] !== "undefined") {
 		if (match[1] === "")
 			return {parameters: null, text: match[2]};
 		else
 			return {parameters: parseInlineCodeParameters(match[1]), text: match[2]};
-	} else 
+	} else
 		return {parameters: null, text: codeText};
 }
 function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters {
@@ -36,8 +36,7 @@ function parseInlineCodeParameterString(parameterString: string, inlineCodeParam
 	if (parameterString.startsWith("title:")) {
 		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
 		if (titleMatch)
-			inlineCodeParameters.title = titleMatch[2].trim();
+			inlineCodeParameters.title = titleMatch[2].trim().replace(/\\{/g, "{");
 	} else if (parameterString === "icon" || (parameterString.startsWith("icon:") && parameterString.toLowerCase() === "icon:true"))
 		inlineCodeParameters.icon = true;
 }
-
