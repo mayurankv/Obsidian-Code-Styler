@@ -5,7 +5,7 @@ import { SettingsTab } from "./SettingsTab";
 import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
 import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
 import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
-import { referenceCodeblockProcessor } from "./Referencing";
+import { cleanExternalReferencedFiles, referenceCodeblockProcessor, updateExternalReferencedFiles } from "./Referencing";
 import { addModes, removeModes } from "./SyntaxHighlighting";
 
 export default class CodeStylerPlugin extends Plugin {
@@ -17,7 +17,7 @@ export default class CodeStylerPlugin extends Plugin {
 		zoom: string;
 	};
 
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings(); // Load Settings
 		const settingsTab = new SettingsTab(this.app,this);
 		this.addSettingTab(settingsTab);
@@ -34,11 +34,6 @@ export default class CodeStylerPlugin extends Plugin {
 			font: document.body.getCssPropertyValue("--font-text-size"),
 			zoom: document.body.getCssPropertyValue("--zoom-factor"),
 		};
-
-		if (!(await this.app.vault.adapter.exists(EXTERNAL_REFERENCE_PATH))) {// Create folder for external references
-			await this.app.vault.adapter.mkdir(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH);
-			await this.app.vault.adapter.write(this.app.vault.configDir + EXTERNAL_REFERENCE_CACHE, JSON.stringify({}));
-		}
 
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 
@@ -103,13 +98,22 @@ export default class CodeStylerPlugin extends Plugin {
 					editingDocumentFold(activeView.editor.cm.docView.view);
 			}
 		}});
+		this.addCommand({id: "update-references-vault", name: "Update all external references in vault", callback: async ()=>{
+			await updateExternalReferencedFiles(this);
+		}});
+		this.addCommand({id: "update-references-page", name: "Update all external references in note", callback: async ()=>{
+			await updateExternalReferencedFiles(this, this.app.workspace.getActiveFile()?.path);
+		}});
+		this.addCommand({id: "clean-references", name: "Remove all unneeded external references", callback: async ()=>{
+			await cleanExternalReferencedFiles(this);
+		}});
 
-		this.app.workspace.onLayoutReady(()=>{this.renderReadingView();}); // Add decoration on enabling of plugin
+		this.app.workspace.onLayoutReady(async () => this.initialiseOnLayout()); // Add decoration on enabling of plugin
 
 		console.log("Loaded plugin: Code Styler");
 	}
 
-	onunload() {
+	onunload(): void {
 		removeModes();
 		this.executeCodeMutationObserver.disconnect();
 		removeStylesAndClasses();
@@ -119,17 +123,30 @@ export default class CodeStylerPlugin extends Plugin {
 		console.log("Unloaded plugin: Code Styler");
 	}
 
-	async loadSettings() {
+	async loadSettings(): Promise<void> {
 		this.settings = {...structuredClone(DEFAULT_SETTINGS), ...convertSettings(await this.loadData())};
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 		this.app.workspace.updateOptions();
 		updateStyling(this.settings,this.app);
 	}
 
-	renderReadingView() {
+	async initialiseOnLayout(): Promise<void> {
+		if (!(await this.app.vault.adapter.exists(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH))) {// Create folder for external references
+			await this.app.vault.adapter.mkdir(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH);
+			await this.app.vault.adapter.write(this.app.vault.configDir + EXTERNAL_REFERENCE_CACHE, JSON.stringify({}));
+		}
+		if (true) //TODO (@mayurankv) Change to be based on update on load setting
+			await updateExternalReferencedFiles(this);
+		else {
+			await cleanExternalReferencedFiles(this);
+			this.renderReadingView();
+		}
+	}
+
+	renderReadingView(): void {
 		this.app.workspace.iterateRootLeaves((leaf: WorkspaceLeaf) => {
 			if (leaf.view instanceof MarkdownView && leaf.view.getMode() === "preview")
 				leaf.view.previewMode.rerender(true);

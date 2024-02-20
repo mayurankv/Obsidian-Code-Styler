@@ -55,6 +55,7 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 	updateIcon.title = "Update Reference";
 	updateIcon.addEventListener("click", (event) => {
 		// TODO (@mayurankv) Update codeblock
+		console.log(event);
 		event.stopPropagation();
 	});
 	externalReferenceContainer.appendChild(updateIcon);

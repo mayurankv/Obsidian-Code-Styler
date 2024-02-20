@@ -180,8 +180,6 @@ async function getCodeblockPreElements(element: HTMLElement, specific: boolean,e
 async function getCodeblocksParameters(sourcePath: string, cache: CachedMetadata | null, plugin: CodeStylerPlugin, editingEmbeds: boolean): Promise<Array<CodeblockParameters>> {
 	let codeblocksParameters: Array<CodeblockParameters> = [];
 	const fileContentLines = await getFileContentLines(sourcePath,plugin);
-	if (!fileContentLines)
-		return [];
 
 	if (typeof cache?.sections !== "undefined") {
 		for (const section of cache.sections) {

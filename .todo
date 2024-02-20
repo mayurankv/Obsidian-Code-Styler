@@ -1,6 +1,7 @@
 Features:
 	Code Referencing:
 		☐ Embed other online markdown files? (@low)
+		☐ Add other syntax for quickly referring to github and gitlab links etc.: (?site/author/repo/?verion)
 		☐ Local reference  (@low)
 			☐ Prevent clicking reading mode external links causing fold (@low)
 			☐ File watcher? Or refresh button? (@low)

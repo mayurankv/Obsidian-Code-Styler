@@ -6,6 +6,7 @@ export interface Reference {
 	language: string;
 	path: string;
 	external?: {
+		id: string,
 		storePath: string,
 		website: string,
 		info: ExternalReferenceInfo;

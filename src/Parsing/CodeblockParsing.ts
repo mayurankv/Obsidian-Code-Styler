@@ -1,4 +1,4 @@
-import { MarkdownPreviewRenderer, Plugin, TFile } from "obsidian";
+import { MarkdownPreviewRenderer, Plugin } from "obsidian";
 
 import CodeStylerPlugin from "../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
@@ -430,19 +430,8 @@ export function trimParameterLine(parameterLine: string): string {
 	return parameterLine.trim();
 }
 
-export async function getFileContentLines(sourcePath: string, plugin: CodeStylerPlugin): Promise<Array<string> | undefined> {
-	const file = plugin.app.vault.getAbstractFileByPath(sourcePath);
-	if (!file) {
-		console.error(`File not found: ${sourcePath}`);
-		return;
-	}
-	const fileContent = await plugin.app.vault.cachedRead(<TFile> file).catch((error) => {
-		console.error(`Error reading file: ${error.message}`);
-		return "";
-	});
-	if (!fileContent)
-		return;
-	return fileContent.split(/\n/g);
+export async function getFileContentLines(sourcePath: string, plugin: CodeStylerPlugin): Promise<Array<string>> {
+	return (await plugin.app.vault.adapter.read(sourcePath)).split(/\n/g);
 }
 
 function arraysEqual(array1: Array<unknown>,array2: Array<unknown>): boolean {

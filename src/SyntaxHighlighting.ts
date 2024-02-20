@@ -42,6 +42,9 @@ export function addReferenceSyntaxHighlight(CodeMirror: typeof window.CodeMirror
 				if (stream.eatSpace()) return null;
 				if (stream.match(/^#.*/)) return "comment";
 				if (stream.match(/^https?:\/\/.*/)) return "variable";
+				if (stream.match(/^\w+\/\w+\/\w+\/\w+$/)) return "variable";
+				if (stream.match(/^\w+\/\w+\/\w+$/)) return "variable";
+				if (stream.match(/^\w+\/\w+$/)) return "variable";
 				if (stream.match(/\[\[.+\]\]/)) return "variable";
 				if (stream.match(keyPattern)) return "string";
 				if (stream.match(/:/)) return "meta";
