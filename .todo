@@ -1,19 +1,12 @@
 Features:
 	Code Referencing:
 		☐ Gitlab compatibility proper
-		☐ Embed other online markdown files? (@low)
+		☐ Full Embed other online markdown files? (@low)
 		☐ Add other syntax for quickly referring to github and gitlab links etc.: (?site/author/repo/?verion)
 		☐ Local reference  (@low)
 			☐ Prevent clicking reading mode external links causing fold (@low)
 			☐ File watcher? Or refresh button? (@low)
 		☐ External Referencing
-			☐ base64 encode and bundle font (check license)
-			☐ Update button (@medium)
-				☐ Update inplace
-				☐ Automatic updating (set frequency in setttings an dupdate if older than that at every plugin load, manual command for updating all, manual update button)
-				☐ Remove old files? (check if any blocks exist requiring it, if not delete it - how to do this?)
-			☐ Add colours to settings (@medium)
-				☐ Update settings converter to reflect
 			☐ Non github compatibility
 				☐ finish gitlab
 				☐ gitlab based things
