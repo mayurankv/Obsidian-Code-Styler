@@ -27,19 +27,24 @@ Features:
 				☐ Also allow reference to properly show notebooks
 
 			Quarto:
-				☐
+				☐ Custom view for `.qmd` files
 
 			Rmarkdown:
-				☐
+				☐ Custom view for `.rmd` files
 
 			LaTeX:
-				☐ Compiling and Previewing
+				☐ Compiling and Previewing referenced files
 					☐ pdfjs synctex
 						☐ https://github.com/tdurieux/synctex-js
 						☐ https://github.com/James-Yu/LaTeX-Workshop/wiki/View
+				☐ Option to compils latex codeblocks?
+					☐ Should be different name than latex?
 
 				Other LaTeX:
 					☐ Highlight specific part of latex that you are inside in the preview
+
+			Terminal:
+				☐ Terminal Appearance #9
 
 		General:
 			☐ Prevent clicking reading mode external links causing fold
@@ -47,46 +52,66 @@ Features:
 
 	Codeblocks:
 		Implementation:
-			☐ Folding Fade #128
-			☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
-			☐ List codeblocks not indented properly #13
-			☐ Edit Mode Line Wrapping #12
-			☐ Hanging Indents #109
-			☐ Reading Mode Section Code Folding #110
-			☐ Automatic Link Updating #204
-			☐ Alternative Fold Toggler Button at bottom of Codeblock #129
-			☐ Remember and Sync Fold State #126
+			Folding:
+				☐ Folding Fade #128
+				☐ Remember and Sync Fold State #126
+				☐ Alternative Fold Toggler Button at bottom of Codeblock #129
+				☐ Edit Mode Folding Transitions #11
+
+			Code Folding:
+				☐ Reading Mode Section Code Folding #110
+
+			Wrapping:
+				☐ Hanging Indents #109
+				☐ Edit Mode Line Wrapping #12
+
+			Indentation:
+				☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
+				☐ List codeblocks not indented properly #13
+
+			Links:
+				☐ Automatic Link Updating #204
+
+			Tabs:
+				☐ Tabbed codeblocks with higher fencing level compiles all codeblocks inside to single block https://forum.obsidian.md/t/add-the-support-for-tabbed-code-blocks/62724
+
+			Autocompletion:
+				☐ Codeblock type autocompletion https://forum.obsidian.md/t/autocompletion-for-code-block-types/35133
+				☐ Autocompletion for my codeblock header parameters
+				☐ Reference block autocompletion for my parameters
+				☐ General code autocompletion
+				☐ Autocompletion for other plugins like dataview etc.
+				☐ Code snippets
+					☐ Define
+					☐ Call from commmandline
+					☐ Autocomplete in codeblocks based on language
+
+			Command Selection:
+				☐ Command to select all modified
+					☐ Select all text in codeblock #75
+					☐ Select all text in inline code
+
+			Linting:
+				☐ Way to paste copied code content properly without Cmd-Shift-V
+				☐ Overall linter
+				☐ Specify linter for specific codeblocks i.e. black for python etc.
+
+			Other:
+				☐ Smooth Caret Animation https://forum.obsidian.md/t/cursor-smooth-caret-animation/31068
+				☐ Save codeblock files to file via button or command
+					☐ Option to automatically turn converted file into referenced block based on file
 
 		Prettification:
 			☐ Change token colours
-				☐ Match in both live preview and reading mode?
+				☐ Match in both live preview and reading mode
 			☐ Codeblock Shadow #25
 			☐ Codeblock Border #24
 			☐ Retain some styling in source mode #74
-
-			Long Term:
-				☐ Edit Mode Folding Transitions #11
-				☐ Terminal Appearance #9
 
 	Inline Code:
 		☐ Add copy button via settings and parameter #88
 		☐ Add optional pandoc style marking
 		☐ Empty backticks followed by new line "``\n" disappear
-
-	Other UX:
-		Autocompletion:
-			☐ Codeblock type autocompletion https://forum.obsidian.md/t/autocompletion-for-code-block-types/35133
-			☐ Autocompletion for my codeblock header parameters
-			☐ Reference block autocompletion for my parameters
-			☐ General code autocompletion
-			☐ Autocompletion for other plugins like dataview etc.
-
-		Command Selection:
-			☐ Command to select all modified
-				☐ Select all text in codeblock #75
-				☐ Select all text in inline code
-
-		☐ Smooth Caret Animation https://forum.obsidian.md/t/cursor-smooth-caret-animation/31068
 
 	General:
 		Improvements:
