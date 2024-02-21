@@ -22,8 +22,6 @@ See this project's [releases](/../../../releases).
 
 ## [1.1.5] - 2024-02-21
 
-## [1.1.5] - 2024-02-21
-
 ### Added
 
 - Reference codeblocks for referencing local and external files
@@ -316,7 +314,6 @@ See this project's [releases](/../../../releases).
 
 [Unreleased]: /../../compare/1.1.5...HEAD
 [1.1.5]: /../../compare/1.1.5...1.1.5
-[1.1.5]: /../../compare/1.1.4...1.1.5
 [1.1.4]: /../../compare/1.1.3...1.1.4
 [1.1.3]: /../../compare/1.1.2...1.1.3
 [1.1.2]: /../../compare/1.1.1...1.1.2
