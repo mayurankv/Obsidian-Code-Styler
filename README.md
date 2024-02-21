@@ -360,9 +360,7 @@ Please try to create bug reports/issues that are:
 
 ### Contributors
 
-[![List of contributors](https://contrib.rocks/image?repo=mayurankv/Obsidian-Code-Styler)](https://github.com/mayurankv/Obsidian-Code-Styler/graphs/contributors)
-
-*Made with [contrib.rocks](https://contrib.rocks).*
+[![List of contributors via https://contrib.rocks](https://contrib.rocks/image?repo=mayurankv/Obsidian-Code-Styler)](https://github.com/mayurankv/Obsidian-Code-Styler/graphs/contributors)
 
 ## Support
 
