@@ -293,13 +293,37 @@ Example:
 `{python title:'Inline If' icon} 'result if true'.method() if 1 else result_if_false.property`
 ![Inline Code Highlighted Title Icon](images/InlineCodeHighlightedTitleIcon.png)
 
+## File Referencing
+
+You can reference both local and remote files using the `reference` codeblock. The settings for this codeblock are set with YAML syntax and
+
+### Parameters
+
+You can set the local path or remote link using the parameters: `file`, `path`, `link`, and `filePath`. Local paths should be set as relative paths (i.e. `./path/from/current/folder`), absolute paths starting from the root vault - indicated by `@/` (i.e. `@/file.py`=`.../vaultParent/file.py`), or markdown links (i.e. `[[file.py]]`). Remote paths, should be set using a link to the file from the relevant site, i.e. `link: https://github.com/mayurankv/Obsidian-Code-Styler/blob/main/README.md`.
+
+The language of the file is automatically inferred from the file-ending but you can also pass a `language` or `lang` parameter to specify the language for the syntax highlighting and codeblock header.
+
+Some files are very large so you can also set the lines at which the file should be displayed by `start` and `end`. These can be set to numbers, words (for which the first matching line will be returned) or regex (where again the first matching line will be returned). The `end` parameter can also be set to a relative amount like `end: +10` with `start: 980` to display lines `980` through `990`.
+
+### External References
+
+External references can be set to specific versions by finding the version of that file on github or gitlab and using that specific link. You can thus set a link to a specific commit version of a file. Information about the repository, the version, and the time at which it was updated are shown in the codeblock header (and can be turned on/off via settings).
+
+The files are locally downloaded to the `.obsidian/plugins/code-styler/reference-files/` directory. They can be cleaned up and/or updated via commands or manually clicking the update button, but the plugin already automatically cleans any unneeded files when Obsidian is started up. Additionally, you can toggle a setting so that the plugin updates all your external references when Obsidian starts as well. This way you can reference files, then remove the `reference` codeblock and the files downloaded will be automatically removed. This means you don't have to worry about any clutter or unnecessary disk space usage.
+
 ## Commands
 
-The plugin exposes 3 commands:
+The plugin exposes 3 folding commands:
 
 - `Fold all codeblocks` - folds all codeblocks
 - `Unfold all codeblocks` - unfolds all codeblocks
 - `Reset fold state for all codeblocks` - returns all codeblock folding to the state defined in each of their parameter strings
+
+and 3 file referencing commands:
+
+- `Update all external references in vault` - updates all external references
+- `Update all external references in file` - updates all external references in the current file
+- `Remove all unneeded external references` - cleans up any downloaded file versions that are no longer needed
 
 ## Plugin Compatibility
 
