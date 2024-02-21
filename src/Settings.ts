@@ -25,6 +25,11 @@ export interface CodeStylerThemeModeColours {
 			backgroundColour: Colour;
 			textColour: Colour;
 		},
+		externalReference: {
+			displayRepositoryColour: Colour;
+			displayVersionColour: Colour;
+			displayTimestampColour: Colour;
+		}
 		lineColour: Colour;
 	},
 	highlights: {
@@ -71,6 +76,11 @@ export interface CodeStylerThemeSettings {
 			display: Display;
 			displayColour: boolean;
 		},
+		externalReference: {
+			displayRepository: boolean;
+			displayVersion: boolean;
+			displayTimestamp: boolean;
+		}
 		fontSize: number;
 		foldPlaceholder: string;
 	},
@@ -115,6 +125,7 @@ export interface CodeStylerSettings {
 	exampleInlineCode: string;
 	decoratePrint: boolean;
 	excludedLanguages: string;
+	externalReferenceUpdateOnLoad: boolean;
 	processedCodeblocksWhitelist: string;
 	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>;
 	version: string;
@@ -160,6 +171,11 @@ const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 			display: "none",
 			displayColour: true,
 		},
+		externalReference: {
+			displayRepository: true,
+			displayVersion: true,
+			displayTimestamp: true,
+		},
 		fontSize: 14,
 		foldPlaceholder: "",
 	},
@@ -203,6 +219,11 @@ export const THEME_FALLBACK_COLOURS: CodeStylerThemeModeColours = {
 		languageTag: {
 			backgroundColour: "--code-background",
 			textColour: "--code-comment",
+		},
+		externalReference: {
+			displayRepositoryColour: "#00FFFF",
+			displayVersionColour: "#FF00FF",
+			displayTimestampColour: "#808080",
 		},
 		lineColour: "--color-base-30",
 	},
@@ -426,6 +447,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 					backgroundColour: "#B8B5AA",
 					textColour: "#C25F30",
 				},
+				externalReference: {
+					displayRepositoryColour: "#941100",
+					displayVersionColour: "#ff9300",
+					displayTimestampColour: "#808080",
+				},
 				lineColour: "#EDD489",
 			},
 			highlights: {
@@ -463,6 +489,11 @@ const SOLARIZED_THEME: CodeStylerTheme = {
 				languageTag: {
 					backgroundColour: "#008080",
 					textColour: "#000000",
+				},
+				externalReference: {
+					displayRepositoryColour: "#00FFFF",
+					displayVersionColour: "#9437ff",
+					displayTimestampColour: "#808080",
 				},
 				lineColour: "#46cced",
 			},
@@ -600,6 +631,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	exampleInlineCode: EXAMPLE_INLINE_CODE,
 	decoratePrint: true,
 	excludedLanguages: EXCLUDED_LANGUAGES,
+	externalReferenceUpdateOnLoad: false,
 	processedCodeblocksWhitelist: WHITELIST_CODEBLOCKS,
 	redirectLanguages: {},
 	version: "1.1.4",
@@ -661,6 +693,15 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.1.2": settingsPreserve,
 	"1.1.3": settingsPreserve,
 	"1.1.4": settingsPreserve,
+	"1.1.5": (settings) => settingsVersionUpdate(settings,(theme)=>{
+		theme.settings.header.externalReference = structuredClone(THEME_DEFAULT_SETTINGS.header.externalReference);
+		theme.colours.light.header.externalReference = structuredClone(THEME_FALLBACK_COLOURS.header.externalReference);
+		theme.colours.dark.header.externalReference = structuredClone(THEME_FALLBACK_COLOURS.header.externalReference);
+		return theme;
+	}, (settings) => {
+		settings.externalReferenceUpdateOnLoad = false;
+		return settings;
+	}),
 };
 
 // Constants

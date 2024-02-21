@@ -40,6 +40,7 @@ export class SettingsTab extends PluginSettingTab {
 	lineNumbersContainer: HTMLElement;
 	headerTagsContainer: HTMLElement;
 	headerIconsContainer: HTMLElement;
+	headerExternalReferenceContainer: HTMLElement;
 	inlineCodeStylesContainer: HTMLElement;
 	disableableComponents: Record<string,Array<ToggleComponent | SliderComponent | TextComponent | ExtraButtonComponent>>;
 
@@ -68,18 +69,6 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	// Create Settings Pages
-	emptySettings(containerEl: HTMLElement) {
-		containerEl.empty();
-		containerEl.createEl("h1", {text: "Settings for the Code Styler Plugin."});
-	}
-	generateSettings(containerEl: HTMLElement) {
-		if (this.page === "main")
-			this.displayMainSettings(containerEl);
-		else if (this.page === "codeblock")
-			this.displayCodeblockSettings(containerEl);
-		else if (this.page === "inline")
-			this.displayInlineCodeSettings(containerEl);
-	}
 	displayMainSettings(containerEl: HTMLElement) {
 		this.emptySettings(containerEl);
 		this.generateThemeSettings(containerEl);
@@ -114,6 +103,18 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	// Create Settings Groups
+	emptySettings(containerEl: HTMLElement) {
+		containerEl.empty();
+		containerEl.createEl("h1", {text: "Settings for the Code Styler Plugin."});
+	}
+	generateSettings(containerEl: HTMLElement) {
+		if (this.page === "main")
+			this.displayMainSettings(containerEl);
+		else if (this.page === "codeblock")
+			this.displayCodeblockSettings(containerEl);
+		else if (this.page === "inline")
+			this.displayInlineCodeSettings(containerEl);
+	}
 	generateSettingsSwitcher(containerEl: HTMLElement) {
 		new Setting(containerEl)
 			.setName("Choose Settings Page")
@@ -534,11 +535,13 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.currentTheme.settings.header.languageIcon.display)
 				.onChange((value: Display) => {
 					this.plugin.settings.currentTheme.settings.header.languageIcon.display = value;
-					this.generateHeaderIconSettings();
+					this.generateHeaderLanguageIconSettings();
 					this.saveSettings(true);
 				}));
 		this.headerIconsContainer = containerEl.createDiv();
-		this.generateHeaderIconSettings();
+		this.generateHeaderLanguageIconSettings();
+		this.headerExternalReferenceContainer = containerEl.createDiv();
+		this.generateHeaderExternalReferenceSettings();
 	}
 	generateHeaderTagSettings() {
 		this.headerTagsContainer.empty();
@@ -586,7 +589,7 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.languageTag.textColour = saveColour;},
 			);});
 	}
-	generateHeaderIconSettings() {
+	generateHeaderLanguageIconSettings() {
 		this.headerIconsContainer.empty();
 		if (this.plugin.settings.currentTheme.settings.header.languageIcon.display === "none")
 			return;
@@ -625,6 +628,61 @@ export class SettingsTab extends PluginSettingTab {
 						this.saveSettings();
 					}));
 			});
+	}
+	generateHeaderExternalReferenceSettings() {
+		this.headerExternalReferenceContainer.empty();
+		this.headerExternalReferenceContainer.createEl("h5", { text: "External Reference Indicators Appearance" });
+		new Setting(this.headerExternalReferenceContainer)
+			.setName("Display Repository")
+			.setDesc("Display repository in codeblock header for external references.")
+			.addToggle(toggle => toggle
+				.setTooltip("Display Repository")
+				.setValue(this.plugin.settings.currentTheme.settings.header.externalReference.displayRepository)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.header.externalReference.displayRepository = value;
+					this.saveSettings();
+				}))
+			.then((setting) => {this.createPickr(
+				this.plugin,this.headerExternalReferenceContainer,setting,
+				"codeblock_header_display_repository",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.externalReference.displayRepositoryColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.externalReference.displayRepositoryColour = saveColour;},
+				() => !this.plugin.settings.currentTheme.settings.header.externalReference.displayRepository,
+			);});
+		new Setting(this.headerExternalReferenceContainer)
+			.setName("Display Repository Name")
+			.setDesc("Display repository version in codeblock header for external references.")
+			.addToggle(toggle => toggle
+				.setTooltip("Display Repository Version")
+				.setValue(this.plugin.settings.currentTheme.settings.header.externalReference.displayVersion)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.header.externalReference.displayVersion = value;
+					this.saveSettings();
+				}))
+			.then((setting) => {this.createPickr(
+				this.plugin,this.headerExternalReferenceContainer,setting,
+				"codeblock_header_display_version",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.externalReference.displayVersionColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.externalReference.displayVersionColour = saveColour;},
+				() => !this.plugin.settings.currentTheme.settings.header.externalReference.displayVersion,
+			);});
+		new Setting(this.headerExternalReferenceContainer)
+			.setName("Display Reference Timestamp")
+			.setDesc("Display the timestamp at which the reference was last updated.")
+			.addToggle(toggle => toggle
+				.setTooltip("Display Timestamp")
+				.setValue(this.plugin.settings.currentTheme.settings.header.externalReference.displayTimestamp)
+				.onChange((value) => {
+					this.plugin.settings.currentTheme.settings.header.externalReference.displayTimestamp = value;
+					this.saveSettings();
+				}))
+			.then((setting) => {this.createPickr(
+				this.plugin,this.headerExternalReferenceContainer,setting,
+				"codeblock_header_display_timestamp",
+				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].header.externalReference.displayTimestampColour,
+				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].header.externalReference.displayTimestampColour = saveColour;},
+				() => !this.plugin.settings.currentTheme.settings.header.externalReference.displayTimestamp,
+			);});
 	}
 	generateCodeblockHighlightSettings(containerEl: HTMLElement) {
 		containerEl.createEl("h3", {text: "Highlighting Appearance"});
@@ -1020,7 +1078,18 @@ export class SettingsTab extends PluginSettingTab {
 				(relevantThemeColours: CodeStylerThemeColours) => relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour,
 				(relevantThemeColours: CodeStylerThemeColours, saveColour: Colour) => {relevantThemeColours[getCurrentMode()].highlights.activeEditorLineColour = saveColour;},
 				() => !this.plugin.settings.currentTheme.settings.highlights.activeEditorLine,
-			);});
+			);
+			});
+		new Setting(this.advancedSettingsContainer)
+			.setName("External References Automatic Update on Load")
+			.setDesc("If enabled, external references will be updated automatically on load when possible.")
+			.addToggle(toggle => toggle
+				.setTooltip("Toggle auto-update external references")
+				.setValue(this.plugin.settings.externalReferenceUpdateOnLoad)
+				.onChange((value) => {
+					this.plugin.settings.externalReferenceUpdateOnLoad = value;
+					this.saveSettings();
+				}));
 		this.disableableComponents["editorActiveLineHighlight"].push(this.pickrs["editor_active_line_highlight"].resetButton);
 		new Setting(this.advancedSettingsContainer)
 			.setName("Reset inbuilt themes")

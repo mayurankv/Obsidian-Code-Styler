@@ -138,7 +138,7 @@ export default class CodeStylerPlugin extends Plugin {
 			await this.app.vault.adapter.mkdir(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH);
 			await this.app.vault.adapter.write(this.app.vault.configDir + EXTERNAL_REFERENCE_CACHE, JSON.stringify({}));
 		}
-		if (true) //TODO (@mayurankv) Change to be based on update on load setting
+		if (this.settings.externalReferenceUpdateOnLoad)
 			await updateExternalReferencedFiles(this);
 		else {
 			await cleanExternalReferencedFiles(this);

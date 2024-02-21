@@ -19,10 +19,10 @@ export function createHeader(codeblockParameters: CodeblockParameters, themeSett
 				headerContainer.appendChild(createDiv({cls: "code-styler-header-language-tag", text: getLanguageTag(codeblockParameters.language)}));
 		}
 		headerContainer.appendChild(createTitleContainer(codeblockParameters, themeSettings, sourcePath, plugin));
-		if (true && codeblockParameters?.externalReference) //TODO (@mayurankv) Add settings toggle
+		if (codeblockParameters?.externalReference)
 			headerContainer.appendChild(createExternalReferenceContainer(codeblockParameters, sourcePath, plugin));
-		if (false) //TODO (@mayurankv) Add settings toggle
-			headerContainer.appendChild(createExecuteCodeContainer(codeblockParameters, themeSettings, plugin));
+		if (false) //TODO (@mayurankv) Add settings toggle once execute code compatibility improved
+			headerContainer.appendChild(createExecuteCodeContainer(codeblockParameters, plugin));
 	} else
 		headerContainer.classList.add("code-styler-header-container-hidden");
 	return headerContainer;
@@ -41,18 +41,24 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 function createExternalReferenceContainer(codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	//TODO (@mayurankv) Add theme settings to conditionally set sections
 	const externalReferenceContainer = createDiv({ cls: "code-styler-header-external-reference" });
-	const siteIcon = createDiv({ cls: "external-reference-repo-icon" });
-	siteIcon.innerHTML = SITE_ICONS?.[codeblockParameters?.externalReference?.external?.info?.site as string] ?? SITE_ICONS["generic"];
-	externalReferenceContainer.appendChild(siteIcon);
-	externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-repo", text: codeblockParameters?.externalReference?.external?.info?.author + "/" + codeblockParameters?.externalReference?.external?.info?.repository }));
-	const refIcon = createDiv({ cls: "external-reference-ref-icon" });
-	refIcon.innerHTML = GIT_ICONS?.[codeblockParameters?.externalReference?.external?.info?.refInfo?.type as string] ?? GIT_ICONS["branch"];
-	externalReferenceContainer.appendChild(refIcon);
-	externalReferenceContainer.appendChild(createDiv({cls: "external-reference-ref", text: codeblockParameters?.externalReference?.external?.info?.refInfo?.ref as string}));
-	const stampIcon = createDiv({ cls: "external-reference-timestamp-icon" });
-	stampIcon.innerHTML = STAMP_ICON;
-	externalReferenceContainer.appendChild(stampIcon);
-	externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-timestamp", text: codeblockParameters?.externalReference?.external?.info?.datetime as string }));
+	if (plugin.settings.currentTheme.settings.header.externalReference.displayRepository) {
+		const siteIcon = createDiv({ cls: "external-reference-repo-icon" });
+		siteIcon.innerHTML = SITE_ICONS?.[codeblockParameters?.externalReference?.external?.info?.site as string] ?? SITE_ICONS["generic"];
+		externalReferenceContainer.appendChild(siteIcon);
+		externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-repo", text: codeblockParameters?.externalReference?.external?.info?.author + "/" + codeblockParameters?.externalReference?.external?.info?.repository }));
+	}
+	if (plugin.settings.currentTheme.settings.header.externalReference.displayVersion) {
+		const refIcon = createDiv({ cls: "external-reference-ref-icon" });
+		refIcon.innerHTML = GIT_ICONS?.[codeblockParameters?.externalReference?.external?.info?.refInfo?.type as string] ?? GIT_ICONS["branch"];
+		externalReferenceContainer.appendChild(refIcon);
+		externalReferenceContainer.appendChild(createDiv({cls: "external-reference-ref", text: codeblockParameters?.externalReference?.external?.info?.refInfo?.ref as string}));
+	}
+	if (plugin.settings.currentTheme.settings.header.externalReference.displayTimestamp) {
+		const stampIcon = createDiv({ cls: "external-reference-timestamp-icon" });
+		stampIcon.innerHTML = STAMP_ICON;
+		externalReferenceContainer.appendChild(stampIcon);
+		externalReferenceContainer.appendChild(createDiv({ cls: "external-reference-timestamp", text: codeblockParameters?.externalReference?.external?.info?.datetime as string }));
+	}
 	const updateIcon = createEl("button", { cls: "external-reference-update-icon"});
 	updateIcon.innerHTML = UPDATE_ICON;
 	updateIcon.title = "Update Reference";
@@ -67,13 +73,13 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 			return;
 
 		if (view?.getMode() === "preview") {
-			view?.previewMode.rerender(true);
 			codeblockElement.addClass("RERENDER-CODE-STYLER");
 			//@ts-expect-error Undocumented Obsidian API
 			for (const section of view.previewMode.renderer.sections.filter(s => (s.el as HTMLElement).querySelector("RERENDER-CODE-STYLER"))) {
 				section.rendered = false;
 				section.html = "";
 			}
+			view?.previewMode.rerender(true);
 		} else {
 			//@ts-expect-error Undocumented Obsidian API
 			const cmView = view?.sourceMode.cmEditor.cm;
@@ -87,8 +93,9 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 	externalReferenceContainer.appendChild(updateIcon);
 	return externalReferenceContainer;
 }
-function createExecuteCodeContainer(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, plugin: CodeStylerPlugin): HTMLElement {
-	const executeCodeContainer = createDiv({cls: "code-styler-header-execute-code"});
+function createExecuteCodeContainer(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin): HTMLElement {
+	const executeCodeContainer = createDiv({ cls: "code-styler-header-execute-code" });
+	console.log("Developer Error: Section not finished", codeblockParameters, plugin);
 	//TODO (@mayurankv) Finish
 	return executeCodeContainer;
 }

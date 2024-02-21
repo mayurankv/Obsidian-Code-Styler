@@ -264,15 +264,15 @@ pre.code-styler-pre .code-styler-header-external-reference > button {
 }
 div.external-reference-repo,
 div.external-reference-repo-icon {
-	color: var(--code-styler-external-reference-repo-colour, cyan);
+	color: var(--code-styler-header-external-reference-repository, cyan);
 }
 div.external-reference-ref,
 div.external-reference-ref-icon {
-	color: var(--code-styler-external-reference-ref-colour, pink);
+	color: var(--code-styler-header-external-reference-version, pink);
 }
 div.external-reference-timestamp,
 div.external-reference-timestamp-icon {
-	color: var(--code-styler-external-reference-timestamp-colour, grey);
+	color: var(--code-styler-header-external-reference-timestamp, grey);
 }
 div:has(> img.code-styler-icon) {
 	display: inline-flex;

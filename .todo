@@ -1,11 +1,4 @@
 For Next Release:
-	☐ Settings to Add
-		☐ Show external in codeblock header
-			☐ Conditionally show sections
-			☐ External codeblock colours
-		☐ Update frequency: "Never": false, "On Load": true
-		☐ Update settings converter to reflect
-		☐ Update settings tab to reflect
 	☐ Gitlab compatibility
 	☐ base64 encode and bundle font (check license) (@last)
 
