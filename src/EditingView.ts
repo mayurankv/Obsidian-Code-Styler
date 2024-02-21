@@ -21,11 +21,17 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	const ignoreCompartment = new Compartment;
 
 	const interaction = ViewPlugin.fromClass(
-		class ExamplePlugin implements PluginValue {
+		class CodeStylerViewPlugin implements PluginValue {
 			constructor() {
 				addReferenceSyntaxHighlight(window.CodeMirror);
-			} // view: EditorView
-			update() {} // update: ViewUpdate
+			}
+			update(_update: ViewUpdate) {
+				//TODO (@mayurankv) Move selection back to original position - Currently done with setTimeout
+				// const previous: number = update.transactions.flatMap(t => t.effects).filter(effect => effect.is(rerender))?.[0]?.value?.pos;
+				// console.log(previous);
+				// if (previous)
+				// 	update.view.dispatch({selection: { anchor: previous, head: previous }});
+			}
 			destroy() {}
 		},
 		{
@@ -499,6 +505,7 @@ const hideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
 const unhideFold: StateEffectType<Range<Decoration>> = StateEffect.define();
 const removeFold: StateEffectType<Array<string>> = StateEffect.define();
 const foldAll: StateEffectType<{toFold?: boolean}> = StateEffect.define();
+export const rerender: StateEffectType<{pos: number}> = StateEffect.define();
 
 function codeblockFoldCallback(startPosition: number, state: EditorState, foldCallback: (foldStart: Line, foldEnd: Line)=>void) {
 	const foldStart = state.doc.lineAt(startPosition);

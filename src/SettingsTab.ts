@@ -68,6 +68,18 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	// Create Settings Pages
+	emptySettings(containerEl: HTMLElement) {
+		containerEl.empty();
+		containerEl.createEl("h1", {text: "Settings for the Code Styler Plugin."});
+	}
+	generateSettings(containerEl: HTMLElement) {
+		if (this.page === "main")
+			this.displayMainSettings(containerEl);
+		else if (this.page === "codeblock")
+			this.displayCodeblockSettings(containerEl);
+		else if (this.page === "inline")
+			this.displayInlineCodeSettings(containerEl);
+	}
 	displayMainSettings(containerEl: HTMLElement) {
 		this.emptySettings(containerEl);
 		this.generateThemeSettings(containerEl);
@@ -102,10 +114,6 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	// Create Settings Groups
-	emptySettings(containerEl: HTMLElement) {
-		containerEl.empty();
-		containerEl.createEl("h1", {text: "Settings for the Code Styler Plugin."});
-	}
 	generateSettingsSwitcher(containerEl: HTMLElement) {
 		new Setting(containerEl)
 			.setName("Choose Settings Page")
@@ -117,14 +125,6 @@ export class SettingsTab extends PluginSettingTab {
 					this.page = value;
 					this.generateSettings(containerEl);
 				}));
-	}
-	generateSettings(containerEl: HTMLElement) {
-		if (this.page === "main")
-			this.displayMainSettings(containerEl);
-		else if (this.page === "codeblock")
-			this.displayCodeblockSettings(containerEl);
-		else if (this.page === "inline")
-			this.displayInlineCodeSettings(containerEl);
 	}
 	generateCodeblockStylingSwitcher(containerEl: HTMLElement) {
 		new Setting(containerEl)

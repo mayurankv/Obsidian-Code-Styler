@@ -5,6 +5,7 @@ import { MarkdownRenderer, MarkdownView } from "obsidian";
 import CodeStylerPlugin from "./main";
 import { updateExternalReference } from "./Referencing";
 import { Reference } from "./Parsing/ReferenceParsing";
+import { rerender } from "./EditingView";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	const headerContainer = createDiv();
@@ -64,20 +65,24 @@ function createExternalReferenceContainer(codeblockParameters: CodeblockParamete
 		const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!view)
 			return;
-		codeblockElement.addClass("RERENDER-CODE-STYLER");
-		//@ts-expect-error Undocumented Obsidian API
-		for (const section of view.previewMode.renderer.sections.filter(s => (s.el as HTMLElement).querySelector("RERENDER-CODE-STYLER"))) {
-			section.rendered = false;
-			section.html = "";
-			console.log("cool");
+
+		if (view?.getMode() === "preview") {
+			view?.previewMode.rerender(true);
+			codeblockElement.addClass("RERENDER-CODE-STYLER");
+			//@ts-expect-error Undocumented Obsidian API
+			for (const section of view.previewMode.renderer.sections.filter(s => (s.el as HTMLElement).querySelector("RERENDER-CODE-STYLER"))) {
+				section.rendered = false;
+				section.html = "";
+			}
+		} else {
+			//@ts-expect-error Undocumented Obsidian API
+			const cmView = view?.sourceMode.cmEditor.cm;
+			const pos = cmView.posAtDOM(event.target);
+			const current: number = cmView.state.selection.main.head;
+			cmView.dispatch({ selection: { anchor: pos, head: pos }, effects: rerender.of({pos: current}) });
+			cmView.focus();
+			setTimeout(()=>cmView.dispatch({ selection: { anchor: current, head: current }}),10);
 		}
-		console.log("or not");
-		view?.previewMode.rerender(true);
-		// // @ts-expect-error Undocumented Obsidian API
-		// view.previewMode.renderer.queueRender();
-		// if (view && view?.getMode() === "preview")
-		// else if (view)
-		// 	console.log("oh no");
 	});
 	externalReferenceContainer.appendChild(updateIcon);
 	return externalReferenceContainer;
