@@ -27,10 +27,13 @@ Features:
 				☐ Also allow reference to properly show notebooks
 
 			Quarto:
-				☐ Custom view for `.qmd` files
+				☐ Custom view for `.qmd` files https://forum.obsidian.md/t/quarto-support-open-source-scientific-and-technical-publishing-system/32625/4
 
 			Rmarkdown:
 				☐ Custom view for `.rmd` files
+
+			Pandoc:
+				☐ Custom pandoc view
 
 			LaTeX:
 				☐ Compiling and Previewing referenced files
@@ -44,7 +47,7 @@ Features:
 					☐ Highlight specific part of latex that you are inside in the preview
 
 			Terminal:
-				☐ Terminal Appearance #9
+				☐ Terminal Appearance #9 https://forum.obsidian.md/t/creating-a-command-line-formatted-code-block/57329/4
 
 		General:
 			☐ Prevent clicking reading mode external links causing fold
@@ -79,9 +82,9 @@ Features:
 				☐ Codeblock type autocompletion https://forum.obsidian.md/t/autocompletion-for-code-block-types/35133
 				☐ Autocompletion for my codeblock header parameters
 				☐ Reference block autocompletion for my parameters
-				☐ General code autocompletion
+				☐ General code autocompletion https://forum.obsidian.md/t/general-autocompletion/7331
 				☐ Autocompletion for other plugins like dataview etc.
-				☐ Code snippets
+				☐ Code snippets https://forum.obsidian.md/t/fuzzy-code-snippets-search-obsidian-ide-copilot/58637
 					☐ Define
 					☐ Call from commmandline
 					☐ Autocomplete in codeblocks based on language
@@ -93,6 +96,8 @@ Features:
 
 			Linting:
 				☐ Way to paste copied code content properly without Cmd-Shift-V
+				☐ Match current indentation on paste
+				☐ Remove indentation on copy option
 				☐ Overall linter
 				☐ Specify linter for specific codeblocks i.e. black for python etc.
 
