@@ -1,29 +1,49 @@
 Next Release:
 	☐ Inline code copy button and settings for icons
 	☐ Performance issues
-	☐ 
+	☐
 
 Features:
 	Code Referencing:
-		☐ Gitlab compatibility proper
-		☐ Full Embed other online markdown files? (@low)
-		☐ Add other syntax for quickly referring to github and gitlab links etc.: (?site/author/repo/?verion)
-		☐ Local reference  (@low)
-			☐ Prevent clicking reading mode external links causing fold (@low)
-			☐ File watcher? Or refresh button? (@low)
-		☐ External Referencing
+		Local References:
+			☐ File watcher? Or refresh button? How to make changes to local file update in Obsidian?
+			☐ Embed code files by `![[file.py]]`
+
+		External References:
+			☐ External reference for quickly referring to github and gitlab links etc.: (?site/author/repo/?verion)
+			☐ Full Embed other online markdown files? `![[hhtps:/.../fil1.md]]`
+			☐ Allow iframe type embed
 			☐ Non github compatibility
-				☐ finish gitlab
-				☐ gitlab based things
+				☐ Gitlab compatibility proper
+				☐ Gitlab based things
 					☐ https://foss.heptapod.net/mercurial/tortoisehg/thg/-/blob/branch/stable/COPYING.txt?ref_type=heads
-				☐ bitbucket
-				☐ sourceforge
-			☐ Allow iframe (@low)
-		☐ LaTeX Functionality (@low)
-			☐ Compiling and Previewing (@low)
-		☐ Me (@low)
-			☐ Ligatures (@low)
-			☐ Nerdfonts (@low)
+				☐ Bitbucket
+				☐ Sourceforge
+			☐ Add other syntax
+
+		Specific File Formats:
+			Jupyter Notebooks:
+				☐ Custom view for Jupyter Notebooks allowing viewing and running of `.ipynb` files
+				☐ Also allow reference to properly show notebooks
+
+			Quarto:
+				☐
+
+			Rmarkdown:
+				☐
+
+			LaTeX:
+				☐ Compiling and Previewing
+					☐ pdfjs synctex
+						☐ https://github.com/tdurieux/synctex-js
+						☐ https://github.com/James-Yu/LaTeX-Workshop/wiki/View
+
+				Other LaTeX:
+					☐ Highlight specific part of latex that you are inside in the preview
+
+		General:
+			☐ Prevent clicking reading mode external links causing fold
+			☐ Package nerdfont better
 
 	Codeblocks:
 		Implementation:
@@ -31,7 +51,6 @@ Features:
 			☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
 			☐ List codeblocks not indented properly #13
 			☐ Edit Mode Line Wrapping #12
-			☐ Command to select all text in codeblock #75
 			☐ Hanging Indents #109
 			☐ Reading Mode Section Code Folding #110
 			☐ Automatic Link Updating #204
@@ -54,6 +73,21 @@ Features:
 		☐ Add optional pandoc style marking
 		☐ Empty backticks followed by new line "``\n" disappear
 
+	Other UX:
+		Autocompletion:
+			☐ Codeblock type autocompletion https://forum.obsidian.md/t/autocompletion-for-code-block-types/35133
+			☐ Autocompletion for my codeblock header parameters
+			☐ Reference block autocompletion for my parameters
+			☐ General code autocompletion
+			☐ Autocompletion for other plugins like dataview etc.
+
+		Command Selection:
+			☐ Command to select all modified
+				☐ Select all text in codeblock #75
+				☐ Select all text in inline code
+
+		☐ Smooth Caret Animation https://forum.obsidian.md/t/cursor-smooth-caret-animation/31068
+
 	General:
 		Improvements:
 			☐ Error Handling
@@ -71,6 +105,9 @@ Features:
 				☐ Dataview created codeblocks #10
 			Tasks:
 				☐ Check if conflict
+
+	For Me:
+		☐ Properly use nerdfonts and ligatures
 
 Bugs:
 	Major Bugs:
