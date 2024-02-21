@@ -634,7 +634,7 @@ export const DEFAULT_SETTINGS: CodeStylerSettings = {
 	externalReferenceUpdateOnLoad: false,
 	processedCodeblocksWhitelist: WHITELIST_CODEBLOCKS,
 	redirectLanguages: {},
-	version: "1.1.4",
+	version: "1.1.5",
 };
 
 export function convertSettings(settings: CodeStylerSettings): CodeStylerSettings {
