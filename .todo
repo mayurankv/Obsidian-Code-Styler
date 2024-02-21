@@ -1,9 +1,9 @@
 For Next Release:
-	☐ Gitlab compatibility
 	☐ base64 encode and bundle font (check license) (@last)
 
 Features:
 	Code Referencing:
+		☐ Gitlab compatibility proper
 		☐ Embed other online markdown files? (@low)
 		☐ Add other syntax for quickly referring to github and gitlab links etc.: (?site/author/repo/?verion)
 		☐ Local reference  (@low)
