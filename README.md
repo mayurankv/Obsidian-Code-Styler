@@ -334,6 +334,8 @@ This plugin is also compatible with the following obsidian plugins out of the bo
 [![File Include Plugin](https://github-readme-stats.vercel.app/api/pin/?username=tillahoffmann&repo=obsidian-file-include&show_owner=true&bg_color=00000010&border_color=e3e7ef)](https://github.com/tillahoffmann/obsidian-file-include)
 [![Admonitions Plugin](https://github-readme-stats.vercel.app/api/pin/?username=javalent&repo=admonitions&show_owner=true&bg_color=00000010&border_color=e3e7ef)](https://github.com/javalent/admonitions)
 
+Note that this plugin can also embed code files without the need for additional plugins!
+
 ## Roadmap
 
 See the roadmap at [Roadmap Discussion](../../discussions/8).
