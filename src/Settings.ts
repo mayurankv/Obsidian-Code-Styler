@@ -680,7 +680,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.0.7": settingsPreserve,
 	"1.0.8": settingsPreserve,
 	"1.0.9": settingsPreserve,
-	"1.0.10": (settings)=>settingsVersionUpdate(settings,(theme)=>{
+	"1.0.10": (settings)=>settingsVersionUpdate(settings,(theme)=>{ // To 1.0.10
 		theme.settings.inline.style = true;
 		return theme;
 	},(settings)=>{//@ts-expect-error Older interface versions
@@ -692,8 +692,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.1.1": settingsPreserve,
 	"1.1.2": settingsPreserve,
 	"1.1.3": settingsPreserve,
-	"1.1.4": settingsPreserve,
-	"1.1.5": (settings) => settingsVersionUpdate(settings,(theme)=>{
+	"1.1.4": (settings) => settingsVersionUpdate(settings,(theme)=>{ // To 1.1.5
 		theme.settings.header.externalReference = structuredClone(THEME_DEFAULT_SETTINGS.header.externalReference);
 		theme.colours.light.header.externalReference = structuredClone(THEME_FALLBACK_COLOURS.header.externalReference);
 		theme.colours.dark.header.externalReference = structuredClone(THEME_FALLBACK_COLOURS.header.externalReference);

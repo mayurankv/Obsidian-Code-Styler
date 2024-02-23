@@ -124,7 +124,7 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = {...structuredClone(DEFAULT_SETTINGS), ...convertSettings(await this.loadData())};
+		this.settings = { ...structuredClone(DEFAULT_SETTINGS), ...convertSettings(await this.loadData()) };
 	}
 
 	async saveSettings(): Promise<void> {
