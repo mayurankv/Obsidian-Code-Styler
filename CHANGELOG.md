@@ -22,7 +22,15 @@ See this project's [releases](/../../../releases).
 
 ## [1.1.7] - 2024-02-23
 
+### Fixed
+
+- Settings Updates fix properly
+
 ## [1.1.6] - 2024-02-23
+
+### Fixed
+
+- Settings Updates
 
 ## [1.1.5] - 2024-02-21
 
