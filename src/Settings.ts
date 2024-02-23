@@ -701,7 +701,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 		settings.externalReferenceUpdateOnLoad = false;
 		return settings;
 	}),
-	"1.1.6": settingsPreserve,
+	"1.1.5": settingsPreserve,
 };
 
 // Constants

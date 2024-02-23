@@ -24,7 +24,7 @@ writeFileSync("CHANGELOG.md",changelogText.replace(/## \[Unreleased\]/,`## [Unre
 // Update settings
 let settingsText = readFileSync("src/settings.ts", "utf8");
 const settingsUpdaterText = /const settingsUpdaters: Record<string,\(settings: CodeStylerSettings\)=>CodeStylerSettings> = {[\s\S]*?\n(?=})/.exec(settingsText)?.[0];
-writeFileSync("src/settings.ts",settingsText.replace(/(?<=export const DEFAULT_SETTINGS: CodeStylerSettings = {[\s\S]*?version: ")(.*)(?="[\s\S]*?})/,newVersion).replace(settingsUpdaterText,settingsUpdaterText+(settingsUpdaterText.split("\n").some(line=>line.trim().startsWith(`"${newVersion}"`))?"":`\t"${newVersion}": settingsPreserve,\n`)));
+writeFileSync("src/settings.ts",settingsText.replace(/(?<=export const DEFAULT_SETTINGS: CodeStylerSettings = {[\s\S]*?version: ")(.*)(?="[\s\S]*?})/,newVersion).replace(settingsUpdaterText,settingsUpdaterText+(settingsUpdaterText.split("\n").some(line=>line.trim().startsWith(`"${lastVersion}"`))?"":`\t"${lastVersion}": settingsPreserve,\n`)));
 
 
 // Push to origin
