@@ -78,6 +78,9 @@ Features:
 			Tabs:
 				☐ Tabbed codeblocks with higher fencing level compiles all codeblocks inside to single block https://forum.obsidian.md/t/add-the-support-for-tabbed-code-blocks/62724
 
+			Comments:
+				☐ Comments depending on language type
+
 			Autocompletion:
 				☐ Codeblock type autocompletion https://forum.obsidian.md/t/autocompletion-for-code-block-types/35133
 				☐ Autocompletion for my codeblock header parameters
