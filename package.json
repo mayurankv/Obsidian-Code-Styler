@@ -48,7 +48,7 @@
 		"@lezer/common": "^1.1.1",
 		"@lezer/highlight": "^1.2.0",
 		"@simonwep/pickr": "^1.9.0",
-		"colortranslator": "^3.0.2",
+		"colortranslator": "^4.1.0",
 		"hast": "^1.0.0",
 		"hast-util-from-html": "^2.0.1",
 		"hast-util-to-html": "^9.0.0",
