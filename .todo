@@ -96,6 +96,7 @@ Features:
 				☐ Command to select all modified
 					☐ Select all text in codeblock #75
 					☐ Select all text in inline code
+				☐ Turn selection into codeblock a-la https://github.com/dy-sh/obsidian-code-block-from-selection
 
 			Linting:
 				☐ Way to paste copied code content properly without Cmd-Shift-V
