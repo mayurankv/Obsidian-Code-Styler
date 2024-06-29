@@ -222,7 +222,7 @@ pre.code-styler-pre .code-styler-header-external-reference > button {
 	padding-top: calc(1em * var(--header-inner-vertical-padding));
 	padding-bottom: calc(1em * var(--header-inner-vertical-padding));
 	padding-left: 0px;
-	color: var(--code-styler-header-text-colour);
+	color: var(--code-styler-header-title-text-colour);
 	font-size: inherit;
 	font-style: var(--code-styler-header-title-text-italic, normal);
 	font-weight: var(--code-styler-header-title-text-bold, normal);
