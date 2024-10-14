@@ -18,7 +18,11 @@ See this project's [releases](/../../../releases).
 <!-- ### Security -->
 <!-- ### Notes -->
 
-## [Unreleased]
+## [1.1.8] - 2024-10-14
+
+### Fixed
+
+- Codeblock active line highlight when language is specified
 
 ## [1.1.7] - 2024-02-23
 
