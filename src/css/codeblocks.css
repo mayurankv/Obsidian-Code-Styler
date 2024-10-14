@@ -308,7 +308,7 @@ pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-
 /*! Complicated */
 .code-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock.cm-active,
 .code-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock.cm-active {
-	background: linear-gradient(to right, var(--code-styler-active-codeblock-line-colour), var(--gradient-highlights-colour-stop), var(--code-styler-codeblock-background-colour)) !important;
+	--gradient-background-colour: var(--code-styler-active-codeblock-line-colour) !important;
 }
 
 /** Line numbers */
