@@ -18,7 +18,7 @@ See this project's [releases](/../../../releases).
 <!-- ### Security -->
 <!-- ### Notes -->
 
-## [1.1.8] - 2024-10-14
+## [Unreleased]
 
 ### Fixed
 
