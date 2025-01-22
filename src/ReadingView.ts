@@ -1,4 +1,4 @@
-import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer } from "obsidian";
+import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, MarkdownView, View } from "obsidian";
 import { visitParents } from "unist-util-visit-parents";
 import { fromHtml } from "hast-util-from-html";
 import { toHtml } from "hast-util-to-html";
@@ -10,29 +10,176 @@ import { CodeblockParameters, getFileContentLines, isCodeblockIgnored, isLanguag
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
 
-export async function readingViewCodeblockDecoratingPostProcessor(element: HTMLElement, {sourcePath,getSectionInfo,frontmatter}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds = false) {
+// Set up the way so that code blocks are marked up with parameter string and then secondary processor adds markup, is-loaded should be checked when marked up only
+export async function readingViewCodeblockDecoratingPostProcessor(
+	element: HTMLElement,
+	{
+		sourcePath,
+		getSectionInfo,
+		frontmatter
+	}: {
+		sourcePath: string,
+		getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null,
+		frontmatter: FrontMatterCache | undefined
+	},
+	plugin: CodeStylerPlugin,
+	editingEmbeds = false,
+) {
+	// console.log(element)
+	// const codeblocks = Array.from(element.getElementsByTagName("code"))
+	// for (const codeBlock of codeblockss) {
+	// 	console.log(codeBlock)
+	// 	const srcCode = codeBlock.getText();
+	// 	console.log(srcCode)
+	// }
+	// console.log(codeblockss.forEach((codeBlock: HTMLElement) => {
+	// // 	if (codeBlock.className.match(/^language-\{\w+/i)) {
+	// // 		codeBlock.className = codeBlock.className.replace(/^language-\{(\w+)/i, "language-$1 {");
+	// // 		codeBlock.parentElement.className = codeBlock.className;
+	// // 	}
+
+	// // 	const language = codeBlock.className.toLowerCase();
+
+	// // 	if (!language || !language.contains("language-"))
+	// // 		return;
+
+	// // 	const pre = codeBlock.parentElement as HTMLPreElement;
+	// // 	const parent = pre.parentElement as HTMLDivElement;
+
+	// // 	const srcCode = codeBlock.getText();
+	// // 	let sanitizedClassList = this.sanitizeClassListOfCodeBlock(codeBlock);
+
+	// // 	const canonicalLanguage = getLanguageAlias(
+	// // 		supportedLanguages.find(lang => sanitizedClassList.contains(`language-${lang}`))
+	// // 	) as LanguageId;
+
+	// // 	if (canonicalLanguage // if the language is supported
+	// // 		&& !parent.classList.contains(hasButtonClass)) { // & this block hasn't been buttonified already
+	// // 		const out = new Outputter(codeBlock, this.settings, view);
+	// // 		parent.classList.add(hasButtonClass);
+	// // 		const button = this.createRunButton();
+	// // 		pre.appendChild(button);
+	// // 		this.addListenerToButton(canonicalLanguage, srcCode, button, out, sourcePath);
+	// // 	}
+	// // }))
+	// console.log("foo")
+	// const codeblocks = element.findAll('code');
+	// console.log(codeblocks)
+	// console.log("bar")
+	//! BREAK
+	// Context: Native, Embed (File, Canvas, Reading, Editing), Whole document, Printing, Canvas, Settings
+
+	// console.log("Check 1")
+	// console.log(sourcePath)
+	if (!element)
+		return;
+
+	const view = plugin.app.workspace.getActiveViewOfType(View);
+
+	// console.log("Check 2")
+	if (!view)
+		return;
+
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
-	if (!sourcePath || !element || (frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
+	if ((frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
 		return;
 
-	editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
-	const specific = !element.querySelector(".view-content > *");
-	const printing = Boolean(element.querySelector("div.print > *")) || Boolean(element.querySelector("div.slides > *"));
-	if (printing && !plugin.settings.decoratePrint)
-		return;
+	// console.log("Check 3")
+	// console.log(element)
+	for (const codeElement of Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>) {
+		if (!codeElement.className)
+			continue;
+		// console.log("Check 4.x")
 
-	const codeblockPreElements: Array<HTMLElement> = await getCodeblockPreElements(element,specific,editingEmbeds);
-	if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
-		return;
+		const fenceCodeElement = codeElement
 
+		//TODO: Check context: Canvas? Settings?
+		console.log(fenceCodeElement)
+		const fenceContext: string = sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
+			? "settings"
+			: document.querySelector("div.canvas")?.contains(fenceCodeElement)
+			? "canvas"
+			: Boolean(element.querySelector("div.print > *"))
+			? "export"
+			: Boolean(element.querySelector("div.slides > *"))
+			? "slides"
+			: element.classList.contains("admonition-content")
+			? "admonition"
+			: "default";
+
+		const fencePreElement = fenceCodeElement.parentElement;
+		if (!fencePreElement)
+			continue;
+		// console.log("Check 6.x")
+
+		const fenceParentElement = fencePreElement.parentElement;
+		if (!fenceParentElement)
+			continue;
+		// console.log("Check 7.x")
+
+		const parsed = fencePreElement.getAttribute("code-styler-parsed")??"false"
+		if (parsed === "true")
+			continue;
+		// console.log("Check 8.x")
+
+		let fenceCodeParameters = "unknown"
+		if (fenceContext === "settings") {
+			const fenceCodeLines = sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
+			fenceCodeParameters = fenceCodeLines[0]
+		} else if (fenceContext === "canvas") {
+			fenceCodeParameters = "TODO"
+			// TODO:
+		} else if (fenceContext === "admonition") {
+			fenceCodeParameters = "TODO"
+			// TODO:
+		} else if (fenceContext === "export") {
+			fenceCodeParameters = "TODO"
+			// TODO:
+		} else if (fenceContext === "slides") {
+			fenceCodeParameters = "TODO"
+			// TODO:
+		} else if (fenceContext === "admonition") {
+			fenceCodeParameters = "TODO"
+			// TODO:
+		} else if (fenceContext === "default") {
+			const fenceSectionInfo: MarkdownSectionInformation | null = getSectionInfo(fenceCodeElement);
+			if (!fenceSectionInfo)
+				continue;
+			console.log("Check 8.x.x")
+
+			const fenceCodeLines = Array.from(
+				{ length: fenceSectionInfo.lineEnd - fenceSectionInfo.lineStart + 1 },
+				(_, num) => num + fenceSectionInfo.lineStart).map((lineNumber) => fenceSectionInfo.text.split("\n")[lineNumber],
+			)
+			fenceCodeParameters = fenceCodeLines[0]
+		}
+		// fenceCodeElement.innerHTML = "DELETED" //TODO: Delete
+		fenceCodeElement.innerHTML = fenceContext //TODO: Delete
+		// console.log("Check Complete")
+		// console.log(fenceCodeElement)
+
+		fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
+		fencePreElement.setAttribute("code-parsed", "true")
+
+	}
+
+	// editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
+	// const specific = !element.querySelector(".view-content > *");
+	// const printing = (print or slides)
+	// if (printing && !plugin.settings.decoratePrint)
+	// 	return;
+
+	// const codeblockPreElements: Array<HTMLElement> = await getCodeblockPreElements(element,specific,editingEmbeds);
+	// if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
+	// 	return;
+
+	return;
 	const codeblockSectionInfo: MarkdownSectionInformation | null = getSectionInfo(codeblockPreElements[0]);
-	if (codeblockSectionInfo && specific && !editingEmbeds)
-		await renderSpecificReadingSection(codeblockPreElements,sourcePath,codeblockSectionInfo,plugin);
-	else if (specific && sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX))
-		await renderSettings(codeblockPreElements,sourcePath,plugin);
-	else if (specific && !printing)
-		await retriggerProcessor(element,{sourcePath,getSectionInfo,frontmatter},plugin,editingEmbeds);
-	else
+	if (specific && !printing) {
+		sourcePath = context;
+		await retriggerProcessor(element, { sourcePath, getSectionInfo, frontmatter }, plugin, editingEmbeds);
+	} else
+		sourcePath = context;
 		await renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,printing,plugin);
 }
 export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
@@ -87,10 +234,6 @@ export function destroyReadingModeElements(): void {
 export async function renderSpecificReadingSection(codeblockPreElements: Array<HTMLElement>, sourcePath: string, codeblockSectionInfo: MarkdownSectionInformation, plugin: CodeStylerPlugin) {
 	const codeblocksParameters = (await parseCodeblockSource(Array.from({length: codeblockSectionInfo.lineEnd-codeblockSectionInfo.lineStart+1}, (_,num) => num + codeblockSectionInfo.lineStart).map((lineNumber)=>codeblockSectionInfo.text.split("\n")[lineNumber]),plugin,sourcePath)).codeblocksParameters;
 	await remakeCodeblocks(codeblockPreElements, codeblocksParameters, sourcePath, true, false, plugin);
-}
-async function renderSettings(codeblockPreElements: Array<HTMLElement>, sourcePath: string, plugin: CodeStylerPlugin) {
-	const codeblocksParameters = (await parseCodeblockSource(sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n"),plugin)).codeblocksParameters;
-	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,true,false,plugin);
 }
 async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
 	const codeblocksParameters: Array<CodeblockParameters> = await getCodeblocksParameters(sourcePath,cache,plugin,editingEmbeds);
@@ -253,39 +396,41 @@ function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockPara
 	});
 }
 function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string, plugin: CodeStylerPlugin): Array<string> {
-	const htmlTree = fromHtml(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"),{fragment: true});
-	let codeblockHTML = codeblockCodeElement.innerHTML;
-	visitParents(htmlTree,["text","element"],(node,ancestors)=>{
-		if (node.type === "element" && node.tagName === "br") {
-			if (ancestors.length >= 2) {
-				codeblockHTML = codeblockHTML.replace(/\n/,ancestors.slice(1).reduce((result,element)=>{
-					const elementCopy = structuredClone(element);
-					elementCopy.children = [];
-					const splitTag = toHtml(elementCopy).split(/(?<=>)(?=<\/)/);
-					return splitTag.splice(-1)+result+splitTag.join("");
-				},"<br>"));
-			} else
-				codeblockHTML = codeblockHTML.replace(/\n/,"<br>");
-		}
-	});
-	const splitHtmlTree = fromHtml(codeblockHTML,{fragment: true});
-	visitParents(splitHtmlTree,["element"],(node)=>{
-		if (node.type === "element" && Array.isArray(node.properties.className) && node.properties?.className?.includes("comment")) {
-			node.children = node.children.reduce((result: Array<ElementContent>, child: ElementContent): Array<ElementContent> => {
-				if (child.type !== "text")
-					result.push(child);
-				else
-					result = convertCommentLinks(result,child.value,sourcePath,plugin);
-				return result;
-			},[]);
-		}
-	});
-	codeblockHTML = toHtml(splitHtmlTree);
-	let codeblockLines = codeblockHTML.split("<br>");
-	if (codeblockLines.length === 1)
-		codeblockLines = ["",""];
-	codeblockCodeElement.innerHTML = "";
-	return codeblockLines;
+	// const htmlTree = fromHtml(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"),{fragment: true});
+	// let codeblockHTML = codeblockCodeElement.innerHTML;
+	// visitParents(htmlTree,["text","element"],(node,ancestors)=>{
+	// 	if (node.type === "element" && node.tagName === "br") {
+	// 		if (ancestors.length >= 2) {
+	// 			codeblockHTML = codeblockHTML.replace(/\n/,ancestors.slice(1).reduce((result,element)=>{
+	// 				const elementCopy = structuredClone(element);
+	// 				elementCopy.children = [];
+	// 				const splitTag = toHtml(elementCopy).split(/(?<=>)(?=<\/)/);
+	// 				return splitTag.splice(-1)+result+splitTag.join("");
+	// 			},"<br>"));
+	// 		} else
+	// 			codeblockHTML = codeblockHTML.replace(/\n/,"<br>");
+	// 	}
+	// });
+	// const splitHtmlTree = fromHtml(codeblockHTML,{fragment: true});
+	// visitParents(splitHtmlTree,["element"],(node)=>{
+	// 	if (node.type === "element" && Array.isArray(node.properties.className) && node.properties?.className?.includes("comment")) {
+	// 		node.children = node.children.reduce((result: Array<ElementContent>, child: ElementContent): Array<ElementContent> => {
+	// 			if (child.type !== "text")
+	// 				result.push(child);
+	// 			else
+	// 				result = convertCommentLinks(result,child.value,sourcePath,plugin);
+	// 			return result;
+	// 		},[]);
+	// 	}
+	// });
+	// codeblockHTML = toHtml(splitHtmlTree);
+	// let codeblockLines = codeblockHTML.split("<br>");
+	// if (codeblockLines.length === 1)
+	// 	codeblockLines = ["",""];
+	// codeblockCodeElement.innerHTML = "";
+	// return codeblockLines;
+	codeblockCodeElement.innerText = sourcePath;
+	return [];
 }
 function convertCommentLinks(result: Array<ElementContent>, commentText: string, sourcePath: string, plugin: CodeStylerPlugin): Array<ElementContent> {
 	const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)].reverse();
