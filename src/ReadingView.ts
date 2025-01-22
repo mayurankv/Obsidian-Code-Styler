@@ -97,8 +97,6 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 		console.log(fenceCodeElement)
 		const fenceContext: string = sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
 			? "settings"
-			: document.querySelector("div.canvas")?.contains(fenceCodeElement)
-			? "canvas"
 			: Boolean(element.querySelector("div.print > *"))
 			? "export"
 			: Boolean(element.querySelector("div.slides > *"))
@@ -126,9 +124,6 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 		if (fenceContext === "settings") {
 			const fenceCodeLines = sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
 			fenceCodeParameters = fenceCodeLines[0]
-		} else if (fenceContext === "canvas") {
-			fenceCodeParameters = "TODO"
-			// TODO:
 		} else if (fenceContext === "admonition") {
 			fenceCodeParameters = "TODO"
 			// TODO:
