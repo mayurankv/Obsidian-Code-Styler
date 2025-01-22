@@ -83,9 +83,20 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
 	if ((frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
 		return;
-
 	// console.log("Check 3")
 	// console.log(element)
+
+
+	const markupContext: string = sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
+		? "settings"
+		: Boolean(element.querySelector("div.print > *"))
+		? "export"
+		: Boolean(element.querySelector("div.slides > *"))
+		? "slides"
+		: element.classList.contains("admonition-content")
+		? "admonition"
+		: "default";
+
 	for (const codeElement of Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>) {
 		if (!codeElement.className)
 			continue;
@@ -95,15 +106,6 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 
 		//TODO: Check context: Canvas? Settings?
 		console.log(fenceCodeElement)
-		const fenceContext: string = sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
-			? "settings"
-			: Boolean(element.querySelector("div.print > *"))
-			? "export"
-			: Boolean(element.querySelector("div.slides > *"))
-			? "slides"
-			: element.classList.contains("admonition-content")
-			? "admonition"
-			: "default";
 
 		const fencePreElement = fenceCodeElement.parentElement;
 		if (!fencePreElement)
@@ -115,28 +117,25 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 			continue;
 		// console.log("Check 7.x")
 
-		const parsed = fencePreElement.getAttribute("code-styler-parsed")??"false"
-		if (parsed === "true")
+		const parsed = fenceCodeElement.getAttribute("code-parameters")
+		if (parsed)
 			continue;
 		// console.log("Check 8.x")
 
 		let fenceCodeParameters = "unknown"
-		if (fenceContext === "settings") {
+		if (markupContext === "settings") {
 			const fenceCodeLines = sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
 			fenceCodeParameters = fenceCodeLines[0]
-		} else if (fenceContext === "admonition") {
+		} else if (markupContext === "export") {
 			fenceCodeParameters = "TODO"
 			// TODO:
-		} else if (fenceContext === "export") {
+		} else if (markupContext === "slides") {
 			fenceCodeParameters = "TODO"
 			// TODO:
-		} else if (fenceContext === "slides") {
+		} else if (markupContext === "admonition") {
 			fenceCodeParameters = "TODO"
 			// TODO:
-		} else if (fenceContext === "admonition") {
-			fenceCodeParameters = "TODO"
-			// TODO:
-		} else if (fenceContext === "default") {
+		} else if (markupContext === "default") {
 			const fenceSectionInfo: MarkdownSectionInformation | null = getSectionInfo(fenceCodeElement);
 			if (!fenceSectionInfo)
 				continue;
@@ -149,12 +148,11 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 			fenceCodeParameters = fenceCodeLines[0]
 		}
 		// fenceCodeElement.innerHTML = "DELETED" //TODO: Delete
-		fenceCodeElement.innerHTML = fenceContext //TODO: Delete
+		fenceCodeElement.innerHTML = markupContext //TODO: Delete
 		// console.log("Check Complete")
 		// console.log(fenceCodeElement)
 
 		fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-		fencePreElement.setAttribute("code-parsed", "true")
 
 	}
 
