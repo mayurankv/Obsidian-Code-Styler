@@ -1,13 +1,17 @@
-import { CachedMetadata, MarkdownPostProcessorContext, MarkdownSectionInformation, View } from "obsidian";
+import { CachedMetadata, DataAdapter, Editor, MarkdownPostProcessorContext, MarkdownSectionInformation, MarkdownView, SectionCache, View } from "obsidian";
+import { PARAMETERS_ATTRIBUTE } from "src/constants";
 import CodeStylerPlugin from "src/main";
 import { SETTINGS_SOURCEPATH_PREFIX } from "src/Settings";
 import { CodeParsingContext, FencedCodeMarkupContext } from "src/types";
+import { unified } from "unified";
+import markdown from 'remark-parse';
+import { visit } from 'unist-util-visit';
 
 export async function renderedFencedParsing(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 	plugin: CodeStylerPlugin,
-) {
+): Promise<void> {
 	if (!element)
 		return;
 
@@ -31,33 +35,58 @@ export async function renderedFencedParsing(
 		: element.querySelector("div.callout-content") !== null
 		? "callout"
 		: "standalone";
+	const editingMode = Boolean(element.matchParent(".cm-embed-block")) && (view.getViewType() === "markdown")
 
 	if (codeParsingContext === "settings") {
 		await applySettingsFencedParsing(
 			element,
 			context,
 		)
-	} else if ((codeParsingContext === "slides") || (codeParsingContext === "export" && plugin.settings.decoratePrint)) {
-		const fileContentLines = (await plugin.app.vault.adapter.read(context.sourcePath)).split(/\n/g);
-		await applyFullFencedParsing(
+	} else if (
+		(codeParsingContext === "slides") ||
+		(codeParsingContext === "export" && plugin.settings.decoratePrint) ||
+		(codeParsingContext === "callout" && editingMode)) //NOTE: Possibly inefficient?
+	{
+		const fileContentLines = await getFileContentLines(
+			context.sourcePath,
+			plugin.app.vault.adapter
+		);
+		console.log("original element", element)
+		console.log(view)
+		// @ts-expect-error Undocumented Obsidian API
+		element = (codeParsingContext === "callout" ? view.contentEl : element) as HTMLElement
+		console.log("element",element)
+		const filterSections = (codeParsingContext === "callout")
+			? (section: SectionCache) => (section.type === "callout" && !doesCalloutOverlap((view as MarkdownView).editor, section))
+			: (section: SectionCache) => (section.type === "callout" || section.type === "code")
+		await applyDocumentFencedParsing(
 			element,
-			context,
 			cache,
 			fileContentLines,
+			filterSections,
 		)
 	} else if (codeParsingContext === "admonition") {
-		await applyAdmonitionFencedParsing(element, context)
+		await applyAdmonitionFencedParsing(
+			element,
+			context,
+		)
 	} else if (codeParsingContext === "callout") {
-		await applyCalloutFencedParsing(element, context)
+		await applyCalloutFencedParsing(
+			element,
+			context,
+		)
 	} else if (codeParsingContext === "standalone") {
-		await applySingleFencedParsing(element, context)
+		await applyStandaloneFencedParsing(
+			element,
+			context,
+		)
 	}
 }
 
-async function applySingleFencedParsing(
+async function applyStandaloneFencedParsing(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
-) {
+): Promise<void> {
 	if (element.querySelectorAll("pre:not(.frontmatter) > code").length > 1)
 		console.warn("Unexpected number of fenced codeblocks")
 
@@ -65,162 +94,247 @@ async function applySingleFencedParsing(
 	if (!fenceCodeElement)
 		return;
 
-	const fenceSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(fenceCodeElement);
-	if (!fenceSectionInfo)
+	const fenceSectionLines = getElementSectionLines(element, context)
+	if (!fenceSectionLines)
 		return;
+
+	if (!isFenceCodeElement(fenceCodeElement))
+		return;
+
+	const fenceCodeParameters = cleanFenceCodeParameters(fenceSectionLines[0])
+	applyFenceCodeParameters(
+		fenceCodeElement,
+		fenceCodeParameters,
+	)
+	fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
+}
+
+async function applyCalloutFencedParsing(
+	element: HTMLElement,
+	context: MarkdownPostProcessorContext,
+): Promise<void> {
+	const fenceSectionLines = getElementSectionLines(element, context)
+	if (!fenceSectionLines)
+		return;
+
+	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
+
+	const fenceCodeParametersList = getMarkdownFenceParameters(fenceSectionLines)
+
+	if (fenceCodeElements.length !== fenceCodeParametersList.length)
+		return;
+
+	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
+		const fenceCodeElement = fenceCodeElements[idx];
+		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		applyFenceCodeParameters(
+			fenceCodeElement,
+			fenceCodeParameters,
+		)
+		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
+	}
+}
+
+async function applyAdmonitionFencedParsing(
+	element: HTMLElement,
+	context: MarkdownPostProcessorContext,
+): Promise<void> {
+	// const fenceSectionLines = getElementSectionLines(element, context)
+	// if (!fenceSectionLines)
+	// 	return;
+
+	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
+
+	// TODO: Parse admonition
+	console.log("Admonition")
+
+	for (const fenceCodeElement of fenceCodeElements) {
+		// TODO: Joint loop with parsed
+
+		const fenceCodeParameters = cleanFenceCodeParameters("TODO ADMONITION")
+		applyFenceCodeParameters(
+			fenceCodeElement,
+			fenceCodeParameters,
+		)
+		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
+	}
+}
+
+async function applyDocumentFencedParsing(
+	element: HTMLElement,
+	cache: CachedMetadata | null,
+	fileContentLines: Array<string>,
+	filterSections: (section: SectionCache) => boolean = (section) => (section.type === "callout" || section.type === "code"),
+) {
+	const fenceDocumentLines = getFenceDocumentLines(
+		cache,
+		fileContentLines,
+		filterSections,
+	)
+	if (!fenceDocumentLines)
+		return;
+
+	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
+	const fenceCodeParametersList = getMarkdownFenceParameters(fenceDocumentLines)
+
+	// TODO: class="internal-embed markdown-embed inline-embed is-loaded"
+	console.log(fenceCodeElements.length, fenceCodeParametersList.length)
+	console.log(fenceCodeParametersList)
+	console.log(fenceCodeElements)
+	if (fenceCodeElements.length !== fenceCodeParametersList.length)
+		return;
+
+	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
+		const fenceCodeElement = fenceCodeElements[idx];
+		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		applyFenceCodeParameters(
+			fenceCodeElement,
+			fenceCodeParameters,
+		)
+		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
+	}
+}
+
+async function applySettingsFencedParsing(
+	element: HTMLElement,
+	context: MarkdownPostProcessorContext,
+): Promise<void> {
+	const fenceCodeElement = element.querySelector("pre:not(.frontmatter) > code") as HTMLElement
+	if (!fenceCodeElement)
+		return;
+
+	const fenceSectionLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
+
+	if (!isFenceCodeElement(fenceCodeElement))
+		return;
+
+	const fenceCodeParameters = cleanFenceCodeParameters(fenceSectionLines[0])
+	applyFenceCodeParameters(
+		fenceCodeElement,
+		fenceCodeParameters,
+	)
+}
+
+// TODO: MOVE THese functions elsewhere
+async function getFileContentLines(
+	sourcePath: string,
+	adapter: DataAdapter,
+): Promise<Array<string>> {
+	return (await adapter.read(sourcePath)).split(/\n/g);
+}
+
+function getElementSectionLines(
+	element: HTMLElement,
+	context: MarkdownPostProcessorContext,
+): Array<string> | null {
+	const fenceSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(element);
+	if (!fenceSectionInfo)
+		return null;
 
 	const fenceSectionLines = Array.from(
 		{ length: fenceSectionInfo.lineEnd - fenceSectionInfo.lineStart + 1 },
 		(_, num) => num + fenceSectionInfo.lineStart).map((lineNumber) => fenceSectionInfo.text.split("\n")[lineNumber],
 	)
 
-	if (!fenceCodeElement.className)
-		return;
+	return fenceSectionLines
+}
+
+function getFenceDocumentLines(
+	cache: CachedMetadata | null,
+	fileContentLines: Array<string>,
+	filterSections: (section: SectionCache) => boolean,
+): Array<string> | null {
+	const sections = cache?.sections
+	if (typeof sections === "undefined")
+		return null;
+
+	const fenceDocumentLines = sections.filter(filterSections).reduce<Array<string>>(
+		(fenceDocumentLines, section) => {
+			const sectionLines = fileContentLines.slice(section.position.start.line, section.position.end.line + 1)
+			fenceDocumentLines = fenceDocumentLines.concat(sectionLines)
+
+			return fenceDocumentLines
+		},
+		[],
+	)
+
+	return fenceDocumentLines
+}
+
+function getMarkdownFenceParameters(
+	fenceSectionLines: Array<string>,
+): Array<string> {
+	const tree = unified().use(markdown).parse(fenceSectionLines.join("\n"));
+	const fenceSectionParameters: Array<string> = []
+	visit(
+		tree,
+		'code',
+		(node: any) => {
+			if (node?.lang?.startsWith("ad-") && !node?.meta)
+				fenceSectionParameters.push(...getMarkdownFenceParameters(node?.value?.split("\n")))
+			else
+				fenceSectionParameters.push(fenceSectionLines[node.position.start.line-1]); //NOTE: Used to use `\`\`\`${node.lang || ""} ${node.meta || ""}`
+		}
+	);
+
+	return fenceSectionParameters
+}
+
+function isFenceCodeElement(
+	fenceCodeElement: HTMLElement,
+): boolean {
+	// if (!fenceCodeElement.className)
+	// 	return false;
 
 	const fencePreElement = fenceCodeElement.parentElement;
 	if (!fencePreElement)
-		return;
+		return false;
 
 	const fenceParentElement = fencePreElement.parentElement;
 	if (!fenceParentElement)
-		return;
+		return false;
 
-	const parsed = fenceCodeElement.getAttribute("code-parameters")
-	if (parsed)
-		return;
-
-	const fenceCodeParameters = fenceSectionLines[0]
-	fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-	fenceCodeElement.innerHTML = fenceCodeElement.getAttribute("code-parameters") ?? "UNDONE"
-	for (const codeElement of Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>) {
-		if (!codeElement.className)
-			continue;
-
-		const fenceCodeElement = codeElement
-
-		const fencePreElement = fenceCodeElement.parentElement;
-		if (!fencePreElement)
-			continue;
-
-		const fenceParentElement = fencePreElement.parentElement;
-		if (!fenceParentElement)
-			continue;
-
-		const parsed = fenceCodeElement.getAttribute("code-parameters")
-		if (parsed)
-			continue;
-
-		const fenceSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(fenceCodeElement);
-		// console.log(fenceSectionInfo)
-		// console.log(element)
-		// console.log(context.getSectionInfo(fenceCodeElement),context.getSectionInfo(element))
-
-		const fencedCodeMarkupContext: FencedCodeMarkupContext = element.querySelector("div.callout-content") !== null
-			? "callout"
-			: element.classList.contains("admonition-content")
-			? "admonition"
-			: "default";
-
-		if (fencedCodeMarkupContext === "admonition") {
-			// TODO:
-			const fenceCodeParameters = "TODO ADMONITION"
-			fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-		} else if (fencedCodeMarkupContext === "callout") {
-			// TODO:
-			const fenceCodeParameters = "TODO CALLOUT"
-			fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-		} else if (fencedCodeMarkupContext === "default") {
-			if (!fenceSectionInfo)
-				continue;
-			// console.log(fenceSectionInfo)
-
-			const fenceSectionLines = Array.from(
-				{ length: fenceSectionInfo.lineEnd - fenceSectionInfo.lineStart + 1 },
-				(_, num) => num + fenceSectionInfo.lineStart).map((lineNumber) => fenceSectionInfo.text.split("\n")[lineNumber],
-			)
-			const fenceCodeParameters = fenceSectionLines[0]
-			fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-		}
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute("code-parameters") ?? "UNDONE"
-	}
+	return true
 }
 
-async function applyCalloutFencedParsing(
-	element: HTMLElement,
-	context: MarkdownPostProcessorContext,
-) {
-	// TODO:
-	const fenceCodeParameters = "TODO CALLOUT"
-	fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-	const fenceSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(element);
-	// TODO:
-	const fenceCodeElement = element.querySelector("pre:not(.frontmatter) > code")
-	if (!fenceCodeElement)
-		return;
-
-	const parsed = fenceCodeElement.getAttribute("code-parameters")
+function isUnparsedFenceCodeElement(
+	fenceCodeElement: HTMLElement,
+): boolean {
+	const parsed = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE)
 	if (parsed)
-		return;
+		return false;
 
-	const fenceCodeLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
-	const fenceCodeParameters = fenceCodeLines[0]
-	fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
+	return true
 }
 
+function cleanFenceCodeParameters(
+	fenceCodeParameters: string,
+): string {
+	fenceCodeParameters = fenceCodeParameters.replace(new RegExp(`^[> ]*`), '')
+	fenceCodeParameters = fenceCodeParameters.replace(new RegExp(`^[\`~]+`), '');
+	fenceCodeParameters += " "
 
-async function applyAdmonitionFencedParsing(
-	element: HTMLElement,
-	context: MarkdownPostProcessorContext,
-) {
-	// TODO:
-	const fenceCodeParameters = "TODO ADMONITION"
-	fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
-	// TODO:
-	const fenceCodeElement = element.querySelector("pre:not(.frontmatter) > code")
-	if (!fenceCodeElement)
-		return;
-
-	const parsed = fenceCodeElement.getAttribute("code-parameters")
-	if (parsed)
-		return;
-
-	const fenceCodeLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
-	const fenceCodeParameters = fenceCodeLines[0]
-	fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
+	return fenceCodeParameters
 }
 
-async function applyFullFencedParsing(
-	element: HTMLElement,
-	context: MarkdownPostProcessorContext,
-	cache: CachedMetadata | null,
-	fileContentLines: Array<string>,
+function applyFenceCodeParameters(
+	fenceCodeElement: HTMLElement,
+	fenceCodeParameters: string,
 ) {
-	const sections = cache?.sections
-	if (typeof sections === "undefined")
-		return;
-
-	for (const section of sections) {
-		console.log(section)
-		// if (!editingEmbeds || section.type === "code" || section.type === "callout") {
-		// 	const parsedCodeblocksParameters = fileContentLines.slice(section.position.start.line,section.position.end.line+1)
-		// }
-	}
-	// class="internal-embed markdown-embed inline-embed is-loaded"
+	if (isUnparsedFenceCodeElement(fenceCodeElement))
+		fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, fenceCodeParameters)
 }
 
-async function applySettingsFencedParsing(
-	element: HTMLElement,
-	context: MarkdownPostProcessorContext,
-) {
-	const fenceCodeElement = element.querySelector("pre:not(.frontmatter) > code")
-	if (!fenceCodeElement)
-		return;
+function doesCalloutOverlap(
+	editor: Editor,
+	section: SectionCache,
+): boolean {
+	const cursor = {from: editor.getCursor("from"), to: editor.getCursor("to")}
+	const cursorPreCallout = (section.position.start.line > cursor.to.line || (section.position.start.line === cursor.to.line && section.position.start.col > cursor.to.ch))
+	const cursorPostCallout = (section.position.end.line < cursor.from.line || (section.position.start.line === cursor.to.line && section.position.start.col < cursor.to.ch))
 
-	const parsed = fenceCodeElement.getAttribute("code-parameters")
-	if (parsed)
-		return;
+	const overlap = !cursorPreCallout && !cursorPostCallout
+	console.log("overlap", overlap)
 
-	const fenceCodeLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
-	const fenceCodeParameters = fenceCodeLines[0]
-	fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
+	return overlap
 }

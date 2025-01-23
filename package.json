@@ -52,7 +52,9 @@
 		"hast": "^1.0.0",
 		"hast-util-from-html": "^2.0.3",
 		"hast-util-to-html": "^9.0.3",
+		"remark-parse": "^11.0.0",
 		"request": "^2.88.2",
+		"unified": "^11.0.5",
 		"unist-util-visit-parents": "^6.0.1"
 	},
 	"contributors": [
