@@ -68,93 +68,92 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 	// console.log("bar")
 	//! BREAK
 	// Context: Native, Embed (File, Canvas, Reading, Editing), Whole document, Printing, Canvas, Settings
-
+	return;
 	// console.log("Check 1")
 	// console.log(sourcePath)
-	if (!element)
-		return;
+	// if (!element)
+	// 	return;
 
-	const view = plugin.app.workspace.getActiveViewOfType(View);
+	// const view = plugin.app.workspace.getActiveViewOfType(View);
 
-	// console.log("Check 2")
-	if (!view)
-		return;
+	// // console.log("Check 2")
+	// if (!view)
+	// 	return;
 
-	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
-	if ((frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
-		return;
-	// console.log("Check 3")
-	// console.log(element)
+	// const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(sourcePath);
+	// if ((frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
+	// 	return;
+	// // console.log("Check 3")
+	// // console.log(element)
 
 
-	const markupContext: string = sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
-		? "settings"
-		: Boolean(element.querySelector("div.print > *"))
-		? "export"
-		: Boolean(element.querySelector("div.slides > *"))
-		? "slides"
-		: element.classList.contains("admonition-content")
-		? "admonition"
-		: "default";
+	// const markupContext: string = sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
+	// 	? "settings"
+	// 	: Boolean(element.querySelector("div.print > *"))
+	// 	? "export"
+	// 	: Boolean(element.querySelector("div.slides > *"))
+	// 	? "slides"
+	// 	: element.classList.contains("admonition-content")
+	// 	? "admonition"
+	// 	: "default";
 
-	for (const codeElement of Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>) {
-		if (!codeElement.className)
-			continue;
-		// console.log("Check 4.x")
+	// for (const codeElement of Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>) {
+	// 	if (!codeElement.className)
+	// 		continue;
+	// 	// console.log("Check 4.x")
 
-		const fenceCodeElement = codeElement
+	// 	const fenceCodeElement = codeElement
 
-		//TODO: Check context: Canvas? Settings?
-		console.log(fenceCodeElement)
+	// 	console.log(fenceCodeElement)
 
-		const fencePreElement = fenceCodeElement.parentElement;
-		if (!fencePreElement)
-			continue;
-		// console.log("Check 6.x")
+	// 	const fencePreElement = fenceCodeElement.parentElement;
+	// 	if (!fencePreElement)
+	// 		continue;
+	// 	// console.log("Check 6.x")
 
-		const fenceParentElement = fencePreElement.parentElement;
-		if (!fenceParentElement)
-			continue;
-		// console.log("Check 7.x")
+	// 	const fenceParentElement = fencePreElement.parentElement;
+	// 	if (!fenceParentElement)
+	// 		continue;
+	// 	// console.log("Check 7.x")
 
-		const parsed = fenceCodeElement.getAttribute("code-parameters")
-		if (parsed)
-			continue;
-		// console.log("Check 8.x")
+	// 	const parsed = fenceCodeElement.getAttribute("code-parameters")
+	// 	if (parsed)
+	// 		continue;
+	// 	// console.log("Check 8.x")
 
-		let fenceCodeParameters = "unknown"
-		if (markupContext === "settings") {
-			const fenceCodeLines = sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
-			fenceCodeParameters = fenceCodeLines[0]
-		} else if (markupContext === "export") {
-			fenceCodeParameters = "TODO"
-			// TODO:
-		} else if (markupContext === "slides") {
-			fenceCodeParameters = "TODO"
-			// TODO:
-		} else if (markupContext === "admonition") {
-			fenceCodeParameters = "TODO"
-			// TODO:
-		} else if (markupContext === "default") {
-			const fenceSectionInfo: MarkdownSectionInformation | null = getSectionInfo(fenceCodeElement);
-			if (!fenceSectionInfo)
-				continue;
-			console.log("Check 8.x.x")
+	// 	let fenceCodeParameters = "unknown"
+	// 	if (markupContext === "settings") {
+	// 		const fenceCodeLines = sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
+	// 		fenceCodeParameters = fenceCodeLines[0]
+	// 	} else if (markupContext === "export") {
+	// 		fenceCodeParameters = "TODO"
+	// 		// TODO:
+	// 	} else if (markupContext === "slides") {
+	// 		fenceCodeParameters = "TODO"
+	// 		// TODO:
+	// 	} else if (markupContext === "admonition") {
+	// 		fenceCodeParameters = "TODO"
+	// 		// TODO:
+	// 	} else if (markupContext === "default") {
+	// 		const fenceSectionInfo: MarkdownSectionInformation | null = getSectionInfo(fenceCodeElement);
+	// 		if (!fenceSectionInfo)
+	// 			continue;
+	// 		console.log("Check 8.x.x")
 
-			const fenceCodeLines = Array.from(
-				{ length: fenceSectionInfo.lineEnd - fenceSectionInfo.lineStart + 1 },
-				(_, num) => num + fenceSectionInfo.lineStart).map((lineNumber) => fenceSectionInfo.text.split("\n")[lineNumber],
-			)
-			fenceCodeParameters = fenceCodeLines[0]
-		}
-		// fenceCodeElement.innerHTML = "DELETED" //TODO: Delete
-		fenceCodeElement.innerHTML = markupContext //TODO: Delete
-		// console.log("Check Complete")
-		// console.log(fenceCodeElement)
+	// 		const fenceCodeLines = Array.from(
+	// 			{ length: fenceSectionInfo.lineEnd - fenceSectionInfo.lineStart + 1 },
+	// 			(_, num) => num + fenceSectionInfo.lineStart).map((lineNumber) => fenceSectionInfo.text.split("\n")[lineNumber],
+	// 		)
+	// 		fenceCodeParameters = fenceCodeLines[0]
+	// 	}
+	// 	// fenceCodeElement.innerHTML = "DELETED" //TODO: Delete
+	// 	// fenceCodeElement.innerHTML = markupContext //TODO: Delete
+	// 	// console.log("Check Complete")
+	// 	// console.log(fenceCodeElement)
 
-		fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
+	// 	// fenceCodeElement.setAttribute("code-parameters", fenceCodeParameters)
 
-	}
+	// }
 
 	// editingEmbeds = editingEmbeds || Boolean(element.matchParent(".cm-embed-block"));
 	// const specific = !element.querySelector(".view-content > *");
@@ -166,14 +165,6 @@ export async function readingViewCodeblockDecoratingPostProcessor(
 	// if (codeblockPreElements.length === 0 && !(editingEmbeds && specific))
 	// 	return;
 
-	return;
-	const codeblockSectionInfo: MarkdownSectionInformation | null = getSectionInfo(codeblockPreElements[0]);
-	if (specific && !printing) {
-		sourcePath = context;
-		await retriggerProcessor(element, { sourcePath, getSectionInfo, frontmatter }, plugin, editingEmbeds);
-	} else
-		sourcePath = context;
-		await renderDocument(codeblockPreElements,sourcePath,cache,editingEmbeds,printing,plugin);
 }
 export async function readingViewInlineDecoratingPostProcessor(element: HTMLElement, {sourcePath}: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin) {
 	if (!sourcePath || !element)

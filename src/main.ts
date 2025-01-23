@@ -7,6 +7,7 @@ import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./Edit
 import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
 import { cleanExternalReferencedFiles, referenceCodeblockProcessor, updateExternalReferencedFiles } from "./Referencing";
 import { addModes, removeModes } from "./SyntaxHighlighting";
+import { renderedFencedParsing } from "./Parsing/Parameters/Fenced";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -36,6 +37,10 @@ export default class CodeStylerPlugin extends Plugin {
 		};
 
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
+
+		this.registerMarkdownPostProcessor(async (element, context) => {
+			await renderedFencedParsing(element, context, this);
+		})
 
 		addModes();
 		// this.registerMarkdownCodeBlockProcessor(REFERENCE_CODEBLOCK, async (source, el, ctx) => {
