@@ -1,13 +1,14 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_CACHE } from "./Settings";
-import { SettingsTab } from "./SettingsTab";
-import { removeStylesAndClasses, updateStyling } from "./ApplyStyling";
-import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./EditingView";
-import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./ReadingView";
-import { cleanExternalReferencedFiles, referenceCodeblockProcessor, updateExternalReferencedFiles } from "./Referencing";
-import { addModes, removeModes } from "./SyntaxHighlighting";
-import { renderedFencedParsing } from "./Parsing/Parameters/Fenced";
+import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_CACHE } from "./_temp/_Old/Settings";
+import { SettingsTab } from "./_temp/_Old/SettingsTab";
+import { removeStylesAndClasses, updateStyling } from "./_temp/_Old/ApplyStyling";
+import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./_temp/_Old/EditingView";
+import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./_temp/_Old/ReadingView";
+import { cleanExternalReferencedFiles, referenceCodeblockProcessor, updateExternalReferencedFiles } from "./_temp/_Old/Referencing";
+import { addModes, removeModes } from "./_temp/_Old/SyntaxHighlighting";
+import { renderedFencedCodeParsing } from "./Internal/Detecting/Preview/Fenced";
+import { renderedInlineCodeParsing } from "./Internal/Detecting/Preview/Inline";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -39,10 +40,13 @@ export default class CodeStylerPlugin extends Plugin {
 		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 
 		this.registerMarkdownPostProcessor(async (element, context) => {
-			await renderedFencedParsing(element, context, this);
+			await renderedFencedCodeParsing(element, context, this);
+		})
+		this.registerMarkdownPostProcessor(async (element, context) => {
+			await renderedInlineCodeParsing(element, context, this);
 		})
 
-		addModes();
+		// addModes();
 		// this.registerMarkdownCodeBlockProcessor(REFERENCE_CODEBLOCK, async (source, el, ctx) => {
 		// 	await referenceCodeblockProcessor(source, el, ctx, this);
 		// });

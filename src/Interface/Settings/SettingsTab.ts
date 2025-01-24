@@ -2,8 +2,8 @@ import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponen
 import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";
 
-import CodeStylerPlugin from "./main";
-import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGES, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, EXCLUDED_LANGUAGES, WHITELIST_CODEBLOCKS, INBUILT_THEMES, CodeStylerTheme } from "./Settings";
+import CodeStylerPlugin from "../../../main";
+import { Colour, CSS, HEX, Display, CodeStylerSettings, CodeStylerThemeColours, FOLD_PLACEHOLDER, PARAMETERS, DEFAULT_SETTINGS, LANGUAGE_NAMES, LANGUAGES, SETTINGS_SOURCEPATH_PREFIX, EXAMPLE_INLINE_CODE, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_CODEBLOCK_CONTENT, EXCLUDED_LANGUAGES, WHITELIST_CODEBLOCKS, INBUILT_THEMES, CodeStylerTheme } from "../../Internal/settings";
 
 const SETTINGS_PAGES: Record<string,string> = {
 	"main": "Core Settings",

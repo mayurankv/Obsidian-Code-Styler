@@ -1,22 +1,21 @@
-import { CachedMetadata, DataAdapter, Editor, MarkdownPostProcessorContext, MarkdownSectionInformation, MarkdownView, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
-import { PARAMETERS_ATTRIBUTE } from "src/constants";
+import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
+import { PARAMETERS_ATTRIBUTE, SETTINGS_SOURCEPATH_PREFIX } from "src/Internal/constants/parameters";
 import CodeStylerPlugin from "src/main";
-import { SETTINGS_SOURCEPATH_PREFIX } from "src/Settings";
-import { CodeParsingContext, FencedCodeMarkupContext } from "src/types";
+import { CodeParsingContext } from "src/Internal/types";
 import { unified } from "unified";
 import markdown from 'remark-parse';
 import { visit } from 'unist-util-visit';
+import { isUndetectedCodeElement } from "../utils";
 
-export async function renderedFencedParsing(
+export async function renderedFencedCodeParsing(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
-	if (!element)
+	if (!element || !context?.sourcePath)
 		return;
 
 	const view = plugin.app.workspace.getActiveViewOfType(View);
-
 	if (!view)
 		return;
 
@@ -70,12 +69,14 @@ export async function renderedFencedParsing(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
-		await applyEditingAdmonitionFencedParsing(
+		const editing = true
+		await applyAdmonitionFencedParsing(
 			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.editMode?.editorEl as HTMLElement,
 			cache,
 			fileContentLines,
+			editing,
 		)
 	} else if ((codeParsingContext === "callout") && editingMode) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
@@ -94,12 +95,14 @@ export async function renderedFencedParsing(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
+		const editing = false
 		await applyAdmonitionFencedParsing(
 			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.previewMode?.renderer?.previewEl as HTMLElement,
 			cache,
 			fileContentLines,
+			editing,
 		)
 	} else if (codeParsingContext === "callout") {
 		await applyCalloutFencedParsing(
@@ -122,10 +125,7 @@ async function applyStandaloneFencedParsing(
 		console.warn("Unexpected number of fenced codeblocks")
 
 	const fenceCodeElement = element.querySelector("pre:not(.frontmatter) > code") as HTMLElement
-	if (!fenceCodeElement)
-		return;
-
-	if (!isFenceCodeElement(fenceCodeElement))
+	if (!fenceCodeElement || !isFenceCodeElement(fenceCodeElement))
 		return;
 
 	const fenceSectionLines = getElementSectionLines(element, context)
@@ -151,21 +151,6 @@ async function applyCalloutFencedParsing(
 		element,
 		fenceSectionLines
 	)
-	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-
-	const fenceCodeParametersList = getMarkdownFenceParameters(fenceSectionLines)
-
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
-		return;
-
-	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
-		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
-			fenceCodeElement,
-			fenceCodeParameters,
-		)
-	}
 }
 
 async function applyEditingCalloutFencedParsing(
@@ -193,21 +178,11 @@ async function applyEditingCalloutFencedParsing(
 		idxSection = calloutSections.findIndex((element) => element.classList.contains("HyperMD-callout"));
 	//TODO: FIX - This isn't unique if multiple callouts are in editing mode rather than embed as there is no information to map them
 
-	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-
-	const fenceCodeParametersList = getMarkdownFenceParameters(calloutSectionsLines[idxSection])
-
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
-		return;
-
-	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
-		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
-			fenceCodeElement,
-			fenceCodeParameters,
-		)
-	}
+	const fenceSectionLines = calloutSectionsLines[idxSection]
+	applyFenceCodeParametersList(
+		element,
+		fenceSectionLines
+	)
 }
 
 async function applyAdmonitionFencedParsing(
@@ -215,12 +190,16 @@ async function applyAdmonitionFencedParsing(
 	contentElement: HTMLElement,
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
+	editing: boolean
 ): Promise<void> {
 	const admonitionSectionsLines = getAdmonitionLines(cache, fileContentLines)
 	if (!admonitionSectionsLines)
 		return;
 
-	const admonitionSections = (Array.from(contentElement.querySelectorAll(".callout-content.admonition-content:not(.internal-embed .callout-content.admonition-content):not(.callout-content.admonition-content .callout-content.admonition-content)")) as Array<HTMLElement>)
+	const query = editing
+		? ".callout-content.admonition-content:not(.admonition-parent):not(.internal-embed .callout-content.admonition-content), .HyperMD-codeblock-begin > .cm-hmd-codeblock"
+		: ".callout-content.admonition-content:not(.internal-embed .callout-content.admonition-content):not(.callout-content.admonition-content .callout-content.admonition-content)"
+	const admonitionSections = (Array.from(contentElement.querySelectorAll(query)) as Array<HTMLElement>).filter((element) => (element.classList.contains("admonition-content") || RegExp(`^[> ]*[\`~]*ad-`).test(element.innerText)))
 
 	if (admonitionSections.length !== admonitionSectionsLines.length)
 		return;
@@ -229,57 +208,11 @@ async function applyAdmonitionFencedParsing(
 	if (idxSection === -1)
 		return;
 
-	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-
-	const fenceCodeParametersList = getMarkdownFenceParameters(admonitionSectionsLines[idxSection])
-
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
-		return;
-
-	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
-		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
-			fenceCodeElement,
-			fenceCodeParameters,
-		)
-	}
-}
-
-async function applyEditingAdmonitionFencedParsing(
-	element: HTMLElement,
-	contentElement: HTMLElement,
-	cache: CachedMetadata | null,
-	fileContentLines: Array<string>,
-): Promise<void> {
-	const admonitionSectionsLines = getAdmonitionLines(cache, fileContentLines)
-	if (!admonitionSectionsLines)
-		return;
-
-	const admonitionSections = (Array.from(contentElement.querySelectorAll(".callout-content.admonition-content:not(.admonition-parent):not(.internal-embed .callout-content.admonition-content), .HyperMD-codeblock-begin > .cm-hmd-codeblock")) as Array<HTMLElement>).filter((element) => (element.classList.contains("admonition-content") || RegExp(`^[> ]*[\`~]*ad-`).test(element.innerText)))
-
-	if (admonitionSections.length !== admonitionSectionsLines.length)
-		return;
-
-	let section_idx = admonitionSections.indexOf(element)
-	if (section_idx === -1)
-		return;
-
-	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-
-	const fenceCodeParametersList = getMarkdownFenceParameters(admonitionSectionsLines[section_idx])
-
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
-		return;
-
-	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
-		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
-			fenceCodeElement,
-			fenceCodeParameters,
-		)
-	}
+	const fenceSectionLines = admonitionSectionsLines[idxSection]
+	applyFenceCodeParametersList(
+		element,
+		fenceSectionLines
+	)
 }
 
 async function applyEmbeddedAdmonitionFencedParsing(
@@ -287,11 +220,11 @@ async function applyEmbeddedAdmonitionFencedParsing(
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
 ): Promise<void> {
-	const admonitionSectionsLines = getAdmonitionLines(cache, fileContentLines)
-	if (!admonitionSectionsLines)
+	if (!cache)
 		return;
 
-	if (!cache)
+	const admonitionSectionsLines = getAdmonitionLines(cache, fileContentLines)
+	if (!admonitionSectionsLines)
 		return;
 
 	const embedElement = element?.matchParent(".internal-embed")
@@ -332,21 +265,11 @@ async function applyEmbeddedAdmonitionFencedParsing(
 	if (idxSection === -1)
 		return;
 
-	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-
-	const fenceCodeParametersList = getMarkdownFenceParameters(embeddedAdmonitionSectionsLines[idxSection])
-
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
-		return;
-
-	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
-		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
-			fenceCodeElement,
-			fenceCodeParameters,
-		)
-	}
+	const fenceSectionLines = embeddedAdmonitionSectionsLines[idxSection]
+	applyFenceCodeParametersList(
+		element,
+		fenceSectionLines
+	)
 }
 
 async function applyDocumentFencedParsing(
@@ -363,20 +286,11 @@ async function applyDocumentFencedParsing(
 	if (!fenceDocumentLines)
 		return;
 
-	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-	const fenceCodeParametersList = getMarkdownFenceParameters(fenceDocumentLines)
-
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
-		return;
-
-	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
-		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
-			fenceCodeElement,
-			fenceCodeParameters,
-		)
-	}
+	const fenceSectionLines = fenceDocumentLines
+	applyFenceCodeParametersList(
+		element,
+		fenceSectionLines
+	)
 }
 
 async function applySettingsFencedParsing(
@@ -496,16 +410,6 @@ function isFenceCodeElement(
 	return true
 }
 
-function isUnparsedFenceCodeElement(
-	fenceCodeElement: HTMLElement,
-): boolean {
-	const parsed = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE)
-	if (parsed)
-		return false;
-
-	return true
-}
-
 function cleanFenceCodeParameters(
 	fenceCodeParameters: string,
 ): string {
@@ -520,7 +424,7 @@ function applyFenceCodeParameters(
 	fenceCodeElement: HTMLElement,
 	fenceCodeParameters: string,
 ) {
-	if (isUnparsedFenceCodeElement(fenceCodeElement))
+	if (isUndetectedCodeElement(fenceCodeElement))
 		fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, cleanFenceCodeParameters(fenceCodeParameters))
 }
 

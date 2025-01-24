@@ -1,9 +1,9 @@
 import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation, SectionCache, normalizePath, request } from "obsidian";
-import { Reference, getLineLimits, parseExternalReference, parseReferenceParameters } from "src/Parsing/ReferenceParsing";
-import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_CACHE } from "src/Settings";
+import { Reference, getLineLimits, parseExternalReference, parseReferenceParameters } from "src/_temp/_Old/Parsing/ReferenceParsing";
+import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_CACHE } from "src/_temp/_Old/Settings";
 import CodeStylerPlugin from "src/main";
 import { renderSpecificReadingSection } from "./ReadingView";
-import { getFileContentLines } from "./Parsing/CodeblockParsing";
+import { getFileContentLines } from "./Internal/Parsing/CodeblockParsing";
 
 type Cache = Record<string, IdCache>
 interface IdCache {

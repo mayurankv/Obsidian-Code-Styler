@@ -1,11 +1,11 @@
 import { LANGUAGE_NAMES, CodeStylerThemeSettings, FOLD_PLACEHOLDER, GIT_ICONS, STAMP_ICON, SITE_ICONS, UPDATE_ICON } from "./Settings";
-import { CodeblockParameters, Highlights } from "./Parsing/CodeblockParsing";
+import { CodeblockParameters, Highlights } from "./Internal/Parsing/CodeblockParsing";
 import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { MarkdownRenderer, MarkdownView } from "obsidian";
-import CodeStylerPlugin from "./main";
-import { updateExternalReference } from "./Referencing";
+import CodeStylerPlugin from "../../main";
+import { updateExternalReference } from "../../Referencing";
 import { Reference } from "./Parsing/ReferenceParsing";
-import { rerender } from "./EditingView";
+import { rerender } from "../../EditingView";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {
 	const headerContainer = createDiv();

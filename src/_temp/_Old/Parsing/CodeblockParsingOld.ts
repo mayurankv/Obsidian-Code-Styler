@@ -1,8 +1,8 @@
 import { MarkdownPreviewRenderer, Plugin } from "obsidian";
 
-import CodeStylerPlugin from "../main";
+import CodeStylerPlugin from "../../../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
-import { CodeBlockArgs, getArgs } from "../External/ExecuteCode/CodeBlockArgs";
+import { CodeBlockArgs, getArgs } from "../../../External/ExecuteCode/CodeBlockArgs";
 import { getReference } from "src/Referencing";
 import { Reference } from "./ReferenceParsing";
 import { basename } from "path";

@@ -5,10 +5,10 @@ import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
 import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "./Settings";
-import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, trimParameterLine, isCodeblockIgnored, isLanguageIgnored } from "./Parsing/CodeblockParsing";
+import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, trimParameterLine, isCodeblockIgnored, isLanguageIgnored } from "./Internal/Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
-import CodeStylerPlugin from "./main";
+import CodeStylerPlugin from "../../main";
 import { addReferenceSyntaxHighlight } from "./SyntaxHighlighting";
 
 interface SettingsState {
