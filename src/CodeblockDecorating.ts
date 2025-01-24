@@ -32,7 +32,7 @@ function createTitleContainer(codeblockParameters: CodeblockParameters, themeSet
 	const title = codeblockParameters.title || (codeblockParameters.fold.enabled?(codeblockParameters.fold.placeholder || themeSettings.header.foldPlaceholder || FOLD_PLACEHOLDER):"");
 	if (codeblockParameters.reference === "")
 		titleContainer.innerText = title;
-	else if (/^(?:https?|file):\/\//.test(codeblockParameters.reference))
+	else if (/^(?:https?|file|zotero):\/\//.test(codeblockParameters.reference))
 		MarkdownRenderer.render(plugin.app,`[${title}](${codeblockParameters.reference})`,titleContainer,sourcePath,plugin);
 	else
 		MarkdownRenderer.render(plugin.app,`[[${codeblockParameters.reference}|${title}]]`,titleContainer,sourcePath,plugin); //TODO (@mayurankv) Add links to metadata cache properly
