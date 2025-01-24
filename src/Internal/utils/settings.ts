@@ -1,68 +1,8 @@
-import { DEFAULT_SETTINGS } from "../constants/settings";
-import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeModeColours, Colour } from "../types/settings";
+// TODO: Update
 
-function convertColoursToTheme(
-	colours: Record<string, Colour>,
-): CodeStylerThemeModeColours {
-	return {
-		codeblock: {
-			backgroundColour: colours.backgroundColour,
-			textColour: colours.foregroundColour,
-		},
-		gutter: {
-			backgroundColour: GRUVBOX.light1,
-			textColour: "#6c6c6c",
-			activeTextColour: "#8c8c8c",
-		},
-		header: {
-			backgroundColour: "#D5CCB4",
-			title: {
-				textColour: "#866704",
-			},
-			languageTag: {
-				backgroundColour: "#B8B5AA",
-				textColour: "#C25F30",
-			},
-			externalReference: {
-				displayRepositoryColour: "#00FFFF",
-				displayVersionColour: "#9437ff",
-				displayTimestampColour: "#808080",
-			},
-			lineColour: "#EDD489",
-		},
-		highlights: {
-			activeCodeblockLineColour: GRUVBOX.light1,
-			activeEditorLineColour: "#60460633",
-			defaultColour: "#E9DFBA",
-			alternativeHighlights: {},
-		},
-		inline: {
-			backgroundColour: GRUVBOX.light0,
-			textColour: "#bababa",
-			activeTextColour: "#bababa",
-			titleTextColour: "#C25F30",
-		},
-		advanced: {
-			buttonColour: "--text-muted",
-			buttonActiveColour: "--text-normal",
-		},
-	}
-}
-
-function createTheme(
-	themeName: string,
-): CodeStylerTheme {
-	if (!COLOUR_THEMES?.[themeName])
-		throw new Error("Theme not found")
-
-	return {
-		settings: THEME_DEFAULT_SETTINGS,
-		colours: {
-			light: convertColoursToTheme(COLOUR_THEMES[themeName]["light"]),
-			dark: convertColoursToTheme(COLOUR_THEMES[themeName]["dark"]),
-		},
-	}
-}
+import { DEFAULT_SETTINGS, THEME_DEFAULT_SETTINGS } from "../constants/settings";
+import { THEME_FALLBACK_COLOURS } from "../settings";
+import { CodeStylerSettings, CodeStylerTheme, Colour } from "../types/settings";
 
 export function convertSettings(
 	settings: CodeStylerSettings

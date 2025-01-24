@@ -1,10 +1,3 @@
-
-export interface InlineCodeParameters {
-	language: string;
-	title: string;
-	icon: boolean;
-}
-
 export function parseInlineCode(codeText: string): {parameters: InlineCodeParameters | null, text: string} {
 	const match = /^{((?:[^"'{}\\]|\\.|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')*)} *?([^ ].*)$/.exec(codeText);
 

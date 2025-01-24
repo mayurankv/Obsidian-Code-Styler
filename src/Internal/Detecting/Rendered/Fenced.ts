@@ -1,5 +1,5 @@
 import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
-import { PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
+import { DETECTING_CONTEXT, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import CodeStylerPlugin from "src/main";
 import { unified } from "unified";
 import markdown from 'remark-parse';
@@ -8,23 +8,17 @@ import { isUndetectedCodeElement } from "../utils";
 import { SETTINGS_TAB_SOURCEPATH_PREFIX } from "src/Internal/constants/interface";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
 
-export async function renderedFencedCodeParsing(
+export async function renderedFencedCodeDetecting(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
-	if (!element || !context?.sourcePath)
-		return;
-
 	const view = plugin.app.workspace.getActiveViewOfType(View);
-	if (!view)
+	const cache = plugin.app.metadataCache.getCache(context.sourcePath)
+	if (!view || !cache)
 		return;
 
-	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
-	if ((context.frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
-		return;
-
-	const codeParsingContext: CodeDetectingContext = context.sourcePath.startsWith(SETTINGS_TAB_SOURCEPATH_PREFIX)
+	const codeDetectingContext: CodeDetectingContext = context.sourcePath.startsWith(SETTINGS_TAB_SOURCEPATH_PREFIX)
 		? "settings"
 		: document.querySelector("div.print")?.contains(element)
 		? "export"
@@ -40,38 +34,38 @@ export async function renderedFencedCodeParsing(
 	// @ts-expect-error Undocumented Obsidian API
 	const embeddedContent = (view?.file?.path !== context.sourcePath);
 
-	if (codeParsingContext === "settings") {
-		await applySettingsFencedParsing(
+	if (codeDetectingContext === "settings") {
+		await applySettingsFencedDetecting(
 			element,
 			context,
 		)
-	} else if ((codeParsingContext === "slides") || (codeParsingContext === "export" && plugin.settings.decoratePrint)) {
+	} else if ((codeDetectingContext === "slides") || (codeDetectingContext === "export" && plugin.settings.decoratePrint)) {
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
-		await applyDocumentFencedParsing(
+		await applyDocumentFencedDetecting(
 			element,
 			cache,
 			fileContentLines,
 		)
-	} else if ((codeParsingContext === "admonition") && embeddedContent) { //NOTE: Possibly inefficient?
+	} else if ((codeDetectingContext === "admonition") && embeddedContent) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
-		await applyEmbeddedAdmonitionFencedParsing(
+		await applyEmbeddedAdmonitionFencedDetecting(
 			element,
 			cache,
 			fileContentLines,
 		)
-	} else if ((codeParsingContext === "admonition") && editingMode) { //NOTE: Possibly inefficient?
+	} else if ((codeDetectingContext === "admonition") && editingMode) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
 		const editing = true
-		await applyAdmonitionFencedParsing(
+		await applyAdmonitionFencedDetecting(
 			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.editMode?.editorEl as HTMLElement,
@@ -79,25 +73,25 @@ export async function renderedFencedCodeParsing(
 			fileContentLines,
 			editing,
 		)
-	} else if ((codeParsingContext === "callout") && editingMode) { //NOTE: Possibly inefficient?
+	} else if ((codeDetectingContext === "callout") && editingMode) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
-		await applyEditingCalloutFencedParsing(
+		await applyEditingCalloutFencedDetecting(
 			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.editMode?.editorEl as HTMLElement,
 			cache,
 			fileContentLines,
 		)
-	} else if (codeParsingContext === "admonition") {
+	} else if (codeDetectingContext === "admonition") {
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
 		const editing = false
-		await applyAdmonitionFencedParsing(
+		await applyAdmonitionFencedDetecting(
 			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.previewMode?.renderer?.previewEl as HTMLElement,
@@ -105,20 +99,20 @@ export async function renderedFencedCodeParsing(
 			fileContentLines,
 			editing,
 		)
-	} else if (codeParsingContext === "callout") {
-		await applyCalloutFencedParsing(
+	} else if (codeDetectingContext === "callout") {
+		await applyCalloutFencedDetecting(
 			element,
 			context,
 		)
-	} else if (codeParsingContext === "standalone") {
-		await applyStandaloneFencedParsing(
+	} else if (codeDetectingContext === "standalone") {
+		await applyStandaloneFencedDetecting(
 			element,
 			context,
 		)
 	}
 }
 
-async function applyStandaloneFencedParsing(
+async function applyStandaloneFencedDetecting(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 ): Promise<void> {
@@ -133,14 +127,15 @@ async function applyStandaloneFencedParsing(
 	if (!fenceSectionLines)
 		return;
 
-	const fenceCodeParameters = fenceSectionLines[0]
-	applyFenceCodeParameters(
+	const fenceCodeParametersLine = fenceSectionLines[0]
+	applyFenceCodeParametersLine(
 		fenceCodeElement,
-		fenceCodeParameters,
+		fenceCodeParametersLine,
+		"standalone",
 	)
 }
 
-async function applyCalloutFencedParsing(
+async function applyCalloutFencedDetecting(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 ): Promise<void> {
@@ -148,13 +143,14 @@ async function applyCalloutFencedParsing(
 	if (!fenceSectionLines)
 		return;
 
-	applyFenceCodeParametersList(
+	applyFenceCodeParametersLinesList(
 		element,
-		fenceSectionLines
+		fenceSectionLines,
+		"callout",
 	)
 }
 
-async function applyEditingCalloutFencedParsing(
+async function applyEditingCalloutFencedDetecting(
 	element: HTMLElement,
 	contentElement: HTMLElement,
 	cache: CachedMetadata | null,
@@ -180,13 +176,14 @@ async function applyEditingCalloutFencedParsing(
 	//TODO: FIX - This isn't unique if multiple callouts are in editing mode rather than embed as there is no information to map them
 
 	const fenceSectionLines = calloutSectionsLines[idxSection]
-	applyFenceCodeParametersList(
+	applyFenceCodeParametersLinesList(
 		element,
-		fenceSectionLines
+		fenceSectionLines,
+		"callout",
 	)
 }
 
-async function applyAdmonitionFencedParsing(
+async function applyAdmonitionFencedDetecting(
 	element: HTMLElement,
 	contentElement: HTMLElement,
 	cache: CachedMetadata | null,
@@ -210,13 +207,14 @@ async function applyAdmonitionFencedParsing(
 		return;
 
 	const fenceSectionLines = admonitionSectionsLines[idxSection]
-	applyFenceCodeParametersList(
+	applyFenceCodeParametersLinesList(
 		element,
-		fenceSectionLines
+		fenceSectionLines,
+		"admonition",
 	)
 }
 
-async function applyEmbeddedAdmonitionFencedParsing(
+async function applyEmbeddedAdmonitionFencedDetecting(
 	element: HTMLElement,
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
@@ -267,13 +265,14 @@ async function applyEmbeddedAdmonitionFencedParsing(
 		return;
 
 	const fenceSectionLines = embeddedAdmonitionSectionsLines[idxSection]
-	applyFenceCodeParametersList(
+	applyFenceCodeParametersLinesList(
 		element,
-		fenceSectionLines
+		fenceSectionLines,
+		"admonition",
 	)
 }
 
-async function applyDocumentFencedParsing(
+async function applyDocumentFencedDetecting(
 	element: HTMLElement,
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
@@ -288,13 +287,14 @@ async function applyDocumentFencedParsing(
 		return;
 
 	const fenceSectionLines = fenceDocumentLines
-	applyFenceCodeParametersList(
+	applyFenceCodeParametersLinesList(
 		element,
-		fenceSectionLines
+		fenceSectionLines,
+		"export",
 	)
 }
 
-async function applySettingsFencedParsing(
+async function applySettingsFencedDetecting(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 ): Promise<void> {
@@ -307,10 +307,11 @@ async function applySettingsFencedParsing(
 
 	const fenceSectionLines = context.sourcePath.substring(SETTINGS_TAB_SOURCEPATH_PREFIX.length).split("\n")
 
-	const fenceCodeParameters = fenceSectionLines[0];
-	applyFenceCodeParameters(
+	const fenceCodeParametersLine = fenceSectionLines[0];
+	applyFenceCodeParametersLine(
 		fenceCodeElement,
-		fenceCodeParameters,
+		fenceCodeParametersLine,
+		"settings",
 	)
 }
 
@@ -411,40 +412,46 @@ function isFenceCodeElement(
 	return true
 }
 
-function cleanFenceCodeParameters(
-	fenceCodeParameters: string,
+function cleanFenceCodeParametersLine(
+	fenceCodeParametersLine: string,
 ): string {
-	fenceCodeParameters = fenceCodeParameters.replace(new RegExp(`^[> ]*`), '')
-	fenceCodeParameters = fenceCodeParameters.replace(new RegExp(`^[\`~]+`), '');
-	fenceCodeParameters += " "
+	fenceCodeParametersLine = fenceCodeParametersLine.replace(new RegExp(`^[> ]*`), '')
+	fenceCodeParametersLine = fenceCodeParametersLine.replace(new RegExp(`^[\`~]+`), '');
+	fenceCodeParametersLine += " "
 
-	return fenceCodeParameters
+	return fenceCodeParametersLine
 }
 
-function applyFenceCodeParameters(
+function applyFenceCodeParametersLine(
 	fenceCodeElement: HTMLElement,
-	fenceCodeParameters: string,
+	fenceCodeParametersLine: string,
+	codeDetectingContext: CodeDetectingContext,
 ) {
-	if (isUndetectedCodeElement(fenceCodeElement))
-		fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, cleanFenceCodeParameters(fenceCodeParameters))
+	if (!isUndetectedCodeElement(fenceCodeElement))
+		return;
+
+	fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, cleanFenceCodeParametersLine(fenceCodeParametersLine))
+	fenceCodeElement.setAttribute(DETECTING_CONTEXT, codeDetectingContext)
 }
 
-function applyFenceCodeParametersList(
+function applyFenceCodeParametersLinesList(
 	element: HTMLElement,
 	fenceSectionLines: Array<string>,
+	codeDetectingContext: CodeDetectingContext,
 ) {
 	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
-	const fenceCodeParametersList = getMarkdownFenceParameters(fenceSectionLines)
+	const fenceCodeParametersLinesList = getMarkdownFenceParameters(fenceSectionLines)
 
-	if (fenceCodeElements.length !== fenceCodeParametersList.length)
+	if (fenceCodeElements.length !== fenceCodeParametersLinesList.length)
 		return;
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = fenceCodeParametersList[idx];
-		applyFenceCodeParameters(
+		const fenceCodeParametersLine = fenceCodeParametersLinesList[idx];
+		applyFenceCodeParametersLine(
 			fenceCodeElement,
-			fenceCodeParameters,
+			fenceCodeParametersLine,
+			codeDetectingContext,
 		)
 	}
 }

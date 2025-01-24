@@ -4,22 +4,11 @@ import CodeStylerPlugin from "src/main";
 import { splitInlineCodeRaw } from "../../Parsing/Inline";
 import { isUndetectedCodeElement } from "../utils";
 
-export async function renderedInlineCodeParsing(
+export async function renderedInlineCodeDetecting(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
-	if (!element || !context?.sourcePath)
-		return;
-
-	const view = plugin.app.workspace.getActiveViewOfType(View);
-	if (!view)
-		return;
-
-	const cache: CachedMetadata | null = plugin.app.metadataCache.getCache(context.sourcePath);
-	if ((context.frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
-		return;
-
 	for (const inlineCodeElement of Array.from(element.querySelectorAll(":not(pre) > code")) as Array<HTMLElement>) {
 		const inlineCodeRaw = inlineCodeElement.innerText;
 		const {inlineCodeParameters, inlineCodeContent} = splitInlineCodeRaw(inlineCodeRaw);

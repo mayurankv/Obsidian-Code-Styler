@@ -1,14 +1,19 @@
 import { Plugin, MarkdownView, WorkspaceLeaf } from "obsidian";
 
-import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_CACHE } from "./_temp/_Old/Settings";
-import { SettingsTab } from "./_temp/_Old/SettingsTab";
-import { removeStylesAndClasses, updateStyling } from "./_temp/_Old/ApplyStyling";
-import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./_temp/_Old/EditingView";
-import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./_temp/_Old/ReadingView";
-import { cleanExternalReferencedFiles, referenceCodeblockProcessor, updateExternalReferencedFiles } from "./_temp/_Old/Referencing";
-import { addModes, removeModes } from "./_temp/_Old/SyntaxHighlighting";
-import { renderedFencedCodeParsing } from "./Internal/Detecting/Preview/Fenced";
-import { renderedInlineCodeParsing } from "./Internal/Detecting/Preview/Inline";
+// import { convertSettings, DEFAULT_SETTINGS, LANGUAGES, CodeStylerSettings, REFERENCE_CODEBLOCK, EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_CACHE } from "./_temp/_Old/Settings";
+// import { removeStylesAndClasses, updateStyling } from "./_temp/_Old/ApplyStyling";
+// import { createCodeblockCodeMirrorExtensions, editingDocumentFold } from "./_temp/_Old/EditingView";
+// import { destroyReadingModeElements, readingDocumentFold, executeCodeMutationObserver, readingViewCodeblockDecoratingPostProcessor, readingViewInlineDecoratingPostProcessor } from "./_temp/_Old/ReadingView";
+// import { cleanExternalReferencedFiles, referenceCodeblockProcessor, updateExternalReferencedFiles } from "./_temp/_Old/Referencing";
+// import { addModes, removeModes } from "./_temp/_Old/SyntaxHighlighting";
+import { CodeStylerSettings } from "./Internal/types/settings";
+import { BODY_CLASS, LANGUAGES } from "./Internal/constants/decoration";
+import { SettingsTab } from "./Interface/Settings/SettingsTab";
+import { renderedInlineCodeDetecting } from "./Internal/Detecting/Rendered/Inline";
+import { renderedFencedCodeDetecting } from "./Internal/Detecting/Rendered/Fenced";
+import { toPostProcess } from "./Internal/utils/rendered";
+import { renderedFencedCodeDecorating } from "./Internal/Decorating/Rendered/Fenced";
+import { renderedInlineCodeDecorating } from "./Internal/Decorating/Rendered/Inline";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -20,30 +25,34 @@ export default class CodeStylerPlugin extends Plugin {
 	};
 
 	async onload(): Promise<void> {
-		await this.loadSettings(); // Load Settings
-		const settingsTab = new SettingsTab(this.app,this);
-		this.addSettingTab(settingsTab);
+		// await this.loadSettings(); // Load Settings
+		// const settingsTab = new SettingsTab(this.app,this);
+		// this.addSettingTab(settingsTab);
 
-		document.body.classList.add("code-styler"); // Load Styles
-		updateStyling(this.settings,this.app);
+		// document.body.classList.add(BODY_CLASS); // Load Styles
+		// updateStyling(this.settings,this.app);
 
-		this.languageIcons = Object.keys(LANGUAGES).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
-			if (LANGUAGES[key]?.icon)
-				result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGES[key].icon}</svg>`], { type: "image/svg+xml" }));
-			return result;
-		},{});
-		this.sizes = {
-			font: document.body.getCssPropertyValue("--font-text-size"),
-			zoom: document.body.getCssPropertyValue("--zoom-factor"),
-		};
+		// this.languageIcons = Object.keys(LANGUAGES).reduce((result: {[key: string]: string}, key: string) => { // Load Icons
+		// 	if (LANGUAGES[key]?.icon)
+		// 		result[key] = URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">${LANGUAGES[key].icon}</svg>`], { type: "image/svg+xml" }));
+		// 	return result;
+		// },{});
+		// this.sizes = {
+		// 	font: document.body.getCssPropertyValue("--font-text-size"),
+		// 	zoom: document.body.getCssPropertyValue("--zoom-factor"),
+		// };
 
-		this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
+		// this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
 
+		//* Rendering Modifiers
 		this.registerMarkdownPostProcessor(async (element, context) => {
-			await renderedFencedCodeParsing(element, context, this);
-		})
-		this.registerMarkdownPostProcessor(async (element, context) => {
-			await renderedInlineCodeParsing(element, context, this);
+			if (!toPostProcess(element, context, this))
+				return;
+
+			await renderedInlineCodeDetecting(element, context, this);
+			await renderedInlineCodeDecorating(element, context, this);
+			await renderedFencedCodeDetecting(element, context, this);
+			await renderedFencedCodeDecorating(element, context, this);
 		})
 
 		// addModes();
@@ -51,37 +60,37 @@ export default class CodeStylerPlugin extends Plugin {
 		// 	await referenceCodeblockProcessor(source, el, ctx, this);
 		// });
 
-		this.registerMarkdownPostProcessor(async (el, ctx) => {
-			await readingViewCodeblockDecoratingPostProcessor(el, ctx, this); // Add codeblock decorating markdownPostProcessor
-		});
+		// this.registerMarkdownPostProcessor(async (el, ctx) => {
+		// 	await readingViewCodeblockDecoratingPostProcessor(el, ctx, this); // Add codeblock decorating markdownPostProcessor
+		// });
 		// this.registerMarkdownPostProcessor(async (el, ctx) => {
 		// 	await readingViewInlineDecoratingPostProcessor(el, ctx, this); // Add inline code decorating markdownPostProcessor
 		// });
 
-		this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this)); // Add codemirror extensions
+		// this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this)); // Add codemirror extensions
 
-		let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{});
-		this.registerEvent(this.app.workspace.on("css-change",()=>{
-			updateStyling(this.settings,this.app); // Update styling on css changes
-			const currentFontSize = document.body.getCssPropertyValue("--font-text-size");
-			if (this.sizes.font !== currentFontSize) {
-				this.sizes.font = currentFontSize;
-				clearTimeout(zoomTimeout);
-				zoomTimeout = setTimeout(()=>{
-					this.renderReadingView(); // Re-render on font size changes
-				},1000);
-			}
-		},this));
-		this.registerEvent(this.app.workspace.on("resize",()=>{
-			const currentZoomSize = document.body.getCssPropertyValue("--zoom-factor");
-			if (this.sizes.zoom !== currentZoomSize) {
-				this.sizes.zoom = currentZoomSize;
-				clearTimeout(zoomTimeout);
-				zoomTimeout = setTimeout(()=>{
-					this.renderReadingView(); // Re-render on zoom changes
-				},1000);
-			}
-		},this));
+		// let zoomTimeout: NodeJS.Timeout = setTimeout(()=>{});
+		// this.registerEvent(this.app.workspace.on("css-change",()=>{
+		// 	updateStyling(this.settings,this.app); // Update styling on css changes
+		// 	const currentFontSize = document.body.getCssPropertyValue("--font-text-size");
+		// 	if (this.sizes.font !== currentFontSize) {
+		// 		this.sizes.font = currentFontSize;
+		// 		clearTimeout(zoomTimeout);
+		// 		zoomTimeout = setTimeout(()=>{
+		// 			this.renderReadingView(); // Re-render on font size changes
+		// 		},1000);
+		// 	}
+		// },this));
+		// this.registerEvent(this.app.workspace.on("resize",()=>{
+		// 	const currentZoomSize = document.body.getCssPropertyValue("--zoom-factor");
+		// 	if (this.sizes.zoom !== currentZoomSize) {
+		// 		this.sizes.zoom = currentZoomSize;
+		// 		clearTimeout(zoomTimeout);
+		// 		zoomTimeout = setTimeout(()=>{
+		// 			this.renderReadingView(); // Re-render on zoom changes
+		// 		},1000);
+		// 	}
+		// },this));
 
 		// this.addCommand({id: "fold-all", name: "Fold all codeblocks", callback: ()=>{
 		// 	const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -123,15 +132,15 @@ export default class CodeStylerPlugin extends Plugin {
 		// 	await cleanExternalReferencedFiles(this);
 		// }});
 
-		this.app.workspace.onLayoutReady(async () => this.initialiseOnLayout()); // Add decoration on enabling of plugin
+		// this.app.workspace.onLayoutReady(async () => this.initialiseOnLayout()); // Add decoration on enabling of plugin
 
-		console.log("Loaded plugin: Code Styler");
+		// console.log("Loaded plugin: Code Styler");
 	}
 
 	onunload(): void {
-		removeModes();
+		// removeModes();
 		this.executeCodeMutationObserver.disconnect();
-		removeStylesAndClasses();
+		// removeStylesAndClasses();
 		destroyReadingModeElements();
 		for (const url of Object.values(this.languageIcons)) // Unload icons
 			URL.revokeObjectURL(url);
@@ -145,7 +154,7 @@ export default class CodeStylerPlugin extends Plugin {
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 		this.app.workspace.updateOptions();
-		updateStyling(this.settings,this.app);
+		// updateStyling(this.settings,this.app);
 	}
 
 	async initialiseOnLayout(): Promise<void> {

@@ -1,7 +1,10 @@
 import { Language } from "../types/decoration";
+import { PREFIX } from "./general";
 
 export const TRANSITION_LENGTH = 240; // In milliseconds
 
+export const BODY_CLASS = PREFIX + "plugin"
+export const DECORATED_ATTRIBUTE = PREFIX + "decorated"
 export const FOLD_PLACEHOLDER = "Folded Code";
 
 export const GIT_ICONS: { [key: string]: string } = {
