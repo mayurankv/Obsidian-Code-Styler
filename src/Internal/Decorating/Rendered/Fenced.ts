@@ -7,9 +7,10 @@ import { DETECTING_CONTEXT, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/
 import CodeStylerPlugin from "src/main";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
-import { DECORATED_ATTRIBUTE } from "src/Internal/constants/decoration";
+import { DECORATED_ATTRIBUTE, DEFAULT_FOLD_ATTRIBUTE, FOLD_ATTRIBUTE } from "src/Internal/constants/decoration";
 import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/Fenced";
 import { createFenceHeaderElement } from "../utils";
+import { PREFIX } from "src/Internal/constants/general";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
@@ -57,6 +58,10 @@ function decorateFenceCodeElement(
 	if (!fencePreElement)
 		return;
 
+	const fencePreParentElement = fencePreElement.parentElement
+	if (!fencePreParentElement)
+		return;
+
 	if (!staticRender)
 		plugin.mutationObservers.executeCode.observe(
 			fencePreElement,
@@ -79,12 +84,64 @@ function decorateFenceCodeElement(
 			() => { toggleFold(fencePreElement); },
 		);
 
-	fencePreElement.insertBefore(fenceHeaderElement,fencePreElement.childNodes[0]);
-
-	//TODO: Decorate
-	console.log("decoorate", fenceCodeElement)
+	markupFencePreParentElement(
+		fencePreParentElement,
+		fenceCodeParameters,
+	)
+	markupFencePreElement(
+		fencePreElement,
+		fenceCodeParameters,
+		staticRender,
+	)
+	markupFenceCodeElement(
+		fenceCodeElement,
+		fenceCodeParameters,
+		sourcePath,
+		plugin,
+	)
+	fencePreElement.insertBefore(fenceHeaderElement, fencePreElement.childNodes[0]);
 
 	fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
+}
+
+function markupFencePreParentElement(
+	fencePreParentElement: HTMLElement,
+	fenceCodeParameters: FenceCodeParameters,
+): void {
+	const classList = [`${PREFIX}pre-parent`];
+
+	if (fenceCodeParameters.language)
+		classList.push(`${PREFIX}pre-parent-${fenceCodeParameters.language}`);
+
+	fencePreParentElement.classList.add(...classList);
+}
+
+function markupFencePreElement(
+	fencePreElement: HTMLElement,
+	fenceCodeParameters: FenceCodeParameters,
+	staticRender: boolean,
+): void {
+	const classList = [`${PREFIX}pre`];
+
+	if (fenceCodeParameters.language)
+		classList.push(`${PREFIX}pre-${fenceCodeParameters.language}`);
+
+	fencePreElement.classList.add(...classList);
+
+	fencePreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, fenceCodeParameters.fold.enabled.toString());
+
+	if (staticRender)
+		return;
+
+	if (fenceCodeParameters.fold.enabled)
+		fencePreElement.setAttribute(FOLD_ATTRIBUTE, "true");
+
+	if (fenceCodeParameters.lineUnwrap.alwaysEnabled)
+		preClassList.push(
+			fenceCodeParameters.lineUnwrap.activeWrap ? "unwrapped-inactive" : "unwrapped"
+		);
+	else if (fenceCodeParameters.lineUnwrap.alwaysDisabled)
+		preClassList.push("wrapped");
 }
 
 //!========================================================================================================================
@@ -135,10 +192,6 @@ function remakeCodeblock(
 	dynamic: boolean,
 	plugin: CodeStylerPlugin,
 ) {
-	codeblockPreElement.classList.add(...getPreClasses(codeblockParameters,dynamic));
-	codeblockPreElement.setAttribute("defaultFold",codeblockParameters.fold.enabled.toString());
-	if (codeblockPreElement.parentElement)
-		codeblockPreElement.parentElement.classList.add("code-styler-pre-parent");
 
 	if (!codeblockCodeElement.querySelector("code [class*='code-styler-line']")) // Ignore styled lines
 		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,sourcePath,plugin);
@@ -150,9 +203,23 @@ export function renderedViewFold(
 ): void {
 	const codeblockPreElements = contentEl.querySelectorAll("pre.code-styler-pre");
 	if (typeof fold === "undefined") //Return all blocks to original state
-		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{toggleFold(codeblockPreElement,(codeblockPreElement.getAttribute("defaultFold")??"false")==="true");});
+		codeblockPreElements.forEach(
+			(codeblockPreElement: HTMLElement) => {
+				toggleFold(
+					codeblockPreElement,
+					(codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE) ?? "false") === "true",
+				);
+			},
+		);
 	else //Fold or unfold all blocks
-		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{toggleFold(codeblockPreElement,fold);});
+		codeblockPreElements.forEach(
+			(codeblockPreElement: HTMLElement) => {
+				toggleFold(
+					codeblockPreElement,
+					fold,
+				);
+			},
+		);
 }
 async function toggleFold(
 	codeblockPreElement: HTMLElement,
@@ -171,23 +238,7 @@ async function toggleFold(
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
 	codeblockPreElement.classList.remove("hide-scroll");
 }
-function getPreClasses(
-	codeblockParameters: FenceCodeParameters,
-	dynamic: boolean,
-): Array<string> {
-	const preClassList = ["code-styler-pre"];
-	if (codeblockParameters.language)
-		preClassList.push(`language-${codeblockParameters.language}`);
-	if (dynamic) {
-		if (codeblockParameters.fold.enabled)
-			preClassList.push("code-styler-folded");
-		if (codeblockParameters.lineUnwrap.alwaysEnabled)
-			preClassList.push(codeblockParameters.lineUnwrap.activeWrap?"unwrapped-inactive":"unwrapped");
-		else if (codeblockParameters.lineUnwrap.alwaysDisabled)
-			preClassList.push("wrapped");
-	}
-	return preClassList;
-}
+
 function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: FenceCodeParameters, sourcePath: string, plugin: CodeStylerPlugin): void {
 	let indentation = 0;
 	getCodeblockLines(codeblockCodeElement,sourcePath,plugin).forEach((line,index,codeblockLines) => {
