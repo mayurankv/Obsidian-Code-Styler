@@ -1,13 +1,15 @@
-import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
+import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer } from "obsidian";
+import { visitParents } from "unist-util-visit-parents";
+import { ElementContent, Element } from "hast";
+import { fromHtml } from "hast-util-from-html";
+import { toHtml } from "hast-util-to-html";
 import { DETECTING_CONTEXT, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import CodeStylerPlugin from "src/main";
-import { unified } from "unified";
-import markdown from 'remark-parse';
-import { visit } from 'unist-util-visit';
-import { SETTINGS_TAB_SOURCEPATH_PREFIX } from "src/Internal/constants/interface";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
+import { FenceCodeParameters } from "src/Internal/types/parsing";
 import { DECORATED_ATTRIBUTE } from "src/Internal/constants/decoration";
 import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/Fenced";
+import { createFenceHeaderElement } from "../utils";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
@@ -22,33 +24,72 @@ export async function renderedFencedCodeDecorating(
 		const decorated = fenceCodeElement.getAttribute(DECORATED_ATTRIBUTE) ?? "false"
 		if (decorated === "true")
 			return;
-
-		//TODO: Decorate
-		console.log("decoorate", fenceCodeElement)
-		const codeblockParameters = parseFenceCodeParameters(fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ");
+		const fenceCodeParameters = parseFenceCodeParameters(fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ");
 		const codeDetectingContext = (fenceCodeElement.getAttribute(DETECTING_CONTEXT) ?? "standalone") as CodeDetectingContext
 
-		if (!toDecorateFenceCode(codeblockParameters))
+		if (!toDecorateFenceCode(fenceCodeParameters))
 			return;
 
-		fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
+		const staticRender = codeDetectingContext === "export"
+
+		decorateFenceCodeElement(
+			fenceCodeElement,
+			fenceCodeParameters,
+			staticRender,
+			context.sourcePath,
+			plugin,
+		)
 	}
 }
 
+export function renderedFencedCodeUndecorating(): void {
+	document.querySelectorAll("")
+}
+
+function decorateFenceCodeElement(
+	fenceCodeElement: HTMLElement,
+	fenceCodeParameters: FenceCodeParameters,
+	staticRender: boolean,
+	sourcePath: string,
+	plugin: CodeStylerPlugin,
+): void {
+	const fencePreElement = fenceCodeElement.parentElement
+	if (!fencePreElement)
+		return;
+
+	if (!staticRender)
+		plugin.mutationObservers.executeCode.observe(
+			fencePreElement,
+			{
+				childList: true,
+				subtree: true,
+				attributes: true,
+				characterData: true,
+			},
+		)
+
+	const fenceHeaderElement = createFenceHeaderElement(
+		fenceCodeParameters,
+		sourcePath,
+		plugin,
+	);
+	if (!staticRender)
+		fenceHeaderElement.addEventListener(
+			"click",
+			() => { toggleFold(fencePreElement); },
+		);
+
+	fencePreElement.insertBefore(fenceHeaderElement,fencePreElement.childNodes[0]);
+
+	//TODO: Decorate
+	console.log("decoorate", fenceCodeElement)
+
+	fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
+}
+
+//!========================================================================================================================
+
 // //TODO: Update
-
-// import { MarkdownSectionInformation, CachedMetadata, sanitizeHTMLToDom, FrontMatterCache, MarkdownRenderer, MarkdownView, View } from "obsidian";
-// import { visitParents } from "unist-util-visit-parents";
-// import { fromHtml } from "hast-util-from-html";
-// import { toHtml } from "hast-util-to-html";
-// import { ElementContent, Element } from "hast";
-
-// import CodeStylerPlugin from "./main";
-// import { SETTINGS_SOURCEPATH_PREFIX, TRANSITION_LENGTH } from "./Settings";
-// import { CodeblockParameters, getFileContentLines, isCodeblockIgnored, isLanguageIgnored, parseCodeblockSource } from "./Parsing/CodeblockParsing";
-// import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
-// import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
-
 export function destroyReadingModeElements(): void {
 	document.querySelectorAll(".code-styler-pre-parent").forEach(codeblockPreParent => {
 		codeblockPreParent.classList.remove("code-styler-pre-parent");
@@ -84,19 +125,16 @@ export function destroyReadingModeElements(): void {
 			return reconstructedCodeblockLines;
 		},[]).join("\n")+"\n";
 	});
-	document.querySelectorAll(":not(pre) > code").forEach((inlineCodeElement: HTMLElement) => {
-		inlineCodeElement.classList.remove("code-styler-highlighted");
-		inlineCodeElement.classList.remove("code-styler-highlight-ignore");
-		inlineCodeElement.innerText = inlineCodeElement.getAttribute("parameters") + inlineCodeElement.innerText;
-	});
 }
 
-async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, dynamic: boolean, plugin: CodeStylerPlugin) {
-	if (dynamic)
-		plugin.executeCodeMutationObserver.observe(codeblockPreElement,{childList: true,subtree: true,attributes: true,characterData: true}); // Add Execute Code Observer
-
-	insertHeader(codeblockPreElement,codeblockParameters,sourcePath,plugin,dynamic);
-
+function remakeCodeblock(
+	codeblockCodeElement: HTMLElement,
+	codeblockPreElement: HTMLElement,
+	codeblockParameters: FenceCodeParameters,
+	sourcePath: string,
+	dynamic: boolean,
+	plugin: CodeStylerPlugin,
+) {
 	codeblockPreElement.classList.add(...getPreClasses(codeblockParameters,dynamic));
 	codeblockPreElement.setAttribute("defaultFold",codeblockParameters.fold.enabled.toString());
 	if (codeblockPreElement.parentElement)
@@ -106,20 +144,20 @@ async function remakeCodeblock(codeblockCodeElement: HTMLElement, codeblockPreEl
 		decorateCodeblockLines(codeblockCodeElement,codeblockParameters,sourcePath,plugin);
 }
 
-function insertHeader(codeblockPreElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin, dynamic: boolean): void {
-	const headerContainer = createHeader(codeblockParameters, plugin.settings.currentTheme.settings, sourcePath, plugin);
-	if (dynamic)
-		headerContainer.addEventListener("click",()=>{toggleFold(codeblockPreElement);}); // Add listener for header folding on click
-	codeblockPreElement.insertBefore(headerContainer,codeblockPreElement.childNodes[0]);
-}
-export function readingDocumentFold(contentEl: HTMLElement, fold?: boolean) {
+export function renderedViewFold(
+	contentEl: HTMLElement,
+	fold?: boolean,
+): void {
 	const codeblockPreElements = contentEl.querySelectorAll("pre.code-styler-pre");
 	if (typeof fold === "undefined") //Return all blocks to original state
 		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{toggleFold(codeblockPreElement,(codeblockPreElement.getAttribute("defaultFold")??"false")==="true");});
 	else //Fold or unfold all blocks
 		codeblockPreElements.forEach((codeblockPreElement: HTMLElement)=>{toggleFold(codeblockPreElement,fold);});
 }
-async function toggleFold(codeblockPreElement: HTMLElement, fold?: boolean): Promise<void> {
+async function toggleFold(
+	codeblockPreElement: HTMLElement,
+	fold?: boolean,
+): Promise<void> {
 	if (codeblockPreElement.firstElementChild?.classList?.contains("code-styler-header-container-hidden"))
 		return;
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.setProperty("max-height",`calc(${Math.ceil(codeblockCodeElement.scrollHeight+0.01)}px + var(--code-padding) * ${codeblockCodeElement.classList.contains("execute-code-output")?"3.5 + var(--header-separator-width)":"2"})`));
@@ -133,7 +171,10 @@ async function toggleFold(codeblockPreElement: HTMLElement, fold?: boolean): Pro
 	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
 	codeblockPreElement.classList.remove("hide-scroll");
 }
-function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolean): Array<string> {
+function getPreClasses(
+	codeblockParameters: FenceCodeParameters,
+	dynamic: boolean,
+): Array<string> {
 	const preClassList = ["code-styler-pre"];
 	if (codeblockParameters.language)
 		preClassList.push(`language-${codeblockParameters.language}`);
@@ -147,7 +188,7 @@ function getPreClasses(codeblockParameters: CodeblockParameters, dynamic: boolea
 	}
 	return preClassList;
 }
-function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, sourcePath: string, plugin: CodeStylerPlugin): void {
+function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockParameters: FenceCodeParameters, sourcePath: string, plugin: CodeStylerPlugin): void {
 	let indentation = 0;
 	getCodeblockLines(codeblockCodeElement,sourcePath,plugin).forEach((line,index,codeblockLines) => {
 		const currentIndentation = countTabs(line);
@@ -165,7 +206,12 @@ function decorateCodeblockLines(codeblockCodeElement: HTMLElement, codeblockPara
 			insertLineWrapper(codeblockCodeElement,codeblockParameters,index+1,line,plugin.settings.currentTheme.settings.codeblock.lineNumbers);
 	});
 }
-function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string, plugin: CodeStylerPlugin): Array<string> {
+
+function getCodeblockLines(
+	codeblockCodeElement: HTMLElement,
+	sourcePath: string,
+	plugin: CodeStylerPlugin,
+): Array<string> {
 	const htmlTree = fromHtml(codeblockCodeElement.innerHTML.replace(/\n/g,"<br>"),{fragment: true});
 	let codeblockHTML = codeblockCodeElement.innerHTML;
 	visitParents(htmlTree,["text","element"],(node,ancestors)=>{
@@ -200,7 +246,13 @@ function getCodeblockLines(codeblockCodeElement: HTMLElement, sourcePath: string
 	codeblockCodeElement.innerHTML = "";
 	return codeblockLines;
 }
-function convertCommentLinks(result: Array<ElementContent>, commentText: string, sourcePath: string, plugin: CodeStylerPlugin): Array<ElementContent> {
+
+function convertCommentLinks(
+	result: Array<ElementContent>,
+	commentText: string,
+	sourcePath: string,
+	plugin: CodeStylerPlugin,
+): Array<ElementContent> {
 	const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)].reverse();
 	const newChildren = linkMatches.reduce((result: Array<ElementContent>, linkMatch: RegExpMatchArray): Array<ElementContent> => {
 		if (typeof linkMatch?.index === "undefined")
@@ -217,10 +269,16 @@ function convertCommentLinks(result: Array<ElementContent>, commentText: string,
 	},[]).reverse();
 	return [...result, ...[{type: "text",value: commentText} as ElementContent,...newChildren]];
 }
-function insertLineWrapper(codeblockCodeElement: HTMLElement, codeblockParameters: CodeblockParameters, lineNumber: number, line: string, showLineNumbers: boolean): void {
+function insertLineWrapper(
+	codeblockCodeElement: HTMLElement,
+	codeblockParameters: FenceCodeParameters,
+	lineNumber: number,
+	line: string,
+	showLineNumbers: boolean,
+): void {
 	const lineWrapper = document.createElement("div");
 	codeblockCodeElement.appendChild(lineWrapper);
-	getLineClasses(codeblockParameters,lineNumber,line).forEach((lineClass) => lineWrapper.classList.add(lineClass));
+	getLineClasses(codeblockParameters,lineNumber,line).forEach((lineClass: string) => lineWrapper.classList.add(lineClass));
 	if ((showLineNumbers && !codeblockParameters.lineNumbers.alwaysDisabled) || codeblockParameters.lineNumbers.alwaysEnabled)
 		lineWrapper.appendChild(createDiv({cls: "code-styler-line-number", text: (lineNumber+codeblockParameters.lineNumbers.offset).toString()}));
 	lineWrapper.appendChild(createDiv({cls: "code-styler-line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>")}));

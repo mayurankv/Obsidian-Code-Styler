@@ -17,7 +17,7 @@ import { renderedInlineCodeDecorating } from "./Internal/Decorating/Rendered/Inl
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
-	executeCodeMutationObserver: MutationObserver;
+	mutationObservers: Record<string,MutationObserver>;
 	languageIcons: Record<string,string>;
 	sizes: {
 		font: string;
