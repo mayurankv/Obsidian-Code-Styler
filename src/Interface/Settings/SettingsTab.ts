@@ -1,3 +1,5 @@
+//TODO: Update
+
 import { App, PluginSettingTab, Setting, Notice, TextComponent, DropdownComponent, SliderComponent, ToggleComponent, ExtraButtonComponent, MarkdownRenderer } from "obsidian";
 import Pickr from "@simonwep/pickr";
 import { ColorTranslator } from "colortranslator";

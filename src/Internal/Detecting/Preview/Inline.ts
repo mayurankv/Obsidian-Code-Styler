@@ -1,13 +1,8 @@
 import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
-import { CONTENT_ATTRIBUTE, EMPTY_PARAMETERS_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/parameters";
+import { CONTENT_ATTRIBUTE, EMPTY_PARAMETERS_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import CodeStylerPlugin from "src/main";
-import { SETTINGS_SOURCEPATH_PREFIX } from "src/_temp/_Old/Settings";
-import { CodeParsingContext } from "src/Internal/types";
-import { unified } from "unified";
-import markdown from 'remark-parse';
-import { visit } from 'unist-util-visit';
 import { splitInlineCodeRaw } from "../../Parsing/Inline";
-import { isUnparsedCodeElement } from "../../Parsing/utils";
+import { isUndetectedCodeElement } from "../utils";
 
 export async function renderedInlineCodeParsing(
 	element: HTMLElement,
@@ -29,7 +24,7 @@ export async function renderedInlineCodeParsing(
 		const inlineCodeRaw = inlineCodeElement.innerText;
 		const {inlineCodeParameters, inlineCodeContent} = splitInlineCodeRaw(inlineCodeRaw);
 
-		if (!isUnparsedCodeElement(inlineCodeElement))
+		if (!isUndetectedCodeElement(inlineCodeElement))
 			return;
 
 		inlineCodeElement.setAttribute(CONTENT_ATTRIBUTE, inlineCodeContent);

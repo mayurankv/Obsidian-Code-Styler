@@ -1,1 +1,1 @@
-const PREFIX = "cs-"
+export const PREFIX = "cs-"

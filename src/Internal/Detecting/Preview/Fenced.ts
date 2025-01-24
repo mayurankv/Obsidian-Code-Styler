@@ -1,11 +1,12 @@
 import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
-import { PARAMETERS_ATTRIBUTE, SETTINGS_SOURCEPATH_PREFIX } from "src/Internal/constants/parameters";
+import { PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import CodeStylerPlugin from "src/main";
-import { CodeParsingContext } from "src/Internal/types";
 import { unified } from "unified";
 import markdown from 'remark-parse';
 import { visit } from 'unist-util-visit';
 import { isUndetectedCodeElement } from "../utils";
+import { SETTINGS_TAB_SOURCEPATH_PREFIX } from "src/Internal/constants/interface";
+import { CodeDetectingContext } from "src/Internal/types/detecting";
 
 export async function renderedFencedCodeParsing(
 	element: HTMLElement,
@@ -23,7 +24,7 @@ export async function renderedFencedCodeParsing(
 	if ((context.frontmatter ?? cache?.frontmatter)?.["code-styler-ignore"] === true)
 		return;
 
-	const codeParsingContext: CodeParsingContext = context.sourcePath.startsWith(SETTINGS_SOURCEPATH_PREFIX)
+	const codeParsingContext: CodeDetectingContext = context.sourcePath.startsWith(SETTINGS_TAB_SOURCEPATH_PREFIX)
 		? "settings"
 		: document.querySelector("div.print")?.contains(element)
 		? "export"
@@ -304,7 +305,7 @@ async function applySettingsFencedParsing(
 	if (!isFenceCodeElement(fenceCodeElement))
 		return;
 
-	const fenceSectionLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
+	const fenceSectionLines = context.sourcePath.substring(SETTINGS_TAB_SOURCEPATH_PREFIX.length).split("\n")
 
 	const fenceCodeParameters = fenceSectionLines[0];
 	applyFenceCodeParameters(

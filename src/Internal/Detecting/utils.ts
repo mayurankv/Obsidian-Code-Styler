@@ -1,4 +1,4 @@
-import { PARAMETERS_ATTRIBUTE } from "src/Internal/constants/parameters";
+import { PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 
 export function isUndetectedCodeElement(
 	codeElement: HTMLElement,
