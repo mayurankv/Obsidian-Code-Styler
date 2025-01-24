@@ -12,6 +12,8 @@ export const WRAP_ATTRIBUTE = PREFIX + "wrap"
 
 export const FOLD_PLACEHOLDER = "Folded Code";
 
+export const TEMPORARY_SOURCEPATH = `@${PREFIX}-temporary-sourcepath`
+
 export const GIT_ICONS: { [key: string]: string } = {
 	"branch": "&#xe0a0;",
 	"tree": "&#xeafc;", // commit

@@ -1,9 +1,24 @@
+import CodeStylerPlugin from "src/main";
 import { InlineCodeParameters } from "../types/parsing";
 
-export function parseFenceCodeParameters(
+export function parseInlineCodeParameters(
 	inlineCodeParametersLine: string,
 ): InlineCodeParameters {
 
+}
+
+export function toDecorateInlineCode(
+	inlineCodeParameters: InlineCodeParameters,
+): boolean {
+	//TODO: Check if language is ignored
+	//TODO: Check if codeblock arguments contain ignore
+	return true
+}
+
+export function toHighlightInlineCode(
+	plugin: CodeStylerPlugin,
+): boolean {
+	return plugin.settings.currentTheme.settings.inline.syntaxHighlight
 }
 
 export function splitInlineCodeRaw(
