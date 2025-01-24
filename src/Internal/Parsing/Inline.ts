@@ -1,3 +1,11 @@
+import { InlineCodeParameters } from "../types/parsing";
+
+export function parseFenceCodeParameters(
+	inlineCodeParametersLine: string,
+): InlineCodeParameters {
+
+}
+
 export function splitInlineCodeRaw(
 	inlineCodeRaw: string,
 ): { inlineCodeParameters: string | null, inlineCodeContent: string } {

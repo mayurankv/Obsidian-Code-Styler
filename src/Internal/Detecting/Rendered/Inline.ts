@@ -17,7 +17,7 @@ export async function renderedInlineCodeDetecting(
 			return;
 
 		inlineCodeElement.setAttribute(CONTENT_ATTRIBUTE, inlineCodeContent);
-		inlineCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, inlineCodeParameters ?? "");
+		inlineCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, (inlineCodeParameters ?? "") + " ");
 		inlineCodeElement.setAttribute(EMPTY_PARAMETERS_ATTRIBUTE, (inlineCodeParameters === null) ? "true" : "false");
 	}
 }

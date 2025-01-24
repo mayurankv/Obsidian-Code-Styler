@@ -137,7 +137,7 @@ function isHeaderRequired(codeblockParameters: CodeblockParameters): boolean {
 	return codeblockParameters.fold.enabled || codeblockParameters.title !== "";
 }
 
-export function getLineClass(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {
+export function getLineClasses(codeblockParameters: CodeblockParameters, lineNumber: number, line: string): Array<string> {
 	let classList: Array<string> = [];
 	if (codeblockParameters.highlights.default.lineNumbers.includes(lineNumber+codeblockParameters.lineNumbers.offset) || codeblockParameters.highlights.default.plainText.some(text => line.indexOf(text) > -1) || codeblockParameters.highlights.default.regularExpressions.some(regExp => regExp.test(line)))
 		classList.push("code-styler-line-highlighted");
