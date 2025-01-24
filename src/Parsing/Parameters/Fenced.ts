@@ -1,4 +1,4 @@
-import { CachedMetadata, DataAdapter, Editor, MarkdownPostProcessorContext, MarkdownSectionInformation, MarkdownView, SectionCache, View } from "obsidian";
+import { CachedMetadata, DataAdapter, Editor, MarkdownPostProcessorContext, MarkdownSectionInformation, MarkdownView, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
 import { PARAMETERS_ATTRIBUTE } from "src/constants";
 import CodeStylerPlugin from "src/main";
 import { SETTINGS_SOURCEPATH_PREFIX } from "src/Settings";
@@ -35,7 +35,10 @@ export async function renderedFencedParsing(
 		: element.querySelector("div.callout-content") !== null
 		? "callout"
 		: "standalone";
-	const editingMode = Boolean(element.matchParent(".cm-embed-block")) && (view.getViewType() === "markdown")
+	// @ts-expect-error Undocumented Obsidian API
+	const editingMode = (view.getViewType() === "markdown") && (view.currentMode.type === "source")
+	// @ts-expect-error Undocumented Obsidian API
+	const embeddedContent = (view?.file?.path !== context.sourcePath);
 
 	if (codeParsingContext === "settings") {
 		await applySettingsFencedParsing(
@@ -49,29 +52,37 @@ export async function renderedFencedParsing(
 		);
 		await applyDocumentFencedParsing(
 			element,
-			// @ts-expect-error Undocumented Obsidian API
-			view?.previewMode?.renderer?.previewEl as HTMLElement,
 			cache,
 			fileContentLines,
 		)
-	} else if ((codeParsingContext === "admonition" && editingMode)) { //NOTE: Possibly inefficient?
+	} else if ((codeParsingContext === "admonition") && embeddedContent) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
 		await applyEmbeddedAdmonitionFencedParsing(
 			element,
+			cache,
+			fileContentLines,
+		)
+	} else if ((codeParsingContext === "admonition") && editingMode) { //NOTE: Possibly inefficient?
+		const fileContentLines = await getFileContentLines(
+			context.sourcePath,
+			plugin.app.vault.adapter
+		);
+		await applyEditingAdmonitionFencedParsing(
+			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.editMode?.editorEl as HTMLElement,
 			cache,
 			fileContentLines,
 		)
-	} else if ((codeParsingContext === "callout" && editingMode)) { //NOTE: Possibly inefficient?
+	} else if ((codeParsingContext === "callout") && editingMode) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
 		);
-		await applyEmbeddedCalloutFencedParsing(
+		await applyEditingCalloutFencedParsing(
 			element,
 			// @ts-expect-error Undocumented Obsidian API
 			view?.editMode?.editorEl as HTMLElement,
@@ -114,11 +125,11 @@ async function applyStandaloneFencedParsing(
 	if (!fenceCodeElement)
 		return;
 
-	const fenceSectionLines = getElementSectionLines(element, context)
-	if (!fenceSectionLines)
+	if (!isFenceCodeElement(fenceCodeElement))
 		return;
 
-	if (!isFenceCodeElement(fenceCodeElement))
+	const fenceSectionLines = getElementSectionLines(element, context)
+	if (!fenceSectionLines)
 		return;
 
 	const fenceCodeParameters = cleanFenceCodeParameters(fenceSectionLines[0])
@@ -155,7 +166,7 @@ async function applyCalloutFencedParsing(
 	}
 }
 
-async function applyEmbeddedCalloutFencedParsing(
+async function applyEditingCalloutFencedParsing(
 	element: HTMLElement,
 	contentElement: HTMLElement,
 	cache: CachedMetadata | null,
@@ -175,14 +186,14 @@ async function applyEmbeddedCalloutFencedParsing(
 	if (calloutSections.length !== calloutSectionsLines.length)
 		return;
 
-	let section_idx = calloutSections.indexOf(element)
-	if (section_idx === -1)
-		section_idx = calloutSections.findIndex((element) => element.classList.contains("HyperMD-callout"));
+	let idxSection = calloutSections.indexOf(element)
+	if (idxSection === -1)
+		idxSection = calloutSections.findIndex((element) => element.classList.contains("HyperMD-callout"));
 	//TODO: FIX - This isn't unique if multiple callouts are in editing mode rather than embed as there is no information to map them
 
 	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
 
-	const fenceCodeParametersList = getMarkdownFenceParameters(calloutSectionsLines[section_idx])
+	const fenceCodeParametersList = getMarkdownFenceParameters(calloutSectionsLines[idxSection])
 
 	if (fenceCodeElements.length !== fenceCodeParametersList.length)
 		return;
@@ -206,13 +217,47 @@ async function applyAdmonitionFencedParsing(
 ): Promise<void> {
 	const admonitionSectionsLines = getAdmonitionLines(cache, fileContentLines)
 	if (!admonitionSectionsLines)
-		{console.log("foo");  return;}
+		return;
 
 	const admonitionSections = (Array.from(contentElement.querySelectorAll(".callout-content.admonition-content:not(.internal-embed .callout-content.admonition-content):not(.callout-content.admonition-content .callout-content.admonition-content)")) as Array<HTMLElement>)
 
-	console.log(admonitionSections)
-	console.log(admonitionSectionsLines)
-	console.log(admonitionSections.length, admonitionSectionsLines.length)
+	if (admonitionSections.length !== admonitionSectionsLines.length)
+		return;
+
+	let idxSection = admonitionSections.indexOf(element)
+	if (idxSection === -1)
+		return;
+
+	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
+
+	const fenceCodeParametersList = getMarkdownFenceParameters(admonitionSectionsLines[idxSection])
+
+	if (fenceCodeElements.length !== fenceCodeParametersList.length)
+		return;
+
+	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
+		const fenceCodeElement = fenceCodeElements[idx];
+		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		applyFenceCodeParameters(
+			fenceCodeElement,
+			fenceCodeParameters,
+		)
+		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
+	}
+}
+
+async function applyEditingAdmonitionFencedParsing(
+	element: HTMLElement,
+	contentElement: HTMLElement,
+	cache: CachedMetadata | null,
+	fileContentLines: Array<string>,
+): Promise<void> {
+	const admonitionSectionsLines = getAdmonitionLines(cache, fileContentLines)
+	if (!admonitionSectionsLines)
+		return;
+
+	const admonitionSections = (Array.from(contentElement.querySelectorAll(".callout-content.admonition-content:not(.admonition-parent):not(.internal-embed .callout-content.admonition-content), .HyperMD-codeblock-begin > .cm-hmd-codeblock")) as Array<HTMLElement>).filter((element) => (element.classList.contains("admonition-content") || RegExp(`^[> ]*[\`~]*ad-`).test(element.innerText)))
+
 	if (admonitionSections.length !== admonitionSectionsLines.length)
 		return;
 
@@ -241,7 +286,6 @@ async function applyAdmonitionFencedParsing(
 
 async function applyEmbeddedAdmonitionFencedParsing(
 	element: HTMLElement,
-	contentElement: HTMLElement,
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
 ): Promise<void> {
@@ -249,34 +293,57 @@ async function applyEmbeddedAdmonitionFencedParsing(
 	if (!admonitionSectionsLines)
 		return;
 
-	const admonitionSections = (Array.from(contentElement.querySelectorAll(".callout-content.admonition-content, .HyperMD-codeblock-begin > .cm-hmd-codeblock")) as Array<HTMLElement>).filter((element) => (element.classList.contains("admonition-content") || RegExp(`^[> ]*[\`~]*ad-`).test(element.innerText)))
-	console.log(admonitionSections)
-	console.log(admonitionSectionsLines)
-	console.log(element)
-
-	console.log(admonitionSections)
-	console.log(admonitionSectionsLines)
-	console.log(admonitionSections.length, admonitionSectionsLines.length)
-	if (admonitionSections.length !== admonitionSectionsLines.length)
+	if (!cache)
 		return;
 
-	let section_idx = admonitionSections.indexOf(element)
-	if (section_idx === -1)
-		section_idx = admonitionSections.findIndex((element) => element.classList.contains("cm-hmd-codeblock"));
-	console.log(section_idx)
-	//TODO: FIX - This isn't unique if multiple callouts are in editing mode rather than embed as there is no information to map them
+	const embedElement = element?.matchParent(".internal-embed")
+	if (!embedElement)
+		return;
+
+	const embedLink = embedElement?.getAttribute("src")
+	if (!embedLink)
+		return;
+
+	const subPath = parseLinktext(embedLink).subpath
+
+	let embeddedAdmonitionSectionsLines = admonitionSectionsLines
+	if (subPath !== "") {
+		const linkSection = resolveSubpath(cache, subPath)
+		if (!linkSection)
+			return;
+
+		if (linkSection.type === "heading") {
+			fileContentLines = (typeof linkSection.end?.line === "undefined")
+				? fileContentLines.slice(linkSection.start.line)
+				: fileContentLines.slice(linkSection.start.line, linkSection.end.line+2)
+		} else if (linkSection.type === "block") {
+			if (!linkSection.end?.line)
+				return;
+
+			fileContentLines = fileContentLines.slice(linkSection.start.line, linkSection.end.line + 1)
+		}
+		embeddedAdmonitionSectionsLines = embeddedAdmonitionSectionsLines.filter((admonitionSectionLines) => admonitionSectionLines.every((admonitionSectionLine) => fileContentLines.includes(admonitionSectionLine)))
+	}
+
+	const embeddedAdmonitionSections = (Array.from(embedElement.querySelectorAll(".callout-content.admonition-content:not(.admonition-parent)")) as Array<HTMLElement>)
+
+	if (embeddedAdmonitionSections.length !== embeddedAdmonitionSectionsLines.length)
+		return;
+
+	let idxSection = embeddedAdmonitionSections.indexOf(element)
+	if (idxSection === -1)
+		return;
 
 	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
 
-	const fenceCodeParametersList = getMarkdownFenceParameters(admonitionSectionsLines[section_idx])
+	const fenceCodeParametersList = getMarkdownFenceParameters(embeddedAdmonitionSectionsLines[idxSection])
 
 	if (fenceCodeElements.length !== fenceCodeParametersList.length)
 		return;
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		// const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
-		const fenceCodeParameters = "ADMONITION TODO"
+		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
@@ -287,7 +354,6 @@ async function applyEmbeddedAdmonitionFencedParsing(
 
 async function applyDocumentFencedParsing(
 	element: HTMLElement,
-	contentElement: HTMLElement,
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
 ) {
@@ -300,7 +366,7 @@ async function applyDocumentFencedParsing(
 	if (!fenceDocumentLines)
 		return;
 
-	const fenceCodeElements = (Array.from(contentElement.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
+	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
 	const fenceCodeParametersList = getMarkdownFenceParameters(fenceDocumentLines)
 
 	if (fenceCodeElements.length !== fenceCodeParametersList.length)
@@ -325,10 +391,10 @@ async function applySettingsFencedParsing(
 	if (!fenceCodeElement)
 		return;
 
-	const fenceSectionLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
-
 	if (!isFenceCodeElement(fenceCodeElement))
 		return;
+
+	const fenceSectionLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
 
 	const fenceCodeParameters = cleanFenceCodeParameters(fenceSectionLines[0])
 	applyFenceCodeParameters(
@@ -420,6 +486,9 @@ function isFenceCodeElement(
 	// if (!fenceCodeElement.className)
 	// 	return false;
 
+	if (fenceCodeElement.className.startsWith("language-ad-"))
+		return false;
+
 	const fencePreElement = fenceCodeElement.parentElement;
 	if (!fencePreElement)
 		return false;
@@ -459,15 +528,4 @@ function applyFenceCodeParameters(
 		fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, fenceCodeParameters)
 }
 
-function doesCalloutOverlap(
-	editor: Editor,
-	section: SectionCache,
-): boolean {
-	const cursor = {from: editor.getCursor("from"), to: editor.getCursor("to")}
-	const cursorPreCallout = (section.position.start.line > cursor.to.line || (section.position.start.line === cursor.to.line && section.position.start.col > cursor.to.ch))
-	const cursorPostCallout = (section.position.end.line < cursor.from.line || (section.position.start.line === cursor.to.line && section.position.start.col < cursor.to.ch))
 
-	const overlap = !cursorPreCallout && !cursorPostCallout
-
-	return overlap
-}

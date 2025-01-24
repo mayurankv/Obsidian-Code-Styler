@@ -1,5 +1,10 @@
 ☐ Admonitions: Aren't properly classified in exporting
 ☐ Doesn't work with Advanced Slides (what about new alt plugin?)
+☐ codeblock in list setting (bullet, number, checkbox)
+☐ codeblock in embedded admonition
+
+Clean Up:
+☐ Clean up and tidy Fenced
 
 ----------------
 
