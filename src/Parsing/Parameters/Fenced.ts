@@ -132,12 +132,11 @@ async function applyStandaloneFencedParsing(
 	if (!fenceSectionLines)
 		return;
 
-	const fenceCodeParameters = cleanFenceCodeParameters(fenceSectionLines[0])
+	const fenceCodeParameters = fenceSectionLines[0]
 	applyFenceCodeParameters(
 		fenceCodeElement,
 		fenceCodeParameters,
 	)
-	fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 }
 
 async function applyCalloutFencedParsing(
@@ -148,6 +147,10 @@ async function applyCalloutFencedParsing(
 	if (!fenceSectionLines)
 		return;
 
+	applyFenceCodeParametersList(
+		element,
+		fenceSectionLines
+	)
 	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
 
 	const fenceCodeParametersList = getMarkdownFenceParameters(fenceSectionLines)
@@ -157,12 +160,11 @@ async function applyCalloutFencedParsing(
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		const fenceCodeParameters = fenceCodeParametersList[idx];
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
 		)
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 	}
 }
 
@@ -200,12 +202,11 @@ async function applyEditingCalloutFencedParsing(
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		const fenceCodeParameters = fenceCodeParametersList[idx];
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
 		)
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 	}
 }
 
@@ -237,12 +238,11 @@ async function applyAdmonitionFencedParsing(
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		const fenceCodeParameters = fenceCodeParametersList[idx];
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
 		)
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 	}
 }
 
@@ -274,13 +274,11 @@ async function applyEditingAdmonitionFencedParsing(
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
-		// const fenceCodeParameters = "ADMONITION TODO"
+		const fenceCodeParameters = fenceCodeParametersList[idx];
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
 		)
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 	}
 }
 
@@ -343,12 +341,11 @@ async function applyEmbeddedAdmonitionFencedParsing(
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		const fenceCodeParameters = fenceCodeParametersList[idx];
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
 		)
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 	}
 }
 
@@ -374,12 +371,11 @@ async function applyDocumentFencedParsing(
 
 	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
 		const fenceCodeElement = fenceCodeElements[idx];
-		const fenceCodeParameters = cleanFenceCodeParameters(fenceCodeParametersList[idx]);
+		const fenceCodeParameters = fenceCodeParametersList[idx];
 		applyFenceCodeParameters(
 			fenceCodeElement,
 			fenceCodeParameters,
 		)
-		fenceCodeElement.innerHTML = fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? "ERROR" //TODO:DELETE
 	}
 }
 
@@ -396,7 +392,7 @@ async function applySettingsFencedParsing(
 
 	const fenceSectionLines = context.sourcePath.substring(SETTINGS_SOURCEPATH_PREFIX.length).split("\n")
 
-	const fenceCodeParameters = cleanFenceCodeParameters(fenceSectionLines[0])
+	const fenceCodeParameters = fenceSectionLines[0];
 	applyFenceCodeParameters(
 		fenceCodeElement,
 		fenceCodeParameters,
@@ -525,7 +521,25 @@ function applyFenceCodeParameters(
 	fenceCodeParameters: string,
 ) {
 	if (isUnparsedFenceCodeElement(fenceCodeElement))
-		fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, fenceCodeParameters)
+		fenceCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, cleanFenceCodeParameters(fenceCodeParameters))
 }
 
+function applyFenceCodeParametersList(
+	element: HTMLElement,
+	fenceSectionLines: Array<string>,
+) {
+	const fenceCodeElements = (Array.from(element.querySelectorAll("pre:not(.frontmatter) > code")) as Array<HTMLElement>).filter(isFenceCodeElement)
+	const fenceCodeParametersList = getMarkdownFenceParameters(fenceSectionLines)
 
+	if (fenceCodeElements.length !== fenceCodeParametersList.length)
+		return;
+
+	for (let idx = 0; idx < fenceCodeElements.length; idx++) {
+		const fenceCodeElement = fenceCodeElements[idx];
+		const fenceCodeParameters = fenceCodeParametersList[idx];
+		applyFenceCodeParameters(
+			fenceCodeElement,
+			fenceCodeParameters,
+		)
+	}
+}
