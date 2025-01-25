@@ -105,8 +105,7 @@ export const mutationObservers: Record<string, MutationObserver> = {
 			if (mutation.type !== "childList" || (mutation.target as HTMLElement).tagName !== "PRE")
 				return;
 
-			const executeCodeOutput = (mutation.target as HTMLElement).querySelector("pre > code ~ code.language-output");
-			executeCodeOutput?.classList?.add("execute-code-output");
+			(mutation.target as HTMLElement).querySelector("pre > code ~ code.language-output")?.classList?.add(PREFIX+"execute-code-output");
 		});
 	}),
 };
