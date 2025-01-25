@@ -7,6 +7,7 @@ import { visit } from 'unist-util-visit';
 import { isUndetectedCodeElement } from "../../utils/detecting";
 import { SETTINGS_TAB_SOURCEPATH_PREFIX } from "src/Internal/constants/interface";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
+import { getFileContentLines } from "src/Internal/utils/rendered";
 
 export async function renderedFencedCodeDetecting(
 	element: HTMLElement,
@@ -112,7 +113,7 @@ export async function renderedFencedCodeDetecting(
 	}
 }
 
-async function applyStandaloneFencedDetecting(
+export async function applyStandaloneFencedDetecting(
 	element: HTMLElement,
 	context: MarkdownPostProcessorContext,
 ): Promise<void> {
@@ -316,12 +317,6 @@ async function applySettingsFencedDetecting(
 }
 
 // TODO: MOVE THese functions elsewhere
-async function getFileContentLines(
-	sourcePath: string,
-	adapter: DataAdapter,
-): Promise<Array<string>> {
-	return (await adapter.read(sourcePath)).split(/\n/g);
-}
 
 function getElementSectionLines(
 	element: HTMLElement,

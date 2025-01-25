@@ -111,7 +111,7 @@ export const mutationObservers: Record<string, MutationObserver> = {
 	}),
 };
 
-async function asyncDecorateFenceCodeElement(
+export async function asyncDecorateFenceCodeElement(
 	fenceCodeElement: HTMLElement,
 	context: MarkdownPostProcessorContext,
 	plugin: CodeStylerPlugin,

@@ -2,8 +2,6 @@ import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeSettings } from "..
 import { EXAMPLE_CODEBLOCK_CONTENT, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_INLINE_CODE } from "./interface";
 import { convertColoursToTheme, THEME_COLOURS } from "./themes";
 
-export const LOCAL_PREFIX = "@/";
-
 export const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 	codeblock: {
 		lineNumbers: true,

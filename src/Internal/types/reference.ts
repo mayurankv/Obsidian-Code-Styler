@@ -1,14 +1,18 @@
-export interface Reference {
-	startLine: number;
-	code: string;
-	language: string;
-	path: string;
+export class Reference {
+	startLine: number = 1;
+	code: string = "";
+	language: string = "";
+	path: string = "";
 	external?: {
 		id: string,
 		storePath: string,
 		website: string,
 		info: ExternalReferenceInfo;
-	}
+	} = undefined
+
+    public constructor(init?:Partial<Reference>) {
+        Object.assign(this, init);
+    }
 }
 
 export type LineIdentifier = null | string | number | RegExp;

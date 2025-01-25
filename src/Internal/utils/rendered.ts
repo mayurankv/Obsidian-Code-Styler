@@ -1,4 +1,4 @@
-import { CachedMetadata, MarkdownPostProcessorContext, View } from "obsidian";
+import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, View } from "obsidian";
 import CodeStylerPlugin from "src/main";
 
 export function toPostProcess(
@@ -18,4 +18,11 @@ export function toPostProcess(
 		return false;
 
 	return true;
+}
+
+export async function getFileContentLines(
+	sourcePath: string,
+	adapter: DataAdapter,
+): Promise<Array<string>> {
+	return (await adapter.read(sourcePath)).split(/\n/g);
 }
