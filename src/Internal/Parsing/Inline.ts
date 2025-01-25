@@ -7,7 +7,9 @@ import { convertBoolean, removeBoundaryQuotes } from "../utils/text";
 export function parseInlineCodeParameters(
 	inlineCodeParametersLine: string,
 ): InlineCodeParameters {
-	const separatedParameters: Array<string> = separateParameters(inlineCodeParametersLine.trim().slice(1,-1).trim())
+	inlineCodeParametersLine = inlineCodeParametersLine.trim()
+
+	const separatedParameters: Array<string> = separateParameters(inlineCodeParametersLine.slice(1,-1).trim())
 
 	const inlineCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<InlineCodeParameters>, parameterSection: string, idx: number) => {

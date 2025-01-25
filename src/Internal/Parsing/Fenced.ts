@@ -4,14 +4,18 @@ import { isLanguageMatched, separateParameters } from "./utils";
 import { FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND, PLUGIN_CODEBLOCK_WHITELIST } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
 import { MarkdownPreviewRenderer, Plugin } from "obsidian";
+import { getArgs } from "src/External/ExecuteCode/CodeBlockArgs";
+import { EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../constants/external";
 
-export function parseFenceCodeParameters(
+export async function parseFenceCodeParameters(
 	fenceCodeParametersLine: string,
-): FenceCodeParameters {
+	plugin: CodeStylerPlugin,
+): Promise<FenceCodeParameters> {
 	fenceCodeParametersLine = fenceCodeParametersLine.trim()
-	const rmarkdownParameters = fenceCodeParametersLine.startsWith("{") && fenceCodeParametersLine.endsWith("}")
-	let separatedParameters: Array<string> = separateParameters(removeCurlyBraces(fenceCodeParametersLine))
 
+	const rmarkdownParameters = fenceCodeParametersLine.startsWith("{") && fenceCodeParametersLine.endsWith("}")
+
+	let separatedParameters: Array<string> = separateParameters(removeCurlyBraces(fenceCodeParametersLine))
 	if (separatedParameters.every((parameterSection: string, idx: number, separatedParameters: Array<string>) => parameterSection.endsWith(",") || (idx === (separatedParameters.length - 1)) || (idx === 0)))
 		separatedParameters = separatedParameters.map((parameterSection: string, idx: number, separatedParameters: Array<string>) => idx === (separatedParameters.length - 1) ? parameterSection : parameterSection.slice(0,-1))
 
@@ -63,8 +67,10 @@ export function parseFenceCodeParameters(
 		{ highlights: { default: {lineNumbers: [], plainText: [], regularExpressions: []}, alternative: {} } },
 	)
 
-	const fenceCodeParameters = pluginAdjustFenceCodeParameters(
+	const fenceCodeParameters = await pluginAdjustFenceCodeParameters(
 		new FenceCodeParameters(fenceCodeParametersParsed),
+		fenceCodeParametersLine,
+		plugin,
 	)
 
 
@@ -73,19 +79,68 @@ export function parseFenceCodeParameters(
 	return fenceCodeParameters
 }
 
-function pluginAdjustFenceCodeParameters(
+async function pluginAdjustFenceCodeParameters(
 	fenceCodeParameters: FenceCodeParameters,
-	plugins: Record<string, Plugin>,
-): FenceCodeParameters {
+	fenceCodeParametersLine: string,
+	plugin: CodeStylerPlugin,
+): Promise<FenceCodeParameters> {
 	const adjustedParameters: Partial<FenceCodeParameters> = {}
-	if ("execute-code" in plugins) {
 
+	// @ts-expect-error Undocumented Obsidian API
+	const plugins: Record<string, Plugin> = plugin.app.plugins.plugins
+	if ("execute-code" in plugins) {
+		const executeCodeCodeblockArgs = getArgs(fenceCodeParametersLine)
+		if (fenceCodeParameters.title === "")
+			adjustedParameters.title = executeCodeCodeblockArgs?.label ?? fenceCodeParameters.title
+
+		if (fenceCodeParameters.language.startsWith("run-")) {
+			const executeCodeLanguage = fenceCodeParameters.language.slice(4)
+			if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(executeCodeLanguage) && !isLanguageMatched(fenceCodeParameters.language, plugin.settings.processedCodeblocksWhitelist))
+				adjustedParameters.language = executeCodeLanguage
+		}
 	}
 	if ("file-include" in plugins) {
+		if (fenceCodeParameters.language === "include")
+			adjustedParameters.language = fenceCodeParametersLine.match(new RegExp(`^include +(\w+)$`, "g"))?.[1] ?? "include"
+	}
+	if ("obsidian-code-preview" in plugins) {
+		if (fenceCodeParameters.language === "preview") {
+			const codePreviewPlugin = plugins["obsidian-code-preview"]
+			if (
+				"code" in codePreviewPlugin && typeof codePreviewPlugin.code === "function" &&
+				"analyzeHighLightLines" in codePreviewPlugin && typeof codePreviewPlugin.analyzeHighLightLines === "function"
+			) {
+				//TODO:
+				const codePreviewParameters = await codePreviewPlugin.code(
+					codeblockLines.slice(1, -1).join("\n"),
+					sourcePath,
+				);
 
+				adjustedParameters.language = codePreviewParameters.language;
+
+				if (fenceCodeParameters.title === "")
+					adjustedParameters.title = codePreviewParameters.filePath.split("\\").pop()?.split("/").pop() ?? "";
+
+				if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
+					adjustedParameters.lineNumbers = fenceCodeParameters.lineNumbers
+					if (typeof codePreviewParameters.start === "number")
+						adjustedParameters.lineNumbers.offset = codePreviewParameters.start - 1;
+					adjustedParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParameters.linenumber);
+				}
+
+				const codePreviewHighlightLines = Array.from(
+					codePreviewPlugin.analyzeHighLightLines(
+						codePreviewParameters.lines,
+						codePreviewParameters.highlight,
+					),
+					(pair: [number, boolean]) => (pair[0]),
+				)
+				fenceCodeParameters.highlights.default.lineNumbers = [...new Set([...codePreviewHighlightLines, ...fenceCodeParameters.highlights.default.lineNumbers])];
+			}
+		}
 	}
 
-	return {...fenceCodeParameters}
+	return {...adjustedParameters, ...fenceCodeParameters}
 }
 
 function inferFenceValue(

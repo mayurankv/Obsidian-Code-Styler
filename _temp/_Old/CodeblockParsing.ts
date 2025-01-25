@@ -1,11 +1,9 @@
 import { Plugin } from "obsidian";
 
-import CodeStylerPlugin from "../../main";
-import { EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
-import { CodeBlockArgs, getArgs } from "../../../External/ExecuteCode/CodeBlockArgs";
-import { getReference } from "src/_temp/_Old/Referencing";
 import { basename } from "path";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
+import CodeStylerPlugin from "src/main";
+import { getReference } from "./Referencing";
 
 
 interface ExternalPlugin extends Plugin {
@@ -28,96 +26,46 @@ async function pluginAdjustParameters(
 	codeblockLines: Array<string>,
 	sourcePath?: string,
 ): Promise<FenceCodeParameters> {
+	//@ts-expect-error Undocumented Obsidian API
 	const plugins: Record<string,ExternalPlugin> = plugin.app.plugins.plugins;
 	if (fenceCodeParameters.language === "reference") {
 		if (typeof sourcePath === "undefined")
 			throw Error("Reference block has undefined sourcePath");
-		fenceCodeParameters = await adjustReference(fenceCodeParameters, codeblockLines, sourcePath, plugin);
-	}  else if (fenceCodeParameters.language === "preview")
-		fenceCodeParameters = await pluginAdjustPreviewCode(fenceCodeParameters,plugins,codeblockLines,sourcePath);
-	else if (fenceCodeParameters.language === "include")
-		fenceCodeParameters = pluginAdjustFileInclude(fenceCodeParameters,plugins,codeblockLines);
-	else if (/run-\w*/.test(fenceCodeParameters.language))
-		fenceCodeParameters = pluginAdjustExecuteCodeRun(fenceCodeParameters,plugin,plugins);
-	fenceCodeParameters = pluginAdjustExecuteCode(fenceCodeParameters,plugins,codeblockLines);
-	return fenceCodeParameters;
-}
-async function adjustReference(
-	fenceCodeParameters: FenceCodeParameters,
-	codeblockLines: Array<string>,
-	sourcePath: string,
-	plugin: CodeStylerPlugin,
-): Promise<FenceCodeParameters> {
-	const reference = await getReference(codeblockLines, sourcePath, plugin);
-	if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
-		fenceCodeParameters.lineNumbers.offset = reference.startLine - 1;
-		fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
+
+		const reference = await getReference(codeblockLines, sourcePath, plugin);
+		if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
+			fenceCodeParameters.lineNumbers.offset = reference.startLine - 1;
+			fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
+		}
+		if (fenceCodeParameters.title === "")
+			fenceCodeParameters.title = reference.external?.info?.title ?? basename(reference.path);
+		if (fenceCodeParameters.reference === "")
+			//@ts-expect-error Undocumented Obsidian API
+			fenceCodeParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
+
+		fenceCodeParameters.language = reference.language;
+		if (reference.external)
+			fenceCodeParameters.externalReference = reference;
 	}
-	if (fenceCodeParameters.title === "")
-		fenceCodeParameters.title = reference.external?.info?.title ?? basename(reference.path);
-	if (fenceCodeParameters.reference === "")
-		//@ts-expect-error Undocumented Obsidian API
-		fenceCodeParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
-	fenceCodeParameters.language = reference.language;
-	if (reference.external)
-		fenceCodeParameters.externalReference = reference;
 	return fenceCodeParameters;
 }
+
 async function pluginAdjustPreviewCode(
 	fenceCodeParameters: FenceCodeParameters,
 	plugins: Record<string, ExternalPlugin>,
 	codeblockLines: Array<string>,
 	sourcePath?: string,
 ): Promise<FenceCodeParameters> {
-	if (plugins?.["obsidian-code-preview"]?.code && plugins?.["obsidian-code-preview"]?.analyzeHighLightLines) {
-		const codePreviewParams = await plugins["obsidian-code-preview"].code(codeblockLines.slice(1,-1).join("\n"),sourcePath);
-		if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
-			if (typeof codePreviewParams.start === "number")
-				fenceCodeParameters.lineNumbers.offset = codePreviewParams.start - 1;
-			fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParams.linenumber);
-		}
-		fenceCodeParameters.highlights.default.lineNumbers = [...new Set(fenceCodeParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),(pair: [number,boolean])=>(pair[0]))))];
-		if (fenceCodeParameters.title === "")
-			fenceCodeParameters.title = codePreviewParams.filePath.split("\\").pop()?.split("/").pop() ?? "";
-		fenceCodeParameters.language = codePreviewParams.language;
+	const codePreviewParams = await plugins["obsidian-code-preview"].code(codeblockLines.slice(1, -1).join("\n"), sourcePath);
+	if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
+		if (typeof codePreviewParams.start === "number")
+			fenceCodeParameters.lineNumbers.offset = codePreviewParams.start - 1;
+		fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(codePreviewParams.linenumber);
 	}
-	return fenceCodeParameters;
-}
-function pluginAdjustFileInclude(
-	fenceCodeParameters: FenceCodeParameters,
-	plugins: Record<string, ExternalPlugin>,
-	parameterLine: string,
-): FenceCodeParameters {
-	if ("file-include" in plugins) {
-		const fileIncludeLanguage = /include (\w+)/.exec(parameterLine)?.[1];
-		if (typeof fileIncludeLanguage !== "undefined")
-			fenceCodeParameters.language = fileIncludeLanguage;
-	}
-	return fenceCodeParameters;
-}
-function pluginAdjustExecuteCode(
-	fenceCodeParameters: FenceCodeParameters,
-	plugins: Record<string, ExternalPlugin>,
-	parameterLine: string,
-): FenceCodeParameters {
-	if ("execute-code" in plugins) {
-		const codeblockArgs: CodeBlockArgs = getArgs(parameterLine);
-		if ("label" in codeblockArgs)
-			fenceCodeParameters.title = codeblockArgs.label;
-	}
-	return fenceCodeParameters;
-}
-
-function pluginAdjustExecuteCodeRun(
-	fenceCodeParameters: FenceCodeParameters,
-	plugin: CodeStylerPlugin,
-	plugins: Record<string, ExternalPlugin>,
-): FenceCodeParameters {
-	if ("execute-code" in plugins) {
-		if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(fenceCodeParameters.language.slice(4)) && !isCodeblockIgnored(fenceCodeParameters.language,plugin.settings.processedCodeblocksWhitelist))
-			fenceCodeParameters.language = fenceCodeParameters.language.slice(4);
-	}
-	return fenceCodeParameters;
+	fenceCodeParameters.highlights.default.lineNumbers = [...new Set(fenceCodeParameters.highlights.default.lineNumbers.concat(Array.from(plugins["obsidian-code-preview"].analyzeHighLightLines(codePreviewParams.lines,codePreviewParams.highlight),(pair: [number,boolean])=>(pair[0]))))];
+	if (fenceCodeParameters.title === "")
+		fenceCodeParameters.title = codePreviewParams.filePath.split("\\").pop()?.split("/").pop() ?? "";
+	fenceCodeParameters.language = codePreviewParams.language;
 }
 
 //!==========================================================================
