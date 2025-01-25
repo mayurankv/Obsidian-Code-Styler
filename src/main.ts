@@ -109,7 +109,7 @@ export default class CodeStylerPlugin extends Plugin {
 			);
 	}
 
-	addModes
+	addModes(
 		load: boolean = true,
 	): void {
 		addModes(load)
