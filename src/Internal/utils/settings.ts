@@ -1,7 +1,7 @@
 // TODO: Update
 
 import { DEFAULT_SETTINGS, THEME_DEFAULT_SETTINGS } from "../constants/settings";
-import { THEME_FALLBACK_COLOURS } from "../settings";
+import { convertColoursToTheme } from "../constants/themes";
 import { CodeStylerSettings, CodeStylerTheme, Colour } from "../types/settings";
 
 export function convertSettings(
@@ -81,8 +81,8 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.1.3": settingsPreserve,
 	"1.1.4": (settings) => settingsVersionUpdate(settings,(theme)=>{ // To 1.1.5
 		theme.settings.header.externalReference = structuredClone(THEME_DEFAULT_SETTINGS.header.externalReference);
-		theme.colours.light.header.externalReference = structuredClone(THEME_FALLBACK_COLOURS.header.externalReference);
-		theme.colours.dark.header.externalReference = structuredClone(THEME_FALLBACK_COLOURS.header.externalReference);
+		theme.colours.light.header.externalReference = structuredClone(convertColoursToTheme("default", "light").header.externalReference);
+		theme.colours.dark.header.externalReference = structuredClone(convertColoursToTheme("default", "light").header.externalReference);
 		return theme;
 	}, (settings) => {
 		settings.externalReferenceUpdateOnLoad = false;

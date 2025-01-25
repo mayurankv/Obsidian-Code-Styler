@@ -19,28 +19,10 @@ export async function renderedFencedCodeDecorating(
 ): Promise<void> {
 	const fenceCodeElements = Array.from(element.querySelectorAll(`pre:not(frontmatter) > code[${PARAMETERS_ATTRIBUTE}]`))
 	for (const fenceCodeElement of fenceCodeElements as Array<HTMLElement>) {
-		if (!fenceCodeElement.classList.contains("is-loaded")) //TODO: Is this needed?
-			console.log("WASN'T LOADED")
+		if (!fenceCodeElement.hasClass("is-loaded"))
+			console.info("Code not loaded")
 
-		const decorated = fenceCodeElement.getAttribute(DECORATED_ATTRIBUTE) ?? "false"
-		if (decorated === "true")
-			return;
-
-		const fenceCodeParameters = parseFenceCodeParameters(fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ");
-		const codeDetectingContext = (fenceCodeElement.getAttribute(DETECTING_CONTEXT) ?? "standalone") as CodeDetectingContext
-
-		if (!toDecorateFenceCode(fenceCodeParameters))
-			return;
-
-		const staticRender = codeDetectingContext === "export"
-
-		decorateFenceCodeElement(
-			fenceCodeElement,
-			fenceCodeParameters,
-			staticRender,
-			context.sourcePath,
-			plugin,
-		)
+		asyncDecorateFenceCodeElement(fenceCodeElement, context, plugin)
 	}
 }
 
@@ -107,6 +89,17 @@ export function renderedViewFold(
 }
 
 export const mutationObservers: Record<string, MutationObserver> = {
+	// fenceCode: new MutationObserver((mutations: Array<MutationRecord>) => {
+	// 	mutations.forEach((mutation: MutationRecord) => {
+	// 		const fenceCodeElement = mutation.target as HTMLElement;
+	// 		foo(fenceCodeElement, context, plugin)
+	// 		if (mutation.type !== "childList" || (mutation.target as HTMLElement).tagName !== "PRE")
+	// 			return;
+
+	// 		const executeCodeOutput = (mutation.target as HTMLElement).querySelector("pre > code ~ code.language-output");
+	// 		executeCodeOutput?.classList?.add("execute-code-output");
+	// 	});
+	// }),
 	executeCode: new MutationObserver((mutations: Array<MutationRecord>) => {
 		mutations.forEach((mutation: MutationRecord) => {
 			if (mutation.type !== "childList" || (mutation.target as HTMLElement).tagName !== "PRE")
@@ -115,8 +108,37 @@ export const mutationObservers: Record<string, MutationObserver> = {
 			const executeCodeOutput = (mutation.target as HTMLElement).querySelector("pre > code ~ code.language-output");
 			executeCodeOutput?.classList?.add("execute-code-output");
 		});
-	})
+	}),
 };
+
+async function asyncDecorateFenceCodeElement(
+	fenceCodeElement: HTMLElement,
+	context: MarkdownPostProcessorContext,
+	plugin: CodeStylerPlugin,
+) {
+	await sleep(10)
+	const decorated = fenceCodeElement.getAttribute(DECORATED_ATTRIBUTE) ?? "false"
+	if (decorated === "true")
+		return;
+
+	fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
+
+	const fenceCodeParameters = parseFenceCodeParameters(fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ");
+
+	if (!toDecorateFenceCode(fenceCodeParameters, plugin))
+		return;
+
+	const codeDetectingContext = (fenceCodeElement.getAttribute(DETECTING_CONTEXT) ?? "standalone") as CodeDetectingContext
+	const staticRender = codeDetectingContext === "export"
+
+	decorateFenceCodeElement(
+		fenceCodeElement,
+		fenceCodeParameters,
+		staticRender,
+		context.sourcePath,
+		plugin,
+	)
+}
 
 function decorateFenceCodeElement(
 	fenceCodeElement: HTMLElement,
@@ -171,8 +193,6 @@ function decorateFenceCodeElement(
 		plugin,
 	)
 	fencePreElement.insertBefore(fenceHeaderElement, fencePreElement.childNodes[0]);
-
-	fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
 }
 
 function markupFencePreParentElement(
@@ -238,26 +258,25 @@ function markupFenceCodeElement(
 		},
 	);
 
-	fenceCodeElement.classList.add(`${PREFIX}code`)
-	fenceCodeElement.innerHTML = ""
-	fenceCodeElement.append(
-		...fenceCodeLines.filter(
-			(line, idx, fenceCodeLines) => idx !== fenceCodeLines.length - 1,
-		).map(
-			(line, idx) => {
-				const lineNumber = idx + fenceCodeParameters.lineNumbers.offset + 1
-				const lineContainer = document.createDiv({
-					cls: getLineClasses(fenceCodeParameters, lineNumber, line)
-				});
-				lineContainer.append(
-					createDiv({ cls: PREFIX + "line-number", text: lineNumber.toString() }),
-					createDiv({ cls: PREFIX + "line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>") }),
-				);
+	const lineContainers = fenceCodeLines.filter(
+		(line, idx, fenceCodeLines) => idx !== fenceCodeLines.length - 1,
+	).map(
+		(line, idx) => {
+			const lineNumber = idx + fenceCodeParameters.lineNumbers.offset + 1
+			const lineContainer = createDiv({
+				cls: getLineClasses(fenceCodeParameters, lineNumber, line)
+			});
+			lineContainer.append(
+				createDiv({ cls: PREFIX + "line-number", text: lineNumber.toString() }),
+				createDiv({ cls: PREFIX + "line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>") }),
+			);
 
-				return lineContainer
-			},
-		)
+			return lineContainer
+		},
 	)
+
+	fenceCodeElement.classList.add(`${PREFIX}code`)
+	fenceCodeElement.replaceChildren(...lineContainers)
 }
 
 function getFenceCodeLines(

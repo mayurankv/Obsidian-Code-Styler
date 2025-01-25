@@ -4,7 +4,7 @@ import { InlineCodeParameters } from "./Parsing/InlineCodeParsing";
 import { MarkdownRenderer, MarkdownView } from "obsidian";
 import CodeStylerPlugin from "../../main";
 import { updateExternalReference } from "../../Referencing";
-import { Reference } from "./Parsing/ReferenceParsing";
+import { Reference } from "./ReferenceParsing";
 import { rerender } from "../../EditingView";
 
 export function createHeader(codeblockParameters: CodeblockParameters, themeSettings: CodeStylerThemeSettings, sourcePath: string, plugin: CodeStylerPlugin): HTMLElement {

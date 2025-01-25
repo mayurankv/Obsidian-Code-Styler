@@ -1,6 +1,6 @@
 import { MarkdownPreviewRenderer, Plugin } from "obsidian";
 
-import CodeStylerPlugin from "../../../main";
+import CodeStylerPlugin from "../../main";
 import { CodeStylerTheme, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../Settings";
 import { CodeBlockArgs, getArgs } from "../../../External/ExecuteCode/CodeBlockArgs";
 import { getReference } from "src/_temp/_Old/Referencing";
@@ -61,6 +61,7 @@ async function parseCodeblocks(codeblocks: Array<Array<string>>, plugin: CodeSty
 	}
 	return codeblocksParameters;
 }
+
 async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, sourcePath?: string): Promise<CodeblockParameters | null> {
 	const parameterLine = getParameterLine(codeblockLines);
 	if (!parameterLine)
@@ -72,6 +73,7 @@ async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerP
 
 	return await (typeof sourcePath !== "undefined"?pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines,sourcePath):pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines));
 }
+
 export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
 	const codeblockParameters: CodeblockParameters = {
 		language: "",
@@ -102,13 +104,6 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 		ignore: false,
 	};
 
-	if (parameterLine.startsWith("```"))
-		parameterLine = parameterLine.replace(/^```+(?=[^`]|$)/,"");
-	else if (parameterLine.startsWith("~~~"))
-		parameterLine = parameterLine.replace(/^~~~+(?=[^~]|$)/,"");
-	else
-		return codeblockParameters;
-
 	const rmdMatch = /^\{(.+)\} *$/.exec(parameterLine);
 	if (rmdMatch)
 		parameterLine = rmdMatch[1];
@@ -117,6 +112,12 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	codeblockParameters.language = parameterLine.slice(0,(languageBreak !== -1)?languageBreak:parameterLine.length).toLowerCase();
 	if (languageBreak === -1)
 		return codeblockParameters;
+
+
+
+
+
+
 	parameterLine = parameterLine.slice(languageBreak+1);
 	if (rmdMatch)
 		parameterLine = "title:" + parameterLine;
@@ -125,7 +126,7 @@ export function parseCodeblockParameters(parameterLine: string, theme: CodeStyle
 	if (!parameterStrings)
 		return codeblockParameters;
 
-	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString.replace(/(?:^,|,$)/g, ""),codeblockParameters,theme));
+	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
 	return codeblockParameters;
 }
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
@@ -197,20 +198,10 @@ function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, pl
 }
 
 function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
-	if (parameterString === "ignore")
-		codeblockParameters.ignore = true;
-	else if (/^title[:=]/.test(parameterString))
+	if (/^title[:=]/.test(parameterString))
 		manageTitle(parameterString,codeblockParameters);
 	else if (/^ref[:=]/.test(parameterString) || /^reference[:=]/.test(parameterString))
 		manageReference(parameterString,codeblockParameters);
-	else if (/^fold[:=]?/.test(parameterString))
-		manageFolding(parameterString,codeblockParameters);
-	else if (/^ln[:=]/.test(parameterString))
-		manageLineNumbering(parameterString,codeblockParameters);
-	else if (/^unwrap[:=]?/.test(parameterString) || parameterString === "wrap")
-		manageWrapping(parameterString,codeblockParameters);
-	else
-		addHighlights(parameterString,codeblockParameters,theme);
 }
 function manageTitle(parameterString: string, codeblockParameters: CodeblockParameters) {
 	const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
@@ -223,9 +214,8 @@ function manageTitle(parameterString: string, codeblockParameters: CodeblockPara
 		codeblockParameters.reference = linkInfo.reference;
 	}
 }
-function manageReference(parameterString: string, codeblockParameters: CodeblockParameters) {
-	parameterString = parameterString.slice(((/^ref[:=]/.test(parameterString))?"ref:":"reference:").length);
-	const linkInfo = manageLink(parameterString);
+function manageReference(parameterValue: string, codeblockParameters: CodeblockParameters) {
+	const linkInfo = manageLink(parameterValue);
 	if (linkInfo) {
 		codeblockParameters.reference = linkInfo.reference;
 		if (codeblockParameters.title === "")
@@ -233,13 +223,13 @@ function manageReference(parameterString: string, codeblockParameters: Codeblock
 	}
 }
 export function manageLink(parameterString: string): {title: string, reference: string} | undefined {
-	const refWikiMatch = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/.exec(parameterString);
-	const refMdMatch = /\[(.*?)\]\((.+)\)/.exec(parameterString);
-	const urlMatch = /^(["']?)(https?:\/\/.*)\1$/.exec(parameterString);
+	const wikiLinkMatch = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/.exec(parameterString);
+	const markdownLinkMatch = /\[(.*?)\]\((.+)\)/.exec(parameterString);
+	const urlMatch = /^(["']?)(https?:\/\/.*)\1$/.exec(parameterString); //TODO: Improve to match google.com for example
 	let title = "";
 	let reference = "";
-	if (refWikiMatch) {
-		title = refWikiMatch[2]?refWikiMatch[2].trim():refWikiMatch[1].trim();
+	if (wikiLinkMatch) {
+		title = wikiLinkMatch[2]?wikiLinkMatch[2].trim():wikiLinkMatch[1].trim();
 		reference = refWikiMatch[1].trim();
 	} else if (refMdMatch) {
 		title = refMdMatch[1].trim();
@@ -251,130 +241,10 @@ export function manageLink(parameterString: string): {title: string, reference: 
 		return;
 	return {title: title, reference: reference};
 }
-function manageFolding(parameterString: string, codeblockParameters: CodeblockParameters) {
-	if (parameterString === "fold") {
-		codeblockParameters.fold = {
-			enabled: true,
-			placeholder: "",
-		};
-	} else {
-		const foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("fold:".length));
-		if (foldPlaceholderMatch) {
-			codeblockParameters.fold = {
-				enabled: true,
-				placeholder: foldPlaceholderMatch[2].trim(),
-			};
-		}
-	}
-}
-function manageLineNumbering(parameterString: string, codeblockParameters: CodeblockParameters) {
-	parameterString = parameterString.slice("ln:".length);
-	if (/^\d+$/.test(parameterString)) {
-		codeblockParameters.lineNumbers = {
-			alwaysEnabled: true,
-			alwaysDisabled: false,
-			offset: parseInt(parameterString)-1,
-		};
-	} else if (parameterString.toLowerCase() === "true") {
-		codeblockParameters.lineNumbers = {
-			alwaysEnabled: true,
-			alwaysDisabled: false,
-			offset: 0,
-		};
-	} else if (parameterString.toLowerCase() === "false") {
-		codeblockParameters.lineNumbers = {
-			alwaysEnabled: false,
-			alwaysDisabled: true,
-			offset: 0,
-		};
-	}
-}
-function manageWrapping(parameterString: string, codeblockParameters: CodeblockParameters) {
-	if (parameterString === "wrap") {
-		codeblockParameters.lineUnwrap = {
-			alwaysEnabled: false,
-			alwaysDisabled: true,
-			activeWrap: false,
-		};
-	} else if (parameterString === "unwrap") {
-		codeblockParameters.lineUnwrap = {
-			alwaysEnabled: true,
-			alwaysDisabled: false,
-			activeWrap: false,
-		};
-	} else {
-		parameterString = parameterString.slice("unwrap:".length);
-		if (parameterString.toLowerCase() === "inactive") {
-			codeblockParameters.lineUnwrap = {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
-				activeWrap: true,
-			};
-		} else if (parameterString.toLowerCase() === "true") {
-			codeblockParameters.lineUnwrap = {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
-				activeWrap: false,
-			};
-		} else if (parameterString.toLowerCase() === "false") {
-			codeblockParameters.lineUnwrap = {
-				alwaysEnabled: false,
-				alwaysDisabled: true,
-				activeWrap: false,
-			};
-		}
-	}
-}
-function addHighlights(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme) {
-	const highlightMatch = /^(\w+)[:=](.+)$/.exec(parameterString);
-	if (highlightMatch) {
-		if (highlightMatch[1] === "hl")
-			codeblockParameters.highlights.default = parseHighlightedLines(highlightMatch[2]);
-		else if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
-			codeblockParameters.highlights.alternative[highlightMatch[1]] = parseHighlightedLines(highlightMatch[2]);
-	} else if (/^{[\d-,]+}$/.test(parameterString))
-		codeblockParameters.highlights.default = parseHighlightedLines(parameterString.slice(1,-1));
-}
-function parseHighlightedLines(highlightedLinesString: string): Highlights {
-	const highlightRules = highlightedLinesString.split(",");
-	const lineNumbers: Set<number> = new Set();
-	const plainText: Set<string> = new Set();
-	const regularExpressions: Set<RegExp> = new Set();
-	highlightRules.forEach(highlightRule => {
-		if (/\d+-\d+/.test(highlightRule)) { // Number Range
-			const [start,end] = highlightRule.split("-").map(num => parseInt(num));
-			if (start && end && start <= end)
-				Array.from({length:end-start+1}, (_,num) => num + start).forEach(lineNumber => lineNumbers.add(lineNumber));
-		} else if (/^\/(.*)\/$/.test(highlightRule)) { // Regex
-			try {
-				regularExpressions.add(new RegExp(highlightRule.replace(/^\/(.*)\/$/, "$1")));
-			} catch {
-				//pass
-			}
-		}  else if (/".*"/.test(highlightRule)) // Plain Text
-			plainText.add(highlightRule.substring(1,highlightRule.length-1));
-		else if (/'.*'/.test(highlightRule)) // Plain Text
-			plainText.add(highlightRule.substring(1,highlightRule.length-1));
-		else if (/\D/.test(highlightRule)) // Plain Text //TODO (@mayurankv) Should this be \D+ ??
-			plainText.add(highlightRule);
-		else if (/\d+/.test(highlightRule)) // Plain Number
-			lineNumbers.add(parseInt(highlightRule));
-	});
-	return {
-		lineNumbers: [...lineNumbers],
-		plainText: [...plainText],
-		regularExpressions: [...regularExpressions],
-	};
-}
-export function isLanguageIgnored(language: string, excludedLanguagesString: string): boolean {
-	return parseRegexExcludedLanguages(excludedLanguagesString).some(regexExcludedLanguage=>regexExcludedLanguage.test(language));
-}
+
 export function isCodeblockIgnored(language: string, whitelistedCodeblocksString: string): boolean {
 	//@ts-expect-error Undocumented Obsidian API
-	return (language in MarkdownPreviewRenderer.codeBlockPostProcessors) && !parseRegexExcludedLanguages(whitelistedCodeblocksString).some(regexExcludedLanguage=>regexExcludedLanguage.test(language));
-}
-function parseRegexExcludedLanguages(excludedLanguagesString: string): Array<RegExp> {
-	return excludedLanguagesString.split(",").map(regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g,".+")}$`,"i"));
+	return (language in MarkdownPreviewRenderer.codeBlockPostProcessors) && !isLanguageIgnored(language, whitelistedCodeblocksString);
 }
 
 function getParameterLine(codeblockLines: Array<string>): string | undefined {

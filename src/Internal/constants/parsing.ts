@@ -1,5 +1,10 @@
-export const FENCE_PARAMETERS = ["title","fold","ln","wrap","unwrap","ignore"];
-export const INLINE_PARAMETERS = ["title","icon"];
+export const FENCE_PARAMETERS_KEY_VALUE = ["title", "fold", "ln", "unwrap", "icon", "reference", "ref", "ignore", "hl"]
+export const FENCE_PARAMETERS_SHORTHAND = ["fold", "wrap", "unwrap", "ignore", "icon", "ln"]
+export const FENCE_PARAMETERS = [...new Set([...FENCE_PARAMETERS_KEY_VALUE, ...FENCE_PARAMETERS_SHORTHAND])];
+
+export const INLINE_PARAMETERS_KEY_VALUE = ["title", "icon", "language", "ignore"]
+export const INLINE_PARAMETERS_SHORTHAND = ["icon", "ignore"]
+export const INLINE_PARAMETERS = [...new Set([...INLINE_PARAMETERS_KEY_VALUE, ...INLINE_PARAMETERS_SHORTHAND])];
 
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names

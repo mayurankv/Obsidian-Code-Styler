@@ -2,9 +2,9 @@ import { MarkdownRenderer, MarkdownPostProcessorContext, sanitizeHTMLToDom } fro
 import { DECORATED_ATTRIBUTE, TEMPORARY_SOURCEPATH } from "src/Internal/constants/decoration";
 import { CONTENT_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import { PREFIX } from "src/Internal/constants/general";
-import { FenceCodeParameters, InlineCodeParameters } from "src/Internal/types/parsing";
+import { InlineCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
-import { createFenceHeaderElement, createInlineHeaderElement, getIndentation, getLineClasses } from "../utils";
+import { createInlineHeaderElement } from "../utils";
 import { parseInlineCodeParameters, toDecorateInlineCode, toHighlightInlineCode } from "src/Internal/Parsing/Inline";
 
 export async function renderedInlineCodeDecorating(
@@ -58,7 +58,6 @@ async function decorateInlineCodeElement(
 	await markupInlineCodeElement(
 		inlineCodeElement,
 		inlineCodeParameters,
-		sourcePath,
 		plugin,
 	)
 	inlineCodeElement.insertBefore(inlineHeaderElement, inlineCodeElement.childNodes[0]);
@@ -69,7 +68,6 @@ async function decorateInlineCodeElement(
 async function markupInlineCodeElement(
 	inlineCodeElement: HTMLElement,
 	inlineCodeParameters: InlineCodeParameters,
-	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
 	inlineCodeElement.classList.add(`${PREFIX}code-inline`)
@@ -88,9 +86,6 @@ async function markupInlineCodeElement(
 	const renderedCodeElement = temporaryRenderingContainer.querySelector("code");
 	if (!renderedCodeElement)
 		throw new Error("Could not render highlighted code");
-
-	// while (plugin.settings.currentTheme.settings.inline.syntaxHighlight && !renderedCodeElement.classList.contains("is-loaded")) //TODO: Is needed?
-	// 	await sleep(2);
 
 	inlineCodeElement.innerHTML = renderedCodeElement.innerHTML + "&ZeroWidthSpace;";
 }

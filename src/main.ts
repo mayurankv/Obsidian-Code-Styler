@@ -12,8 +12,10 @@ import { SettingsTab } from "./Interface/Settings/SettingsTab";
 import { renderedInlineCodeDetecting } from "./Internal/Detecting/Rendered/Inline";
 import { renderedFencedCodeDetecting } from "./Internal/Detecting/Rendered/Fenced";
 import { toPostProcess } from "./Internal/utils/rendered";
-import { renderedFencedCodeDecorating } from "./Internal/Decorating/Rendered/Fenced";
+import { mutationObservers, renderedFencedCodeDecorating } from "./Internal/Decorating/Rendered/Fenced";
 import { renderedInlineCodeDecorating } from "./Internal/Decorating/Rendered/Inline";
+import { DEFAULT_SETTINGS } from "./Internal/constants/settings";
+import { convertSettings } from "./Internal/utils/settings";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -25,7 +27,7 @@ export default class CodeStylerPlugin extends Plugin {
 	};
 
 	async onload(): Promise<void> {
-		// await this.loadSettings(); // Load Settings
+		await this.loadSettings();
 		// const settingsTab = new SettingsTab(this.app,this);
 		// this.addSettingTab(settingsTab);
 
@@ -42,7 +44,7 @@ export default class CodeStylerPlugin extends Plugin {
 		// 	zoom: document.body.getCssPropertyValue("--zoom-factor"),
 		// };
 
-		// this.executeCodeMutationObserver = executeCodeMutationObserver; // Add execute code mutation observer
+		this.mutationObservers = mutationObservers;
 
 		//* Rendering Modifiers
 		this.registerMarkdownPostProcessor(async (element, context) => {
@@ -134,7 +136,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 		// this.app.workspace.onLayoutReady(async () => this.initialiseOnLayout()); // Add decoration on enabling of plugin
 
-		// console.log("Loaded plugin: Code Styler");
+		console.log("Loaded plugin: Code Styler");
 	}
 
 	onunload(): void {
