@@ -75,14 +75,14 @@ export function renderedFencedCodeUndecorating(): void {
 
 export function renderedViewFold(
 	contentEl: HTMLElement,
-	fold?: boolean,
+	fold: boolean | null,
 ): void {
 	const codeblockPreElements = contentEl.querySelectorAll(`pre.${PREFIX}pre`);
 	codeblockPreElements.forEach(
 		(codeblockPreElement: HTMLElement) => {
 			foldFencePreElement(
 				codeblockPreElement,
-				(typeof fold === "undefined") ? (codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE) ?? "false") === "true" : fold,
+				fold ?? (codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE) ?? "false") === "true",
 			);
 		},
 	);

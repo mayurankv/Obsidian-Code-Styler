@@ -267,16 +267,17 @@ function setTitleAndReference(
 ): Partial<FenceCodeParameters> {
 	if (parameterValue !== null) {
 		const linkInfo = parseLink(parameterValue)
-		if (linkInfo === null)
+		if (linkInfo === null) {
 			if (parameterKey === "title")
 				return { ...result, title: parameterValue }
 			else
 				return result
-		else
+		} else {
 			if ((parameterKey === "title") || !("title" in result))
-				return {...result, ...linkInfo}
+				return { ...result, ...linkInfo }
 			else
 				return { ...result, reference: linkInfo.reference }
+		}
 
 	} else {
 		if (parameterKey !== "title" || !("title" in result))
