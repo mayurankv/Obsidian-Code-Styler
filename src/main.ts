@@ -13,6 +13,7 @@ import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH, REFERENCE_CODEBLOCK 
 import { registerCommands } from "./Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
 import { registerRerenderingOnWorkspaceChange } from "./Interface/View/rendered";
+import { addModes } from "./Internal/Decorating/LivePreview/SyntaxHighlight";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -108,17 +109,10 @@ export default class CodeStylerPlugin extends Plugin {
 			);
 	}
 
-	addModes(
+	addModes
 		load: boolean = true,
 	): void {
-		if (load)
-			//!==================================
-			addModes();
-			//!==================================
-		else
-			//!==================================
-			removeModes();
-			//!==================================
+		addModes(load)
 	}
 
 	addCodeblockProcessors(
