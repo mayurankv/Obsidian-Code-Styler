@@ -5,6 +5,7 @@ import CodeStylerPlugin from "src/main";
 import { renderSpecificReadingSection } from "./ReadingView";
 import { getFileContentLines } from "./Internal/Parsing/CodeblockParsing";
 import { basename } from "path";
+import { rerenderRenderedView } from "src/Interface/View/rendered";
 
 async function referenceAdjustParameters(
 	fenceCodeParameters: FenceCodeParameters,
@@ -85,20 +86,35 @@ export async function getReference(codeblockLines: Array<string>, sourcePath: st
 	return reference;
 }
 
-export async function updateExternalReferencedFiles(plugin: CodeStylerPlugin, sourcePath: string | undefined = undefined): Promise<void> {
+export async function manageExternalReferencedFiles(
+	plugin: CodeStylerPlugin,
+	sourcePath: string | null = null,
+	update: boolean = true,
+): Promise<void> {
 	await cleanExternalReferencedFiles(plugin);
-	const cache = await readCache(plugin);
-	const references = (typeof sourcePath !== "undefined") ? await getFileReferences(sourcePath, plugin) : Object.values(cache).map((idCache: IdCache) => idCache.reference);
-	for (const reference of references) {
-		await updateExternalReference(reference, plugin);
-		cache[reference?.external?.id as string].reference = reference;
+
+	if (update) {
+		const cache = await readCache(plugin);
+		const references = (sourcePath === null)
+			? await getFileReferences(sourcePath, plugin)
+			: Object.values(cache).map((idCache: IdCache) => idCache.reference);
+
+		for (const reference of references) {
+			await updateExternalReference(reference, plugin);
+			cache[reference?.external?.id as string].reference = reference;
+		}
+		await updateCache(cache, plugin);
 	}
-	await updateCache(cache, plugin);
-	plugin.renderReadingView();
+
+	rerenderRenderedView(plugin);
 }
-export async function cleanExternalReferencedFiles(plugin: CodeStylerPlugin): Promise<void> {
+
+async function cleanExternalReferencedFiles(
+	plugin: CodeStylerPlugin,
+): Promise<void> {
 	const cache = await readCache(plugin);
 	const referencesByFile = cacheToReferencesByFile(cache);
+
 	for (const sourcePath of Object.keys(referencesByFile)) {
 		const fileReferenceIds = (await getFileReferences(sourcePath, plugin)).map((reference: Reference) => reference?.external?.id as string);
 		referencesByFile[sourcePath] = referencesByFile[sourcePath].filter((id: string) => fileReferenceIds.includes(id));
@@ -110,7 +126,7 @@ export async function cleanExternalReferencedFiles(plugin: CodeStylerPlugin): Pr
 			await plugin.app.vault.adapter.remove(plugin.app.vault.configDir + EXTERNAL_REFERENCE_PATH + id + EXTERNAL_REFERENCE_INFO_SUFFIX);
 		}
 	}
-	await updateCache(new_cache,plugin);
+	await updateCache(new_cache, plugin);
 }
 
 function cacheToReferencesByFile(cache: Cache): ReferenceByFile {

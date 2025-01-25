@@ -11,7 +11,7 @@ import { convertSettings } from "./Internal/utils/settings";
 import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH, REFERENCE_CODEBLOCK } from "./Internal/constants/reference";
 import { registerCommands } from "./Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
-import { registerRerenderingOnWorkspaceChange } from "./Interface/View/rendered";
+import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./Interface/View/rendered";
 import { addModes } from "./Internal/Decorating/LivePreview/SyntaxHighlight";
 import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
 import { referenceCodeblockProcessor } from "./Internal/Decorating/Reference";
@@ -183,14 +183,7 @@ export default class CodeStylerPlugin extends Plugin {
 	): void {
 		if (load)
 			this.app.workspace.onLayoutReady(
-				async () => {
-					if (this.settings.externalReferenceUpdateOnLoad)
-						await updateExternalReferencedFiles(this);
-					else {
-						await cleanExternalReferencedFiles(this);
-						this.renderReadingView();
-					}
-				},
+				async () => await manageExternalReferencedFiles(this, null, this.settings.externalReferenceUpdateOnLoad),
 			);
 	}
 
