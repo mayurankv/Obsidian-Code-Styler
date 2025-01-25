@@ -123,7 +123,7 @@ async function asyncDecorateFenceCodeElement(
 
 	fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
 
-	const fenceCodeParameters = await parseFenceCodeParameters(
+	const fenceCodeParameters = parseFenceCodeParameters(
 		fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ",
 		plugin,
 	);

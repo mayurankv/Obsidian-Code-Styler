@@ -14,19 +14,19 @@ export function parseInlineCodeParameters(
 	const inlineCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<InlineCodeParameters>, parameterSection: string, idx: number) => {
 			if ((idx === 0) && (parameterSection.indexOf(" ") === -1)) //TODO: Exclude any symbols existing
-				return {language: parameterSection.toLowerCase(), ...result}
+				return { ...result, language: parameterSection.toLowerCase() }
 
 			for (const parameterKey of INLINE_PARAMETERS_KEY_VALUE as Array<keyof InlineCodeParameters>)
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
-					return {...inferInlineValue(parameterKey, removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim().replace(/\\{/g, "{")), ...result};
+					return { ...result, ...inferInlineValue(parameterKey, removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim().replace(/\\{/g, "{")) };
 
 			for (const parameterShorthand of INLINE_PARAMETERS_SHORTHAND as Array<keyof InlineCodeParameters>)
 				if (parameterSection === parameterShorthand)
-					return {...inferInlineShorthand(parameterShorthand), ...result}
+					return { ...result, ...inferInlineShorthand(parameterShorthand) }
 		},
 		{},
 	)
-	const inlineCodeParameters = new InlineCodeParameters({...inlineCodeParametersParsed})
+	const inlineCodeParameters = new InlineCodeParameters(inlineCodeParametersParsed)
 
 	return inlineCodeParameters
 }

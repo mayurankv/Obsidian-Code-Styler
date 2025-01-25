@@ -12,10 +12,11 @@ import { SettingsTab } from "./Interface/Settings/SettingsTab";
 import { renderedInlineCodeDetecting } from "./Internal/Detecting/Rendered/Inline";
 import { renderedFencedCodeDetecting } from "./Internal/Detecting/Rendered/Fenced";
 import { toPostProcess } from "./Internal/utils/rendered";
-import { mutationObservers, renderedFencedCodeDecorating } from "./Internal/Decorating/Rendered/Fenced";
-import { renderedInlineCodeDecorating } from "./Internal/Decorating/Rendered/Inline";
+import { mutationObservers, renderedFencedCodeDecorating, renderedFencedCodeUndecorating } from "./Internal/Decorating/Rendered/Fenced";
+import { renderedInlineCodeDecorating, renderedInlineCodeUndecorating } from "./Internal/Decorating/Rendered/Inline";
 import { DEFAULT_SETTINGS } from "./Internal/constants/settings";
 import { convertSettings } from "./Internal/utils/settings";
+import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH } from "./Internal/constants/reference";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -30,6 +31,11 @@ export default class CodeStylerPlugin extends Plugin {
 		await this.loadSettings();
 		// const settingsTab = new SettingsTab(this.app,this);
 		// this.addSettingTab(settingsTab);
+
+		if (!(await this.app.vault.adapter.exists(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH))) {
+			await this.app.vault.adapter.mkdir(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH);
+			await this.app.vault.adapter.write(this.app.vault.configDir + EXTERNAL_REFERENCE_CACHE, JSON.stringify({}));
+		}
 
 		// document.body.classList.add(BODY_CLASS); // Load Styles
 		// updateStyling(this.settings,this.app);
@@ -141,11 +147,15 @@ export default class CodeStylerPlugin extends Plugin {
 
 	onunload(): void {
 		// removeModes();
-		this.executeCodeMutationObserver.disconnect();
+		Object.values(this.mutationObservers).forEach((mutationObserver: MutationObserver) => mutationObserver.disconnect());
+
 		// removeStylesAndClasses();
-		destroyReadingModeElements();
+		renderedInlineCodeUndecorating()
+		renderedFencedCodeUndecorating()
+
 		for (const url of Object.values(this.languageIcons)) // Unload icons
 			URL.revokeObjectURL(url);
+
 		console.log("Unloaded plugin: Code Styler");
 	}
 
@@ -160,10 +170,6 @@ export default class CodeStylerPlugin extends Plugin {
 	}
 
 	async initialiseOnLayout(): Promise<void> {
-		if (!(await this.app.vault.adapter.exists(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH))) {// Create folder for external references
-			await this.app.vault.adapter.mkdir(this.app.vault.configDir + EXTERNAL_REFERENCE_PATH);
-			await this.app.vault.adapter.write(this.app.vault.configDir + EXTERNAL_REFERENCE_CACHE, JSON.stringify({}));
-		}
 		if (this.settings.externalReferenceUpdateOnLoad)
 			await updateExternalReferencedFiles(this);
 		else {

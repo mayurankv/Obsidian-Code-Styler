@@ -419,7 +419,7 @@ export function convertColoursToTheme(
 	theme: string,
 	mode: string,
 ): CodeStylerThemeModeColours {
-	const mappedThemeColours = {...mapThemeColours(theme, mode), ...mapThemeColours("default", "light")}
+	const mappedThemeColours = {...mapThemeColours("default", "light"), ...mapThemeColours(theme, mode)}
 	return {
 		codeblock: {
 			backgroundColour: mappedThemeColours.backgroundPrimary,
