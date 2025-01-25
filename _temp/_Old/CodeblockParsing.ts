@@ -74,61 +74,8 @@ async function parseCodeblock(codeblockLines: Array<string>, plugin: CodeStylerP
 	return await (typeof sourcePath !== "undefined"?pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines,sourcePath):pluginAdjustParameters(codeblockParameters,plugin,plugins,codeblockLines));
 }
 
-export function parseCodeblockParameters(parameterLine: string, theme: CodeStylerTheme): CodeblockParameters {
-	const codeblockParameters: CodeblockParameters = {
-		language: "",
-		title: "",
-		reference: "",
-		fold: {
-			enabled: false,
-			placeholder: "",
-		},
-		lineNumbers: {
-			alwaysEnabled: false,
-			alwaysDisabled: false,
-			offset: 0,
-		},
-		lineUnwrap: {
-			alwaysEnabled: false,
-			alwaysDisabled: false,
-			activeWrap: false,
-		},
-		highlights: {
-			default: {
-				lineNumbers: [],
-				plainText: [],
-				regularExpressions: [],
-			},
-			alternative: {},
-		},
-		ignore: false,
-	};
+//?======================================================================
 
-	const rmdMatch = /^\{(.+)\} *$/.exec(parameterLine);
-	if (rmdMatch)
-		parameterLine = rmdMatch[1];
-
-	const languageBreak = parameterLine.indexOf(" ");
-	codeblockParameters.language = parameterLine.slice(0,(languageBreak !== -1)?languageBreak:parameterLine.length).toLowerCase();
-	if (languageBreak === -1)
-		return codeblockParameters;
-
-
-
-
-
-
-	parameterLine = parameterLine.slice(languageBreak+1);
-	if (rmdMatch)
-		parameterLine = "title:" + parameterLine;
-
-	const parameterStrings = parameterLine.match(/(?:(?:ref|reference|title):(?:\[\[.*?\]\]|\[.*?\]\(.+\))|[^\s"']+|"[^"]*"|'[^']*')+/g);
-	if (!parameterStrings)
-		return codeblockParameters;
-
-	parameterStrings.forEach((parameterString) => parseCodeblockParameterString(parameterString,codeblockParameters,theme));
-	return codeblockParameters;
-}
 async function pluginAdjustParameters(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>, codeblockLines: Array<string>, sourcePath?: string): Promise<CodeblockParameters> {
 	if (codeblockParameters.language === "reference") {
 		if (typeof sourcePath === "undefined")
@@ -197,50 +144,7 @@ function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, pl
 	return codeblockParameters;
 }
 
-function parseCodeblockParameterString(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme): void {
-	if (/^title[:=]/.test(parameterString))
-		manageTitle(parameterString,codeblockParameters);
-	else if (/^ref[:=]/.test(parameterString) || /^reference[:=]/.test(parameterString))
-		manageReference(parameterString,codeblockParameters);
-}
-function manageTitle(parameterString: string, codeblockParameters: CodeblockParameters) {
-	const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
-	if (titleMatch)
-		codeblockParameters.title = titleMatch[2].trim();
-	parameterString = parameterString.slice("title:".length);
-	const linkInfo = manageLink(parameterString);
-	if (linkInfo) {
-		codeblockParameters.title = linkInfo.title;
-		codeblockParameters.reference = linkInfo.reference;
-	}
-}
-function manageReference(parameterValue: string, codeblockParameters: CodeblockParameters) {
-	const linkInfo = manageLink(parameterValue);
-	if (linkInfo) {
-		codeblockParameters.reference = linkInfo.reference;
-		if (codeblockParameters.title === "")
-			codeblockParameters.title = linkInfo.title;
-	}
-}
-export function manageLink(parameterString: string): {title: string, reference: string} | undefined {
-	const wikiLinkMatch = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/.exec(parameterString);
-	const markdownLinkMatch = /\[(.*?)\]\((.+)\)/.exec(parameterString);
-	const urlMatch = /^(["']?)(https?:\/\/.*)\1$/.exec(parameterString); //TODO: Improve to match google.com for example
-	let title = "";
-	let reference = "";
-	if (wikiLinkMatch) {
-		title = wikiLinkMatch[2]?wikiLinkMatch[2].trim():wikiLinkMatch[1].trim();
-		reference = refWikiMatch[1].trim();
-	} else if (refMdMatch) {
-		title = refMdMatch[1].trim();
-		reference = refMdMatch[2].trim();
-	} else if (urlMatch) {
-		title = "URL";
-		reference = urlMatch[2].trim();
-	}  else
-		return;
-	return {title: title, reference: reference};
-}
+//?======================================================================
 
 export function isCodeblockIgnored(language: string, whitelistedCodeblocksString: string): boolean {
 	//@ts-expect-error Undocumented Obsidian API
@@ -250,7 +154,7 @@ export function isCodeblockIgnored(language: string, whitelistedCodeblocksString
 function getParameterLine(codeblockLines: Array<string>): string | undefined {
 	let openingCodeblockLine = getOpeningLine(codeblockLines);
 	if (openingCodeblockLine && (openingCodeblockLine !== codeblockLines[0] || />\s*(?:[`~])/.test(openingCodeblockLine)))
-		openingCodeblockLine = cleanParameterLine(openingCodeblockLine);
+		openingCodeblockLine = openingCodeblockLine.trim().replace(/^(?:>\s*)*(```+|~~~+)/,"$1");
 	return openingCodeblockLine;
 }
 function getOpeningLine(codeblockLines: Array<string>): string | undefined {
@@ -263,16 +167,6 @@ export function testOpeningLine(codeblockLine: string): string {
 	if (codeblockLine.indexOf(lineMatch[2],lineMatch[1].length+lineMatch[2].length+1)===-1)
 		return lineMatch[2];
 	return "";
-}
-function cleanParameterLine(parameterLine: string): string {
-	return trimParameterLine(parameterLine).replace(/^(?:>\s*)*(```+|~~~+)/,"$1");
-}
-export function trimParameterLine(parameterLine: string): string {
-	return parameterLine.trim();
-}
-
-export async function getFileContentLines(sourcePath: string, plugin: CodeStylerPlugin): Promise<Array<string>> {
-	return (await plugin.app.vault.adapter.read(sourcePath)).split(/\n/g);
 }
 
 function arraysEqual(array1: Array<unknown>,array2: Array<unknown>): boolean {

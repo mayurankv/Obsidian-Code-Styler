@@ -7,7 +7,9 @@ import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../util
 export function parseFenceCodeParameters(
 	fenceCodeParametersLine: string,
 ): FenceCodeParameters {
-	let separatedParameters: Array<string> = separateParameters(removeCurlyBraces(fenceCodeParametersLine.trim()))
+	fenceCodeParametersLine = fenceCodeParametersLine.trim()
+	const rmarkdownParameters = fenceCodeParametersLine.startsWith("{") && fenceCodeParametersLine.endsWith("}")
+	let separatedParameters: Array<string> = separateParameters(removeCurlyBraces(fenceCodeParametersLine))
 
 	if (separatedParameters.every((parameterSection: string, idx: number, separatedParameters: Array<string>) => parameterSection.endsWith(",") || (idx === (separatedParameters.length - 1)) || (idx === 0)))
 		separatedParameters = separatedParameters.map((parameterSection: string, idx: number, separatedParameters: Array<string>) => idx === (separatedParameters.length - 1) ? parameterSection : parameterSection.slice(0,-1))
@@ -15,14 +17,25 @@ export function parseFenceCodeParameters(
 	const fenceCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<FenceCodeParameters>, parameterSection: string, idx: number) => {
 			if (idx === 0) //TODO: Check whether this matches how Obsidian parses
-				return {language: parameterSection.toLowerCase(), ...result}
+				return { language: parameterSection.toLowerCase(), ...result }
+
+			if ((idx === 1) && rmarkdownParameters)
+				parameterSection = "title:" + parameterSection
 
 			//TODO: managing of reference and title
 			for (const parameterKey of ["title", "reference", "ref"])
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
-					return result; //TODO: removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim()
+					return setTitleAndReference(
+						parameterKey,
+						removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim(),
+						result,
+					);
 				else if (parameterSection === parameterKey)
-					return result; //TODO:
+					return setTitleAndReference(
+						parameterKey,
+						null,
+						result,
+					);
 
 			for (const parameterKey of FENCE_PARAMETERS_KEY_VALUE)
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
@@ -50,6 +63,8 @@ export function parseFenceCodeParameters(
 	)
 
 	const fenceCodeParameters = new FenceCodeParameters(fenceCodeParametersParsed)
+
+	//todo: Adjust parameters
 
 	return fenceCodeParameters
 }
@@ -175,18 +190,36 @@ function setTitleAndReference(
 	parameterValue: string | null,
 	result: Partial<FenceCodeParameters>,
 ): Partial<FenceCodeParameters> {
-	if (parameterValue === null) {
+	if (parameterValue !== null) {
+		const linkInfo = parseLink(parameterValue)
+		if (linkInfo === null)
+			if (parameterKey === "title")
+				return { title: parameterValue, ...result }
+			else
+				return result
+		else
+			if ((parameterKey === "title") || !("title" in result))
+				return {...linkInfo, ...result}
+			else
+				return { reference: linkInfo.reference, ...result }
 
 	} else {
+		if (parameterKey !== "title" || !("title" in result))
+			return result
 
+		const linkInfo = parseLink(result?.title ?? "")
+
+		if (linkInfo === result)
+			return result
+		else
+			return ({...linkInfo, ...result})
 	}
-	return result
 }
 
 function parseLink(
 	linkText: string,
 ): { title: string, reference: string } | null {
-	const markdownLinkMatch = linkText.match(new RegExp(`\\[(.*?)\\]\\((.+)\\)`));
+	const markdownLinkMatch = linkText.match(new RegExp(`\\[(.*?)\\]\\((.+)\\)`, "g"));
 	if (markdownLinkMatch)
 		return {
 			title: markdownLinkMatch[1] !== ""
@@ -196,20 +229,20 @@ function parseLink(
 		}
 
 	//TODO: Check match
-	const wikiLinkMatch = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/.exec(linkText);
+	const wikiLinkMatch = linkText.match(new RegExp(`\\[\\[([^\\]|\\r\\n]+?)(?:\\|([^\\]|\\r\\n]+?))?\\]\\]`, "g"))
 	if (wikiLinkMatch)
 		return {
 			title: wikiLinkMatch[2]
 				? wikiLinkMatch[2].trim()
 				: wikiLinkMatch[1].trim(),
-			reference: markdownLinkMatch[2].trim(),
+			reference: wikiLinkMatch[1].trim(),
 		}
 
-	const urlLinkMatch = removeBoundaryQuotes(linkText).match(new RegExp(`^(.+)\\.(.+)$`));
+	const urlLinkMatch = removeBoundaryQuotes(linkText).match(new RegExp(`^(\S+)\\.(\S+)$`, "g"));
 	if (urlLinkMatch)
 		return {
-			title: ,
-			reference: markdownLinkMatch[2].trim(),
+			title: urlLinkMatch[0].trim(),
+			reference: urlLinkMatch[0].trim(),
 		}
 
 	return null
