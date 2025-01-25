@@ -77,7 +77,7 @@ export const INBUILT_THEMES: Record<string, CodeStylerTheme> = Object.fromEntrie
 
 export const EXCLUDED_LANGUAGES = "ad-*, reference";
 export const WHITELIST_CODEBLOCKS = "run-*, include";
-export const SPECIAL_LANGUAGES = ["^reference$","^foofoo","^preview$","^include$","^output$","^run-.+$"];
+export const SPECIAL_LANGUAGES = ["^reference$","^preview$","^include$","^output$","^run-.+$"];
 
 export const DECORATE_ON_PRINT = true
 export const EXTERNAL_REFERENCE_UPDATE_ON_LOAD = false

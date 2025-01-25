@@ -1,8 +1,9 @@
 import CodeStylerPlugin from "src/main";
 import { FenceCodeParameters, Highlights } from "../types/parsing";
-import { separateParameters } from "./utils";
-import { FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND } from "../constants/parsing";
+import { isLanguageMatched, separateParameters } from "./utils";
+import { FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND, PLUGIN_CODEBLOCK_WHITELIST } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
+import { MarkdownPreviewRenderer, Plugin } from "obsidian";
 
 export function parseFenceCodeParameters(
 	fenceCodeParametersLine: string,
@@ -62,11 +63,29 @@ export function parseFenceCodeParameters(
 		{ highlights: { default: {lineNumbers: [], plainText: [], regularExpressions: []}, alternative: {} } },
 	)
 
-	const fenceCodeParameters = new FenceCodeParameters(fenceCodeParametersParsed)
+	const fenceCodeParameters = pluginAdjustFenceCodeParameters(
+		new FenceCodeParameters(fenceCodeParametersParsed),
+	)
+
 
 	//todo: Adjust parameters
 
 	return fenceCodeParameters
+}
+
+function pluginAdjustFenceCodeParameters(
+	fenceCodeParameters: FenceCodeParameters,
+	plugins: Record<string, Plugin>,
+): FenceCodeParameters {
+	const adjustedParameters: Partial<FenceCodeParameters> = {}
+	if ("execute-code" in plugins) {
+
+	}
+	if ("file-include" in plugins) {
+
+	}
+
+	return {...fenceCodeParameters}
 }
 
 function inferFenceValue(
@@ -325,19 +344,15 @@ export function toDecorateFenceCode(
 	if (isLanguageMatched(fenceCodeParameters.language, plugin.settings.excludedLanguages))
 		return false
 
+	if (
+		// @ts-expect-error Undocumented Obsidian API
+		(fenceCodeParameters.language in MarkdownPreviewRenderer.codeBlockPostProcessors) &&
+		!isLanguageMatched(fenceCodeParameters.language, plugin.settings.processedCodeblocksWhitelist + "," + PLUGIN_CODEBLOCK_WHITELIST)
+	)
+		return false
+
 	if (fenceCodeParameters.ignore)
 		return false
 
 	return true
-}
-
-export function isLanguageMatched(
-	language: string,
-	languagesString: string,
-): boolean {
-	return languagesString.split(",").map(
-		regexLanguage => new RegExp(`^${regexLanguage.trim().replace(/\*/g, ".+")}$`, "i"),
-	).some(
-		regexLanguage => regexLanguage.test(language),
-	);
 }

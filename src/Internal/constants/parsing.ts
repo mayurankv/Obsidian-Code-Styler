@@ -6,6 +6,8 @@ export const INLINE_PARAMETERS_KEY_VALUE = ["title", "icon", "language", "ignore
 export const INLINE_PARAMETERS_SHORTHAND = ["icon", "ignore"]
 export const INLINE_PARAMETERS = [...new Set([...INLINE_PARAMETERS_KEY_VALUE, ...INLINE_PARAMETERS_SHORTHAND])];
 
+export const PLUGIN_CODEBLOCK_WHITELIST = ["reference"]
+
 const PRISM_LANGUAGES: {[key: string]: string} = { // Prism Languages: https://prismjs.com/plugins/show-language/
 	// "none": "Plain text", // NOTE: Obsidian uses this for codeblocks without language names
 	"plain": "Plain text",
