@@ -2,7 +2,7 @@ import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSect
 import { CONTENT_ATTRIBUTE, EMPTY_PARAMETERS_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import CodeStylerPlugin from "src/main";
 import { splitInlineCodeRaw } from "../../Parsing/Inline";
-import { isUndetectedCodeElement } from "../utils";
+import { isUndetectedCodeElement } from "../../utils/detecting";
 
 export async function renderedInlineCodeDetecting(
 	element: HTMLElement,

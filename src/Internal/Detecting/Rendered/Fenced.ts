@@ -4,7 +4,7 @@ import CodeStylerPlugin from "src/main";
 import { unified } from "unified";
 import markdown from 'remark-parse';
 import { visit } from 'unist-util-visit';
-import { isUndetectedCodeElement } from "../utils";
+import { isUndetectedCodeElement } from "../../utils/detecting";
 import { SETTINGS_TAB_SOURCEPATH_PREFIX } from "src/Internal/constants/interface";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
 

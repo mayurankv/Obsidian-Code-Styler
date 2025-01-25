@@ -4,7 +4,7 @@ import { fromHtml } from "hast-util-from-html";
 import CodeStylerPlugin from "src/main";
 import { FenceCodeParameters, Highlights, InlineCodeParameters } from "src/Internal/types/parsing";
 import { PREFIX } from "../constants/general";
-import { toKebabCase } from "../utils/text";
+import { toKebabCase } from "./text";
 
 // TODO: Clean up
 

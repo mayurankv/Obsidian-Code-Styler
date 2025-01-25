@@ -4,7 +4,7 @@ import { CONTENT_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/
 import { PREFIX } from "src/Internal/constants/general";
 import { InlineCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
-import { createInlineHeaderElement } from "../utils";
+import { createInlineHeaderElement } from "../../utils/decorating";
 import { parseInlineCodeParameters, toDecorateInlineCode, toHighlightInlineCode } from "src/Internal/Parsing/Inline";
 
 export async function renderedInlineCodeDecorating(

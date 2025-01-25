@@ -1,6 +1,6 @@
 import CodeStylerPlugin from "src/main";
 import { FenceCodeParameters, Highlights } from "../types/parsing";
-import { isLanguageMatched, separateParameters } from "./utils";
+import { isLanguageMatched, separateParameters } from "../utils/parsing";
 import { FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND, PLUGIN_CODEBLOCK_WHITELIST } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
 import { MarkdownPreviewRenderer, Plugin } from "obsidian";

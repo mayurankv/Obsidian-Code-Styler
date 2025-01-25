@@ -1,6 +1,6 @@
 import CodeStylerPlugin from "src/main";
 import { InlineCodeParameters } from "../types/parsing";
-import { separateParameters } from "./utils";
+import { separateParameters } from "../utils/parsing";
 import { INLINE_PARAMETERS_KEY_VALUE, INLINE_PARAMETERS_SHORTHAND } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes } from "../utils/text";
 
