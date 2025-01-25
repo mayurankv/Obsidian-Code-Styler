@@ -1,54 +1,7 @@
-import { App } from "obsidian";
-
-import { CodeStylerSettings, CodeStylerThemeColours, CodeStylerThemeModeColours, CodeStylerThemeSettings, Colour, LANGUAGE_NAMES, LANGUAGES } from "./Settings";
-import { isCss } from "./SettingsTab";
-
-interface ThemeStyle {
-	border?: {
-		size: number;
-		style: string;
-	},
-	scrollbar?: boolean;
-	extra?: string;
-}
-
-const STYLE_ID = "code-styler-styles";
-const THEME_STYLES: Record<string,ThemeStyle> = {
-	"Prism": {
-		border: {
-			size: 1,
-			style: "1px solid var(--window-border-color)",
-		},
-	},
-	"Shimmering Focus": {
-		border: {
-			size: 1,
-			style: "var(--thin-muted-border)",
-		},
-	},
-	"Minimal": {
-		extra: `
-			.markdown-source-view.mod-cm6.is-readable-line-width :not(pre.code-styler-pre) > .code-styler-header-container {
-				box-sizing: border-box;
-			}
-		`,
-	},
-	"Obsidianite": {
-		scrollbar: true,
-	}
-};
-
-export function updateStyling(settings: CodeStylerSettings, app: App): void {
-	const currentTheme = getCurrentTheme(app);
-	let styleTag = document.getElementById(STYLE_ID);
-	if (!styleTag) {
-		styleTag = document.createElement("style");
-		styleTag.id = STYLE_ID;
-		document.getElementsByTagName("head")[0].appendChild(styleTag);
-	}
-	styleTag.innerText = (styleThemeColours(settings.currentTheme.colours)+styleThemeSettings(settings.currentTheme.settings,currentTheme)+styleLanguageColours(settings.currentTheme.settings,settings.redirectLanguages,currentTheme)).trim().replace(/\s+/g," ");
-	addThemeSettingsClasses(settings.currentTheme.settings);
-}
+import { LANGUAGES, OBSIDIAN_THEME_STYLES } from "src/Internal/constants/decoration";
+import { LANGUAGE_NAMES } from "src/Internal/constants/parsing";
+import { isCss } from "src/Internal/Decorating/css";
+import { CodeStylerThemeColours, CodeStylerThemeModeColours, CodeStylerThemeSettings, Colour } from "src/Internal/types/settings";
 
 function styleThemeColours (themeColours: CodeStylerThemeColours): string {
 	return Object.keys(themeColours.light.highlights.alternativeHighlights).reduce((result: string, alternativeHighlight: string) => {
@@ -128,7 +81,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 			${!themeSettings.codeblock.wrapLinesActive?"":"--line-active-wrapping: pre-wrap;"}
 			${themeSettings.header.languageIcon.displayColour?"":"--icon-filter: grayscale(1);"}
 		}
-		${THEME_STYLES?.[currentTheme]?.border?`
+		${OBSIDIAN_THEME_STYLES?.[currentTheme]?.border?`
 			.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container {
 				--code-styler-header-border:`+ //@ts-expect-error Does Exist
 					THEME_STYLES[currentTheme].border.style+`;
@@ -137,7 +90,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 				--folded-bottom-border: var(--code-styler-header-border);
 			}
 		`:""}
-		${THEME_STYLES?.[currentTheme]?.scrollbar?`
+		${OBSIDIAN_THEME_STYLES?.[currentTheme]?.scrollbar?`
 			pre.code-styler-pre::-webkit-scrollbar,
 			pre.code-styler-pre > code::-webkit-scrollbar {
 				width: var(--code-padding);
@@ -145,7 +98,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 				background-color: var(--code-styler-codeblock-background-colour);
 			}
 		`:""}
-		${THEME_STYLES?.[currentTheme]?.extra?THEME_STYLES[currentTheme].extra:""}
+		${OBSIDIAN_THEME_STYLES?.[currentTheme]?.extra?OBSIDIAN_THEME_STYLES[currentTheme].extra:""}
 	`;
 }
 
@@ -158,7 +111,7 @@ function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectL
 					--language-border-width: ${themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth:0}px;
 				}
 			`;
-			if (THEME_STYLES?.[currentTheme]?.border) {
+			if (OBSIDIAN_THEME_STYLES?.[currentTheme]?.border) {
 				result += `
 					.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.language-${languageName}  {
 						--language-border-width: ${ //@ts-expect-error Does exist
@@ -168,33 +121,4 @@ function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectL
 		}
 		return result;
 	},"");
-}
-
-function addThemeSettingsClasses (themeSettings: CodeStylerThemeSettings): void {
-	themeSettings.inline.style ? document.body.classList.add("code-styler-style-inline") : document.body.classList.remove("code-styler-style-inline");
-	themeSettings.gutter.highlight ? document.body.classList.add("code-styler-gutter-highlight") : document.body.classList.remove("code-styler-gutter-highlight");
-	themeSettings.gutter.activeLine ? document.body.classList.add("code-styler-gutter-active-line") : document.body.classList.remove("code-styler-gutter-active-line");
-
-	document.body.classList.remove("code-styler-active-line-highlight","code-styler-active-line-highlight-codeblock","code-styler-active-line-highlight-editor"); //TODO (@mayurankv) Is this section necessary? Is this function necessary?
-	if (themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Inside and outside of codeblocks with different colours
-		document.body.classList.add("code-styler-active-line-highlight");
-	else if (themeSettings.highlights.activeEditorLine && !themeSettings.highlights.activeCodeblockLine) // Only outside codeblocks
-		document.body.classList.add("code-styler-active-line-highlight-editor");
-	else if (!themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine) // Only inside codeblocks
-		document.body.classList.add("code-styler-active-line-highlight-codeblock");
-}
-
-export function removeStylesAndClasses(): void {
-	document.getElementById(STYLE_ID)?.remove();
-	document.body.classList.remove(
-		"code-styler",
-		"code-styler-show-line-numbers",
-		"code-styler-gutter-highlight",
-		"code-styler-gutter-active-line",
-	);
-}
-
-function getCurrentTheme(app: App): string {
-	//@ts-expect-error Undocumented Obsidian API
-	return app.vault.getConfig("cssTheme");
 }

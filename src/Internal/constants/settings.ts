@@ -1,4 +1,4 @@
-import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeModeColours, CodeStylerThemeSettings } from "../types/settings";
+import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeSettings } from "../types/settings";
 import { EXAMPLE_CODEBLOCK_CONTENT, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_INLINE_CODE } from "./interface";
 import { convertColoursToTheme, THEME_COLOURS } from "./themes";
 

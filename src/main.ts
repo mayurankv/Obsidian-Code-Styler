@@ -1,7 +1,6 @@
 import { Plugin} from "obsidian";
 import { CodeStylerSettings } from "./Internal/types/settings";
-import { BODY_CLASS } from "./Internal/constants/decoration";
-import { SettingsTab } from "./Interface/Settings/SettingsTab";
+import { SettingsTab } from "./Interface/Settings/settingsTab";
 import { renderedInlineCodeDetecting } from "./Internal/Detecting/Rendered/Inline";
 import { renderedFencedCodeDetecting } from "./Internal/Detecting/Rendered/Fenced";
 import { toPostProcess } from "./Internal/utils/rendered";
@@ -14,6 +13,8 @@ import { registerCommands } from "./Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
 import { registerRerenderingOnWorkspaceChange } from "./Interface/View/rendered";
 import { addModes } from "./Internal/Decorating/LivePreview/SyntaxHighlight";
+import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
+import { referenceCodeblockProcessor } from "./Internal/Decorating/Reference";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -62,8 +63,7 @@ export default class CodeStylerPlugin extends Plugin {
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 		this.app.workspace.updateOptions();
-
-		updateStyling(this.settings,this.app);
+		applyStyling(this);
 	}
 
 	async initialiseFileSystem(): Promise<void> {
@@ -86,16 +86,10 @@ export default class CodeStylerPlugin extends Plugin {
 	addStyling(
 		load: boolean = true,
 	): void {
-		if (load) {
-			//!==================================
-			document.body.classList.add(BODY_CLASS);
-			//!==================================
-
-			updateStyling(this.settings, this.app);
-
-		} else {
-			removeStylesAndClasses();
-		}
+		if (load)
+			applyStyling(this);
+		else
+			removeStyling()
 	}
 
 	addObservers(
@@ -158,12 +152,22 @@ export default class CodeStylerPlugin extends Plugin {
 			this.registerEvent(
 				this.app.workspace.on(
 					"css-change",
-					() => updateStyling(this.settings, this.app),
+					() => applyStyling(this),
 					this,
 				),
 			);
-			registerRerenderingOnWorkspaceChange("font", () => document.body.getCssPropertyValue("--font-text-size"), "css-change", this)
-			registerRerenderingOnWorkspaceChange("zoom", () => document.body.getCssPropertyValue("--zoom-factor"), "resize", this)
+			registerRerenderingOnWorkspaceChange(
+				"font",
+				() => document.body.getCssPropertyValue("--font-text-size"),
+				"css-change",
+				this,
+			)
+			registerRerenderingOnWorkspaceChange(
+				"zoom",
+				() => document.body.getCssPropertyValue("--zoom-factor"),
+				"resize",
+				this,
+			)
 		}
 	}
 

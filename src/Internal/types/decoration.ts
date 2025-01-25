@@ -1,4 +1,15 @@
-import { Colour } from "./settings";
+export type HEX = `#${string}`;
+export type CSS = `--${string}`;
+export type Colour = HEX | CSS;
+
+export interface ThemeStyle {
+	border?: {
+		size: number;
+		style: string;
+	},
+	scrollbar?: boolean;
+	extra?: string;
+}
 
 export interface Language {
 	icon?: string;

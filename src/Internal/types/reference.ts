@@ -48,3 +48,10 @@ interface PassedParameters {
 	start?: string | number;
 	end?: string | number;
 }
+
+export type Cache = Record<string, IdCache>
+export interface IdCache {
+	sourcePaths: Array<string>;
+	reference: Reference;
+}
+export type ReferenceByFile = Record<string,Array<string>>

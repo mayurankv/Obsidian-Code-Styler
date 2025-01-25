@@ -1,9 +1,34 @@
-import { Language } from "../types/decoration";
+import { Language, ThemeStyle } from "../types/decoration";
 import { PREFIX } from "./general";
 
 export const TRANSITION_LENGTH = 240; // In milliseconds
 
 export const BODY_CLASS = PREFIX + "plugin"
+export const STYLE_ELEMENT_ID = PREFIX+"style";
+export const OBSIDIAN_THEME_STYLES: Record<string, ThemeStyle> = {
+	"Prism": {
+		border: {
+			size: 1,
+			style: "1px solid var(--window-border-color)",
+		},
+	},
+	"Shimmering Focus": {
+		border: {
+			size: 1,
+			style: "var(--thin-muted-border)",
+		},
+	},
+	"Minimal": {
+		extra: `
+			.markdown-source-view.mod-cm6.is-readable-line-width :not(pre.code-styler-pre) > .code-styler-header-container {
+				box-sizing: border-box;
+			}
+		`,
+	},
+	"Obsidianite": {
+		scrollbar: true,
+	}
+};
 
 export const DECORATED_ATTRIBUTE = PREFIX + "decorated"
 export const DEFAULT_FOLD_ATTRIBUTE = PREFIX + "fold-default"

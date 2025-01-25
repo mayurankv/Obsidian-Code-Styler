@@ -4,15 +4,37 @@ import { EXTERNAL_REFERENCE_PATH, EXTERNAL_REFERENCE_INFO_SUFFIX, LOCAL_PREFIX, 
 import CodeStylerPlugin from "src/main";
 import { renderSpecificReadingSection } from "./ReadingView";
 import { getFileContentLines } from "./Internal/Parsing/CodeblockParsing";
+import { basename } from "path";
 
-type Cache = Record<string, IdCache>
-interface IdCache {
-	sourcePaths: Array<string>;
-	reference: Reference;
+async function referenceAdjustParameters(
+	fenceCodeParameters: FenceCodeParameters,
+	plugin: CodeStylerPlugin,
+	codeblockLines: Array<string>,
+	sourcePath: string,
+): Promise<FenceCodeParameters> {
+	if (fenceCodeParameters.language === "reference") {
+		const reference = await getReference(codeblockLines, sourcePath, plugin);
+		if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
+			fenceCodeParameters.lineNumbers.offset = reference.startLine - 1;
+			fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
+		}
+
+		if (fenceCodeParameters.title === "")
+			fenceCodeParameters.title = reference.external?.info?.title ?? basename(reference.path);
+
+		if (fenceCodeParameters.reference === "")
+			//@ts-expect-error Undocumented Obsidian API
+			fenceCodeParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
+
+		fenceCodeParameters.language = reference.language;
+		if (reference.external)
+			fenceCodeParameters.externalReference = reference;
+	}
+
+	return fenceCodeParameters;
 }
-type ReferenceByFile = Record<string,Array<string>>
 
-export async function referenceCodeblockProcessor(source: string, codeblockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeStylerPlugin) {
+export async function processor(source: string, codeblockElement: HTMLElement, context: MarkdownPostProcessorContext, plugin: CodeStylerPlugin) {
 	const codeblockSectionInfo: MarkdownSectionInformation | null = context.getSectionInfo(codeblockElement);
 	if (codeblockSectionInfo === null)
 		throw Error("Could not retrieve codeblock information");

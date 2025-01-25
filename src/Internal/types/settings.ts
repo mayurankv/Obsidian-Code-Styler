@@ -1,8 +1,6 @@
-export type HEX = `#${string}`;
-export type CSS = `--${string}`;
-export type Colour = HEX | CSS;
-export type Percentage = `${number}%`;
+import { Colour } from "./decoration";
 
+export type Percentage = `${number}%`;
 export type Display = "none" | "if_header_shown" | "always";
 
 export interface CodeStylerThemeModeColours {

@@ -8,26 +8,6 @@ import { toKebabCase } from "./text";
 
 // TODO: Clean up
 
-export function createFenceHeaderElement(
-	fenceCodeParameters: FenceCodeParameters,
-	sourcePath: string,
-	plugin: CodeStylerPlugin,
-): HTMLElement {
-	const fenceHeaderElement = createDiv();
-	// TODO: Create element
-	return fenceHeaderElement
-}
-
-export function createInlineHeaderElement(
-	inlineCodeParameters: InlineCodeParameters,
-	sourcePath: string,
-	plugin: CodeStylerPlugin,
-): HTMLElement {
-	const fenceHeaderElement = createDiv();
-	// TODO: Create element
-	return fenceHeaderElement
-}
-
 export function getLineClasses(
 	fenceCodeParameters: FenceCodeParameters,
 	lineNumber: number,

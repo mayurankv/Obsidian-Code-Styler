@@ -10,7 +10,8 @@ import { CodeDetectingContext } from "src/Internal/types/detecting";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
 import { visitParents } from "unist-util-visit-parents";
-import { convertCommentLinks, createFenceHeaderElement, getIndentation, getLineClasses } from "../../utils/decorating";
+import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
+import { createFenceHeaderElement } from "../elements";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
