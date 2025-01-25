@@ -1,5 +1,5 @@
 import { MarkdownView } from "obsidian";
-import { renderedViewFold } from "src/Internal/Decorating/Rendered/Fenced";
+import { renderedViewFold } from "src/Internal/Decorating/Rendered/fenced";
 import CodeStylerPlugin from "src/main";
 
 function viewFold(

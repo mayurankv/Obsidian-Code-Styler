@@ -5,11 +5,11 @@ import { MarkdownPostProcessorContext, sanitizeHTMLToDom } from "obsidian";
 import { DECORATED_ATTRIBUTE, DEFAULT_FOLD_ATTRIBUTE, FOLD_ATTRIBUTE, WRAP_ATTRIBUTE } from "src/Internal/constants/decoration";
 import { DETECTING_CONTEXT, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import { PREFIX } from "src/Internal/constants/general";
-import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/Fenced";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
 import { visitParents } from "unist-util-visit-parents";
+import { parseFenceCodeParameters, toDecorateFenceCode } from "../../Parsing/fenced";
 import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
 import { createFenceHeaderElement } from "../elements";
 

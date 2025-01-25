@@ -1,10 +1,10 @@
-import { MarkdownRenderer, MarkdownPostProcessorContext, sanitizeHTMLToDom } from "obsidian";
+import { MarkdownPostProcessorContext, MarkdownRenderer } from "obsidian";
 import { DECORATED_ATTRIBUTE, TEMPORARY_SOURCEPATH } from "src/Internal/constants/decoration";
 import { CONTENT_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import { PREFIX } from "src/Internal/constants/general";
 import { InlineCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
-import { parseInlineCodeParameters, toDecorateInlineCode, toHighlightInlineCode } from "src/Internal/Parsing/Inline";
+import { parseInlineCodeParameters, toDecorateInlineCode, toHighlightInlineCode } from "../../Parsing/inline";
 import { createInlineHeaderElement } from "../elements";
 
 export async function renderedInlineCodeDecorating(

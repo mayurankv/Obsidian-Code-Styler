@@ -1,7 +1,7 @@
-import { CachedMetadata, DataAdapter, MarkdownPostProcessorContext, MarkdownSectionInformation, parseLinktext, resolveSubpath, SectionCache, View } from "obsidian";
+import { MarkdownPostProcessorContext } from "obsidian";
 import { CONTENT_ATTRIBUTE, EMPTY_PARAMETERS_ATTRIBUTE, PARAMETERS_ATTRIBUTE } from "src/Internal/constants/detecting";
 import CodeStylerPlugin from "src/main";
-import { splitInlineCodeRaw } from "../../Parsing/Inline";
+import { splitInlineCodeRaw } from "../../Parsing/inline";
 import { isUndetectedCodeElement } from "../../utils/detecting";
 
 export async function renderedInlineCodeDetecting(

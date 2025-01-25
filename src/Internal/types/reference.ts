@@ -11,13 +11,17 @@ export interface Reference {
 	}
 }
 
-type LineIdentifier = null | string | number | RegExp;
+export type LineIdentifier = null | string | number | RegExp;
 
-export interface ReferenceParameters {
-	filePath: string;
-	language: string;
-	start: LineIdentifier;
-	end: LineIdentifier;
+export class ReferenceParameters {
+	filePath: string = "";
+	language: string = "";
+	start: LineIdentifier = null;
+	end: LineIdentifier = null;
+
+    public constructor(init?:Partial<ReferenceParameters>) {
+        Object.assign(this, init);
+    }
 }
 
 export interface ExternalReferenceInfo {
@@ -38,7 +42,7 @@ export interface ExternalReferenceInfo {
 	};
 }
 
-interface PassedParameters {
+export interface PassedParameters {
 	filePath?: string;
 	file?: string;
 	path?: string;
