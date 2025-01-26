@@ -1,43 +1,46 @@
 import { EditorView, WidgetType } from "@codemirror/view";
 import { MarkdownRenderer } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
-import { FenceCodeParameters, InlineCodeParameters, LineParameters } from "src/Internal/types/parsing";
+import { CodeParameters, FenceCodeParameters, InlineCodeParameters, LineParameters } from "src/Internal/types/parsing";
 import { isDeepStrictEqual } from "util";
 import { createHeaderElement } from "../../elements";
 import { foldOnClick } from "./actions";
+import CodeStylerPlugin from "src/main";
+import { getLanguageIcon } from "src/Internal/utils/decorating";
 
-export class FenceHeaderWidget extends WidgetType {
-	fenceCodeParameters: FenceCodeParameters;
+export class HeaderWidget extends WidgetType {
+	codeParameters: CodeParameters;
 	sourcePath: string;
+	private fence: boolean;
+	private plugin: CodeStylerPlugin;
 
 	constructor(
-		fenceCodeParameters: FenceCodeParameters,
+		codeParameters: CodeParameters,
 		sourcePath: string,
+		fence: boolean,
+		plugin: CodeStylerPlugin,
 	) {
 		super();
 
-		this.fenceCodeParameters = structuredClone(fenceCodeParameters);
+		this.codeParameters = structuredClone(codeParameters);
 		this.sourcePath = sourcePath;
+		this.fence = fence;
+		this.plugin = plugin;
 	}
 
 	eq(
-		other: FenceHeaderWidget,
+		other: HeaderWidget,
 	): boolean {
-		this.iconURL = getLanguageIcon(this.fenceCodeParameters.language,plugin.languageIcons);
-		this.hidden = isHeaderHidden(this.fenceCodeParameters,this.themeSettings,this.iconURL);
 		return (
-			isDeepStrictEqual(this, other) &&
-			this.fenceCodeParameters.language === other.fenceCodeParameters.language &&
-			this.fenceCodeParameters.title === other.fenceCodeParameters.title &&
-			this.fenceCodeParameters.reference === other.fenceCodeParameters.reference &&
-			// isDeepStrictEqual(this.fenceCodeParameters.fold, other.fenceCodeParameters.fold) &&
-			this.fenceCodeParameters.fold.enabled === other.fenceCodeParameters.fold.enabled &&
-			this.fenceCodeParameters.fold.placeholder === other.fenceCodeParameters.fold.placeholder &&
-			this.themeSettings.header.foldPlaceholder === other.themeSettings.header.foldPlaceholder &&
-			this.themeSettings.header.languageIcon.display === other.themeSettings.header.languageIcon.display &&
-			this.themeSettings.header.languageTag.display === other.themeSettings.header.languageTag.display &&
-			this.folded === other.folded &&
-			this.iconURL === other.iconURL
+			this.fence === other.fence &&
+			this.codeParameters.language === other.codeParameters.language &&
+			this.codeParameters.title === other.codeParameters.title &&
+			this.codeParameters.reference === other.codeParameters.reference &&
+			this.codeParameters.icon === other.codeParameters.icon &&
+			this.codeParameters.ignore === other.codeParameters.ignore &&
+			getLanguageIcon(this.codeParameters.language, this.plugin) == getLanguageIcon(other.codeParameters.language, other.plugin) &&
+			(this.codeParameters as FenceCodeParameters)?.fold?.placeholder === (other.codeParameters as FenceCodeParameters)?.fold?.placeholder &&
+			(!("fold" in this.codeParameters) || this.plugin.settings.currentTheme.settings.header.foldPlaceholder === other.plugin.settings.currentTheme.settings.header.foldPlaceholder)
 		);
 	}
 
@@ -45,57 +48,26 @@ export class FenceHeaderWidget extends WidgetType {
 		view: EditorView,
 	): HTMLElement {
 		const headerContainer = createHeaderElement(
-			this.fenceCodeParameters,
-			true,
+			this.codeParameters,
+			this.fence,
 			this.sourcePath,
-			plugin,
+			this.plugin,
 		);
 
-		headerContainer.onclick = (event) => {
-			if ((event.target as HTMLElement)?.hasClass("internal-link") || (event.target as HTMLElement)?.hasClass("external-link"))
-				return;
+		if (this.fence)
+			headerContainer.onclick = (event) => {
+				if ((event.target as HTMLElement)?.hasClass("internal-link") || (event.target as HTMLElement)?.hasClass("external-link"))
+					return;
 
-			foldOnClick(
-				view,
-				headerContainer,
-				this.folded,
-				this.fenceCodeParameters.language,
-			);
-		};
+				foldOnClick(
+					view,
+					headerContainer,
+					folded,
+					this.codeParameters.language,
+				);
+			};
 
 		return headerContainer;
-	}
-}
-
-export class InlineHeaderWidget extends WidgetType {
-	inlineCodeParameters: InlineCodeParameters;
-
-	constructor(
-		inlineCodeParameters: InlineCodeParameters,
-	) {
-		super();
-
-		this.inlineCodeParameters = inlineCodeParameters;
-	}
-
-	eq(
-		other: InlineHeaderWidget,
-	): boolean {
-		return (
-			this.inlineCodeParameters.language == other.inlineCodeParameters.language &&
-			this.inlineCodeParameters.title == other.inlineCodeParameters.title &&
-			this.inlineCodeParameters.icon == other.inlineCodeParameters.icon &&
-			getLanguageIcon(this.inlineCodeParameters.language,this.plugin.languageIcons) == getLanguageIcon(other.inlineCodeParameters.language,other.plugin.languageIcons)
-		);
-	}
-
-	toDOM(): HTMLElement {
-		return createHeaderElement(
-			this.inlineCodeParameters,
-			false,
-			sourcePath,
-			plugin,
-		);
 	}
 }
 
@@ -142,15 +114,18 @@ export class LineNumberWidget extends WidgetType {
 export class CommentLinkWidget extends WidgetType {
 	linkText: string;
 	sourcePath: string;
+	private plugin: CodeStylerPlugin;
 
 	constructor(
 		linkText: string,
 		sourcePath: string,
+		plugin: CodeStylerPlugin,
 	) {
 		super();
 
 		this.linkText = linkText;
 		this.sourcePath = sourcePath;
+		this.plugin = plugin;
 	}
 
 	eq(
@@ -172,11 +147,11 @@ export class CommentLinkWidget extends WidgetType {
 		);
 
 		MarkdownRenderer.render(
-			plugin.app,
+			this.plugin.app,
 			this.linkText,
 			linkParentElement,
 			this.sourcePath,
-			plugin,
+			this.plugin,
 		);
 
 		return linkParentElement;

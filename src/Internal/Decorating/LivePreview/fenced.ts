@@ -6,3 +6,8 @@ export function getFenceCodemirrorExtensions(
 	return [
 	]
 }
+
+
+function baz() {
+	const foo = bar
+}

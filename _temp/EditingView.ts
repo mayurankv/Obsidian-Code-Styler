@@ -2,6 +2,7 @@ import { syntaxTree } from "@codemirror/language";
 import { EditorState, Extension, Line, Range, RangeSetBuilder, SelectionRange, StateEffect, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, ViewUpdate } from "@codemirror/view";
 import { editorEditorField, editorInfoField } from "obsidian";
+import { isFileIgnored, isSourceMode } from "src/Internal/Decorating/LivePreview/codemirror/utils";
 import { CodeStylerSettings } from "src/Internal/types/settings";
 import CodeStylerPlugin from "src/main";
 
@@ -10,21 +11,17 @@ interface SettingsState {
 	processedCodeblocksWhitelist: string;
 }
 
-
-
 export function createCodeblockCodeMirrorExtensions(
 	settings: CodeStylerSettings,
 	plugin: CodeStylerPlugin,
 ) {
-
-
 	const ignoreListener = EditorView.updateListener.of((update: ViewUpdate) => { //TODO (@mayurankv) Can I make this startState only? Does it need to be?
 		const livePreviewExtensions = livePreviewCompartment.get(update.state);
 
-		const toIgnore = isSourceMode(update.state);
+		const sourceMode = isSourceMode(update.state);
 
 		const fileIgnore = isFileIgnored(update.state) && !(Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
-		const fileUnignore = !toIgnore && !isFileIgnored(update.state) && (Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
+		const fileUnignore = !isFileIgnored(update.state) && (Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
 
 		if (isSourceMode(update.startState) !== toIgnore || fileIgnore || fileUnignore) {
 			update.view.dispatch({effects: livePreviewCompartment.reconfigure((toIgnore||fileIgnore)?[]:[headerDecorations,lineDecorations,foldDecorations,hiddenDecorations])});
@@ -33,26 +30,19 @@ export function createCodeblockCodeMirrorExtensions(
 		}
 	});
 
-	const ignoreFileListener = EditorView.updateListener.of((update: ViewUpdate) => {
-		const ignoreExtensions = ignoreCompartment.get(update.state);
-
-		const fileIgnore = isFileIgnored(update.state) && !(Array.isArray(ignoreExtensions) && ignoreExtensions.length === 0);
-		const fileUnignore = !isFileIgnored(update.state) && (Array.isArray(ignoreExtensions) && ignoreExtensions.length === 0);
-
-		if (fileIgnore || fileUnignore)
-			update.view.dispatch({
-				effects: ignoreCompartment.reconfigure(fileIgnore ? [] : inlineDecorations)
-			});
-	});
-
 	const settingsState = StateField.define<SettingsState>({
-		create(): SettingsState {
+		create(
+			state: EditorState,
+		): SettingsState {
 			return {
 				excludedLanguages: settings.excludedLanguages,
 				processedCodeblocksWhitelist: settings.processedCodeblocksWhitelist,
 			};
 		},
-		update(value: SettingsState): SettingsState {
+		update(
+			value: SettingsState,
+			transaction: Transaction,
+		): SettingsState {
 			if (value.processedCodeblocksWhitelist !== settings.processedCodeblocksWhitelist || value.excludedLanguages !== settings.excludedLanguages)
 				return {
 					excludedLanguages: settings.excludedLanguages,
@@ -98,13 +88,16 @@ export function createCodeblockCodeMirrorExtensions(
 	const foldDecorations = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet { //TODO (@mayurankv) Can I change this?
 			const builder = new RangeSetBuilder<Decoration>();
-			for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
+
+			for (let iter = (state.field(headerDecorations, false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 				if (!iter.value.spec.widget.codeblockParameters.fold.enabled)
 					continue;
-				codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
+
+				codeblockFoldCallback(iter.from, state, (foldStart, foldEnd) => {
 					builder.add(foldStart.from,foldEnd.to,foldDecoration((iter.value as Decoration).spec.widget.codeblockParameters.language));
 				});
 			}
+
 			return builder.finish();
 		},
 		update(value: DecorationSet, transaction: Transaction): DecorationSet {
@@ -198,6 +191,10 @@ export function createCodeblockCodeMirrorExtensions(
 
 	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold) {
 		const builder = new RangeSetBuilder<Decoration>();
+
+		if (isSourceMode(state) || isFileIgnored(state))
+			return Decoration.none;
+
 		const sourcePath = state.field(editorInfoField)?.file?.path ?? "";
 		let codeblockParameters: CodeblockParameters;
 		syntaxTree(state).iterate({
@@ -216,23 +213,29 @@ export function createCodeblockCodeMirrorExtensions(
 	}
 	function buildLineDecorations(state: EditorState): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
+
+		if (isSourceMode(state) || isFileIgnored(state))
+			return Decoration.none;
+
 		const sourcePath = state.field(editorInfoField)?.file?.path ?? "";
 		const sourceMode = isSourceMode(state);
 		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 			const foldStart = state.doc.lineAt(iter.from);
 			const startDelimiter = testOpeningLine(foldStart.text.toString());
 			const codeblockParameters = iter.value.spec.widget.codeblockParameters;
-			const showLineNumbers = (settings.currentTheme.settings.codeblock.lineNumbers && !codeblockParameters.lineNumbers.alwaysDisabled) || codeblockParameters.lineNumbers.alwaysEnabled;
+
 			let foldEnd: Line | null = null;
 			let maxLineNum: number = 0;
-			codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
+
+			codeblockFoldCallback(iter.from, state, (foldStart, foldEnd) => {
 				maxLineNum = foldEnd.to-foldStart.from-1+codeblockParameters.lineNumbers.offset;
 			});
-			const lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * state.field(charWidthState):undefined;
+
+			const lineNumberMargin = (maxLineNum.toString().length > 2) ? maxLineNum.toString().length * state.field(charWidthState) : undefined;
 			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-			if (showLineNumbers)
-				builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
-			for (let i = foldStart.number+1; i <= state.doc.lines; i++) {
+			builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
+
+			for (let i = foldStart.number + 1; i <= state.doc.lines; i++) {
 				const line = state.doc?.line(i);
 				if (!line)
 					break;
@@ -242,16 +245,14 @@ export function createCodeblockCodeMirrorExtensions(
 					break;
 				}
 				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-				if (showLineNumbers)
-					builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
+				builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
 				if (codeblockParameters.language === "markdown")
 					continue;
 				convertCommentLinks(state, line, sourcePath, builder, sourceMode);
 			}
 			if (foldEnd !== null) {
 				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-				if (showLineNumbers)
-					builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
+				builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			}
 		}
 		return builder.finish();
@@ -330,8 +331,8 @@ export function createCodeblockCodeMirrorExtensions(
 	}
 
 	return [
-		interaction,
-		ignoreListener,ignoreFileListener,
+		ignoreListener,
+		headerDecorations,lineDecorations,foldDecorations,hiddenDecorations,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
 		settingsState,charWidthState,livePreviewCompartment.of([]),ignoreCompartment.of([]),
 	];
