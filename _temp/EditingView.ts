@@ -334,7 +334,7 @@ export function createCodeblockCodeMirrorExtensions(
 		ignoreListener,
 		headerDecorations,lineDecorations,foldDecorations,hiddenDecorations,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
-		settingsState,charWidthState,livePreviewCompartment.of([]),ignoreCompartment.of([]),
+		settingsState,charWidthState,
 	];
 }
 

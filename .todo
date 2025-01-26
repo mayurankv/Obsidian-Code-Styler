@@ -23,6 +23,13 @@ Understand:
 		// console.log(previous);
 		// if (previous)
 		// 	update.view.dispatch({selection: { anchor: previous, head: previous }});
+	LineNumberWidget Element:
+		// TODO: Needed?
+		// attr: {
+		// 	style: this.maxLineNum.toString().length > (this.lineNumber + this.lineNumbers.offset).toString().length
+		// 		? "width: var(--line-number-gutter-width);"
+		// 		: ""
+		// },
 
 ----------------
 

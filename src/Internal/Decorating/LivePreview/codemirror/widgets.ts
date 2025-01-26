@@ -97,12 +97,6 @@ export class LineNumberWidget extends WidgetType {
 		return createEl(
 			"span",
 			{
-				// TODO: Needed?
-				// attr: {
-				// 	style: this.maxLineNum.toString().length > (this.lineNumber + this.lineNumbers.offset).toString().length
-				// 		? "width: var(--line-number-gutter-width);"
-				// 		: ""
-				// },
 				cls: [
 					PREFIX + "line-number",
 				],
