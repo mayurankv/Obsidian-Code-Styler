@@ -1,5 +1,7 @@
 import { Reference } from "./reference";
 
+export type LinkType = "markdown" | "wiki" | "url"
+
 export class CodeParameters {
 	language: string = "";
 	title: string = "";

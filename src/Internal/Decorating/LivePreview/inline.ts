@@ -5,7 +5,7 @@ import { PREFIX } from "src/Internal/constants/general";
 import { toHighlightInlineCode } from "src/Internal/Parsing/inline";
 import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
-import { isRangeInteracting, isSourceMode } from "./codemirror/utils";
+import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
 import { HeaderWidget } from "./codemirror/widgets";
 import { buildInlineDecorations } from "src/Internal/Detecting/LivePreview/inline";
 
@@ -38,9 +38,10 @@ function buildInlineDecoration(
 	inlineCodeInfo: InlineCodeInfo | null,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
-	let decorations: Array<Range<Decoration>> = []
 	if (!inlineCodeInfo)
-		return decorations
+		return []
+
+	let decorations: Array<Range<Decoration>> = []
 
 	if (inlineCodeInfo.parameters.from < inlineCodeInfo.parameters.to)
 		decorations.push({
@@ -61,16 +62,7 @@ function buildInlineDecoration(
 			),
 		]
 
-	if (
-		state.selection.ranges.some(
-			(range: SelectionRange) => isRangeInteracting(
-				inlineCodeInfo.section.from,
-				inlineCodeInfo.section.to,
-				range,
-			),
-		) ||
-		isSourceMode(state)
-	)
+	if (isSourceMode(state) || areRangesInteracting(state, inlineCodeInfo.section.from, inlineCodeInfo.section.to))
 		return decorations
 
 	if (inlineCodeInfo.parameters.from < inlineCodeInfo.parameters.to) {

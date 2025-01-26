@@ -1,3 +1,5 @@
+import { Editor, SectionCache } from "obsidian"
+
 function doesCalloutOverlap(
 	editor: Editor,
 	section: SectionCache,

@@ -21,20 +21,17 @@ export function buildInlineDecorations(
 		return Decoration.none;
 
 	syntaxTree(state).iterate({
-		enter: (syntaxNode) => {
-			const inlineCodeInfo = getInlineCodeInfo(state, syntaxNode)
-			buildInlineDecoration(
-				state,
-				inlineCodeInfo,
-				plugin,
-			).sort(
-				(a, b) => (a.from === b.from)
-					? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
-					: a.from < b.from ? -1 : 1
-			).forEach(
-				({from, to, value}) => builder.add(from, to, value),
-			);
-		},
+		enter: (syntaxNode) => buildInlineDecoration(
+			state,
+			getInlineCodeInfo(state, syntaxNode),
+			plugin,
+		).sort(
+			(a, b) => (a.from === b.from)
+				? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
+				: a.from < b.from ? -1 : 1
+		).forEach(
+			({from, to, value}) => builder.add(from, to, value),
+		),
 	});
 
 	return builder.finish();

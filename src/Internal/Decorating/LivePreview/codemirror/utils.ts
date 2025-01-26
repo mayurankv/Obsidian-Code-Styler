@@ -3,7 +3,15 @@ import { EditorState, SelectionRange } from "@codemirror/state";
 import { SyntaxNodeRef } from "@lezer/common";
 import { editorInfoField, editorLivePreviewField } from "obsidian";
 
-export function isRangeInteracting(
+export function areRangesInteracting(
+	state: EditorState,
+	from: number,
+	to: number,
+) {
+	return state.selection.ranges.some((range: SelectionRange) => isRangeInteracting(from, to, range))
+}
+
+function isRangeInteracting(
 	from: number,
 	to: number,
 	range: SelectionRange,

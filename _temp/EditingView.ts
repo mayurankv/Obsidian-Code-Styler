@@ -294,6 +294,7 @@ export function createCodeblockCodeMirrorExtensions(
 			to: line.to
 		});
 	}
+	
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		for (let iter = (transaction.state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) { //TODO (@mayurankv) Refactor: Try and make this startState
@@ -305,6 +306,7 @@ export function createCodeblockCodeMirrorExtensions(
 		}
 		return addEffects;
 	}
+
 	function isFolded(state: EditorState, position: number): boolean {
 		let folded = false;
 		state.field(foldDecorations,false)?.between(position,position,()=>{
@@ -312,6 +314,7 @@ export function createCodeblockCodeMirrorExtensions(
 		});
 		return folded;
 	}
+
 	function documentFold(state: EditorState, toFold?: boolean): Array<StateEffect<unknown>> {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		const reset = (typeof toFold === "undefined");

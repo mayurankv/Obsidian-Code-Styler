@@ -1,4 +1,4 @@
-import { InlineCodeParameters } from "./parsing"
+import { InlineCodeParameters, LinkType } from "./parsing"
 
 export type CodeDetectingContext = "settings" | "export" | "slides" | "admonition" | "callout" | "standalone"
 
@@ -18,3 +18,11 @@ export interface InlineCodeInfo {
 		to: number,
 	}
 }
+
+export type CommentInfo = Array<{
+	from: number,
+	to: number,
+	title: string,
+	reference: string,
+	type: LinkType,
+}>

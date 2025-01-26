@@ -1,5 +1,9 @@
-import { CodeParameters, FenceCodeParameters } from "../types/parsing";
+import { CodeParameters, FenceCodeParameters, LinkType } from "../types/parsing";
 import { removeBoundaryQuotes } from "./text";
+
+const MARKDOWN_REGEX = /\[(.*?)\]\((.+?)\)/;
+const WIKI_REGEX = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/;
+const URL_REGEX = /^(?:(?:https?|file):\/\/|.+\.(?:com|io|ai|gov|co\.uk))/;
 
 export function separateParameters(
 	parametersLine: string,
@@ -21,7 +25,7 @@ export function setTitleAndReference(
 				return result
 		} else {
 			if ((parameterKey === "title") || !("title" in result))
-				return { ...result, ...linkInfo }
+				return { ...result, title: linkInfo.title, reference: linkInfo.reference }
 			else
 				return { ...result, reference: linkInfo.reference }
 		}
@@ -32,43 +36,79 @@ export function setTitleAndReference(
 
 		const linkInfo = parseLink(result?.title ?? "")
 
-		if (linkInfo === result)
+		if (linkInfo === null)
 			return result
 		else
-			return {...result, ...linkInfo}
+			return {...result, title: linkInfo.title, reference: linkInfo.reference}
 	}
 }
 
 function parseLink(
 	linkText: string,
-): { title: string, reference: string } | null {
-	const markdownLinkMatch = linkText.match(new RegExp(`\\[(.*?)\\]\\((.+)\\)`, "g"));
+): { title: string, reference: string, type: LinkType } | null {
+
+
+	// let markdownLinkMatch;
+	// while ((markdownLinkMatch = MARKDOWN_REGEX.exec(linkText)) !== null) {
+	// 	links.push({
+	// 		title: markdownLinkMatch[1] !== ""
+	// 			? markdownLinkMatch[1].trim()
+	// 			: markdownLinkMatch[2].trim(),
+	// 		reference: markdownLinkMatch[2].trim(),
+	// 		type: "markdown",
+	// 	});
+	// }
+
+	const markdownLinkMatch = linkText.match(MARKDOWN_REGEX);
 	if (markdownLinkMatch)
 		return {
 			title: markdownLinkMatch[1] !== ""
 				? markdownLinkMatch[1].trim()
 				: markdownLinkMatch[2].trim(),
 			reference: markdownLinkMatch[2].trim(),
+			type: "markdown",
 		}
 
 	//TODO: Check match
-	const wikiLinkMatch = linkText.match(new RegExp(`\\[\\[([^\\]|\\r\\n]+?)(?:\\|([^\\]|\\r\\n]+?))?\\]\\]`, "g"))
+	const wikiLinkMatch = linkText.match(WIKI_REGEX)
 	if (wikiLinkMatch)
 		return {
 			title: wikiLinkMatch[2]
 				? wikiLinkMatch[2].trim()
 				: wikiLinkMatch[1].trim(),
 			reference: wikiLinkMatch[1].trim(),
+			type: "wiki",
 		}
 
-	const urlLinkMatch = removeBoundaryQuotes(linkText).match(new RegExp(`^(\S+)\\.(\S+)$`, "g"));
+	const urlLinkMatch = removeBoundaryQuotes(linkText).trim().match(URL_REGEX)
 	if (urlLinkMatch)
 		return {
-			title: urlLinkMatch[0].trim(),
-			reference: urlLinkMatch[0].trim(),
+			title: urlLinkMatch[0],
+			reference: urlLinkMatch[0],
+			type: "url",
 		}
 
 	return null
+}
+
+function getLinks(
+	text: string,
+): Array<string> {
+	const links: Array<string> = [];
+
+	for (const match of text.matchAll(MARKDOWN_REGEX)) {
+		links.push(match[0]);
+	}
+
+	for (const match of text.matchAll(WIKI_REGEX)) {
+		links.push(match[0]);
+	}
+
+	for (const match of text.matchAll(URL_REGEX)) {
+		links.push(match[0]);
+	}
+
+	return links;
 }
 
 export function isLanguageMatched(
@@ -87,5 +127,5 @@ export function isLanguageMatched(
 export function isUrl(
 	text: string | CodeMirror.StringStream,
 ): boolean {
-	return Boolean(text.match(/^(?:https?|file):\/\//)) || Boolean(text.match(/\.(?:com|io|ai|gov|co\.uk)/))
+	return Boolean(text.match(URL_REGEX))
 }
