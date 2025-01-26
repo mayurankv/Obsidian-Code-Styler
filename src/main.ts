@@ -15,6 +15,7 @@ import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./In
 import { addModes } from "./Internal/Decorating/LivePreview/syntaxHighlight";
 import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
 import { referenceCodeblockProcessor } from "./Internal/Decorating/reference";
+import { manageExternalReferencedFiles } from "./Internal/utils/reference";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -57,7 +58,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 	async loadSettings(): Promise<void> {
 		this.settings = { ...structuredClone(DEFAULT_SETTINGS), ...convertSettings(await this.loadData()) };
-		this.addSettingTab(new SettingsTab(this.app, this));
+		// this.addSettingTab(new SettingsTab(this.app, this));
 	}
 
 	async saveSettings(): Promise<void> {
@@ -78,9 +79,11 @@ export default class CodeStylerPlugin extends Plugin {
 		load: boolean = true,
 	): void {
 		if (load)
-			this.languageIcons = loadLanguageIcons()
+			this.resources = {
+				languageIcons: loadLanguageIcons(),
+			}
 		else
-			unloadLanguageIcons(this.languageIcons)
+			unloadLanguageIcons(this.resources.languageIcons)
 	}
 
 	addStyling(
@@ -141,14 +144,15 @@ export default class CodeStylerPlugin extends Plugin {
 	addEditorExtensions(
 		load: boolean = true,
 	): void {
-		if (load)
-			this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this));
+		// if (load)
+		// 	this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this));
 	}
 
 	registerEvents(
 		load: boolean = true,
 	): void {
 		if (load) {
+			this.watchedValues = {}
 			this.registerEvent(
 				this.app.workspace.on(
 					"css-change",

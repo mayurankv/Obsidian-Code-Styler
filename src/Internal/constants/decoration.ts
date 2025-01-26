@@ -1,4 +1,5 @@
 import { Language, ThemeStyle } from "../types/decoration";
+import { DATA_PREFIX } from "./detecting";
 import { PREFIX } from "./general";
 
 export const TRANSITION_LENGTH = 240; // In milliseconds
@@ -30,8 +31,8 @@ export const OBSIDIAN_THEME_STYLES: Record<string, ThemeStyle> = {
 	}
 };
 
-export const DECORATED_ATTRIBUTE = PREFIX + "decorated"
-export const DEFAULT_FOLD_ATTRIBUTE = PREFIX + "fold-default"
+export const DECORATED_ATTRIBUTE = DATA_PREFIX + PREFIX + "decorated"
+export const DEFAULT_FOLD_ATTRIBUTE = DATA_PREFIX + PREFIX + "fold-default"
 export const FOLD_ATTRIBUTE = PREFIX + "fold"
 export const WRAP_ATTRIBUTE = PREFIX + "wrap"
 

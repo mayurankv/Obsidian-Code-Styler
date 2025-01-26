@@ -1,6 +1,6 @@
 import CodeStylerPlugin from "src/main";
 import { InlineCodeParameters } from "../types/parsing";
-import { separateParameters } from "../utils/parsing";
+import { separateParameters, setTitleAndReference } from "../utils/parsing";
 import { INLINE_PARAMETERS_KEY_VALUE, INLINE_PARAMETERS_SHORTHAND } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes } from "../utils/text";
 
@@ -15,6 +15,20 @@ export function parseInlineCodeParameters(
 		(result: Partial<InlineCodeParameters>, parameterSection: string, idx: number) => {
 			if ((idx === 0) && (parameterSection.indexOf(" ") === -1)) //TODO: Exclude any symbols existing
 				return { ...result, language: parameterSection.toLowerCase() }
+
+			for (const parameterKey of ["title", "reference", "ref"])
+				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
+					return setTitleAndReference(
+						parameterKey,
+						removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim(),
+						result,
+					) as Partial<InlineCodeParameters>;
+				else if (parameterSection === parameterKey)
+					return setTitleAndReference(
+						parameterKey,
+						null,
+						result,
+					) as Partial<InlineCodeParameters>;
 
 			for (const parameterKey of INLINE_PARAMETERS_KEY_VALUE as Array<keyof InlineCodeParameters>)
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))

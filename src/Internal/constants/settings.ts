@@ -73,7 +73,7 @@ export const INBUILT_THEMES: Record<string, CodeStylerTheme> = Object.fromEntrie
 	]),
 );
 
-export const EXCLUDED_LANGUAGES = "ad-*, reference";
+export const EXCLUDED_LANGUAGES = "ad-*";
 export const WHITELIST_CODEBLOCKS = "run-*, include";
 export const SPECIAL_LANGUAGES = ["^reference$","^preview$","^include$","^output$","^run-.+$"];
 

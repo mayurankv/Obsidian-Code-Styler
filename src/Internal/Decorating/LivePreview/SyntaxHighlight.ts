@@ -1,3 +1,5 @@
+import { isUrl } from "src/Internal/utils/parsing";
+
 const MODES = [
 	"reference",
 	"yaml-frontmatter",
@@ -47,7 +49,7 @@ export function addReferenceSyntaxHighlight(
 				token: (stream, state) => {
 					if (stream.eatSpace()) return null;
 					if (stream.match(/^#.*/)) return "comment";
-					if (stream.match(/^https?:\/\/.*/)) return "variable";
+					if (isUrl(stream)) return "variable";
 					if (stream.match(/^\w+\/\w+\/\w+\/\w+$/)) return "variable";
 					if (stream.match(/^\w+\/\w+\/\w+$/)) return "variable";
 					if (stream.match(/^\w+\/\w+$/)) return "variable";

@@ -28,22 +28,26 @@ export class ReferenceParameters {
     }
 }
 
-export interface ExternalReferenceInfo {
-	title: string;
-	url: string;
-	site: string;
-	datetime: string;
-	rawUrl: string;
-	displayUrl?: string;
-	author?: string;
-	repository?: string;
-	path?: string;
-	fileName?: string;
+export class ExternalReferenceInfo {
+	title: string = "";
+	url: string = "";
+	site: string = "";
+	datetime: string = "";
+	rawUrl: string = "";
+	displayUrl?: string = undefined;
+	author?: string = undefined;
+	repository?: string = undefined;
+	path?: string = undefined;
+	fileName?: string = undefined;
 	refInfo?: {
 		ref: string;
 		type: string;
 		hash: string;
-	};
+	} = undefined;
+	
+    public constructor(init?:Partial<ReferenceParameters>) {
+        Object.assign(this, init);
+    }
 }
 
 export interface PassedParameters {

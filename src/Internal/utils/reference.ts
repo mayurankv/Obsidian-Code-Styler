@@ -6,6 +6,7 @@ import { Cache, IdCache, Reference, ReferenceByFile } from "../types/reference";
 import { getLineLimits, parseExternalReference, parseReferenceParameters } from "../Parsing/reference";
 import { getFileContentLines } from "./rendered";
 import { rerenderRenderedView } from "src/Interface/View/rendered";
+import { isUrl } from "./parsing";
 
 export async function getReference(
 	codeblockLines: Array<string>,
@@ -20,7 +21,7 @@ export async function getReference(
 		parsedReference.language = referenceParameters.language
 		parsedReference.path = referenceParameters.filePath
 
-		if (/^https?:\/\//.test(referenceParameters.filePath) || /.com/.test(referenceParameters.filePath)) {
+		if (isUrl(referenceParameters.filePath)) {
 			const externalReferenceId = getExternalReferenceId(referenceParameters.filePath);
 
 			parsedReference.external = {
@@ -42,6 +43,7 @@ export async function getReference(
 					code: "",
 					language: parsedReference.language,
 					path: parsedReference.path,
+					external: parsedReference.external
 				},
 				externalReferenceId.id,
 				sourcePath,
@@ -67,14 +69,13 @@ export async function getReference(
 			referenceParameters,
 		);
 
-		return new Reference({
-			language: referenceParameters.language,
-			startLine: codeSectionInfo.startLine,
-			code: `\`\`\`${referenceParameters.language} ${codeblockLines[0].substring(REFERENCE_CODEBLOCK.length).trim()}\n${codeSectionInfo.codeSection}\n\`\`\``,
-			path: referenceParameters.filePath.startsWith("[[") && referenceParameters.filePath.endsWith("]]")
-				? referenceParameters.filePath
-				: vaultPath,
-		});
+		parsedReference.startLine = codeSectionInfo.startLine
+		parsedReference.code = `\`\`\`${referenceParameters.language} ${codeblockLines[0].substring(REFERENCE_CODEBLOCK.length).trim()}\n${codeSectionInfo.codeSection}\n\`\`\``
+		parsedReference.path = referenceParameters.filePath.startsWith("[[") && referenceParameters.filePath.endsWith("]]")
+			? parsedReference.path
+			: vaultPath
+
+		return new Reference(parsedReference);
 
 	} catch (error) {
 		return new Reference({
@@ -204,7 +205,7 @@ async function accessExternalReference(
 	plugin: CodeStylerPlugin,
 ): Promise<string> {
 	try {
-		if (!(await plugin.app.vault.adapter.exists(reference?.external?.storePath as string)))
+		if (reference?.external?.storePath && !(await plugin.app.vault.adapter.exists(reference?.external?.storePath)))
 			await updateExternalReference(reference, plugin);
 
 		const cache = await readCache(plugin);
@@ -317,7 +318,11 @@ function getRelativePath(
 function getExternalReferenceId(
 	fileLink: string,
 ): { id: string, website: string } {
-	const linkInfo = fileLink.match(/^https?:\/\/(.+)\.(?:com|io|ai)\/(.+)$/);
+	if (!isUrl(fileLink))
+		throw new Error("Invalid URL passed")
+
+	const linkInfo = fileLink.match(/^(?:https?:\/\/)?(.+)\.(?:com|io|ai)\/(.+)$/);
+
 	if (!linkInfo?.[1] || !linkInfo?.[2])
 		throw new Error("No such repository could be found");
 

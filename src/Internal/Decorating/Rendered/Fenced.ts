@@ -9,9 +9,10 @@ import { CodeDetectingContext } from "src/Internal/types/detecting";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
 import { visitParents } from "unist-util-visit-parents";
-import { parseFenceCodeParameters, toDecorateFenceCode } from "../../Parsing/fenced";
+import { parseFenceCodeParameters, referenceAdjustParameters, toDecorateFenceCode } from "../../Parsing/fenced";
 import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
-import { createFenceHeaderElement } from "../elements";
+import { getReference } from "src/Internal/utils/reference";
+import { createHeaderElement } from "../elements";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
@@ -21,7 +22,7 @@ export async function renderedFencedCodeDecorating(
 	const fenceCodeElements = Array.from(element.querySelectorAll(`pre:not(frontmatter) > code[${PARAMETERS_ATTRIBUTE}]`))
 	for (const fenceCodeElement of fenceCodeElements as Array<HTMLElement>) {
 		if (!fenceCodeElement.hasClass("is-loaded"))
-			console.info("Code not loaded")
+			console.debug("Code not loaded")
 
 		asyncDecorateFenceCodeElement(fenceCodeElement, context, plugin)
 	}
@@ -111,19 +112,19 @@ export const mutationObservers: Record<string, MutationObserver> = {
 	}),
 };
 
-export async function asyncDecorateFenceCodeElement(
+async function asyncDecorateFenceCodeElement(
 	fenceCodeElement: HTMLElement,
 	context: MarkdownPostProcessorContext,
 	plugin: CodeStylerPlugin,
 ) {
-	await sleep(10)
+	await sleep(20)
 	const decorated = fenceCodeElement.getAttribute(DECORATED_ATTRIBUTE) ?? "false"
 	if (decorated === "true")
 		return;
 
 	fenceCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
 
-	const fenceCodeParameters = parseFenceCodeParameters(
+	let fenceCodeParameters = parseFenceCodeParameters(
 		fenceCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ",
 		plugin,
 	);
@@ -131,8 +132,14 @@ export async function asyncDecorateFenceCodeElement(
 	if (!toDecorateFenceCode(fenceCodeParameters, plugin))
 		return;
 
+	fenceCodeParameters = await referenceAdjustParameters(
+		fenceCodeParameters,
+		fenceCodeElement,
+		plugin,
+	)
+
 	const codeDetectingContext = (fenceCodeElement.getAttribute(DETECTING_CONTEXT) ?? "standalone") as CodeDetectingContext
-	const staticRender = codeDetectingContext === "export"
+	const staticRender = (codeDetectingContext === "export") || (codeDetectingContext === "slides")
 
 	decorateFenceCodeElement(
 		fenceCodeElement,
@@ -169,8 +176,9 @@ function decorateFenceCodeElement(
 			},
 		)
 
-	const fenceHeaderElement = createFenceHeaderElement(
+	const fenceHeaderElement = createHeaderElement(
 		fenceCodeParameters,
+		true,
 		sourcePath,
 		plugin,
 	);

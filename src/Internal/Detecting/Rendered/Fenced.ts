@@ -8,6 +8,7 @@ import { isUndetectedCodeElement } from "../../utils/detecting";
 import { SETTINGS_TAB_SOURCEPATH_PREFIX } from "src/Internal/constants/interface";
 import { CodeDetectingContext } from "src/Internal/types/detecting";
 import { getFileContentLines } from "src/Internal/utils/rendered";
+import { PREFIX } from "src/Internal/constants/general";
 
 export async function renderedFencedCodeDetecting(
 	element: HTMLElement,
@@ -49,6 +50,7 @@ export async function renderedFencedCodeDetecting(
 			element,
 			cache,
 			fileContentLines,
+			codeDetectingContext,
 		)
 	} else if ((codeDetectingContext === "admonition") && embeddedContent) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
@@ -277,6 +279,7 @@ async function applyDocumentFencedDetecting(
 	element: HTMLElement,
 	cache: CachedMetadata | null,
 	fileContentLines: Array<string>,
+	codeDetectingContext: CodeDetectingContext,
 ) {
 	const filterSections = (section: SectionCache) => (section.type === "callout" || section.type === "code")
 	const fenceDocumentLines = getSectionLines(
@@ -291,7 +294,7 @@ async function applyDocumentFencedDetecting(
 	applyFenceCodeParametersLinesList(
 		element,
 		fenceSectionLines,
-		"export",
+		codeDetectingContext,
 	)
 }
 

@@ -1,11 +1,15 @@
 import CodeStylerPlugin from "src/main";
 import { FenceCodeParameters, Highlights } from "../types/parsing";
-import { isLanguageMatched, separateParameters } from "../utils/parsing";
+import { isLanguageMatched, separateParameters, setTitleAndReference } from "../utils/parsing";
 import { FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND, PLUGIN_CODEBLOCK_WHITELIST } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
-import { MarkdownPreviewRenderer, Plugin } from "obsidian";
+import { MarkdownPostProcessorContext, MarkdownPreviewRenderer, MarkdownSectionInformation, Plugin } from "obsidian";
 import { getArgs } from "src/External/ExecuteCode/CodeBlockArgs";
 import { EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../constants/external";
+import { Reference } from "../types/reference";
+import { basename } from "path";
+import { getReference } from "../utils/reference";
+import { REFERENCE_ATTRIBUTE } from "../constants/reference";
 
 export function parseFenceCodeParameters(
 	fenceCodeParametersLine: string,
@@ -16,7 +20,9 @@ export function parseFenceCodeParameters(
 	const rmarkdownParameters = fenceCodeParametersLine.startsWith("{") && fenceCodeParametersLine.endsWith("}")
 
 	let separatedParameters: Array<string> = separateParameters(removeCurlyBraces(fenceCodeParametersLine))
-	if (separatedParameters.every((parameterSection: string, idx: number, separatedParameters: Array<string>) => parameterSection.endsWith(",") || (idx === (separatedParameters.length - 1)) || (idx === 0)))
+	if (separatedParameters.every(
+		(parameterSection: string, idx: number, separatedParameters: Array<string>) => parameterSection.endsWith(",") || (idx === (separatedParameters.length - 1)) || (idx === 0),
+	))
 		separatedParameters = separatedParameters.map((parameterSection: string, idx: number, separatedParameters: Array<string>) => idx === (separatedParameters.length - 1) ? parameterSection : parameterSection.slice(0,-1))
 
 	const fenceCodeParametersParsed = separatedParameters.reduce(
@@ -27,20 +33,19 @@ export function parseFenceCodeParameters(
 			if ((idx === 1) && rmarkdownParameters)
 				parameterSection = "title:" + parameterSection
 
-			//TODO: managing of reference and title
 			for (const parameterKey of ["title", "reference", "ref"])
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
 					return setTitleAndReference(
 						parameterKey,
 						removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim(),
 						result,
-					);
+					) as Partial<FenceCodeParameters>;
 				else if (parameterSection === parameterKey)
 					return setTitleAndReference(
 						parameterKey,
 						null,
 						result,
-					);
+					) as Partial<FenceCodeParameters>;
 
 			for (const parameterKey of FENCE_PARAMETERS_KEY_VALUE)
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
@@ -67,7 +72,7 @@ export function parseFenceCodeParameters(
 		{ highlights: { default: {lineNumbers: [], plainText: [], regularExpressions: []}, alternative: {} } },
 	)
 
-	const fenceCodeParameters = pluginAdjustFenceCodeParameters(
+	const fenceCodeParameters = externalPluginAdjustFenceCodeParameters(
 		new FenceCodeParameters(fenceCodeParametersParsed),
 		fenceCodeParametersLine,
 		plugin,
@@ -76,7 +81,40 @@ export function parseFenceCodeParameters(
 	return fenceCodeParameters
 }
 
-function pluginAdjustFenceCodeParameters(
+export async function referenceAdjustParameters(
+	fenceCodeParameters: FenceCodeParameters,
+	fenceCodeElement: HTMLElement,
+	plugin: CodeStylerPlugin,
+): Promise<FenceCodeParameters> {
+	if (fenceCodeParameters.language === "reference") {
+		const stringifiedReference = fenceCodeElement.getAttribute(REFERENCE_ATTRIBUTE)
+		if (!stringifiedReference)
+			throw new Error("Missing reference")
+
+		const reference = new Reference(JSON.parse(stringifiedReference))
+
+		fenceCodeParameters.language = reference.language;
+
+		if (fenceCodeParameters.title === "")
+			fenceCodeParameters.title = reference.external?.info?.title ?? basename(reference.path);
+
+		if (fenceCodeParameters.reference === "")
+			//@ts-expect-error Undocumented Obsidian API
+			fenceCodeParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
+
+		if (reference.external)
+			fenceCodeParameters.externalReference = reference;
+
+		if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
+			fenceCodeParameters.lineNumbers.offset = reference.startLine - 1;
+			fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
+		}
+	}
+
+	return fenceCodeParameters;
+}
+
+function externalPluginAdjustFenceCodeParameters(
 	fenceCodeParameters: FenceCodeParameters,
 	fenceCodeParametersLine: string,
 	plugin: CodeStylerPlugin,
@@ -199,10 +237,7 @@ function inferFenceValue(
 			}
 		}
 
-	} else if (parameterKey === "icon") {
-		throw new Error("Icon not handled yet") //TODO: Fix
-
-	} else if (["ignore"].includes(parameterKey)) {
+	} else if (["ignore", "icon"].includes(parameterKey)) {
 		const booleanParameterValue = convertBoolean(parameterValue) //TODO:
 
 		return booleanParameterValue === null ? {} : { [parameterKey]: booleanParameterValue };
@@ -251,77 +286,10 @@ function inferFenceShorthand(
 			}
 		}
 
-	else if (parameterShorthand === "icon")
-		throw new Error("Icon not handled yet") //TODO: Fix
-
-	else if (["ignore"].includes(parameterShorthand))
+	else if (["ignore", "icon"].includes(parameterShorthand))
 		return { [parameterShorthand]: true }
 
 	throw new Error("Unmanaged inline shorthand parameter")
-}
-
-function setTitleAndReference(
-	parameterKey: string,
-	parameterValue: string | null,
-	result: Partial<FenceCodeParameters>,
-): Partial<FenceCodeParameters> {
-	if (parameterValue !== null) {
-		const linkInfo = parseLink(parameterValue)
-		if (linkInfo === null) {
-			if (parameterKey === "title")
-				return { ...result, title: parameterValue }
-			else
-				return result
-		} else {
-			if ((parameterKey === "title") || !("title" in result))
-				return { ...result, ...linkInfo }
-			else
-				return { ...result, reference: linkInfo.reference }
-		}
-
-	} else {
-		if (parameterKey !== "title" || !("title" in result))
-			return result
-
-		const linkInfo = parseLink(result?.title ?? "")
-
-		if (linkInfo === result)
-			return result
-		else
-			return {...result, ...linkInfo}
-	}
-}
-
-function parseLink(
-	linkText: string,
-): { title: string, reference: string } | null {
-	const markdownLinkMatch = linkText.match(new RegExp(`\\[(.*?)\\]\\((.+)\\)`, "g"));
-	if (markdownLinkMatch)
-		return {
-			title: markdownLinkMatch[1] !== ""
-				? markdownLinkMatch[1].trim()
-				: markdownLinkMatch[2].trim(),
-			reference: markdownLinkMatch[2].trim(),
-		}
-
-	//TODO: Check match
-	const wikiLinkMatch = linkText.match(new RegExp(`\\[\\[([^\\]|\\r\\n]+?)(?:\\|([^\\]|\\r\\n]+?))?\\]\\]`, "g"))
-	if (wikiLinkMatch)
-		return {
-			title: wikiLinkMatch[2]
-				? wikiLinkMatch[2].trim()
-				: wikiLinkMatch[1].trim(),
-			reference: wikiLinkMatch[1].trim(),
-		}
-
-	const urlLinkMatch = removeBoundaryQuotes(linkText).match(new RegExp(`^(\S+)\\.(\S+)$`, "g"));
-	if (urlLinkMatch)
-		return {
-			title: urlLinkMatch[0].trim(),
-			reference: urlLinkMatch[0].trim(),
-		}
-
-	return null
 }
 
 function addHighlights(

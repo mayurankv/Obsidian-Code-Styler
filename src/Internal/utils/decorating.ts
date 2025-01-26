@@ -5,6 +5,7 @@ import CodeStylerPlugin from "src/main";
 import { FenceCodeParameters, Highlights, InlineCodeParameters } from "src/Internal/types/parsing";
 import { PREFIX } from "../constants/general";
 import { toKebabCase } from "./text";
+import { LANGUAGE_NAMES } from "../constants/parsing";
 
 // TODO: Clean up
 
@@ -23,6 +24,19 @@ export function getLineClasses(
 	]
 
 	return classList;
+}
+
+export function getLanguageIcon(
+	language: string,
+	plugin: CodeStylerPlugin,
+): string | null {
+	return plugin.resources.languageIcons?.[getLanguageName(language)] ?? null;
+}
+
+export function getLanguageName(
+	language: string,
+): string {
+	return LANGUAGE_NAMES?.[language] ?? ((language.charAt(0).toUpperCase() + language.slice(1)) || "");
 }
 
 export function convertCommentLinks(

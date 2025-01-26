@@ -1,10 +1,10 @@
 Refactor:
+	☐ Live Preview
+	☐ SettingsTabs
+	☐ CSS
+	☐ Element decoration
 	☐ Settings interfaces
 	☐ FenceCodeParameters interface
-	☐ SettingsTabs
-	☐ Live Preview
-	☐ Reference blocks
-	☐ CSS
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

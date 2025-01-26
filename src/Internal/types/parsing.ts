@@ -1,10 +1,14 @@
 import { Reference } from "./reference";
 
-export class FenceCodeParameters {
+export class CodeParameters {
 	language: string = "";
 	title: string = "";
 	reference: string = "";
-	// icon //TODO: Add
+	icon: boolean = false;
+	ignore: boolean = false;
+}
+
+export class FenceCodeParameters extends CodeParameters {
 	fold: {
 		enabled: boolean;
 		placeholder: string;
@@ -23,10 +27,10 @@ export class FenceCodeParameters {
 		default: Highlights;
 		alternative: Record<string, Highlights>
 	} = { default: { lineNumbers: [], plainText: [], regularExpressions: []}, alternative: {} };
-	ignore: boolean = false;
 	externalReference?: Reference;
 
-    public constructor(init?:Partial<FenceCodeParameters>) {
+	public constructor(init?: Partial<FenceCodeParameters>) {
+		super()
         Object.assign(this, init);
     }
 }
@@ -37,13 +41,9 @@ export interface Highlights {
 	regularExpressions: Array<RegExp>;
 }
 
-export class InlineCodeParameters {
-	language: string = "";
-	title: string = "";
-	icon: boolean = false;
-	ignore: boolean = false;
-
+export class InlineCodeParameters extends CodeParameters {
     public constructor(init?:Partial<InlineCodeParameters>) {
+		super()
         Object.assign(this, init);
     }
 }

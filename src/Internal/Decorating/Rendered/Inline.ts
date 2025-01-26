@@ -5,7 +5,7 @@ import { PREFIX } from "src/Internal/constants/general";
 import { InlineCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
 import { parseInlineCodeParameters, toDecorateInlineCode, toHighlightInlineCode } from "../../Parsing/inline";
-import { createInlineHeaderElement } from "../elements";
+import { createHeaderElement } from "../elements";
 
 export async function renderedInlineCodeDecorating(
 	element: HTMLElement,
@@ -49,8 +49,9 @@ async function decorateInlineCodeElement(
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
-	const inlineHeaderElement = createInlineHeaderElement(
+	const inlineHeaderElement = createHeaderElement(
 		inlineCodeParameters,
+		false,
 		sourcePath,
 		plugin,
 	);

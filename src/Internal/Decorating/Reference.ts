@@ -2,7 +2,9 @@ import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformat
 import CodeStylerPlugin from "src/main";
 import { getReference } from "../utils/reference";
 import { applyStandaloneFencedDetecting } from "../Detecting/Rendered/fenced";
-import { asyncDecorateFenceCodeElement } from "./Rendered/fenced";
+import { PREFIX } from "../constants/general";
+import { Reference } from "../types/reference";
+import { REFERENCE_ATTRIBUTE } from "../constants/reference";
 
 export async function referenceCodeblockProcessor(
 	source: string,
@@ -18,11 +20,12 @@ export async function referenceCodeblockProcessor(
 	if (codeblockLines[codeblockLines.length - 1] !== "")
 		codeblockLines.push("");
 
-	const reference = await getReference(
+	const reference: Reference = await getReference(
 		codeblockLines,
 		context.sourcePath,
 		plugin,
 	);
+
 	MarkdownRenderer.render(
 		plugin.app,
 		reference.code,
@@ -31,18 +34,16 @@ export async function referenceCodeblockProcessor(
 		plugin,
 	);
 
+
 	await applyStandaloneFencedDetecting(
 		codeblockElement,
 		context
 	)
 
-	const fenceCodeElement = codeblockElement.querySelector("pre:not(.frontmatter) > code") as HTMLElement | null
+	const fenceCodeElement = codeblockElement.querySelector("pre > code")
 	if (!fenceCodeElement)
-		throw new Error("Could't find codeblock in reference element")
+		throw new Error("Missing rendered code element")
 
-	await asyncDecorateFenceCodeElement(
-		fenceCodeElement,
-		context,
-		plugin,
-	)
+	codeblockElement.addClass(`${PREFIX}-reference`)
+	fenceCodeElement.setAttribute(REFERENCE_ATTRIBUTE, JSON.stringify(reference))
 }

@@ -1,5 +1,6 @@
 import { MarkdownView } from "obsidian";
 import { renderedViewFold } from "src/Internal/Decorating/Rendered/fenced";
+import { manageExternalReferencedFiles } from "src/Internal/utils/reference";
 import CodeStylerPlugin from "src/main";
 
 function viewFold(
@@ -37,16 +38,16 @@ export function registerCommands(
 	plugin.addCommand({
 		id: "update-references-vault",
 		name: "Update all external references in vault",
-		callback: async () => await updateExternalReferencedFiles(this),
+		callback: async () => await manageExternalReferencedFiles(this, null, true),
 	});
 	plugin.addCommand({
 		id: "update-references-page",
 		name: "Update all external references in note",
-		callback: async () => await updateExternalReferencedFiles(this, this.app.workspace.getActiveFile()?.path)
+		callback: async () => await manageExternalReferencedFiles(this, this.app.workspace.getActiveFile()?.path, true)
 	});
 	plugin.addCommand({
 		id: "clean-references",
 		name: "Remove all unneeded external references",
-		callback: async () => await cleanExternalReferencedFiles(this)
+		callback: async () => await manageExternalReferencedFiles(this, null, false)
 	});
 }
