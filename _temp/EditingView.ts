@@ -10,13 +10,18 @@ import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsi
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
 import CodeStylerPlugin from "../../main";
 import { addReferenceSyntaxHighlight } from "./SyntaxHighlighting";
+import { isDeepStrictEqual } from "util";
+import { FenceCodeParameters, LineParameters } from "src/Internal/types/parsing";
 
 interface SettingsState {
 	excludedLanguages: string;
 	processedCodeblocksWhitelist: string;
 }
 
-export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings, plugin: CodeStylerPlugin) {
+export function createCodeblockCodeMirrorExtensions(
+	settings: CodeStylerSettings,
+	plugin: CodeStylerPlugin,
+) {
 	const livePreviewCompartment = new Compartment;
 	const ignoreCompartment = new Compartment;
 
@@ -59,6 +64,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				update.view.dispatch({effects: foldAll.of({})});
 		}
 	});
+
 	const ignoreFileListener = EditorView.updateListener.of((update: ViewUpdate) => {
 		const ignoreExtensions = ignoreCompartment.get(update.state);
 		const fileIgnore = isFileIgnored(update.state) && !(Array.isArray(ignoreExtensions) && ignoreExtensions.length === 0);
@@ -83,6 +89,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return value;
 		}
 	});
+
 	const charWidthState = StateField.define<number>({ //TODO (@mayurankv) Improve implementation
 		create(state: EditorState): number {
 			return(state.field(editorEditorField).defaultCharacterWidth * 1.105);
@@ -91,6 +98,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return(transaction.state.field(editorEditorField).defaultCharacterWidth * 1.105);
 		}
 	});
+
 	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
 		create(state: EditorState): DecorationSet {
 			return buildHeaderDecorations(state);
@@ -102,6 +110,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		}
 	});
+
 	const lineDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Deal with source mode - make apply styling in source mode
 		create(state: EditorState): DecorationSet {
 			return buildLineDecorations(state);
@@ -113,6 +122,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		}
 	});
+
 	const foldDecorations = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet { //TODO (@mayurankv) Can I change this?
 			const builder = new RangeSetBuilder<Decoration>();
@@ -136,6 +146,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return EditorView.decorations.from(field);
 		},
 	});
+
 	const hiddenDecorations = StateField.define<DecorationSet>({
 		create(): DecorationSet {
 			return Decoration.none;
@@ -150,6 +161,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return value;
 		}
 	});
+
 	const inlineDecorations = StateField.define<DecorationSet>({
 		create(state: EditorState): DecorationSet {
 			return buildInlineDecorations(state);
@@ -189,6 +201,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return (addEffects.length !== 0)?{effects: addEffects}:null;
 		});
 	}
+
 	function cursorFoldExtender() {
 		return EditorState.transactionExtender.of((transaction: Transaction) => {
 			const addEffects: Array<StateEffect<unknown>> = [];
@@ -207,6 +220,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 			return (addEffects.length !== 0)?{effects: addEffects}:null;
 		});
 	}
+
 	function documentFoldExtender() {
 		return EditorState.transactionExtender.of((transaction) => {
 			let addEffects: Array<StateEffect<unknown>> = [];
@@ -221,28 +235,6 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 	}
 	//TODO (@mayurankv) Urgent: Auto add temp unfold on type of fold and remove both fold and temp unfold for removal
 
-	class LineNumberWidget extends WidgetType {
-		lineNumber: number;
-		codeblockParameters: CodeblockParameters;
-		maxLineNum: number;
-		empty: boolean;
-
-		constructor(lineNumber: number, codeblockParameters: CodeblockParameters, maxLineNum: number, empty: boolean = false) {
-			super();
-			this.lineNumber = lineNumber;
-			this.codeblockParameters = codeblockParameters;
-			this.maxLineNum = maxLineNum;
-			this.empty = empty;
-		}
-
-		eq(other: LineNumberWidget): boolean {
-			return this.lineNumber === other.lineNumber && this.codeblockParameters.lineNumbers.alwaysEnabled === other.codeblockParameters.lineNumbers.alwaysEnabled && this.codeblockParameters.lineNumbers.alwaysDisabled === other.codeblockParameters.lineNumbers.alwaysDisabled && this.codeblockParameters.lineNumbers.offset === other.codeblockParameters.lineNumbers.offset && this.maxLineNum === other.maxLineNum && this.empty === other.empty;
-		}
-
-		toDOM(): HTMLElement {
-			return createSpan({attr: {style: this.maxLineNum.toString().length > (this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString().length?"width: var(--line-number-gutter-width);":""}, cls: "code-styler-line-number", text: this.empty?"":(this.lineNumber + this.codeblockParameters.lineNumbers.offset).toString()});
-		}
-	}
 	class CommentLinkWidget extends WidgetType {
 		linkText: string;
 		sourcePath: string;
@@ -498,6 +490,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		settingsState,charWidthState,livePreviewCompartment.of([]),ignoreCompartment.of([]),
 	];
 }
+
+//!============================================================
 
 const fold: StateEffectType<{from: number, to: number, value: {spec: {language: string}}}> = StateEffect.define();
 const unfold: StateEffectType<{from: number, to: number}> = StateEffect.define();

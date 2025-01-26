@@ -8,16 +8,18 @@ export class CodeParameters {
 	ignore: boolean = false;
 }
 
+export interface LineParameters {
+	alwaysEnabled: boolean;
+	alwaysDisabled: boolean;
+	offset: number;
+}
+
 export class FenceCodeParameters extends CodeParameters {
 	fold: {
 		enabled: boolean;
 		placeholder: string;
 	} = {enabled: false, placeholder: ""};
-	lineNumbers: {
-		alwaysEnabled: boolean;
-		alwaysDisabled: boolean;
-		offset: number;
-	} = {alwaysEnabled: false, alwaysDisabled: false, offset: 0};
+	lineNumbers: LineParameters = {alwaysEnabled: false, alwaysDisabled: false, offset: 0};
 	lineUnwrap: {
 		alwaysEnabled: boolean;
 		alwaysDisabled: boolean;

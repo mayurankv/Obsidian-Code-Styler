@@ -12,7 +12,7 @@ import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH, REFERENCE_CODEBLOCK 
 import { registerCommands } from "./Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
 import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./Interface/View/rendered";
-import { addModes } from "./Internal/Decorating/LivePreview/syntaxHighlight";
+import { addModes } from "./Internal/Decorating/LivePreview/syntaxHighlightModes";
 import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
 import { referenceCodeblockProcessor } from "./Internal/Decorating/reference";
 import { manageExternalReferencedFiles } from "./Internal/utils/reference";
@@ -144,8 +144,10 @@ export default class CodeStylerPlugin extends Plugin {
 	addEditorExtensions(
 		load: boolean = true,
 	): void {
-		// if (load)
-		// 	this.registerEditorExtension(createCodeblockCodeMirrorExtensions(this.settings,this));
+		if (load)
+			this.registerEditorExtension([
+				// ...createCodeblockCodeMirrorExtensions(this.settings,this),
+			]);
 	}
 
 	registerEvents(
