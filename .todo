@@ -1,10 +1,8 @@
 Refactor:
 	☐ Live Preview
 	☐ SettingsTabs
-	☐ CSS
-	☐ Element decoration
+	☐ Styles + CSS + Applying settings
 	☐ Settings interfaces
-	☐ FenceCodeParameters interface
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting
