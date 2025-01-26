@@ -2,34 +2,36 @@ import { EditorState, Range, StateField, Transaction, Extension } from "@codemir
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 import { editorInfoField } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
-import { buildCommentDecorations, buildHeaderDecorations } from "src/Internal/Detecting/LivePreview/fenced";
-import { CommentInfo } from "src/Internal/types/detecting";
+import { CommentInfo, HeaderInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
 import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
-import { CommentLinkWidget } from "./codemirror/widgets";
+import { CommentLinkWidget, HeaderWidget } from "./codemirror/widgets";
+import { parseFenceCodeParameters } from "src/Internal/Parsing/fenced";
+import { buildFenceCodeDecorations } from "src/Internal/Detecting/LivePreview/fenced";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
+		createFenceCodeDecorationsStateField(plugin),
 	]
 }
 
-export function createHeaderDecorationsStateField(
+function createFenceCodeDecorationsStateField(
 	plugin: CodeStylerPlugin,
 ) {
 	return StateField.define<DecorationSet>({
 		create(
 			state: EditorState,
 		): DecorationSet {
-			return buildHeaderDecorations(state, plugin, buildHeaderDecoration);
+			return buildFenceCodeDecorations(state, plugin, 1, 2 ,3);
 		},
 
 		update(
 			value: DecorationSet,
 			transaction: Transaction,
 		): DecorationSet {
-			return buildHeaderDecorations(transaction.state, plugin, buildHeaderDecoration);
+			return buildFenceCodeDecorations(transaction.state, plugin, 1, 2 ,3);
 		},
 
 		provide(
@@ -38,6 +40,64 @@ export function createHeaderDecorationsStateField(
 			return EditorView.decorations.from(field);
 		}
 	});
+}
+
+function buildHeaderDecoration(
+	state: EditorState,
+	headerInfo: HeaderInfo | null,
+	plugin: CodeStylerPlugin,
+): Array<Range<Decoration>> | null {
+	if (!headerInfo)
+		return []
+
+	const fenceCodeParameters = parseFenceCodeParameters(headerInfo.fenceCodeParametersLine, plugin);
+
+	// TODO: Check if these are needed?
+	// !isLanguageIgnored(codeblockParameters.language, settings.excludedLanguages) &&
+	// !isCodeblockIgnored(codeblockParameters.language, settings.processedCodeblocksWhitelist) &&
+	// !SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))
+	if (fenceCodeParameters.ignore)
+		return null
+
+	if (isSourceMode(state))
+		return []
+
+	return [{
+		from: headerInfo.position,
+		to: headerInfo.position,
+		value: Decoration.widget({
+			widget: new HeaderWidget(
+				fenceCodeParameters,
+				state.field(editorInfoField)?.file?.path ?? "",
+				true,
+				plugin,
+			)
+		}),
+	}]
+}
+
+function buildLineDecoration(
+	state: EditorState,
+	lineInfo: LineInfo | null,
+	plugin: CodeStylerPlugin,
+): Array<Range<Decoration>> {
+	if (!lineInfo)
+		return []
+
+	const fenceCodeParameters = parseFenceCodeParameters(headerInfo.fenceCodeParametersLine, plugin);
+
+	return [{
+		from: headerInfo.position,
+		to: headerInfo.position,
+		value: Decoration.widget({
+			widget: new HeaderWidget(
+				fenceCodeParameters,
+				state.field(editorInfoField)?.file?.path ?? "",
+				true,
+				plugin,
+			)
+		}),
+	}]
 }
 
 function buildCommentDecoration(

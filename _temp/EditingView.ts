@@ -24,7 +24,7 @@ export function createCodeblockCodeMirrorExtensions(
 		const fileUnignore = !isFileIgnored(update.state) && (Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
 
 		if (isSourceMode(update.startState) !== toIgnore || fileIgnore || fileUnignore) {
-			update.view.dispatch({effects: livePreviewCompartment.reconfigure((toIgnore||fileIgnore)?[]:[headerDecorations,lineDecorations,foldDecorations,hiddenDecorations])});
+			update.view.dispatch({effects: livePreviewCompartment.reconfigure((toIgnore||fileIgnore)?[]:[foldDecorations,hiddenDecorations])});
 			if (!toIgnore && !fileIgnore)
 				update.view.dispatch({effects: foldAll.of({})});
 		}
@@ -58,30 +58,6 @@ export function createCodeblockCodeMirrorExtensions(
 		},
 		update(value: number, transaction: Transaction): number {
 			return(transaction.state.field(editorEditorField).defaultCharacterWidth * 1.105);
-		}
-	});
-
-	const headerDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Update (does this need to be updated in this manner?)
-		create(state: EditorState): DecorationSet {
-			return buildHeaderDecorations(state);
-		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			return buildHeaderDecorations(transaction.state,(position)=>isFolded(transaction.state,position));
-		},
-		provide(field: StateField<DecorationSet>): Extension {
-			return EditorView.decorations.from(field);
-		}
-	});
-
-	const lineDecorations = StateField.define<DecorationSet>({ //TODO (@mayurankv) Deal with source mode - make apply styling in source mode
-		create(state: EditorState): DecorationSet {
-			return buildLineDecorations(state);
-		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
-			return buildLineDecorations(transaction.state);
-		},
-		provide(field: StateField<DecorationSet>): Extension {
-			return EditorView.decorations.from(field);
 		}
 	});
 
@@ -156,6 +132,8 @@ export function createCodeblockCodeMirrorExtensions(
 		});
 	}
 
+	//!====================================================================
+
 	function cursorFoldExtender() {
 		return EditorState.transactionExtender.of((transaction: Transaction) => {
 			const addEffects: Array<StateEffect<unknown>> = [];
@@ -163,11 +141,11 @@ export function createCodeblockCodeMirrorExtensions(
 			const hiddenDecorationsState = transaction.startState.field(hiddenDecorations,false)?.map(transaction.changes) ?? Decoration.none;
 			transaction.newSelection.ranges.forEach((range: SelectionRange)=>{
 				foldDecorationsState.between(range.from, range.to, (foldFrom, foldTo, decorationValue) => {
-					if (rangeInteraction(foldFrom,foldTo,range))
+					if (areRangesInteracting(foldFrom,foldTo,range))
 						addEffects.push(hideFold.of({from: foldFrom, to: foldTo, value: decorationValue}));
 				});
 				for (let iter = hiddenDecorationsState.iter(); iter.value !== null; iter.next()) {
-					if (!rangeInteraction(iter.from,iter.to,range))
+					if (!areRangesInteracting(iter.from,iter.to,range))
 						addEffects.push(unhideFold.of({from: iter.from, to: iter.to, value: iter.value}));
 				}
 			});
@@ -189,33 +167,8 @@ export function createCodeblockCodeMirrorExtensions(
 	}
 	//TODO (@mayurankv) Urgent: Auto add temp unfold on type of fold and remove both fold and temp unfold for removal
 
-
 	//!====================================================================
 
-	function buildHeaderDecorations(
-		state: EditorState,
-		foldValue: (position: number, defaultFold: boolean) => boolean = (position, defaultFold) => defaultFold,
-	) {
-		const builder = new RangeSetBuilder<Decoration>();
-
-		if (isSourceMode(state) || isFileIgnored(state))
-			return Decoration.none;
-
-		let codeblockParameters: CodeblockParameters;
-		syntaxTree(state).iterate({
-			enter: (syntaxNode) => {
-				if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
-					const startLine = state.doc.lineAt(syntaxNode.from);
-					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
-					if (!isLanguageIgnored(codeblockParameters.language,settings.excludedLanguages) && !isCodeblockIgnored(codeblockParameters.language,settings.processedCodeblocksWhitelist) && !codeblockParameters.ignore) {
-						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,state.field(editorInfoField)?.file?.path ?? "",plugin), block: true, side: -1}));
-					}
-				}
-			}
-		});
-		return builder.finish();
-	}
 	function buildLineDecorations(state: EditorState): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
 
@@ -229,15 +182,13 @@ export function createCodeblockCodeMirrorExtensions(
 
 			let foldEnd: Line | null = null;
 
-			// let maxLineNum: number = 0;
-			// codeblockFoldCallback(iter.from, state, (foldStart, foldEnd) => {
-			// 	maxLineNum = foldEnd.to-foldStart.from-1+codeblockParameters.lineNumbers.offset;
-			// });
-
-			// const lineNumberMargin = (maxLineNum.toString().length > 2) ? maxLineNum.toString().length * state.field(charWidthState) : undefined;
-
-			builder.add(foldStart.from, foldStart.from, Decoration.line({ attributes: { style: `--line-number-gutter-width: ${lineNumberMargin ? lineNumberMargin + "px" : "calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line" + (["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language)) ? "" : ` language-${codeblockParameters.language}`) } }));
-			builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
+			builder.add(foldStart.from, foldStart.from, Decoration.line(
+				{
+					attributes: {
+						style: `--line-number-gutter-width: ${lineNumberMargin ? lineNumberMargin + "px" : "calc(var(--line-number-gutter-min-width) - 12px)"};`,
+						class: "code-styler-line" + (["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language)) ? "" : ` language-${codeblockParameters.language}`)
+					}
+				}));
 
 			for (let i = foldStart.number + 1; i <= state.doc.lines; i++) {
 				const line = state.doc?.line(i);
@@ -249,15 +200,20 @@ export function createCodeblockCodeMirrorExtensions(
 					foldEnd = line;
 					break;
 				}
-				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-				builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
+				builder.add(
+					line.from,
+					line.from,
+					Decoration.line(
+						{
+							attributes: {
+								style: `--line-number-gutter-width: ${lineNumberMargin ? lineNumberMargin + "px" : "calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language))) ? "code-styler-line" : getLineClass(codeblockParameters, i - foldStart.number, line.text).join(" ")) + (["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language)) ? "" : ` language-${codeblockParameters.language}`)
+							}
+						}));
+
+
 				if (codeblockParameters.language === "markdown")
 					continue;
 				buildCommentDecorations(state, line, builder, plugin);
-			}
-			if (foldEnd !== null) {
-				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
-				builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			}
 		}
 		return builder.finish();
@@ -303,7 +259,7 @@ export function createCodeblockCodeMirrorExtensions(
 
 	return [
 		ignoreListener,
-		headerDecorations,lineDecorations,foldDecorations,hiddenDecorations,
+		foldDecorations,hiddenDecorations,
 		cursorFoldExtender(),documentFoldExtender(),settingsChangeExtender(),
 		settingsState,charWidthState,
 	];

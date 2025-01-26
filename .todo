@@ -3,6 +3,7 @@ Refactor:
 	☐ SettingsTabs
 	☐ Styles + CSS + Applying settings
 	☐ Settings interfaces
+	☐ Adjust for special languages
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

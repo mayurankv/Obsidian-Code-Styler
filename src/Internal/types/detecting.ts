@@ -28,4 +28,7 @@ export type CommentInfo = Array<{
 	type: LinkType,
 }>
 
-export type HeaderInfo = string
+export interface HeaderInfo{
+	fenceCodeParametersLine: string,
+	position: number,
+}

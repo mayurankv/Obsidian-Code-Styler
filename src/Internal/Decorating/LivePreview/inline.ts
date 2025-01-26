@@ -7,31 +7,31 @@ import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
 import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
 import { HeaderWidget } from "./codemirror/widgets";
-import { buildInlineDecorations } from "src/Internal/Detecting/LivePreview/inline";
+import { buildInlineDecorations as buildInlineCodeDecorations } from "src/Internal/Detecting/LivePreview/inline";
 
 export function getInlineCodeMirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
-		createInlineDecorationsStateField(plugin),
+		createInlineCodeDecorationsStateField(plugin),
 	]
 }
 
-export function createInlineDecorationsStateField(
+export function createInlineCodeDecorationsStateField(
 	plugin: CodeStylerPlugin,
 ) {
 	return StateField.define<DecorationSet>({
 		create(
 			state: EditorState,
 		): DecorationSet {
-			return buildInlineDecorations(state, plugin, buildInlineDecoration);
+			return buildInlineCodeDecorations(state, plugin, buildInlineCodeDecoration);
 		},
-		
+
 		update(
 			value: DecorationSet,
 			transaction: Transaction,
 		): DecorationSet {
-			return buildInlineDecorations(transaction.state, plugin, buildInlineDecoration);
+			return buildInlineCodeDecorations(transaction.state, plugin, buildInlineCodeDecoration);
 		},
 
 		provide(
@@ -42,7 +42,7 @@ export function createInlineDecorationsStateField(
 	});
 }
 
-function buildInlineDecoration(
+function buildInlineCodeDecoration(
 	state: EditorState,
 	inlineCodeInfo: InlineCodeInfo | null,
 	plugin: CodeStylerPlugin,
