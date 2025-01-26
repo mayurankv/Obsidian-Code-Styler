@@ -1,4 +1,4 @@
-import { CodeParameters, FenceCodeParameters, LinkType } from "../types/parsing";
+import { CodeParameters, FenceCodeParameters, LinkInfo, LinkType } from "../types/parsing";
 import { removeBoundaryQuotes } from "./text";
 
 const MARKDOWN_REGEX = /\[(.*?)\]\((.+?)\)/;
@@ -17,78 +17,76 @@ export function setTitleAndReference(
 	result: Partial<CodeParameters>,
 ): Partial<CodeParameters> {
 	if (parameterValue !== null) {
-		const linkInfo = parseLink(parameterValue)
-		if (linkInfo === null) {
+		const linksInfo = parseLinks(parameterValue)
+
+		if (linksInfo.length === 0) {
 			if (parameterKey === "title")
 				return { ...result, title: parameterValue }
 			else
 				return result
 		} else {
 			if ((parameterKey === "title") || !("title" in result))
-				return { ...result, title: linkInfo.title, reference: linkInfo.reference }
+				return { ...result, title: linksInfo[0].title, reference: linksInfo[0].reference }
 			else
-				return { ...result, reference: linkInfo.reference }
+				return { ...result, reference: linksInfo[0].reference }
 		}
 
 	} else {
 		if (parameterKey !== "title" || !("title" in result))
 			return result
 
-		const linkInfo = parseLink(result?.title ?? "")
+		const linksInfo = parseLinks(result?.title ?? "")
 
-		if (linkInfo === null)
+		if (linksInfo.length === 0)
 			return result
 		else
-			return {...result, title: linkInfo.title, reference: linkInfo.reference}
+			return {...result, title: linksInfo[0].title, reference: linksInfo[0].reference}
 	}
 }
 
-function parseLink(
+export function parseLinks(
 	linkText: string,
-): { title: string, reference: string, type: LinkType } | null {
+): Array<LinkInfo> {
+	const links: Array<LinkInfo> = []
 
-
-	// let markdownLinkMatch;
-	// while ((markdownLinkMatch = MARKDOWN_REGEX.exec(linkText)) !== null) {
-	// 	links.push({
-	// 		title: markdownLinkMatch[1] !== ""
-	// 			? markdownLinkMatch[1].trim()
-	// 			: markdownLinkMatch[2].trim(),
-	// 		reference: markdownLinkMatch[2].trim(),
-	// 		type: "markdown",
-	// 	});
-	// }
-
-	const markdownLinkMatch = linkText.match(MARKDOWN_REGEX);
-	if (markdownLinkMatch)
-		return {
+	let markdownLinkMatch;
+	while ((markdownLinkMatch = new RegExp(MARKDOWN_REGEX.source, "g").exec(linkText)) !== null) {
+		links.push({
 			title: markdownLinkMatch[1] !== ""
 				? markdownLinkMatch[1].trim()
 				: markdownLinkMatch[2].trim(),
 			reference: markdownLinkMatch[2].trim(),
 			type: "markdown",
-		}
+			match: markdownLinkMatch[0],
+			offset: markdownLinkMatch.index,
+		});
+	}
 
-	//TODO: Check match
-	const wikiLinkMatch = linkText.match(WIKI_REGEX)
-	if (wikiLinkMatch)
-		return {
+	let wikiLinkMatch;
+	while ((wikiLinkMatch = new RegExp(WIKI_REGEX.source, "g").exec(linkText)) !== null) {
+		links.push({
 			title: wikiLinkMatch[2]
 				? wikiLinkMatch[2].trim()
 				: wikiLinkMatch[1].trim(),
 			reference: wikiLinkMatch[1].trim(),
 			type: "wiki",
-		}
+			match: wikiLinkMatch[0],
+			offset: wikiLinkMatch.index,
+		});
+	}
 
-	const urlLinkMatch = removeBoundaryQuotes(linkText).trim().match(URL_REGEX)
-	if (urlLinkMatch)
-		return {
+	let urlLinkMatch;
+	while ((urlLinkMatch = new RegExp(URL_REGEX.source, "g").exec(removeBoundaryQuotes(linkText).trim())) !== null) {
+		links.push({
 			title: urlLinkMatch[0],
 			reference: urlLinkMatch[0],
 			type: "url",
-		}
+			match: urlLinkMatch[0],
+			offset: urlLinkMatch.index,
+		});
+	}
 
-	return null
+	return links
 }
 
 function getLinks(

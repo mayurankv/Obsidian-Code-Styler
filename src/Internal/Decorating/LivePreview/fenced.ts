@@ -1,17 +1,43 @@
-import CodeStylerPlugin from "src/main";
-import { EditorState, Range } from "@codemirror/state";
-import { Decoration } from "@codemirror/view";
+import { EditorState, Range, StateField, Transaction, Extension } from "@codemirror/state";
+import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { editorInfoField } from "obsidian";
+import { PREFIX } from "src/Internal/constants/general";
+import { buildCommentDecorations, buildHeaderDecorations } from "src/Internal/Detecting/LivePreview/fenced";
 import { CommentInfo } from "src/Internal/types/detecting";
+import CodeStylerPlugin from "src/main";
 import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
 import { CommentLinkWidget } from "./codemirror/widgets";
-import { PREFIX } from "src/Internal/constants/general";
-import { editorInfoField } from "obsidian";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
 	]
+}
+
+export function createHeaderDecorationsStateField(
+	plugin: CodeStylerPlugin,
+) {
+	return StateField.define<DecorationSet>({
+		create(
+			state: EditorState,
+		): DecorationSet {
+			return buildHeaderDecorations(state, plugin, buildHeaderDecoration);
+		},
+
+		update(
+			value: DecorationSet,
+			transaction: Transaction,
+		): DecorationSet {
+			return buildHeaderDecorations(transaction.state, plugin, buildHeaderDecoration);
+		},
+
+		provide(
+			field: StateField<DecorationSet>,
+		): Extension {
+			return EditorView.decorations.from(field);
+		}
+	});
 }
 
 function buildCommentDecoration(
@@ -25,25 +51,40 @@ function buildCommentDecoration(
 	return commentInfo.reduce(
 		(result: Array<Range<Decoration>>, extendedLinkInfo) => {
 			if (isSourceMode(state) || areRangesInteracting(state, extendedLinkInfo.from, extendedLinkInfo.to)) {
-				result.push({
-					from: extendedLinkInfo.from + (extendedLinkInfo.type === "wiki" ? 2 : 1),
-					to: (extendedLinkInfo.type === "wiki" ? (extendedLinkInfo.to - 2) : (extendedLinkInfo.from + extendedLinkInfo.title.length + 3)),
-					value: Decoration.mark({
-						class: (extendedLinkInfo.type === "wiki" ? "cm-hmd-internal-link" : "cm-link") + ` ${PREFIX}-source-link`,
-						attributes: {
-							destination: extendedLinkInfo.reference,
-						},
-					}),
-				})
-
-				if (extendedLinkInfo.type !== "wiki")
+				if (extendedLinkInfo.type === "wiki")
 					result.push({
-						from: extendedLinkInfo.from + extendedLinkInfo.title.length + 3,
+						from: extendedLinkInfo.from + (extendedLinkInfo.type === "wiki" ? 2 : 1),
+						to: extendedLinkInfo.to - 2,
+						value: Decoration.mark({
+							class: `cm-hmd-internal-link ${PREFIX}-source-link`,
+							attributes: {
+								destination: extendedLinkInfo.reference,
+							},
+						}),
+					})
+
+				else {
+					const splitIndex = extendedLinkInfo.fullLink.match(new RegExp(`\\[\\s*${extendedLinkInfo.title}\\s*\\]`))?.length ?? 0
+
+					result.push({
+						from: extendedLinkInfo.from + 1,
+						to: extendedLinkInfo.from + splitIndex + 1,
+						value: Decoration.mark({
+							class: `"cm-link ${PREFIX}-source-link`,
+							attributes: {
+								destination: extendedLinkInfo.reference,
+							},
+						}),
+					})
+
+					result.push({
+						from: extendedLinkInfo.from + splitIndex + 1,
 						to: extendedLinkInfo.to - 1,
 						value: Decoration.mark({
 							class: "cm-sttring cm-url",
 						})
 					})
+				}
 
 			}  else
 				result.push({

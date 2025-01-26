@@ -21,13 +21,22 @@ export function createInlineDecorationsStateField(
 	plugin: CodeStylerPlugin,
 ) {
 	return StateField.define<DecorationSet>({
-		create(state: EditorState): DecorationSet {
+		create(
+			state: EditorState,
+		): DecorationSet {
 			return buildInlineDecorations(state, plugin, buildInlineDecoration);
 		},
-		update(value: DecorationSet, transaction: Transaction): DecorationSet {
+		
+		update(
+			value: DecorationSet,
+			transaction: Transaction,
+		): DecorationSet {
 			return buildInlineDecorations(transaction.state, plugin, buildInlineDecoration);
 		},
-		provide(field: StateField<DecorationSet>): Extension {
+
+		provide(
+			field: StateField<DecorationSet>,
+		): Extension {
 			return EditorView.decorations.from(field);
 		}
 	});

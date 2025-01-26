@@ -189,13 +189,18 @@ export function createCodeblockCodeMirrorExtensions(
 	}
 	//TODO (@mayurankv) Urgent: Auto add temp unfold on type of fold and remove both fold and temp unfold for removal
 
-	function buildHeaderDecorations(state: EditorState, foldValue: (position: number, defaultFold: boolean)=>boolean = (position,defaultFold)=>defaultFold) {
+
+	//!====================================================================
+
+	function buildHeaderDecorations(
+		state: EditorState,
+		foldValue: (position: number, defaultFold: boolean) => boolean = (position, defaultFold) => defaultFold,
+	) {
 		const builder = new RangeSetBuilder<Decoration>();
 
 		if (isSourceMode(state) || isFileIgnored(state))
 			return Decoration.none;
 
-		const sourcePath = state.field(editorInfoField)?.file?.path ?? "";
 		let codeblockParameters: CodeblockParameters;
 		syntaxTree(state).iterate({
 			enter: (syntaxNode) => {
@@ -204,7 +209,7 @@ export function createCodeblockCodeMirrorExtensions(
 					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
 					if (!isLanguageIgnored(codeblockParameters.language,settings.excludedLanguages) && !isCodeblockIgnored(codeblockParameters.language,settings.processedCodeblocksWhitelist) && !codeblockParameters.ignore) {
 						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
-							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,sourcePath,plugin), block: true, side: -1}));
+							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,state.field(editorInfoField)?.file?.path ?? "",plugin), block: true, side: -1}));
 					}
 				}
 			}
@@ -217,28 +222,28 @@ export function createCodeblockCodeMirrorExtensions(
 		if (isSourceMode(state) || isFileIgnored(state))
 			return Decoration.none;
 
-		const sourcePath = state.field(editorInfoField)?.file?.path ?? "";
-		const sourceMode = isSourceMode(state);
 		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 			const foldStart = state.doc.lineAt(iter.from);
 			const startDelimiter = testOpeningLine(foldStart.text.toString());
 			const codeblockParameters = iter.value.spec.widget.codeblockParameters;
 
 			let foldEnd: Line | null = null;
-			let maxLineNum: number = 0;
 
-			codeblockFoldCallback(iter.from, state, (foldStart, foldEnd) => {
-				maxLineNum = foldEnd.to-foldStart.from-1+codeblockParameters.lineNumbers.offset;
-			});
+			// let maxLineNum: number = 0;
+			// codeblockFoldCallback(iter.from, state, (foldStart, foldEnd) => {
+			// 	maxLineNum = foldEnd.to-foldStart.from-1+codeblockParameters.lineNumbers.offset;
+			// });
 
-			const lineNumberMargin = (maxLineNum.toString().length > 2) ? maxLineNum.toString().length * state.field(charWidthState) : undefined;
-			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+			// const lineNumberMargin = (maxLineNum.toString().length > 2) ? maxLineNum.toString().length * state.field(charWidthState) : undefined;
+
+			builder.add(foldStart.from, foldStart.from, Decoration.line({ attributes: { style: `--line-number-gutter-width: ${lineNumberMargin ? lineNumberMargin + "px" : "calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line" + (["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language)) ? "" : ` language-${codeblockParameters.language}`) } }));
 			builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 
 			for (let i = foldStart.number + 1; i <= state.doc.lines; i++) {
 				const line = state.doc?.line(i);
 				if (!line)
 					break;
+
 				const lineText = line.text.toString();
 				if (testOpeningLine(lineText) === startDelimiter) {
 					foldEnd = line;
@@ -248,7 +253,7 @@ export function createCodeblockCodeMirrorExtensions(
 				builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
 				if (codeblockParameters.language === "markdown")
 					continue;
-				convertCommentLinks(state, line, sourcePath, builder, sourceMode);
+				buildCommentDecorations(state, line, builder, plugin);
 			}
 			if (foldEnd !== null) {
 				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
@@ -258,43 +263,6 @@ export function createCodeblockCodeMirrorExtensions(
 		return builder.finish();
 	}
 
-	function convertCommentLinks(
-		state: EditorState,
-		line: Line,
-		sourcePath: string,
-		builder: RangeSetBuilder<Decoration>,
-		sourceMode: boolean,
-	) {
-		syntaxTree(state).iterate({
-			enter: (syntaxNode) => {
-				if (syntaxNode.type.name.includes("comment_hmd-codeblock")) {
-					const commentText = state.sliceDoc(syntaxNode.from,syntaxNode.to);
-					const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)];
-					linkMatches.forEach((linkMatch: RegExpMatchArray) => {
-						if (typeof linkMatch?.index === "undefined")
-							return;
-						const from = syntaxNode.from + linkMatch.index;
-						const to = from + linkMatch[0].length;
-						if (sourceMode || state.selection.ranges.some((range: SelectionRange)=>rangeInteraction(from,to,range))) {
-							const mdBreak = linkMatch[0].indexOf("](");
-							//TODO (@mayurankv) Add editor wide viewer to allow clicking on files with cursor inside
-							if (mdBreak === -1) {
-								const wikilinkSeparator = linkMatch[0].indexOf("|");
-								builder.add(from+2,to-2,Decoration.mark({class: "cm-hmd-internal-link code-styler-source-link", attributes: {destination: linkMatch[0].slice(2,wikilinkSeparator!==-1?wikilinkSeparator:-2)}}));
-							} else {
-								builder.add(from+1,from+mdBreak,Decoration.mark({class: "cm-link code-styler-source-link", attributes: {destination: linkMatch[0].slice(mdBreak+2,-1)}}));
-								builder.add(from+mdBreak+2,to-1,Decoration.mark({class: "cm-string cm-url"}));
-							}
-						} else
-							builder.add(from,to,Decoration.replace({widget: new CommentLinkWidget(linkMatch[0], sourcePath)}));
-					});
-				}
-			},
-			from: line.from,
-			to: line.to
-		});
-	}
-	
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		for (let iter = (transaction.state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) { //TODO (@mayurankv) Refactor: Try and make this startState

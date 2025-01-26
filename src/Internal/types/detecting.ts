@@ -24,5 +24,8 @@ export type CommentInfo = Array<{
 	to: number,
 	title: string,
 	reference: string,
+	fullLink: string,
 	type: LinkType,
 }>
+
+export type HeaderInfo = string

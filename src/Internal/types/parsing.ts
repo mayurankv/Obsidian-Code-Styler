@@ -1,6 +1,13 @@
 import { Reference } from "./reference";
 
 export type LinkType = "markdown" | "wiki" | "url"
+export interface LinkInfo {
+	title: string,
+	reference: string,
+	type: LinkType,
+	match: string,
+	offset: number,
+}
 
 export class CodeParameters {
 	language: string = "";

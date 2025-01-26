@@ -16,9 +16,10 @@ export function buildInlineDecorations(
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
 ): DecorationSet {
-	let builder = new RangeSetBuilder<Decoration>();
 	if (isFileIgnored(state))
 		return Decoration.none;
+
+	let builder = new RangeSetBuilder<Decoration>();
 
 	syntaxTree(state).iterate({
 		enter: (syntaxNode) => buildInlineDecoration(
