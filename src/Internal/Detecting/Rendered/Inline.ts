@@ -11,13 +11,13 @@ export async function renderedInlineCodeDetecting(
 ): Promise<void> {
 	for (const inlineCodeElement of Array.from(element.querySelectorAll(":not(pre) > code")) as Array<HTMLElement>) {
 		const inlineCodeRaw = inlineCodeElement.innerText;
-		const {inlineCodeParameters, inlineCodeContent} = splitInlineCodeRaw(inlineCodeRaw);
+		const {inlineCodeParametersLine, inlineCodeContent} = splitInlineCodeRaw(inlineCodeRaw);
 
 		if (!isUndetectedCodeElement(inlineCodeElement))
 			return;
 
 		inlineCodeElement.setAttribute(CONTENT_ATTRIBUTE, inlineCodeContent);
-		inlineCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, (inlineCodeParameters ?? "") + " ");
-		inlineCodeElement.setAttribute(EMPTY_PARAMETERS_ATTRIBUTE, (inlineCodeParameters === null) ? "true" : "false");
+		inlineCodeElement.setAttribute(PARAMETERS_ATTRIBUTE, (inlineCodeParametersLine ?? "") + " ");
+		inlineCodeElement.setAttribute(EMPTY_PARAMETERS_ATTRIBUTE, (inlineCodeParametersLine === null) ? "true" : "false");
 	}
 }

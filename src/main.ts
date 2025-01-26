@@ -12,10 +12,13 @@ import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH, REFERENCE_CODEBLOCK 
 import { registerCommands } from "./Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
 import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./Interface/View/rendered";
-import { addModes } from "./Internal/Decorating/LivePreview/syntaxHighlightModes";
+import { addModes } from "./Internal/Decorating/LivePreview/codemirror/modes";
 import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
-import { referenceCodeblockProcessor } from "./Internal/Decorating/reference";
 import { manageExternalReferencedFiles } from "./Internal/utils/reference";
+import { getReferenceCodeMirrorExtensions as getReferenceCodemirrorExtensions } from "./Internal/Decorating/LivePreview/reference";
+import { getFenceCodemirrorExtensions } from "./Internal/Decorating/LivePreview/fenced";
+import { getInlineCodeMirrorExtensions as getInlineCodemirrorExtensions } from "./Internal/Decorating/LivePreview/inline";
+import { referenceCodeblockProcessor } from "./Internal/Decorating/Rendered/reference";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -58,7 +61,7 @@ export default class CodeStylerPlugin extends Plugin {
 
 	async loadSettings(): Promise<void> {
 		this.settings = { ...structuredClone(DEFAULT_SETTINGS), ...convertSettings(await this.loadData()) };
-		// this.addSettingTab(new SettingsTab(this.app, this));
+		this.addSettingTab(new SettingsTab(this.app, this));
 	}
 
 	async saveSettings(): Promise<void> {
@@ -118,7 +121,12 @@ export default class CodeStylerPlugin extends Plugin {
 		if (load)
 			this.registerMarkdownCodeBlockProcessor(
 				REFERENCE_CODEBLOCK,
-				async (source, el, ctx) => await referenceCodeblockProcessor(source, el, ctx, this),
+				async (source, element, context) => await referenceCodeblockProcessor(
+					source,
+					element,
+					context,
+					this,
+				),
 			);
 	}
 
@@ -146,7 +154,9 @@ export default class CodeStylerPlugin extends Plugin {
 	): void {
 		if (load)
 			this.registerEditorExtension([
-				// ...createCodeblockCodeMirrorExtensions(this.settings,this),
+				...getFenceCodemirrorExtensions(this),
+				...getInlineCodemirrorExtensions(this),
+				...getReferenceCodemirrorExtensions(this),
 			]);
 	}
 

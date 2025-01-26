@@ -16,6 +16,14 @@ Refactor Issues:
 Clean Up:
 	☐ Clean up and tidy Fenced
 
+Understand:
+	ViewPlugin:
+		//TODO (@mayurankv) Move selection back to original position - Currently done with setTimeout
+		// const previous: number = update.transactions.flatMap(t => t.effects).filter(effect => effect.is(rerender))?.[0]?.value?.pos;
+		// console.log(previous);
+		// if (previous)
+		// 	update.view.dispatch({selection: { anchor: previous, head: previous }});
+
 ----------------
 
 Next Release:

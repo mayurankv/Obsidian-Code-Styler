@@ -1,10 +1,10 @@
 import { MarkdownPostProcessorContext, MarkdownRenderer, MarkdownSectionInformation } from "obsidian";
 import CodeStylerPlugin from "src/main";
-import { getReference } from "../utils/reference";
-import { applyStandaloneFencedDetecting } from "../Detecting/Rendered/fenced";
-import { PREFIX } from "../constants/general";
-import { Reference } from "../types/reference";
-import { REFERENCE_ATTRIBUTE } from "../constants/reference";
+import { applyStandaloneFencedDetecting } from "../../Detecting/Rendered/fenced";
+import { PREFIX } from "../../constants/general";
+import { REFERENCE_ATTRIBUTE } from "../../constants/reference";
+import { Reference } from "../../types/reference";
+import { getReference } from "../../utils/reference";
 
 export async function referenceCodeblockProcessor(
 	source: string,
@@ -33,7 +33,6 @@ export async function referenceCodeblockProcessor(
 		context.sourcePath,
 		plugin,
 	);
-
 
 	await applyStandaloneFencedDetecting(
 		codeblockElement,
