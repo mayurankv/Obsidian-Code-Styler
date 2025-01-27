@@ -1,0 +1,607 @@
+/** Define CSS Variables */
+body {
+	/* Codeblock Body */
+	--border-radius: 10px;
+	--gradient-background-colour: transparent;
+	--code-padding: 8px;
+	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
+	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
+	--language-border-colour: var(--code-styler-codeblock-background-colour);
+	--language-border-width: 0px;
+
+	/* Header */
+	--header-font-size: var(--code-size);
+	--header-padding: 0px;
+	--header-inner-vertical-padding: 0.3;
+	--header-spacing: 15px;
+	--header-button-spacing: 14px;
+	--header-separator-width: 2px;
+	--header-separator-width-padding: var(--header-separator-width);
+	--code-styler-header-border: none;
+	--folded-bottom-border: 0 solid transparent;
+	--language-icon-size: 28px;
+	--language-icon-filter: none;
+
+	/* Lines */
+	--gradient-highlights-colour-stop: 100%;
+
+	/* Line Numbers */
+	--line-number-height-correction: 2px;
+	--line-number-gutter-padding: 16px;
+	--line-number-gutter-min-width: 32.67px;
+
+	/* Line Text */
+	--line-wrapping: pre-wrap;
+	--line-active-wrapping: var(--line-wrapping);
+
+	/* Buttons */
+	--code-styler-button-colour: var(--text-muted);
+	--code-styler-button-active-colour: white;
+	--duration-button: 240ms;
+	--dent-difference: 30px;
+	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
+	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
+}
+
+@font-face {
+	font-family: code-styler-nerdfont;
+	src: url('https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf') format('truetype');
+}
+
+
+
+body.cs-plugin {
+	.cs-hidden {
+		display: none !important;
+	}
+
+	/** Pre elements */
+	.cs-pre-parent{
+		margin-bottom: 16px;
+	}
+	.markdown-source-view.mod-cm6 .cs-pre-parent{
+		margin-bottom: 0px;
+	}
+
+	.cs-pre-parent {
+		pre > code {
+			padding-top: var(--code-padding) !important;
+			padding-bottom: var(--code-padding) !important;
+		}
+
+		pre.cs-pre {
+			overflow: hidden !important;
+			min-height: unset;
+			padding: 0px !important;
+			border-radius: var(--border-radius) !important;
+			background: var(--code-styler-codeblock-background-colour) !important;
+
+			[class*='language-'] {
+				padding-left: var(--language-border-width) !important;
+				background: linear-gradient(90deg, var(--language-border-colour), var(--language-border-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) 100%), var(--code-styler-codeblock-background-colour) !important;
+			}
+
+			> code {
+				display: grid;
+				max-height: unset;
+				padding-top: var(--code-padding) !important;
+				padding-right: 0px !important;
+				padding-bottom: var(--code-padding) !important;
+				padding-left: 0px !important;
+				border-radius: 0px !important;
+				background: none !important;
+				grid-template-columns: min-content auto;
+				grid-template-rows: auto;
+				overflow-x: overlay;
+				transition-duration: var(--duration-button);
+				transition-property: max-height, padding-top, padding-bottom, border-top;
+				transition-timing-function: ease-in-out;
+				white-space: var(--line-wrapping) !important;
+			}
+		}
+
+		pre.cs-pre.wrapped > code {
+			--line-wrapping: pre-wrap;
+			--line-active-wrapping: pre-wrap;
+		}
+		pre.code-styler-pre.unwrapped > code {
+			--line-wrapping: pre;
+			--line-active-wrapping: pre;
+		}
+		pre.code-styler-pre.unwrapped-inactive > code {
+			--line-wrapping: pre;
+			--line-active-wrapping: pre-wrap;
+		}
+		pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
+			--line-wrapping: var(--line-active-wrapping) !important;
+		}
+		pre.code-styler-pre.code-styler-folded > code {
+			max-height: 0 !important;
+			padding-top: 0 !important;
+			padding-bottom: 0 !important;
+		}
+
+		pre.cs-pre::before,
+		pre.cs-pre::after {
+			content: none !important;
+		}
+
+		.markdown-source-view.mod-cm6 .cm-embed-block pre.code-styler-pre {
+			margin: 0em 0px;
+			/* margin: 1em 0px; */
+		}
+
+		/** Editing Mode Body */
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container + [class*="code-styler-line"].HyperMD-codeblock-begin {
+			border-top: none !important;
+			border-top-left-radius: 0px !important;
+			border-top-right-radius: 0px !important;
+		}
+		.markdown-source-view [class*="code-styler-line"].HyperMD-codeblock-end {
+			border-bottom-left-radius: var(--border-radius);
+			border-bottom-right-radius: var(--border-radius);
+		}
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin {
+			border-top-left-radius: var(--border-radius) !important;
+			border-top-right-radius: var(--border-radius) !important
+		}
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin .code-styler-line-number {
+			border-top-left-radius: var(--border-radius) !important;
+		}
+		.code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'] {
+			overflow: hidden;
+			padding: 0 !important;
+			padding-left: var(--size-4-4) !important;
+			background: linear-gradient(90deg, var(--gradient-background-colour) var(--gradient-highlights-colour-stop), transparent 100%), var(--code-styler-codeblock-background-colour) !important;
+		}
+		.code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'][class*='language-'] {
+			background: linear-gradient(90deg, var(--language-border-colour), var(--language-border-colour) var(--language-border-width), var(--gradient-background-colour) var(--language-border-width) var(--gradient-highlights-colour-stop), transparent 100%), var(--code-styler-codeblock-background-colour) !important;
+		}
+		.code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line'][class*='language-'] .code-styler-line-number {
+			margin-left: var(--language-border-width);
+		}
+
+		/** Header styling */
+		.cs-header {
+			display: flex !important;
+			overflow: visible;
+			height: var(--container-height);
+			min-height: var(--container-min-height);
+			box-sizing: content-box;
+			padding-top: var(--header-padding);
+			margin-top: 0px !important;
+			font-size: var(--header-font-size);
+			transition: border-bottom ease-in-out var(--duration-button);
+			user-select: none;
+		}
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container {
+			padding-bottom: var(--header-separator-width);
+			padding-left: var(--language-border-width);
+			border-top: var(--code-styler-header-border);
+			border-right: var(--code-styler-header-border);
+			border-left: var(--code-styler-header-border);
+			background: linear-gradient(var(--code-styler-header-background-colour) 0%,var(--code-styler-header-background-colour) calc(100% - var(--header-separator-width)), var(--code-styler-header-separator-colour) calc(100% - var(--header-separator-width)), var(--code-styler-header-separator-colour) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-colour) !important;
+			border-top-left-radius: var(--border-radius);
+			border-top-right-radius: var(--border-radius);
+		}
+		pre.code-styler-pre .code-styler-header-container {
+			border-bottom: var(--header-separator-width) solid var(--code-styler-header-separator-colour);
+			background-color: var(--code-styler-header-background-colour);
+		}
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.code-styler-header-folded {
+			padding-bottom: var(--header-padding);
+			border-bottom: var(--code-styler-header-border);
+			border-bottom: var(--folded-bottom-border);
+			background: linear-gradient(var(--code-styler-header-background-colour) 0%,var(--code-styler-header-background-colour) 100%) var(--language-border-width) bottom/100% border-box no-repeat,var(--language-border-colour) !important;
+			border-bottom-left-radius: var(--border-radius);
+			border-bottom-right-radius: var(--border-radius);
+		}
+		pre.code-styler-pre.code-styler-folded .code-styler-header-container {
+			border-bottom: var(--folded-bottom-border);
+		}
+		.cs-header .cs-language-title {
+			display: flex;
+			height: 100%;
+			flex-direction: column;
+			align-content: center;
+			justify-content: center;
+			padding-top: calc(1em * var(--header-inner-vertical-padding));
+			padding-right: var(--header-spacing);
+			padding-bottom: calc(1em * var(--header-inner-vertical-padding));
+			padding-left: var(--header-spacing);
+			border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+			margin-right: var(--header-spacing);
+			background-color: var(--code-styler-header-language-tag-background-colour);
+			color: var(--code-styler-header-language-tag-text-colour);
+			font-size: inherit;
+			font-style: var(--code-styler-header-language-tag-text-italic, normal);
+			font-weight: var(--code-styler-header-language-tag-text-bold, normal);
+			text-align: center;
+			transition: border-radius ease-in-out var(--duration-button), padding ease-in-out var(--duration-button);
+		}
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.code-styler-header-folded .code-styler-header-language-tag,
+		pre.code-styler-pre.code-styler-folded .code-styler-header-container .code-styler-header-language-tag {
+			border-radius: var(--border-radius);
+		}
+		.code-styler-header-text,
+		.code-styler-header-external-reference > div,
+		pre.code-styler-pre .code-styler-header-external-reference > button {
+			display: flex;
+			flex-direction: column;
+			align-content: center;
+			justify-content: center;
+			padding-top: calc(1em * var(--header-inner-vertical-padding));
+			padding-bottom: calc(1em * var(--header-inner-vertical-padding));
+			padding-left: 0px;
+			color: var(--code-styler-header-title-text-colour);
+			font-size: inherit;
+			font-style: var(--code-styler-header-title-text-italic, normal);
+			font-weight: var(--code-styler-header-title-text-bold, normal);
+			transition: padding ease-in-out var(--duration-button);
+		}
+		pre.code-styler-pre .code-styler-header-external-reference > button {
+			display: inline-flex !important;
+			height: auto;
+			padding-top: calc(1em * var(--header-inner-vertical-padding)) !important;
+			padding-bottom: calc(1em * var(--header-inner-vertical-padding)) !important;
+			padding-left: 6px !important;
+			transition:  padding ease-in-out var(--duration-button), scale ease-in-out var(--duration-button), visibility var(--duration-button), opacity var(--duration-button) !important;
+		}
+		pre.code-styler-pre .code-styler-header-external-reference > button:hover {
+			scale: 1.4;
+		}
+		body .code-styler-header-container:not(:has( div > img.code-styler-icon)) .code-styler-header-language-tag {
+			border-bottom-left-radius: 0 !important;
+			border-top-left-radius: 0 !important;
+		}
+		body .code-styler-header-container:not(:has( .code-styler-header-language-tag)) .code-styler-header-text {
+			padding-left: var(--header-spacing);
+		}
+		.code-styler-header-external-reference {
+			display: contents;
+			margin-left: var(--header-spacing);
+		}
+		.code-styler-header-external-reference > div:first-child {
+			padding-left: var(--header-spacing) !important;
+		}
+		.code-styler-header-external-reference > div,
+		pre.code-styler-pre .code-styler-header-external-reference > button {
+			padding-left: 6px;
+			font-family: code-styler-nerdfont, menlo, var(--font-monospace);
+			font-size: var(--code-styler-external-reference-text-size,xx-small);
+		}
+		.code-styler-header-external-reference > div[class$=icon] {
+			font-size: var(--code-styler-external-reference-icon-size,x-small);
+		}
+		div.external-reference-repo,
+		div.external-reference-repo-icon {
+			color: var(--code-styler-header-external-reference-repository, cyan);
+		}
+		div.external-reference-ref,
+		div.external-reference-ref-icon {
+			color: var(--code-styler-header-external-reference-version, pink);
+		}
+		div.external-reference-timestamp,
+		div.external-reference-timestamp-icon {
+			color: var(--code-styler-header-external-reference-timestamp, grey);
+		}
+		div.cs-icon-container {
+			&:has(> img.cs-icon) {
+				display: inline-flex;
+				flex-direction: column;
+				align-content: center;
+				justify-content: center;
+				padding-top: calc(1em * var(--header-inner-vertical-padding));
+				padding-right: var(--header-spacing);
+				padding-bottom: calc(1em * var(--header-inner-vertical-padding));
+				padding-left: var(--header-spacing);
+				transition: padding ease-in-out var(--duration-button);
+			}
+
+			> img.cs-icon {
+				width: var(--language-icon-size);
+				height: var(--language-icon-size);
+				border: none !important;
+				margin: 0 !important;
+				filter: var(--language-icon-filter);
+			}
+		}
+
+		/** Lines */
+		pre.code-styler-pre [class^='code-styler-line-highlighted'] > .code-styler-line-text {
+			background-image: linear-gradient(90deg, var(--gradient-background-colour) 0% var(--gradient-highlights-colour-stop), var(--code-styler-codeblock-background-colour) 100%);
+		}
+		.code-styler-line-highlighted {
+			--gradient-background-colour: var(--code-styler-default-highlight-colour) !important;
+		}
+		/*! Complicated */
+		.code-styler-active-line-highlight .cm-active,
+		.code-styler-active-line-highlight-editor .cm-active {
+			background: linear-gradient(to right, var(--code-styler-active-editor-line-colour), var(--gradient-highlights-colour-stop), transparent) !important;
+		}
+		/*! Complicated */
+		.code-styler-active-line-highlight .markdown-source-view .HyperMD-codeblock.cm-active,
+		.code-styler-active-line-highlight-codeblock .markdown-source-view .HyperMD-codeblock.cm-active {
+			background: linear-gradient(to right, var(--code-styler-active-codeblock-line-colour), var(--gradient-highlights-colour-stop), var(--code-styler-codeblock-background-colour)) !important;
+		}
+
+		/** Line numbers */
+		.markdown-source-view :not(div):not([class*="HyperMD-codeblock"]) > .code-styler-line-number {
+			display: none;
+		}
+		.code-styler code > div:first-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
+			box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour);
+			transition: box-shadow ease-in-out var(--duration-button);
+		}
+		.code-styler .code-styler-folded > code > div:first-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
+			box-shadow: 0px 0px var(--code-styler-gutter-background-colour);
+		}
+		.code-styler code > div:last-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
+			box-shadow: 0px var(--code-padding) var(--code-styler-gutter-background-colour);
+		}
+		.code-styler code > div:only-child > .code-styler-line-number { /*? Maintain gutter colour when padded */
+			box-shadow: 0px calc(-1 * var(--code-padding)) var(--code-styler-gutter-background-colour),0px var(--code-padding) var(--code-styler-gutter-background-colour);
+		}
+		pre.code-styler-pre div > [class*='code-styler-line-number'],
+		.markdown-source-view div[class*="HyperMD-codeblock"] > [class*='code-styler-line-number'] {
+			width: var(--line-number-gutter-width);
+			min-width: var(--line-number-gutter-min-width);
+			padding-right: 8px;
+			padding-left: calc(4px + var(--language-border-width));
+			background-color: var(--code-styler-gutter-background-colour);
+			color: var(--code-styler-gutter-text-colour);
+			font-family: var(--font-monospace);
+			font-size: var(--code-size);
+			text-align: right;
+			user-select: none;
+		}
+		.markdown-source-view [class*="HyperMD-codeblock"] > .code-styler-line-number {
+			position: absolute;
+			left: 0;
+			display: inline-block;
+			min-width: calc(var(--line-number-gutter-min-width) - 12px);
+			height: 100%;
+			box-sizing: content-box;
+			padding-top: var(--line-number-height-correction);
+			direction: rtl;
+			overflow-x: auto;
+		}
+		.markdown-source-view .HyperMD-codeblock-begin .code-styler-line-number,
+		.markdown-source-view .HyperMD-codeblock-end .code-styler-line-number {
+			width: var(--line-number-gutter-width);
+		}
+		pre.code-styler-pre .code-styler-line-number {
+			position: sticky;
+			top: -1px;
+			left: 0;
+			border-top: var(--line-number-height-correction) solid transparent;
+			grid-column: 1;
+			white-space: nowrap;
+		}
+		pre.code-styler-pre div:last-child > .code-styler-line-number {
+			width: unset;
+		}
+		.code-styler-gutter-highlight pre.code-styler-pre [class*="code-styler-line-highlighted"] .code-styler-line-number {
+			background-color: var(--gradient-background-colour) !important;
+		}
+		.code-styler-active-line-highlight.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
+		.code-styler-active-line-highlight-codeblock.code-styler-gutter-highlight .markdown-source-view .HyperMD-codeblock[class*="code-styler-line"].cm-active .code-styler-line-number,
+		.code-styler-gutter-highlight [class*="code-styler-line-highlighted"] .code-styler-line-number {
+			background-color: rgba(0,0,0,0) !important;
+		}
+		.code-styler-gutter-active-line .cm-active .code-styler-line-number{
+			color: var(--code-styler-gutter-active-text-colour) !important;
+		}
+		.code-styler .markdown-source-view .HyperMD-codeblock:has(.code-styler-line-number) {
+			padding-left: calc(12px + var(--language-border-width) + var(--line-number-gutter-width) + var(--line-number-gutter-padding)) !important;
+		}
+		.code-styler .markdown-source-view .HyperMD-codeblock[class*='code-styler-line']::before {
+			content: none !important;
+		}
+
+		/** Line text */
+		pre.code-styler-pre > code > div[class*='code-styler-line'] {
+			display: contents !important;
+		}
+		pre.code-styler-pre .code-styler-line-text {
+			flex-basis: 100%;
+			padding-left: var(--line-number-gutter-padding);
+			grid-column: 2;
+		}
+		.HyperMD-codeblock:has(> .cm-widgetBuffer) { /*? Prevent Line Wraps */
+			white-space: nowrap;
+		}
+		.HyperMD-codeblock:has(> .cm-widgetBuffer) > .cm-hmd-codeblock { /*? Prevent Line Wraps */
+			white-space: break-spaces;
+		}
+
+		/** Scroll Bar */
+		pre.code-styler-pre.code-styler-folded::-webkit-scrollbar,
+		pre.code-styler-pre.code-styler-folded code::-webkit-scrollbar,
+		pre.code-styler-pre.hide-scroll::-webkit-scrollbar,
+		pre.code-styler-pre.hide-scroll code::-webkit-scrollbar {
+			display: none !important;
+		}
+
+		/** Buttons */
+		@keyframes outdent {
+			from {
+				margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+				clip-path: var(--polygon-in);
+			}
+			to {
+				margin-right: var(--copy-code-header-right-margin);
+				clip-path: var(--polygon-out);
+			}
+		}
+		@keyframes indent {
+			from {
+				margin-right: var(--copy-code-header-right-margin);
+				clip-path: var(--polygon-out);
+			}
+			to {
+				margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+				clip-path: var(--polygon-in);
+			}
+		}
+		@keyframes reverse-outdent {
+			from {
+				clip-path: var(--polygon-in);
+			}
+			to {
+				clip-path: var(--polygon-out);
+			}
+		}
+		@keyframes reverse-indent {
+			from {
+				clip-path: var(--polygon-out);
+			}
+			to {
+				clip-path: var(--polygon-in);
+			}
+		}
+		pre.code-styler-pre button {
+			display: unset !important;
+			padding: 0 !important;
+			border: none !important;
+			margin: 0;
+			margin-top: 0 !important;
+			margin-bottom: 0 !important;
+			background: transparent !important;
+			box-shadow: none;
+			color: var(--code-styler-button-colour) !important;
+			font-family: var(--font-interface);
+			font-size: var(--font-ui-smaller);
+			opacity: 1;
+			transition: visibility var(--duration-button), opacity var(--duration-button);
+			visibility: visible;
+		}
+		pre.code-styler-pre.code-styler-folded button,
+		pre.code-styler-pre:not(.code-styler-folded):not(:hover) button,
+		pre.code-styler-pre:not(.code-styler-folded):not(:hover) .code-styler-header-container::after {
+			opacity: 0;
+			visibility: hidden
+		}
+		.code-styler-header-container::after {
+			position: relative;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			width: 20px;
+			height: 20px;
+			margin: auto;
+			margin-right: var(--header-button-spacing);
+			background-color: var(--code-styler-button-colour);
+			content: "\200b";
+			-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' xml:space='preserve'%3E%3Cpath d='M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z'/%3E%3C/svg%3E");
+			mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' %3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+			-webkit-mask-repeat: no-repeat;
+			mask-repeat: no-repeat;
+			opacity: 1;
+			scale: 0.8;
+			transition: transform var(--duration-button) ease-out, visibility var(--duration-button), opacity var(--duration-button), scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
+			visibility: visible;
+		}
+		pre.code-styler-pre.code-styler-folded .code-styler-header-container::after,
+		.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container:not(:has(+ .HyperMD-codeblock-begin))::after {
+			transform: rotate(-90deg);
+		}
+		.code-styler-header-container:hover::after {
+			scale: 1;
+		}
+		body pre.code-styler-pre:has(.code-styler-header-container-hidden) button.copy-code-button,
+		body .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container-hidden + .HyperMD-codeblock-begin span.code-block-flair {
+			top: calc(0.5 * var(--font-text-size) * 0.875 * var(--line-height-normal)) !important;
+			--copy-code-header-right-margin: 12px;
+		}
+		body .markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.hidden + .HyperMD-codeblock-begin {
+			overflow: hidden;
+		}
+		pre.code-styler-pre button.copy-code-button {
+			top: max(calc(0.5 * var(--container-height) * 1),calc(0.5 * var(--container-min-height) * 1)) !important;
+			bottom: unset !important;
+			transform: translateY(-50%);
+		}
+		pre.code-styler-pre button.copy-code-button,
+		pre.code-styler-pre button.run-code-button, /*? Execute Code Plugin Compatibility */
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair {
+			margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
+			clip-path: var(--polygon-in);
+			will-change: margin-right, clip-path;
+		}
+		pre.code-styler-pre button.copy-code-button:not(:active),
+		pre.code-styler-pre button.run-code-button:not(:active), /*? Execute Code Plugin Compatibility */
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair:not(:active) {
+			animation: indent var(--duration-button);
+		}
+		pre.code-styler-pre button.copy-code-button:hover,
+		pre.code-styler-pre button.run-code-button:hover, /*? Execute Code Plugin Compatibility */
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair:hover{
+			margin-right: var(--copy-code-header-right-margin);
+			animation: outdent var(--duration-button);
+			background-color: transparent;
+			clip-path: var(--polygon-out);
+		}
+		pre.code-styler-pre button.copy-code-button:active,
+		pre.code-styler-pre button.run-code-button:active, /*? Execute Code Plugin Compatibility */
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair:active {
+			scale: 0.95;
+			transition: scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
+		}
+		pre.code-styler-pre button.copy-code-button::before,
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair::before {
+			display: inline-block;
+			width: 14px;
+			height: 14px;
+			padding-right: 4px;
+			background-color: var(--code-styler-button-colour);
+			content: "\200b";
+			-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z'/%3E%3Cpath d='M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+			mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z'/%3E%3Cpath d='M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z' data-name='&lt;Transparent Rectangle&gt;'/%3E%3C/svg%3E");
+			-webkit-mask-repeat: no-repeat;
+			mask-repeat: no-repeat;
+			vertical-align: 1px;
+		}
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair {
+			position: absolute;
+			top: min(calc(-0.5 * var(--container-height) * 1.1 - var(--header-separator-width)),calc(-0.5 * var(--container-min-height) * 1.1 - var(--header-separator-width))) !important;
+			right: 0;
+			padding: 0;
+			margin-top: 0 !important;
+			margin-bottom: 0 !important;
+			font-size: 0;
+			line-height: initial !important;
+			transform: translateY(-50%);
+			visibility: hidden;
+		}
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair > * {
+			width: 0px;
+		}
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair::before {
+			font-size: var(--font-ui-smaller);
+			opacity: 1;
+			vertical-align: -1px;
+			visibility: visible;
+		}
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair::after {
+			color: var(--code-styler-button-colour);
+			content: 'Copy';
+			font-size: var(--font-ui-smaller);
+			opacity: 1;
+			visibility: visible;
+		}
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock-begin.code-styler-line {
+			overflow: visible;
+		}
+
+		/** Links */
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line .code-styler-comment-link {
+			display: inline;
+		}
+		.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line .code-styler-comment-link > p {
+			display: inline;
+		}
+	}
+}

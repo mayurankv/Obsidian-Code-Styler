@@ -1,0 +1,110 @@
+/** Define CSS Variables */
+body {
+	--code-styler-inline-font-weight: 400;
+	--code-styler-inline-title-font-weight: 800;
+	--code-styler-inline-border-radius: 6px;
+	--code-styler-inline-padding-vertical: 5px;
+	--code-styler-inline-padding-horizontal: 5px;
+	--code-styler-inline-margin-horizontal: 0px;
+
+	--code-styler-inline-colour: var(--code-normal);
+	--code-styler-inline-colour-parameters: var(--code-comment);
+	--code-styler-inline-colour-active: var(--code-normal);
+	--code-styler-inline-background-colour: var(--code-background);
+}
+
+body.cs-plugin {
+	.cs-code-inline {
+		.cm-s-obsidian span.cm-inline-code,
+		.markdown-rendered :not(pre) > code:not([class*="blur"]),
+		.reveal :not(pre) > code:not([class*="blur"]),
+		code.cs-settings {
+			padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal) !important;
+			border-radius: var(--code-styler-inline-border-radius) !important;
+			margin: 0px var(--code-styler-inline-margin-horizontal) !important;
+			background-color: var(--code-styler-inline-background-colour) !important;
+			color: var(--code-styler-inline-colour);
+			font-weight: var(--code-styler-inline-font-weight);
+		}
+	}
+
+	.cm-s-obsidian {
+		span.cm-formatting-code { // Standalone backticks
+			display: inline !important;
+			color: var(--code-styler-inline-colour-active);
+		}
+
+		span.cs-header ~ span.cm-inline-code:not(.cm-formatting-code) {
+			padding-left: 0px !important;
+			border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
+			margin-left: 0px !important;
+		}
+
+		span.cs-header,
+		span.cm-formatting-code:has(+ span.cm-inline-code:not(.cm-formatting-code)) { // First backtick
+			padding-right: 0px !important;
+			padding-left: var(--code-styler-inline-padding-horizontal) !important;
+			border-radius: var(--code-styler-inline-border-radius) 0px 0px var(--code-styler-inline-border-radius) !important;
+			margin-right: 0px !important;
+			margin-left: var(--code-styler-inline-margin-horizontal) !important;
+			color: var(--code-styler-inline-colour-active);
+		}
+
+		span.cm-inline-code:not(.cm-formatting-code) + span.cm-formatting-code {// Last backtick
+			padding-right: var(--code-styler-inline-padding-horizontal) !important;
+			padding-left: 0px !important;
+			border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
+			margin-right: var(--code-styler-inline-margin-horizontal) !important;
+			margin-left: 0px !important;
+			color: var(--code-styler-inline-colour-active);
+		}
+
+		span.cm-inline-code .code-styler-inline-parameters {
+			color: var(--code-comment);
+		}
+	}
+
+	span.cs-inline-parameters {
+		color: var( --code-styler-inline-colour-parameters);
+	}
+
+	span.cs-header {
+		> span.cs-icon-container > img.cs-icon:not([class*="emoji"]) {
+			display: inline !important;
+			height: calc(var(--code-size) * 1.2);
+			margin-bottom: 2px !important;
+			vertical-align: middle;
+		}
+
+		> span.cs-icon-container:has( > img.cs-icon:not([class*="emoji"])):not(.cs-hidden) ~ span {
+			&.cs-title,
+			&.cs-language-title {
+				margin-left: 0.5em,
+			}
+		}
+
+		span.cs-title {
+			color: var(--code-styler-inline-title-colour);
+			font-weight: var(--code-styler-inline-title-font-weight);
+		}
+
+		span:has( > img.code-styler-inline-icon) {
+			padding-right: 8px;
+		}
+
+		.cs-hidden {
+			display: none;
+		}
+
+		&:has(> span.cs-title)::after,
+		&:has(> span.cs-language-title)::after {
+			color: var(--code-styler-inline-title-color);
+			content: '\FF5C';
+		}
+
+	}
+
+	.reveal img.cs-icon {
+		margin: inherit;
+	}
+}

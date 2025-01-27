@@ -9,12 +9,12 @@ export function parseInlineCodeParameters(
 ): InlineCodeParameters {
 	inlineCodeParametersLine = inlineCodeParametersLine.trim()
 
-	const separatedParameters: Array<string> = separateParameters(inlineCodeParametersLine.slice(1,-1).trim())
+	const separatedParameters: Array<string> = separateParameters(":"+inlineCodeParametersLine.slice(1,-1).trimEnd())
 
 	const inlineCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<InlineCodeParameters>, parameterSection: string, idx: number) => {
-			if ((idx === 0) && (parameterSection.indexOf(" ") === -1)) //TODO: Exclude any symbols existing
-				return { ...result, language: parameterSection.toLowerCase() }
+			if ((idx === 0) && (parameterSection.indexOf(" ") === -1) && parameterSection !== ":") //TODO: Exclude any symbols existing
+				return { ...result, language: parameterSection.slice(1).toLowerCase() }
 
 			for (const parameterKey of ["title", "reference", "ref"])
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
@@ -37,6 +37,8 @@ export function parseInlineCodeParameters(
 			for (const parameterShorthand of INLINE_PARAMETERS_SHORTHAND as Array<keyof InlineCodeParameters>)
 				if (parameterSection === parameterShorthand)
 					return { ...result, ...inferInlineShorthand(parameterShorthand) }
+
+			return result
 		},
 		{},
 	)

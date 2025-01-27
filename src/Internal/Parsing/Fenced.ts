@@ -68,6 +68,8 @@ export function parseFenceCodeParameters(
 					"hl",
 					result,
 				)
+
+			return result
 		},
 		{ highlights: { default: {lineNumbers: [], plainText: [], regularExpressions: []}, alternative: {} } },
 	)

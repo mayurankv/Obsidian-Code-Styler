@@ -11,7 +11,7 @@ export function areRangesInteracting(
 	return state.selection.ranges.some((range: SelectionRange) => isRangeInteracting(from, to, range))
 }
 
-function isRangeInteracting(
+export function isRangeInteracting(
 	from: number,
 	to: number,
 	range: SelectionRange,

@@ -23,10 +23,6 @@ export const unhideFold: StateEffectType<Range<Decoration>> = StateEffect.define
 
 export const removeFold: StateEffectType<Array<string>> = StateEffect.define();
 
-export const foldAll: StateEffectType<{
-	toFold?: boolean,
-}> = StateEffect.define();
+export const foldAll: StateEffectType<{ toFold: boolean | null }> = StateEffect.define();
 
-export const rerender: StateEffectType<{
-	pos: number
-}> = StateEffect.define();
+export const rerender: StateEffectType<{ pos: number }> = StateEffect.define();

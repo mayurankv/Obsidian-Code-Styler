@@ -17,7 +17,12 @@ export function createHeaderElement(
 ): HTMLElement {
 	const fenceHeaderElement = createEl(
 		fence ? "div" : "span",
-		{ cls: PREFIX + "header-fence" },
+		{
+			cls: [
+				PREFIX + "header",
+				...( fence ? [] : ["cm-inline-code"])
+			]
+		},
 	);
 
 	fenceHeaderElement.append(
@@ -57,20 +62,21 @@ function createIcon(
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	const iconUrl = getLanguageIcon(codeParameters.language, plugin)
+	console.log(codeParameters.icon)
 	const imgContainer = createEl(
 		fence ? "div" : "span",
-		{cls: PREFIX+"icon-container"}
+		{
+			cls: [
+				PREFIX + "icon-container",
+				...(codeParameters.icon && (iconUrl !== null) ? [] : [PREFIX + "hidden"]),
+			],
+		},
 	)
 
 	imgContainer.appendChild(
 		createEl(
 			"img",
-			{
-				cls: [
-					PREFIX + "icon",
-					...(codeParameters.icon ? [] : [PREFIX + "hidden"]),
-				]
-			},
+			{ cls: PREFIX + "icon" },
 			(imgElement) => imgElement.src = (iconUrl === null ? "" : iconUrl),
 		)
 	)
@@ -86,7 +92,7 @@ function createLanguageTitle(
 		fence ? "div" : "span",
 		{
 			cls: [
-				PREFIX + "lanugage-title",
+				PREFIX + "language-title",
 				...(codeParameters.language !== "" ? [] : [PREFIX + "hidden"]),
 			],
 			text: getLanguageName(codeParameters.language)
@@ -262,10 +268,9 @@ function createExecuteCodeTitle(
 		fence ? "div" : "span",
 		{
 			cls: [
-				PREFIX + "exeucte-code-title",
+				PREFIX + "execute-code-title",
 				...(false ? [] : [PREFIX + "hidden"]),
 			],
-			text: codeParameters.title
 		},
 	)
 }

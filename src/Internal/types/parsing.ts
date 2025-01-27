@@ -13,7 +13,7 @@ export class CodeParameters {
 	language: string = "";
 	title: string = "";
 	reference: string = "";
-	icon: boolean = false;
+	icon: boolean = true;
 	ignore: boolean = false;
 }
 

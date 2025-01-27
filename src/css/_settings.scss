@@ -1,0 +1,7 @@
+$prefix: "cs-";
+
+@mixin prefixed($name) {
+	.#{$prefix}#{$name} {
+		@content;
+	}
+}

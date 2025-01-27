@@ -72,7 +72,7 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 			--gradient-highlights-colour-stop: ${themeSettings.advanced.gradientHighlights?themeSettings.advanced.gradientHighlightsColourStop:"100%"};
 			--header-font-size: ${themeSettings.header.fontSize}px;
 			--line-wrapping: ${themeSettings.codeblock.unwrapLines?"pre":"pre-wrap"};
-			--code-styler-inline-font-weight: ${themeSettings.inline.fontWeight}00;
+			=--code-styler-inline-font-weight: ${themeSettings.inline.fontWeight}00;
 			--code-styler-inline-border-radius: ${themeSettings.inline.curvature}px;
 			--code-styler-inline-padding-vertical: ${themeSettings.inline.paddingVertical}px;
 			--code-styler-inline-padding-horizontal: ${themeSettings.inline.paddingHorizontal}px;

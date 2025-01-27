@@ -47,7 +47,7 @@ function buildInlineCodeDecoration(
 	inlineCodeInfo: InlineCodeInfo | null,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
-	if (!inlineCodeInfo)
+	if (!inlineCodeInfo || inlineCodeInfo.parameters.value.ignore)
 		return []
 
 	let decorations: Array<Range<Decoration>> = []
