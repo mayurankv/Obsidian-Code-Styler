@@ -16,4 +16,8 @@ export class SettingsTab extends PluginSettingTab {
 
 		super(app, plugin)
 	}
+
+	display() {
+		
+	}
 }

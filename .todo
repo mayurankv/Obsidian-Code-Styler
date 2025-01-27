@@ -5,6 +5,7 @@ Refactor:
 	☐ Settings interfaces
 	☐ Adjust for special languages
 	☐ Sort files
+	☐ README and documentation
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

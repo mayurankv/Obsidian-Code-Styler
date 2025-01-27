@@ -9,12 +9,18 @@ export function parseInlineCodeParameters(
 ): InlineCodeParameters {
 	inlineCodeParametersLine = inlineCodeParametersLine.trim()
 
-	const separatedParameters: Array<string> = separateParameters(":"+inlineCodeParametersLine.slice(1,-1).trimEnd())
+	const separatedParameters: Array<string> = separateParameters(inlineCodeParametersLine.slice(1,-1).trimEnd())
 
 	const inlineCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<InlineCodeParameters>, parameterSection: string, idx: number) => {
-			if ((idx === 0) && (parameterSection.indexOf(" ") === -1) && parameterSection !== ":") //TODO: Exclude any symbols existing
-				return { ...result, language: parameterSection.slice(1).toLowerCase() }
+			if (  //TODO: Exclude any symbols existing
+				(idx === 0) &&
+				(parameterSection.indexOf(" ") === -1) &&
+				(parameterSection.indexOf(":") === -1) &&
+				(parameterSection.indexOf("'") === -1) &&
+				(parameterSection.indexOf("\"") === -1)
+			)
+				return { ...result, language: parameterSection.toLowerCase() }
 
 			for (const parameterKey of ["title", "reference", "ref"])
 				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))

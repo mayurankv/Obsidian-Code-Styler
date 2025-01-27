@@ -27,7 +27,13 @@ export function parseFenceCodeParameters(
 
 	const fenceCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<FenceCodeParameters>, parameterSection: string, idx: number) => {
-			if (idx === 0) //TODO: Check whether this matches how Obsidian parses
+			if (  //TODO: Check whether this matches how Obsidian parses
+				(idx === 0) &&
+				(parameterSection.indexOf(" ") === -1) &&
+				(parameterSection.indexOf(":") === -1) &&
+				(parameterSection.indexOf("'") === -1) &&
+				(parameterSection.indexOf("\"") === -1)
+			)
 				return { ...result, language: parameterSection.toLowerCase() }
 
 			if ((idx === 1) && rmarkdownParameters)

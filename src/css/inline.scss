@@ -74,6 +74,8 @@ body.cs-plugin {
 			height: calc(var(--code-size) * 1.2);
 			margin-bottom: 2px !important;
 			vertical-align: middle;
+			width: auto !important;
+			margin: unset;
 		}
 
 		> span.cs-icon-container:has( > img.cs-icon:not([class*="emoji"])):not(.cs-hidden) ~ span {

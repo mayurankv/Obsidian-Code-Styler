@@ -88,5 +88,5 @@ async function markupInlineCodeElement(
 	if (!renderedCodeElement)
 		throw new Error("Could not render highlighted code");
 
-	inlineCodeElement.innerHTML = renderedCodeElement.innerHTML + "&ZeroWidthSpace;";
+	inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
 }
