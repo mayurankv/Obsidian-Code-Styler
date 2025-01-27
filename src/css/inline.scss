@@ -1,25 +1,4 @@
-/** Define CSS Variables */
-body {
-
-	--code-styler-inline-font-weight: 400;
-	--code-styler-inline-title-font-weight: 800;
-
-	--code-styler-inline-colour: var(--code-normal);
-	--cs-code-parameters-colour: var(--code-comment);
-	--code-styler-inline-background-colour: var(--code-background);
-}
-
-
 body.cs-plugin {
-	--cs-code-background-colour: var(--code-background);
-	--cs-code-colour: var(--code-normal);
-	--cs-code-fence-radius: 10px;
-	--cs-title-color: gray;
-	--cs-title-weight: 400;
-	--cs-language-title-color: gray;
-	--cs-language-title-weight: 400;
-
-	--cs-code-inline-radius: 10px;
 
 	.markdown-rendered :not(pre) > code:not([class*="blur"]) {
 		display: inline;

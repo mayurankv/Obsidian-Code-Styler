@@ -21,6 +21,7 @@ const context = await esbuild.context({
 		"src/styles.scss",
 	],
 	bundle: true,
+	minify: true,
 	external: [
 		"obsidian",
 		"electron",

@@ -1,7 +1,7 @@
 import { EditorState, Extension, Line, Range, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
-import { editorInfoField } from "obsidian";
+import { editorInfoField, livePreviewState } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
 import { buildFenceCodeDecorations } from "src/Internal/Detecting/LivePreview/fenced";
 import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
@@ -16,7 +16,6 @@ export function getFenceCodemirrorExtensions(
 ) {
 	return [
 		createFenceCodeDecorationsViewPlugin(plugin),
-		// createFenceCodeDecorationsStateField(plugin),
 	]
 }
 
@@ -65,43 +64,6 @@ export function createFenceCodeDecorationsViewPlugin(
 			) => value.decorations,
 		}
 	);
-}
-
-function createFenceCodeDecorationsStateField(
-	plugin: CodeStylerPlugin,
-) {
-	return StateField.define<DecorationSet>({
-		create(
-			state: EditorState,
-		): DecorationSet {
-			return buildFenceCodeDecorations(
-				state,
-				plugin,
-				buildHeaderDecorations,
-				buildLineDecorations,
-				buildExtraDecoration,
-			);
-		},
-
-		update(
-			value: DecorationSet,
-			transaction: Transaction,
-		): DecorationSet {
-			return buildFenceCodeDecorations(
-				transaction.state,
-				plugin,
-				buildHeaderDecorations,
-				buildLineDecorations,
-				buildExtraDecoration,
-			);
-		},
-
-		provide(
-			field: StateField<DecorationSet>,
-		): Extension {
-			return EditorView.decorations.from(field);
-		}
-	});
 }
 
 function buildHeaderDecorations(

@@ -1,7 +1,7 @@
 Refactor:
-	☐ Live Preview
+	☐ Live Preview (Fence)
 	☐ SettingsTabs
-	☐ Styles + CSS + Applying settings
+	☐ Style (!Inline)s + CSS (!Inline) + Applying settings (All)
 	☐ Settings interfaces
 	☐ Adjust for special languages
 	☐ Sort files
@@ -16,6 +16,10 @@ Refactor Issues:
 
 	☐ When marking u8p highlights (as html), ensure in theme highlights
 	☐ OR when marking up highlights (as html), add new shades automatically to highlight keys
+
+Plugins Interesting:
+	☐ https://github.com/MrGVSV/obsidian-github-embeds embeds
+	☐ https://github.com/mugiwara85/CodeblockCustomizer features
 
 Clean Up:
 	☐ Clean up and tidy Fenced
