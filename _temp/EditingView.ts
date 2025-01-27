@@ -169,56 +169,6 @@ export function createCodeblockCodeMirrorExtensions(
 
 	//!====================================================================
 
-	function buildLineDecorations(state: EditorState): DecorationSet {
-		const builder = new RangeSetBuilder<Decoration>();
-
-		if (isSourceMode(state) || isFileIgnored(state))
-			return Decoration.none;
-
-		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
-			const foldStart = state.doc.lineAt(iter.from);
-			const startDelimiter = testOpeningLine(foldStart.text.toString());
-			const codeblockParameters = iter.value.spec.widget.codeblockParameters;
-
-			let foldEnd: Line | null = null;
-
-			builder.add(foldStart.from, foldStart.from, Decoration.line(
-				{
-					attributes: {
-						style: `--line-number-gutter-width: ${lineNumberMargin ? lineNumberMargin + "px" : "calc(var(--line-number-gutter-min-width) - 12px)"};`,
-						class: "code-styler-line" + (["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language)) ? "" : ` language-${codeblockParameters.language}`)
-					}
-				}));
-
-			for (let i = foldStart.number + 1; i <= state.doc.lines; i++) {
-				const line = state.doc?.line(i);
-				if (!line)
-					break;
-
-				const lineText = line.text.toString();
-				if (testOpeningLine(lineText) === startDelimiter) {
-					foldEnd = line;
-					break;
-				}
-				builder.add(
-					line.from,
-					line.from,
-					Decoration.line(
-						{
-							attributes: {
-								style: `--line-number-gutter-width: ${lineNumberMargin ? lineNumberMargin + "px" : "calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language))) ? "code-styler-line" : getLineClass(codeblockParameters, i - foldStart.number, line.text).join(" ")) + (["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language)) ? "" : ` language-${codeblockParameters.language}`)
-							}
-						}));
-
-
-				if (codeblockParameters.language === "markdown")
-					continue;
-				buildCommentDecorations(state, line, builder, plugin);
-			}
-		}
-		return builder.finish();
-	}
-
 	function convertReaddFold(transaction: Transaction, readdLanguages: Array<string>) {
 		const addEffects: Array<StateEffect<unknown>> = [];
 		for (let iter = (transaction.state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) { //TODO (@mayurankv) Refactor: Try and make this startState
@@ -243,7 +193,7 @@ export function createCodeblockCodeMirrorExtensions(
 		const addEffects: Array<StateEffect<unknown>> = [];
 		const reset = (typeof toFold === "undefined");
 		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
-			if (iter.value.spec.widget.hidden)
+			if (!iter.value.spec.widget.visible)
 				continue;
 			const folded = iter.value.spec.widget.folded;
 			const defaultFold = iter.value.spec.widget.codeblockParameters.fold.enabled;

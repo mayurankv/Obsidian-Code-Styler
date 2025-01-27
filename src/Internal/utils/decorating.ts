@@ -17,7 +17,7 @@ export function getLineClasses(
 	const classList = [
 		PREFIX + "line",
 		...Object.entries({ default: fenceCodeParameters.highlights.default, ...fenceCodeParameters.highlights.alternative }).filter(
-			([highlightName, highlights]: [string, Highlights]) => toHighlight(highlights, lineNumber, line)
+			([highlightName, highlights]: [string, Highlights]) => toHighlight(highlights, lineNumber + fenceCodeParameters.lineNumbers.offset, line)
 		).map(
 			([highlightName, highlights]: [string, Highlights]) => `${PREFIX}highlighted-${toKebabCase(highlightName)}`
 		),

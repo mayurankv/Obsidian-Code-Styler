@@ -3,7 +3,7 @@ import { removeBoundaryQuotes } from "./text";
 
 const MARKDOWN_REGEX = /\[(.*?)\]\((.+?)\)/;
 const WIKI_REGEX = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/;
-const URL_REGEX = /^(?:(?:https?|file):\/\/|.+\.(?:com|io|ai|gov|co\.uk))/;
+const URL_REGEX = /^(?:(?:https?|file):\/\/[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+|[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+\.(?:com|io|ai|gov|co\.uk))/; // !\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%
 
 export function separateParameters(
 	parametersLine: string,
@@ -49,8 +49,9 @@ export function parseLinks(
 ): Array<LinkInfo> {
 	const links: Array<LinkInfo> = []
 
+	const markdownRegex = new RegExp(MARKDOWN_REGEX.source, "g")
 	let markdownLinkMatch;
-	while ((markdownLinkMatch = new RegExp(MARKDOWN_REGEX.source, "g").exec(linkText)) !== null) {
+	while ((markdownLinkMatch = markdownRegex.exec(linkText)) !== null) {
 		links.push({
 			title: markdownLinkMatch[1] !== ""
 				? markdownLinkMatch[1].trim()
@@ -62,8 +63,9 @@ export function parseLinks(
 		});
 	}
 
+	const wikiRegex = new RegExp(WIKI_REGEX.source, "g")
 	let wikiLinkMatch;
-	while ((wikiLinkMatch = new RegExp(WIKI_REGEX.source, "g").exec(linkText)) !== null) {
+	while ((wikiLinkMatch = wikiRegex.exec(linkText)) !== null) {
 		links.push({
 			title: wikiLinkMatch[2]
 				? wikiLinkMatch[2].trim()
@@ -75,8 +77,9 @@ export function parseLinks(
 		});
 	}
 
+	const urlRegex = new RegExp(URL_REGEX.source, "g")
 	let urlLinkMatch;
-	while ((urlLinkMatch = new RegExp(URL_REGEX.source, "g").exec(removeBoundaryQuotes(linkText).trim())) !== null) {
+	while ((urlLinkMatch = urlRegex.exec(removeBoundaryQuotes(linkText).trim())) !== null) {
 		links.push({
 			title: urlLinkMatch[0],
 			reference: urlLinkMatch[0],

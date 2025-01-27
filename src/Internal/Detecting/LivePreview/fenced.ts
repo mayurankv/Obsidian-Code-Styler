@@ -8,6 +8,7 @@ import { LineNumberWidget } from "src/Internal/Decorating/LivePreview/codemirror
 import { parseFenceCodeParameters } from "src/Internal/Parsing/fenced";
 import { CommentInfo, HeaderInfo } from "src/Internal/types/detecting";
 import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
+import { getLineClasses } from "src/Internal/utils/decorating";
 import { cleanFenceCodeParametersLine } from "src/Internal/utils/detecting";
 import { parseLinks } from "src/Internal/utils/parsing";
 import CodeStylerPlugin from "src/main";
@@ -15,19 +16,24 @@ import CodeStylerPlugin from "src/main";
 export function buildFenceCodeDecorations(
 	state: EditorState,
 	plugin: CodeStylerPlugin,
-	buildHeaderDecoration: (
+	buildHeaderDecorations: (
 		state: EditorState,
-		headerInfo: HeaderInfo | null,
+		position: number,
+		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
-	buildLineDecoration: (
+	buildLineDecorations: (
 		state: EditorState,
-		headerInfo: LineInfo | null,
+		position: number,
+		lineText: string,
+		lineNumber: number,
+		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
-	buildFooterDecoration: (
+	buildExtraDecorations: (
 		state: EditorState,
-		headerInfo: HeaderInfo | null,
+		syntaxNode: SyntaxNodeRef,
+		line: Line,
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
 ): DecorationSet {
@@ -38,91 +44,74 @@ export function buildFenceCodeDecorations(
 
 	let fenceCodeParameters: FenceCodeParameters = new FenceCodeParameters({})
 	let lineNumber = 0
+	let line: Line
 
 	syntaxTree(state).iterate({
 		enter: (syntaxNode) => {
-			if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
-				lineNumber = 0
+			const decorations = []
 
-				fenceCodeParameters = parseFenceCodeParameters(cleanFenceCodeParametersLine(state.doc.lineAt(syntaxNode.from).text.toString()), plugin)
+			if (syntaxNode.type.name.includes("HyperMD-codeblock"))
+				line = state.doc.lineAt(syntaxNode.from);
+
+			if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
+				lineNumber = 0;
+
+				fenceCodeParameters = parseFenceCodeParameters(
+					cleanFenceCodeParametersLine(line.text.toString()),
+					plugin,
+				)
+
+				if (!isSourceMode(state) || !fenceCodeParameters.ignore)
+					decorations.push(
+						...buildHeaderDecorations(
+							state,
+							syntaxNode.from,
+							fenceCodeParameters,
+							plugin,
+						)
+					)
 
 			} else if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
-				lineNumber = 0
-				// console.log("end", syntaxNode.from, params)
+				lineNumber = -1;
 
 			}
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-				builder.add(
-					syntaxNode.from,
-					syntaxNode.from,
-					Decoration.line({
-						attributes: {
-							style: "",
-							class: PREFIX + "line",
-						}
-					})
-				)
-				builder.add(
-					syntaxNode.from,
-					syntaxNode.from,
-					Decoration.widget({
-						widget: new LineNumberWidget(
+				if (!isSourceMode(state) || !fenceCodeParameters.ignore)
+					decorations.push(
+						...buildLineDecorations(
+							state,
+							syntaxNode.from,
+							line.text.toString(),
 							lineNumber,
 							fenceCodeParameters,
+							plugin,
 						)
-					})
-				)
+					)
 
 				lineNumber += 1
 			}
+
+			if (lineNumber !== 0)
+				decorations.push(
+					...buildExtraDecorations(
+						state,
+						syntaxNode,
+						line,
+						plugin,
+					)
+				)
+
+			if (decorations.length > 0)
+				decorations.sort(
+					(a, b) => (a.from === b.from)
+						? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
+						: a.from < b.from ? -1 : 1
+				).forEach((range) => builder.add(range.from, range.to, range.value))
 		}
-		// enter: (syntaxNode) => buildLineDecoration(
-		// 		state,
-		// 		getLineInfo(state, syntaxNode),
-		// 		plugin,
-		// 	).sort(
-		// 	(a, b) => (a.from === b.from)
-		// 		? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
-		// 		: a.from < b.from ? -1 : 1
-		// ).forEach(
-		// 	({from, to, value}) => builder.add(from, to, value),
-		// ),
 	});
 
 	return builder.finish();
-}
-
-function getHeaderInfo(
-	state: EditorState,
-	syntaxNode: SyntaxNodeRef,
-): HeaderInfo | null {
-	if (!syntaxNode.type.name.includes("HyperMD-codeblock-begin"))
-		return null
-
-	const startLine = state.doc.lineAt(syntaxNode.from);
-	const fenceCodeParametersLine = cleanFenceCodeParametersLine(startLine.text.toString())
-
-	return {
-		fenceCodeParametersLine: fenceCodeParametersLine,
-		position: startLine.from
-	}
-}
-
-function getLineInfo(
-	state: EditorState,
-	syntaxNode: SyntaxNodeRef,
-): LineInfo | null {
-	if (!syntaxNode.type.name.includes("HyperMD-codeblock-begin"))
-		return null
-
-	const startLine = state.doc.lineAt(syntaxNode.from);
-	const fenceCodeParametersLine = cleanFenceCodeParametersLine(startLine.text.toString())
-
-	return {
-		fenceCodeParametersLine: fenceCodeParametersLine,
-		position: startLine.from
-	}
 }
 
 export function buildCommentDecorations(
@@ -163,7 +152,6 @@ function getCommentInfo(
 	if (!syntaxNode.type.name.includes("comment_hmd-codeblock"))
 		return null
 
-	const commentText = state.sliceDoc(syntaxNode.from, syntaxNode.to);
 	const linksInfo = parseLinks(commentText)
 
 	const commentLinksInfo = linksInfo.map((linkInfo: LinkInfo) => {
