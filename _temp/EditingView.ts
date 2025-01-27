@@ -279,7 +279,7 @@ export function editingDocumentFold(view: EditorView, toFold?: boolean) {
 }
 
 
-function foldRegion({from: foldFrom, to: foldTo, value: {spec: {language}}}: {from: number, to: number,v alue: {spec: {language: string}}}): Range<Decoration> {
+function foldRegion({from: foldFrom, to: foldTo, value: {spec: {language}}}: {from: number, to: number,value: {spec: {language: string}}}): Range<Decoration> {
 	return foldDecoration(language).range(foldFrom,foldTo);
 }
 function unfoldRegion({from: foldFrom, to: foldTo}: {from: number, to: number}) {

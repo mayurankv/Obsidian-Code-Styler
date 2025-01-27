@@ -2,7 +2,9 @@ Refactor:
 	☐ Live Preview (Fence)
 	☐ SettingsTabs
 	☐ Style (!Inline)s + CSS (!Inline) + Applying settings (All)
+		☐ Use https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses
 	☐ Settings interfaces
+	☐ Canvas parsing
 	☐ Adjust for special languages
 	☐ Sort files
 	☐ README and documentation
