@@ -3,7 +3,7 @@ import { removeBoundaryQuotes } from "./text";
 
 const MARKDOWN_REGEX = /\[(.*?)\]\((.+?)\)/;
 const WIKI_REGEX = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/;
-const URL_REGEX = /^(?:(?:https?|file):\/\/[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+|[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+\.(?:com|io|ai|gov|co\.uk))/; // !\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%
+const URL_REGEX = /^(?:(?:https?|file|zotero):\/\/[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+|[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+\.(?:com|io|ai|gov|co\.uk))/; // !\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%
 
 export function separateParameters(
 	parametersLine: string,
