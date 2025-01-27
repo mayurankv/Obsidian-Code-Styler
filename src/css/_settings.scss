@@ -5,3 +5,9 @@ $prefix: "cs-";
 		@content;
 	}
 }
+
+body.cs-plugin {
+	.cs-hidden {
+		display: none !important;
+	}
+}

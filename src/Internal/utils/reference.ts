@@ -5,7 +5,7 @@ import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_INFO_SUFFIX, EXTERNAL_REFE
 import { Cache, IdCache, Reference, ReferenceByFile } from "../types/reference";
 import { getLineLimits, parseExternalReference, parseReferenceParameters } from "../Parsing/reference";
 import { getFileContentLines } from "./rendered";
-import { rerenderRenderedView } from "src/Interface/View/rendered";
+import { rerenderRenderedView } from "src/Internal/Interface/View/rendered";
 import { isUrl } from "./parsing";
 
 export async function getReference(

@@ -1,6 +1,6 @@
 import { Plugin} from "obsidian";
 import { CodeStylerSettings } from "./Internal/types/settings";
-import { SettingsTab } from "./Interface/Settings/settingsTab";
+import { SettingsTab } from "./Internal/Interface/Settings/settingsTab";
 import { renderedInlineCodeDetecting } from "./Internal/Detecting/Rendered/inline";
 import { renderedFencedCodeDetecting } from "./Internal/Detecting/Rendered/fenced";
 import { toPostProcess } from "./Internal/utils/rendered";
@@ -9,9 +9,9 @@ import { renderedInlineCodeDecorating, renderedInlineCodeUndecorating } from "./
 import { DEFAULT_SETTINGS } from "./Internal/constants/settings";
 import { convertSettings } from "./Internal/utils/settings";
 import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH, REFERENCE_CODEBLOCK } from "./Internal/constants/reference";
-import { registerCommands } from "./Interface/Actions/commands";
+import { registerCommands } from "./Internal/Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
-import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./Interface/View/rendered";
+import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./Internal/Interface/View/rendered";
 import { addModes } from "./Internal/Decorating/LivePreview/codemirror/modes";
 import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
 import { manageExternalReferencedFiles } from "./Internal/utils/reference";

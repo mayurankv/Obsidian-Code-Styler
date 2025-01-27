@@ -5,7 +5,7 @@ import { getLanguageIcon, getLanguageName } from "../utils/decorating";
 import { FOLD_PLACEHOLDER, GIT_ICONS, SITE_ICONS, STAMP_ICON, UPDATE_ICON } from "../constants/decoration";
 import { MarkdownPostProcessorContext, MarkdownRenderer } from "obsidian";
 import { isUrl } from "../utils/parsing";
-import { rerenderCodeElement } from "src/Interface/Actions/clicks";
+import { rerenderCodeElement } from "src/Internal/Interface/Actions/clicks";
 import { updateExternalReference } from "../utils/reference";
 import { Reference } from "../types/reference";
 
@@ -21,7 +21,7 @@ export function createHeaderElement(
 			cls: [
 				PREFIX + "header",
 				...( fence ? [] : ["cm-inline-code"])
-			]
+			],
 		},
 	);
 
@@ -34,6 +34,7 @@ export function createHeaderElement(
 		createLanguageTitle(
 			codeParameters,
 			fence,
+			plugin,
 		),
 		createNamedTitle(
 			codeParameters,
@@ -51,9 +52,46 @@ export function createHeaderElement(
 			fence,
 			plugin,
 		),
+		createHeaderSeparator(
+			codeParameters,
+			fence,
+			plugin,
+		)
 	)
 
 	return fenceHeaderElement
+}
+
+export function createFooterElement(
+	codeParameters: CodeParameters,
+	fence: boolean,
+	sourcePath: string,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	const fenceFooterElement = createEl(
+		fence ? "div" : "span",
+		{
+			cls: [
+				PREFIX + "footer",
+				...(fence ? [] : ["cm-inline-code"]),
+			],
+		},
+	);
+
+	fenceFooterElement.append(
+		createFooterSeparator(
+			codeParameters,
+			fence,
+			plugin,
+		),
+		createCopyIcon(
+			codeParameters,
+			fence,
+			plugin,
+		),
+	)
+
+	return fenceFooterElement
 }
 
 function createIcon(
@@ -62,7 +100,6 @@ function createIcon(
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	const iconUrl = getLanguageIcon(codeParameters.language, plugin)
-	console.log(codeParameters.icon)
 	const imgContainer = createEl(
 		fence ? "div" : "span",
 		{
@@ -87,6 +124,7 @@ function createIcon(
 function createLanguageTitle(
 	codeParameters: CodeParameters,
 	fence: boolean,
+	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	return createEl(
 		fence ? "div" : "span",
@@ -271,6 +309,57 @@ function createExecuteCodeTitle(
 				PREFIX + "execute-code-title",
 				...(false ? [] : [PREFIX + "hidden"]),
 			],
+		},
+	)
+}
+
+function createHeaderSeparator(
+	codeParameters: CodeParameters,
+	fence: boolean,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	return createEl(
+		fence ? "div" : "span",
+		{
+			cls: [
+				PREFIX + "separator",
+				...((!fence &&((codeParameters.title !== "") || codeParameters.icon)) ? [] : [PREFIX + "hidden"]),
+			],
+			text: '\uff5c',
+		},
+	)
+}
+
+function createFooterSeparator(
+	codeParameters: CodeParameters,
+	fence: boolean,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	return createEl(
+		fence ? "div" : "span",
+		{
+			cls: [
+				PREFIX + "separator",
+				...(false ? [] : [PREFIX + "hidden"]),
+			],
+			text: '\uff5c',
+		},
+	)
+}
+
+function createCopyIcon(
+	codeParameters: CodeParameters,
+	fence: boolean,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	return createEl(
+		fence ? "div" : "span",
+		{
+			cls: [
+				PREFIX + "copy-icon",
+				...(true ? [] : [PREFIX + "hidden"]),
+			],
+			text: "C",
 		},
 	)
 }

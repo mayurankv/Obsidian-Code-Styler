@@ -1,6 +1,6 @@
 import { syntaxTree } from "@codemirror/language";
 import { EditorState, Range, RangeSetBuilder } from "@codemirror/state";
-import { Decoration, DecorationSet } from "@codemirror/view";
+import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { getInlineDelimiterSize, isFileIgnored } from "src/Internal/Decorating/LivePreview/codemirror/utils";
 import { parseInlineCodeParameters, splitInlineCodeRaw } from "src/Internal/Parsing/inline";

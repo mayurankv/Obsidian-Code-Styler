@@ -5,7 +5,7 @@ import { PREFIX } from "src/Internal/constants/general";
 import { InlineCodeParameters } from "src/Internal/types/parsing";
 import CodeStylerPlugin from "src/main";
 import { parseInlineCodeParameters, toDecorateInlineCode, toHighlightInlineCode } from "../../Parsing/inline";
-import { createHeaderElement } from "../elements";
+import { createFooterElement, createHeaderElement } from "../elements";
 
 export async function renderedInlineCodeDecorating(
 	element: HTMLElement,
@@ -56,12 +56,21 @@ async function decorateInlineCodeElement(
 		plugin,
 	);
 
+	const inlineFooterElement = createFooterElement(
+		inlineCodeParameters,
+		false,
+		sourcePath,
+		plugin,
+	);
+
 	await markupInlineCodeElement(
 		inlineCodeElement,
 		inlineCodeParameters,
 		plugin,
 	)
+
 	inlineCodeElement.insertBefore(inlineHeaderElement, inlineCodeElement.childNodes[0]);
+	inlineCodeElement.appendChild(inlineFooterElement);
 
 	inlineCodeElement.setAttribute(DECORATED_ATTRIBUTE, "true")
 }

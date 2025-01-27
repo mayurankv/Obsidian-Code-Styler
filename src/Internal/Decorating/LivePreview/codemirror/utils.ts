@@ -1,7 +1,8 @@
 import { tokenClassNodeProp } from "@codemirror/language";
 import { EditorState, SelectionRange } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
-import { editorInfoField, editorLivePreviewField } from "obsidian";
+import { editorInfoField, editorLivePreviewField, livePreviewState } from "obsidian";
 
 export function areRangesInteracting(
 	state: EditorState,
@@ -16,7 +17,10 @@ export function isRangeInteracting(
 	to: number,
 	range: SelectionRange,
 ): boolean {
-	return (from <= range.head && range.head <= to) || (from <= range.anchor && range.anchor <= to);
+	return (
+		(from <= range.head && range.head <= to) || (from <= range.anchor && range.anchor <= to) ||
+		(range.from <= from && from <= range.to) || (range.from <= to && to <= range.to)
+	);
 }
 
 export function isFileIgnored(

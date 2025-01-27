@@ -3,7 +3,7 @@ import { MarkdownRenderer } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
 import { CodeParameters, FenceCodeParameters, InlineCodeParameters, LineParameters } from "src/Internal/types/parsing";
 import { isDeepStrictEqual } from "util";
-import { createHeaderElement } from "../../elements";
+import { createFooterElement, createHeaderElement } from "../../elements";
 import { foldOnClick } from "./actions";
 import CodeStylerPlugin from "src/main";
 import { getLanguageIcon } from "src/Internal/utils/decorating";
@@ -47,7 +47,7 @@ export class HeaderWidget extends WidgetType {
 	toDOM(
 		view: EditorView,
 	): HTMLElement {
-		const headerContainer = createHeaderElement(
+		const headerElement = createHeaderElement(
 			this.codeParameters,
 			this.fence,
 			this.sourcePath,
@@ -55,19 +55,69 @@ export class HeaderWidget extends WidgetType {
 		);
 
 		if (this.fence)
-			headerContainer.onclick = (event) => {
+			headerElement.onclick = (event) => {
 				if ((event.target as HTMLElement)?.hasClass("internal-link") || (event.target as HTMLElement)?.hasClass("external-link"))
 					return;
 
 				foldOnClick(
 					view,
-					headerContainer,
+					headerElement,
 					folded,
 					this.codeParameters.language,
 				);
 			};
 
-		return headerContainer;
+		return headerElement;
+	}
+}
+
+export class FooterWidget extends WidgetType {
+	codeParameters: CodeParameters;
+	sourcePath: string;
+	private fence: boolean;
+	private plugin: CodeStylerPlugin;
+
+	constructor(
+		codeParameters: CodeParameters,
+		sourcePath: string,
+		fence: boolean,
+		plugin: CodeStylerPlugin,
+	) {
+		super();
+
+		this.codeParameters = structuredClone(codeParameters);
+		this.sourcePath = sourcePath;
+		this.fence = fence;
+		this.plugin = plugin;
+	}
+
+	eq(
+		other: FooterWidget,
+	): boolean {
+		return (
+			this.fence === other.fence &&
+			this.codeParameters.language === other.codeParameters.language &&
+			this.codeParameters.title === other.codeParameters.title &&
+			this.codeParameters.reference === other.codeParameters.reference &&
+			this.codeParameters.icon === other.codeParameters.icon &&
+			this.codeParameters.ignore === other.codeParameters.ignore &&
+			getLanguageIcon(this.codeParameters.language, this.plugin) == getLanguageIcon(other.codeParameters.language, other.plugin) &&
+			(this.codeParameters as FenceCodeParameters)?.fold?.placeholder === (other.codeParameters as FenceCodeParameters)?.fold?.placeholder &&
+			(!("fold" in this.codeParameters) || this.plugin.settings.currentTheme.settings.header.foldPlaceholder === other.plugin.settings.currentTheme.settings.header.foldPlaceholder)
+		);
+	}
+
+	toDOM(
+		view: EditorView,
+	): HTMLElement {
+		const footerElement = createFooterElement(
+			this.codeParameters,
+			this.fence,
+			this.sourcePath,
+			this.plugin,
+		);
+
+		return footerElement;
 	}
 }
 

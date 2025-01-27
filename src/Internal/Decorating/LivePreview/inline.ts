@@ -1,20 +1,56 @@
 import { EditorState, Extension, Range, SelectionRange, StateField, Transaction } from "@codemirror/state";
-import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
-import { editorInfoField } from "obsidian";
+import { Decoration, DecorationSet, EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { editorInfoField, livePreviewState } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
 import { toHighlightInlineCode } from "src/Internal/Parsing/inline";
 import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
 import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
-import { HeaderWidget } from "./codemirror/widgets";
+import { FooterWidget, HeaderWidget } from "./codemirror/widgets";
 import { buildInlineDecorations as buildInlineCodeDecorations } from "src/Internal/Detecting/LivePreview/inline";
 
 export function getInlineCodeMirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
-		createInlineCodeDecorationsStateField(plugin),
+		createInlineCodeDecorationsViewPlugin(plugin),
+		// createInlineCodeDecorationsStateField(plugin),
 	]
+}
+
+export function createInlineCodeDecorationsViewPlugin(
+	plugin: CodeStylerPlugin,
+) {
+	class InlineCodeDecorationsViewPlugin implements PluginValue {
+		decorations: DecorationSet;
+		plugin: CodeStylerPlugin;
+
+		constructor(
+			view: EditorView,
+		) {
+			this.decorations = buildInlineCodeDecorations(view.state, plugin, buildInlineCodeDecoration);
+		}
+
+		update(
+			update: ViewUpdate,
+		) {
+			if ((update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown)
+				this.decorations = buildInlineCodeDecorations(update.state, plugin, buildInlineCodeDecoration);
+		}
+
+		destroy() {
+			return;
+		}
+	}
+
+	return ViewPlugin.fromClass(
+		InlineCodeDecorationsViewPlugin,
+		{
+			decorations: (
+				value: InlineCodeDecorationsViewPlugin,
+			) => value.decorations,
+		}
+	);
 }
 
 export function createInlineCodeDecorationsStateField(
@@ -31,6 +67,7 @@ export function createInlineCodeDecorationsStateField(
 			value: DecorationSet,
 			transaction: Transaction,
 		): DecorationSet {
+			console.log(transaction.selection)
 			return buildInlineCodeDecorations(transaction.state, plugin, buildInlineCodeDecoration);
 		},
 
@@ -57,7 +94,7 @@ function buildInlineCodeDecoration(
 			from: inlineCodeInfo.parameters.from,
 			to: inlineCodeInfo.parameters.to,
 			value: Decoration.mark({
-				class: PREFIX + "inline-parameters",
+				class: PREFIX + "parameters",
 			}),
 		});
 
@@ -74,25 +111,36 @@ function buildInlineCodeDecoration(
 	if (isSourceMode(state) || areRangesInteracting(state, inlineCodeInfo.section.from, inlineCodeInfo.section.to))
 		return decorations
 
-	if (inlineCodeInfo.parameters.from < inlineCodeInfo.parameters.to) {
-		decorations.push({
-			from: inlineCodeInfo.parameters.from,
-			to: inlineCodeInfo.parameters.from,
-			value: Decoration.replace({
-				widget: new HeaderWidget(
-					inlineCodeInfo.parameters.value,
-					state.field(editorInfoField)?.file?.path ?? "",
-					false,
-					plugin,
-				)
-			}),
-		});
-		decorations.push({
-			from: inlineCodeInfo.parameters.from,
-			to: inlineCodeInfo.parameters.to,
-			value: Decoration.replace({}),
-		});
-	}
+	decorations.push({
+		from: inlineCodeInfo.parameters.from,
+		to: inlineCodeInfo.parameters.from,
+		value: Decoration.replace({
+			widget: new HeaderWidget(
+				inlineCodeInfo.parameters.value,
+				state.field(editorInfoField)?.file?.path ?? "",
+				false,
+				plugin,
+			)
+		}),
+	});
+	decorations.push({
+		from: inlineCodeInfo.parameters.from,
+		to: inlineCodeInfo.parameters.to,
+		value: Decoration.replace({}),
+	});
+
+	decorations.push({
+		from: inlineCodeInfo.content.to+1,
+		to: inlineCodeInfo.content.to+1,
+		value: Decoration.replace({
+			widget: new FooterWidget(
+				inlineCodeInfo.parameters.value,
+				state.field(editorInfoField)?.file?.path ?? "",
+				false,
+				plugin,
+			)
+		}),
+	});
 
 	return decorations
 }
