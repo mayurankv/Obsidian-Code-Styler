@@ -18,17 +18,3 @@ export interface InlineCodeInfo {
 		to: number,
 	}
 }
-
-export type CommentInfo = Array<{
-	from: number,
-	to: number,
-	title: string,
-	reference: string,
-	fullLink: string,
-	type: LinkType,
-}>
-
-export interface HeaderInfo{
-	fenceCodeParametersLine: string,
-	position: number,
-}

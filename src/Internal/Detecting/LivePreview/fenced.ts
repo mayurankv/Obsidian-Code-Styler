@@ -2,15 +2,10 @@ import { syntaxTree } from "@codemirror/language";
 import { EditorState, Line, Range, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, DecorationSet } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
-import { PREFIX } from "src/Internal/constants/general";
 import { isFileIgnored, isSourceMode } from "src/Internal/Decorating/LivePreview/codemirror/utils";
-import { LineNumberWidget } from "src/Internal/Decorating/LivePreview/codemirror/widgets";
 import { parseFenceCodeParameters } from "src/Internal/Parsing/fenced";
-import { CommentInfo, HeaderInfo } from "src/Internal/types/detecting";
-import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
-import { getLineClasses } from "src/Internal/utils/decorating";
+import { FenceCodeParameters } from "src/Internal/types/parsing";
 import { cleanFenceCodeParametersLine } from "src/Internal/utils/detecting";
-import { parseLinks } from "src/Internal/utils/parsing";
 import CodeStylerPlugin from "src/main";
 
 export function buildFenceCodeDecorations(

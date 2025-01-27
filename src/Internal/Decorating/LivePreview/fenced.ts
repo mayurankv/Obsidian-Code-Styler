@@ -1,16 +1,15 @@
-import { EditorState, Range, StateField, Transaction, Extension, Line } from "@codemirror/state";
+import { EditorState, Extension, Line, Range, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { SyntaxNodeRef } from "@lezer/common";
 import { editorInfoField } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
-import { CommentInfo, HeaderInfo } from "src/Internal/types/detecting";
-import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
-import { CommentLinkWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
 import { buildFenceCodeDecorations } from "src/Internal/Detecting/LivePreview/fenced";
 import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
 import { getLineClasses } from "src/Internal/utils/decorating";
-import { SyntaxNodeRef } from "@lezer/common";
 import { parseLinks } from "src/Internal/utils/parsing";
+import CodeStylerPlugin from "src/main";
+import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
+import { CommentLinkWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,

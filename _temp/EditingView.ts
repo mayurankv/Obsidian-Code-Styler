@@ -1,7 +1,6 @@
-import { syntaxTree } from "@codemirror/language";
 import { EditorState, Extension, Line, Range, RangeSetBuilder, SelectionRange, StateEffect, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, ViewUpdate } from "@codemirror/view";
-import { editorEditorField, editorInfoField } from "obsidian";
+import { editorEditorField } from "obsidian";
 import { isFileIgnored, isSourceMode } from "src/Internal/Decorating/LivePreview/codemirror/utils";
 import { CodeStylerSettings } from "src/Internal/types/settings";
 import CodeStylerPlugin from "src/main";
@@ -18,14 +17,12 @@ export function createCodeblockCodeMirrorExtensions(
 	const ignoreListener = EditorView.updateListener.of((update: ViewUpdate) => { //TODO (@mayurankv) Can I make this startState only? Does it need to be?
 		const livePreviewExtensions = livePreviewCompartment.get(update.state);
 
-		const sourceMode = isSourceMode(update.state);
-
 		const fileIgnore = isFileIgnored(update.state) && !(Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
 		const fileUnignore = !isFileIgnored(update.state) && (Array.isArray(livePreviewExtensions) && livePreviewExtensions.length === 0);
 
-		if (isSourceMode(update.startState) !== toIgnore || fileIgnore || fileUnignore) {
-			update.view.dispatch({effects: livePreviewCompartment.reconfigure((toIgnore||fileIgnore)?[]:[foldDecorations,hiddenDecorations])});
-			if (!toIgnore && !fileIgnore)
+		if (isSourceMode(update.startState) !== fileIgnore || fileUnignore) {
+			update.view.dispatch({effects: livePreviewCompartment.reconfigure((fileIgnore)?[]:[foldDecorations,hiddenDecorations])});
+			if (!fileIgnore)
 				update.view.dispatch({effects: foldAll.of({})});
 		}
 	});
@@ -51,6 +48,35 @@ export function createCodeblockCodeMirrorExtensions(
 			return value;
 		}
 	});
+
+	function settingsChangeExtender() {
+		return EditorState.transactionExtender.of((transaction) => {
+			let addEffects: Array<StateEffect<unknown>> = [];
+			const initialSettings = transaction.startState.field(settingsState);
+			let readdFoldLanguages: Array<string> = [];
+			let removeFoldLanguages: Array<string> = [];
+			if (initialSettings.processedCodeblocksWhitelist !== settings.processedCodeblocksWhitelist) {
+				//@ts-expect-error Undocumented Obsidian API
+				const codeblockProcessors = Object.keys(MarkdownPreviewRenderer.codeBlockPostProcessors);
+				const initialExcludedCodeblocks = codeblockProcessors.filter(lang=>!initialSettings.processedCodeblocksWhitelist.split(",").map(lang=>lang.trim()).includes(lang));
+				const currentExcludedCodeblocks = codeblockProcessors.filter(lang=>!settings.processedCodeblocksWhitelist.split(",").map(lang=>lang.trim()).includes(lang));
+				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedCodeblocks,initialExcludedCodeblocks) as Array<string>);
+				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedCodeblocks,currentExcludedCodeblocks) as Array<string>);
+			}
+			if (initialSettings.excludedLanguages !== settings.excludedLanguages) {
+				const initialExcludedLanguages = initialSettings.excludedLanguages.split(",").map(lang=>lang.trim());
+				const currentExcludedLanguages = settings.excludedLanguages.split(",").map(lang=>lang.trim());
+				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedLanguages,initialExcludedLanguages) as Array<string>);
+				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedLanguages,currentExcludedLanguages) as Array<string>);
+			}
+			if (removeFoldLanguages.length !== 0)
+				addEffects.push(removeFold.of(removeFoldLanguages));
+			if (readdFoldLanguages.length !== 0)
+				addEffects = addEffects.concat(convertReaddFold(transaction,readdFoldLanguages));
+			return (addEffects.length !== 0)?{effects: addEffects}:null;
+		});
+	}
+
 
 	const charWidthState = StateField.define<number>({ //TODO (@mayurankv) Improve implementation
 		create(state: EditorState): number {
@@ -104,34 +130,6 @@ export function createCodeblockCodeMirrorExtensions(
 	});
 
 
-	function settingsChangeExtender() {
-		return EditorState.transactionExtender.of((transaction) => {
-			let addEffects: Array<StateEffect<unknown>> = [];
-			const initialSettings = transaction.startState.field(settingsState);
-			let readdFoldLanguages: Array<string> = [];
-			let removeFoldLanguages: Array<string> = [];
-			if (initialSettings.processedCodeblocksWhitelist !== settings.processedCodeblocksWhitelist) {
-				//@ts-expect-error Undocumented Obsidian API
-				const codeblockProcessors = Object.keys(MarkdownPreviewRenderer.codeBlockPostProcessors);
-				const initialExcludedCodeblocks = codeblockProcessors.filter(lang=>!initialSettings.processedCodeblocksWhitelist.split(",").map(lang=>lang.trim()).includes(lang));
-				const currentExcludedCodeblocks = codeblockProcessors.filter(lang=>!settings.processedCodeblocksWhitelist.split(",").map(lang=>lang.trim()).includes(lang));
-				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedCodeblocks,initialExcludedCodeblocks) as Array<string>);
-				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedCodeblocks,currentExcludedCodeblocks) as Array<string>);
-			}
-			if (initialSettings.excludedLanguages !== settings.excludedLanguages) {
-				const initialExcludedLanguages = initialSettings.excludedLanguages.split(",").map(lang=>lang.trim());
-				const currentExcludedLanguages = settings.excludedLanguages.split(",").map(lang=>lang.trim());
-				removeFoldLanguages = removeFoldLanguages.concat(setDifference(currentExcludedLanguages,initialExcludedLanguages) as Array<string>);
-				readdFoldLanguages = readdFoldLanguages.concat(setDifference(initialExcludedLanguages,currentExcludedLanguages) as Array<string>);
-			}
-			if (removeFoldLanguages.length !== 0)
-				addEffects.push(removeFold.of(removeFoldLanguages));
-			if (readdFoldLanguages.length !== 0)
-				addEffects = addEffects.concat(convertReaddFold(transaction,readdFoldLanguages));
-			return (addEffects.length !== 0)?{effects: addEffects}:null;
-		});
-	}
-
 	//!====================================================================
 
 	function cursorFoldExtender() {
@@ -181,11 +179,16 @@ export function createCodeblockCodeMirrorExtensions(
 		return addEffects;
 	}
 
-	function isFolded(state: EditorState, position: number): boolean {
+	function isFolded(
+		state: EditorState,
+		position: number,
+	): boolean {
 		let folded = false;
-		state.field(foldDecorations,false)?.between(position,position,()=>{
+
+		state.field(foldDecorations, false)?.between(position, position, () => {
 			folded = true;
 		});
+
 		return folded;
 	}
 
@@ -195,11 +198,14 @@ export function createCodeblockCodeMirrorExtensions(
 		for (let iter = (state.field(headerDecorations,false) ?? Decoration.none).iter(); iter.value !== null; iter.next()) {
 			if (!iter.value.spec.widget.visible)
 				continue;
+
 			const folded = iter.value.spec.widget.folded;
 			const defaultFold = iter.value.spec.widget.codeblockParameters.fold.enabled;
-			codeblockFoldCallback(iter.from,state,(foldStart,foldEnd)=>{
+
+			codeblockFoldCallback(iter.from, state, (foldStart, foldEnd) => {
 				if ((!reset && toFold && !folded) || (reset && !folded && defaultFold))
 					addEffects.push(fold.of({from: foldStart.from, to: foldEnd.to, value: {spec: {language: (iter.value as Decoration).spec.widget.codeblockParameters.language}}}));
+
 				else if ((!reset && !toFold && folded) || (reset && folded && !defaultFold))
 					addEffects.push(unfold.of({from: foldStart.from, to: foldEnd.to}));
 			});
