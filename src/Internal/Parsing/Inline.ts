@@ -76,8 +76,9 @@ function inferInlineShorthand(
 
 export function toDecorateInlineCode(
 	inlineCodeParameters: InlineCodeParameters,
+	inlineCodeContent: string,
 ): boolean {
-	return !inlineCodeParameters.ignore
+	return !inlineCodeParameters.ignore && !inlineCodeContent.startsWith("BUTTON")
 }
 
 export function toHighlightInlineCode(

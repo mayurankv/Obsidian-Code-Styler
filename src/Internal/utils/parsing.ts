@@ -3,7 +3,7 @@ import { removeBoundaryQuotes } from "./text";
 
 const MARKDOWN_REGEX = /\[(.*?)\]\((.+?)\)/;
 const WIKI_REGEX = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/;
-const URL_REGEX = /^(?:(?:https?|file|zotero):\/\/[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+|[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+\.(?:com|io|ai|gov|co\.uk))/; // !\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%
+const URL_REGEX = /((?:(?:https?|file|zotero):\/\/[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+|[!\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%]+\.(?:com|io|ai|gov|co\.uk)))/; // !\*'\(\);:@&=\+\$,\/\?#\[\]A-Za-z0-9_\.~\-|%
 
 export function separateParameters(
 	parametersLine: string,
@@ -77,9 +77,10 @@ export function parseLinks(
 		});
 	}
 
+	linkText = removeBoundaryQuotes(linkText).trim()
 	const urlRegex = new RegExp(URL_REGEX.source, "g")
 	let urlLinkMatch;
-	while ((urlLinkMatch = urlRegex.exec(removeBoundaryQuotes(linkText).trim())) !== null) {
+	while ((urlLinkMatch = urlRegex.exec(linkText)) !== null) {
 		links.push({
 			title: urlLinkMatch[0],
 			reference: urlLinkMatch[0],

@@ -9,14 +9,33 @@ body {
 	--code-styler-inline-background-colour: var(--code-background);
 }
 
-// --cs-code-background-colour: var(--code-background);
-// --cs-code-colour: var(--code-background);
-// --cs-code-fence-radius: 10px;
 
 body.cs-plugin {
+	--cs-code-background-colour: var(--code-background);
+	--cs-code-colour: var(--code-normal);
+	--cs-code-fence-radius: 10px;
+	--cs-title-color: gray;
+	--cs-title-weight: 400;
+	--cs-language-title-color: gray;
+	--cs-language-title-weight: 400;
+
 	--cs-code-inline-radius: 10px;
 
-	--cs-code-background-colour: red;
+	.markdown-rendered :not(pre) > code:not([class*="blur"]) {
+		display: inline;
+		border-radius: var(--cs-code-inline-radius);
+		color: var(--cs-code-colour);
+		background-color: var(--cs-code-background-colour);
+
+		span.cm-inline-code {
+			padding-left: 0 !important;
+			padding-right: 0 !important;
+		}
+	}
+
+	span.cm-formatting.cm-inline-code ~ span.cs-header {
+		border-radius: 0px !important;
+	}
 
 	span.cs-header {
 		display: inline;
@@ -41,6 +60,7 @@ body.cs-plugin {
 			display: inline-block;
 			vertical-align: text-top;
 			width: 1.1em;
+			margin-left: 0.5em;
 		}
 
 		> span.cs-icon-container > img.cs-icon:not([class*="emoji"]) {
@@ -50,17 +70,17 @@ body.cs-plugin {
 		}
 
 		span.cs-title {
-			color: var(--code-styler-inline-title-colour);
-			font-weight: var(--code-styler-inline-title-font-weight);
+			color: var(--cs-title-color);
+			font-weight: var(--cs-title-weight);
 		}
 
 		span.cs-language-title {
-			color: var(--code-styler-inline-language-title-colour);
-			font-weight: var(--code-styler-inline-language-title-font-weight);
+			color: var(--cs-language-title-color);
+			font-weight: var(--cs-language-title-weight);
 		}
 
 		span.cs-separator {
-			color: var(--code-styler-inline-title-color);
+			color: var(--cs-title-color);
 		}
 
 		span.cs-parameters {
@@ -69,15 +89,54 @@ body.cs-plugin {
 	}
 
 	span.cs-footer {
+		padding-left: 0.4em !important;
+
 		&.cm-inline-code {
-			padding-left: 0px;
+			padding-left: 0px !important;
 			padding-right: 0.25em; // Obsidian default value
 			border-radius: 0px var(--cs-code-inline-radius) var(--cs-code-inline-radius) 0px !important;
+		}
+
+		button.cs-copy-icon {
+			--icon-size: var(--icon-xs);
+			padding: 0.15em;
+			margin-left: 0.25em;
+			background-color: transparent;
+			color: var(--text-muted);
+			box-shadow: none;
+			height: 100%;
+			display: inline-block;
+
+			&:hover {
+				background-color: var(--background-modifier-hover)
+			}
+
+			> svg {
+				display: inline;
+				height: 100%;
+				vertical-align: text-top;
+			}
 		}
 	}
 
 	span.cs-inline-parameters {
 		color: var( --code-styler-inline-colour-parameters);
+	}
+
+	span.cm-comment {
+		span.cs-comment {
+			font-size: inherit;
+			line-height: inherit;
+			padding: 0px !important;
+		}
+	}
+
+	span.cs-comment {
+		box-sizing:initial;
+
+		p {
+			display: inline !important;
+		}
 	}
 
 	// Overwrite Obsidian Defaults
@@ -117,73 +176,5 @@ body.cs-plugin {
 
 	.reveal img.cs-icon {
 		margin: inherit;
-	}
-}
-
-body.cs-plugin {
-	.cs-code-inline {
-		// .cm-s-obsidian span.cm-inline-code,
-		// .markdown-rendered :not(pre) > code:not([class*="blur"]),
-		// .reveal :not(pre) > code:not([class*="blur"]),
-		// code.cs-settings {
-		// 	padding: var(--code-styler-inline-padding-vertical) var(--code-styler-inline-padding-horizontal) !important;
-		// 	border-radius: var(--code-styler-inline-border-radius) !important;
-		// 	margin: 0px var(--code-styler-inline-margin-horizontal) !important;
-		// 	background-color: var(--code-styler-inline-background-colour) !important;
-		// 	color: var(--code-styler-inline-colour);
-		// 	font-weight: var(--code-styler-inline-font-weight);
-		// }
-	}
-
-	.cm-s-obsidian {
-		// span.cm-formatting-code { // Standalone backticks
-		// 	display: inline !important;
-		// 	color: var(--code-styler-inline-colour-active);
-		// }
-
-		// span.cs-header ~ span.cm-inline-code:not(.cm-formatting-code) {
-		// 	// padding-left: 0px !important;
-		// 	// border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
-		// 	// margin-left: 0px !important;
-		// }
-
-		// span.cs-header,
-		// span.cm-formatting-code:has(+ span.cm-inline-code:not(.cm-formatting-code)) { // First backtick
-		// 	// padding-right: 0px !important;
-		// 	// padding-left: var(--code-styler-inline-padding-horizontal) !important;
-		// 	// border-radius: var(--code-styler-inline-border-radius) 0px 0px var(--code-styler-inline-border-radius) !important;
-		// 	// margin-right: 0px !important;
-		// 	// margin-left: var(--code-styler-inline-margin-horizontal) !important;
-		// 	color: var(--code-styler-inline-colour-active);
-		// }
-
-		// span.cm-inline-code:not(.cm-formatting-code) + span.cm-formatting-code {// Last backtick
-		// 	// padding-right: var(--code-styler-inline-padding-horizontal) !important;
-		// 	// padding-left: 0px !important;
-		// 	// border-radius: 0px var(--code-styler-inline-border-radius) var(--code-styler-inline-border-radius) 0px !important;
-		// 	// margin-right: var(--code-styler-inline-margin-horizontal) !important;
-		// 	// margin-left: 0px !important;
-		// 	color: var(--code-styler-inline-colour-active);
-		// }
-
-		// span.cm-inline-code .code-styler-inline-parameters {
-		// 	color: var(--code-comment);
-		// }
-	}
-
-
-	span.cs-header {
-
-		// > span.cs-icon-container:has( > img.cs-icon:not([class*="emoji"])):not(.cs-hidden) ~ span {
-		// 	&.cs-title,
-		// 	&.cs-language-title {
-		// 		margin-left: 0.5em,
-		// 	}
-		// }
-
-		// span:has( > img.code-styler-inline-icon) {
-		// 	padding-right: 8px;
-		// }
-
 	}
 }

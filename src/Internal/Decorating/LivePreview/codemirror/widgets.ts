@@ -73,12 +73,14 @@ export class HeaderWidget extends WidgetType {
 
 export class FooterWidget extends WidgetType {
 	codeParameters: CodeParameters;
+	content: string;
 	sourcePath: string;
 	private fence: boolean;
 	private plugin: CodeStylerPlugin;
 
 	constructor(
 		codeParameters: CodeParameters,
+		content: string,
 		sourcePath: string,
 		fence: boolean,
 		plugin: CodeStylerPlugin,
@@ -86,6 +88,7 @@ export class FooterWidget extends WidgetType {
 		super();
 
 		this.codeParameters = structuredClone(codeParameters);
+		this.content = content;
 		this.sourcePath = sourcePath;
 		this.fence = fence;
 		this.plugin = plugin;
@@ -96,6 +99,7 @@ export class FooterWidget extends WidgetType {
 	): boolean {
 		return (
 			this.fence === other.fence &&
+			this.content === other.content &&
 			this.codeParameters.language === other.codeParameters.language &&
 			this.codeParameters.title === other.codeParameters.title &&
 			this.codeParameters.reference === other.codeParameters.reference &&
@@ -112,6 +116,7 @@ export class FooterWidget extends WidgetType {
 	): HTMLElement {
 		const footerElement = createFooterElement(
 			this.codeParameters,
+			this.content,
 			this.fence,
 			this.sourcePath,
 			this.plugin,
@@ -185,7 +190,8 @@ export class CommentLinkWidget extends WidgetType {
 			"span",
 			{
 				cls: [
-					PREFIX + "line-number",
+					PREFIX + "comment",
+					"cm-inline-code",
 				],
 			},
 		);

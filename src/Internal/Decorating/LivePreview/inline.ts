@@ -1,13 +1,13 @@
-import { EditorState, Extension, Range, SelectionRange, StateField, Transaction } from "@codemirror/state";
+import { EditorState, Range } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { editorInfoField, livePreviewState } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
-import { toHighlightInlineCode } from "src/Internal/Parsing/inline";
+import { buildInlineDecorations as buildInlineCodeDecorations } from "src/Internal/Detecting/LivePreview/inline";
+import { toDecorateInlineCode, toHighlightInlineCode } from "src/Internal/Parsing/inline";
 import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
+import { areRangesInteracting, getCommentDecorations, isSourceMode } from "./codemirror/utils";
 import { FooterWidget, HeaderWidget } from "./codemirror/widgets";
-import { buildInlineDecorations as buildInlineCodeDecorations } from "src/Internal/Detecting/LivePreview/inline";
 
 export function getInlineCodeMirrorExtensions(
 	plugin: CodeStylerPlugin,
@@ -28,14 +28,22 @@ export function createInlineCodeDecorationsViewPlugin(
 		constructor(
 			view: EditorView,
 		) {
-			this.decorations = buildInlineCodeDecorations(view.state, plugin, buildInlineCodeDecoration);
+			this.decorations = buildInlineCodeDecorations(
+				view.state,
+				plugin,
+				buildInlineCodeDecoration,
+			);
 		}
 
 		update(
 			update: ViewUpdate,
 		) {
 			if ((update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown)
-				this.decorations = buildInlineCodeDecorations(update.state, plugin, buildInlineCodeDecoration);
+				this.decorations = buildInlineCodeDecorations(
+					update.state,
+					plugin,
+					buildInlineCodeDecoration,
+				);
 		}
 
 		destroy() {
@@ -53,38 +61,12 @@ export function createInlineCodeDecorationsViewPlugin(
 	);
 }
 
-export function createInlineCodeDecorationsStateField(
-	plugin: CodeStylerPlugin,
-) {
-	return StateField.define<DecorationSet>({
-		create(
-			state: EditorState,
-		): DecorationSet {
-			return buildInlineCodeDecorations(state, plugin, buildInlineCodeDecoration);
-		},
-
-		update(
-			value: DecorationSet,
-			transaction: Transaction,
-		): DecorationSet {
-			console.log(transaction.selection)
-			return buildInlineCodeDecorations(transaction.state, plugin, buildInlineCodeDecoration);
-		},
-
-		provide(
-			field: StateField<DecorationSet>,
-		): Extension {
-			return EditorView.decorations.from(field);
-		}
-	});
-}
-
 function buildInlineCodeDecoration(
 	state: EditorState,
 	inlineCodeInfo: InlineCodeInfo | null,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
-	if (!inlineCodeInfo || inlineCodeInfo.parameters.value.ignore)
+	if (!inlineCodeInfo || !toDecorateInlineCode(inlineCodeInfo.parameters.value, inlineCodeInfo.content.value))
 		return []
 
 	let decorations: Array<Range<Decoration>> = []
@@ -102,9 +84,11 @@ function buildInlineCodeDecoration(
 		decorations = [
 			...decorations,
 			...inlineSyntaxHighlight(
+				state,
 				inlineCodeInfo.parameters.value.language,
 				inlineCodeInfo.content.value,
 				inlineCodeInfo.parameters.to,
+				plugin,
 			),
 		]
 
@@ -130,11 +114,12 @@ function buildInlineCodeDecoration(
 	});
 
 	decorations.push({
-		from: inlineCodeInfo.content.to+1,
-		to: inlineCodeInfo.content.to+1,
+		from: inlineCodeInfo.section.to,
+		to: inlineCodeInfo.section.to,
 		value: Decoration.replace({
 			widget: new FooterWidget(
 				inlineCodeInfo.parameters.value,
+				inlineCodeInfo.content.value,
 				state.field(editorInfoField)?.file?.path ?? "",
 				false,
 				plugin,
@@ -146,26 +131,41 @@ function buildInlineCodeDecoration(
 }
 
 function inlineSyntaxHighlight(
+	state: EditorState,
 	language: string,
 	content: string,
 	start: number,
+	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
 	const decorations: Array<{from: number, to: number, value: Decoration}> = []
 
 	// @ts-expect-error Undocumented Obsidian API
 	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime);
-	const state = window.CodeMirror.startState(mode);
+	const startState = window.CodeMirror.startState(mode);
 
 	if (mode?.token) {
 		const stream = new window.CodeMirror.StringStream(content);
 		while (!stream.eol()) {
-			const style = mode.token(stream,state);
+			const style = mode.token(stream,startState);
 			if (style)
 				decorations.push({
 					from: start + stream.start,
 					to: start + stream.pos,
-					value: Decoration.mark({ class: `cm-${style}` }),
+					value: Decoration.mark({
+						class: `cm-${style}`,
+					}),
 				});
+
+			if (style === "comment")
+				decorations.push(
+					...getCommentDecorations(
+						state,
+						start + stream.start,
+						stream.string.slice(stream.start, stream.pos),
+						plugin,
+					),
+				)
+
 
 			stream.start = stream.pos;
 		}

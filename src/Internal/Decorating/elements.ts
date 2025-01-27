@@ -3,7 +3,7 @@ import { PREFIX } from "../constants/general";
 import { CodeParameters, FenceCodeParameters, InlineCodeParameters } from "../types/parsing";
 import { getLanguageIcon, getLanguageName } from "../utils/decorating";
 import { FOLD_PLACEHOLDER, GIT_ICONS, SITE_ICONS, STAMP_ICON, UPDATE_ICON } from "../constants/decoration";
-import { MarkdownPostProcessorContext, MarkdownRenderer } from "obsidian";
+import { MarkdownPostProcessorContext, MarkdownRenderer, Notice, setIcon } from "obsidian";
 import { isUrl } from "../utils/parsing";
 import { rerenderCodeElement } from "src/Internal/Interface/Actions/clicks";
 import { updateExternalReference } from "../utils/reference";
@@ -64,6 +64,7 @@ export function createHeaderElement(
 
 export function createFooterElement(
 	codeParameters: CodeParameters,
+	content: string,
 	fence: boolean,
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
@@ -81,11 +82,13 @@ export function createFooterElement(
 	fenceFooterElement.append(
 		createFooterSeparator(
 			codeParameters,
+			content,
 			fence,
 			plugin,
 		),
 		createCopyIcon(
 			codeParameters,
+			content,
 			fence,
 			plugin,
 		),
@@ -301,7 +304,7 @@ function createExecuteCodeTitle(
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	//TODO (@mayurankv) Finish
-	console.debug("Execute code title section uncomplete")
+	console.debug("Execute code title section incomplete")
 	return createEl(
 		fence ? "div" : "span",
 		{
@@ -323,7 +326,7 @@ function createHeaderSeparator(
 		{
 			cls: [
 				PREFIX + "separator",
-				...((!fence &&((codeParameters.title !== "") || codeParameters.icon)) ? [] : [PREFIX + "hidden"]),
+				...((!fence && ((codeParameters.title !== "") || (codeParameters.language !== "" && (codeParameters.icon || true)))) ? [] : [PREFIX + "hidden"]), //TODO: true should be setting if to add language title
 			],
 			text: '\uff5c',
 		},
@@ -332,6 +335,7 @@ function createHeaderSeparator(
 
 function createFooterSeparator(
 	codeParameters: CodeParameters,
+	content: string,
 	fence: boolean,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
@@ -349,17 +353,27 @@ function createFooterSeparator(
 
 function createCopyIcon(
 	codeParameters: CodeParameters,
+	content: string,
 	fence: boolean,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
-	return createEl(
-		fence ? "div" : "span",
+	const copyElement = createEl(
+		"button",
 		{
 			cls: [
 				PREFIX + "copy-icon",
+				// "copy-code-button",
 				...(true ? [] : [PREFIX + "hidden"]),
 			],
-			text: "C",
 		},
 	)
+
+	setIcon(copyElement, "copy")
+
+	copyElement.onclick = async (event: MouseEvent) => {
+		await navigator.clipboard.writeText(content)
+		new Notice("Copied to your clipboard");
+	}
+
+	return copyElement
 }

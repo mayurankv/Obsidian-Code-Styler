@@ -19,13 +19,15 @@ export async function renderedInlineCodeDecorating(
 			return;
 
 		const inlineCodeParameters = parseInlineCodeParameters(inlineCodeElement.getAttribute(PARAMETERS_ATTRIBUTE) ?? " ");
+		const inlineCodeContent = (inlineCodeElement.getAttribute(CONTENT_ATTRIBUTE) ?? " ").trim();
 
-		if (!toDecorateInlineCode(inlineCodeParameters))
+		if (!toDecorateInlineCode(inlineCodeParameters, inlineCodeContent))
 			return;
 
 		await decorateInlineCodeElement(
 			inlineCodeElement,
 			inlineCodeParameters,
+			inlineCodeContent,
 			context.sourcePath,
 			plugin,
 		)
@@ -46,6 +48,7 @@ export function renderedInlineCodeUndecorating(): void {
 async function decorateInlineCodeElement(
 	inlineCodeElement: HTMLElement,
 	inlineCodeParameters: InlineCodeParameters,
+	inlineCodeContent: string,
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
@@ -58,6 +61,7 @@ async function decorateInlineCodeElement(
 
 	const inlineFooterElement = createFooterElement(
 		inlineCodeParameters,
+		inlineCodeContent,
 		false,
 		sourcePath,
 		plugin,
@@ -97,5 +101,5 @@ async function markupInlineCodeElement(
 	if (!renderedCodeElement)
 		throw new Error("Could not render highlighted code");
 
-	inlineCodeElement.innerHTML = renderedCodeElement.innerHTML;
+	inlineCodeElement.innerHTML = renderedCodeElement.innerHTML + '&ZeroWidthSpace;';
 }

@@ -6,6 +6,7 @@ Refactor:
 	☐ Adjust for special languages
 	☐ Sort files
 	☐ README and documentation
+	☐ setitins modifiers: Set inline syntax highlighting for file in frontmatter
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

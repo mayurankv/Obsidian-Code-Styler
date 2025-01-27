@@ -1,5 +1,5 @@
 import { EditorState, Extension, Line, Range, StateField, Transaction } from "@codemirror/state";
-import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { Decoration, DecorationSet, EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { editorInfoField } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
@@ -8,15 +8,63 @@ import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
 import { getLineClasses } from "src/Internal/utils/decorating";
 import { parseLinks } from "src/Internal/utils/parsing";
 import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, isSourceMode } from "./codemirror/utils";
+import { areRangesInteracting, getCommentDecorations, isSourceMode } from "./codemirror/utils";
 import { CommentLinkWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
-		createFenceCodeDecorationsStateField(plugin),
+		createFenceCodeDecorationsViewPlugin(plugin),
+		// createFenceCodeDecorationsStateField(plugin),
 	]
+}
+
+export function createFenceCodeDecorationsViewPlugin(
+	plugin: CodeStylerPlugin,
+) {
+	class InlineCodeDecorationsViewPlugin implements PluginValue {
+		decorations: DecorationSet;
+		plugin: CodeStylerPlugin;
+
+		constructor(
+			view: EditorView,
+		) {
+			this.decorations = buildFenceCodeDecorations(
+				view.state,
+				plugin,
+				buildHeaderDecorations,
+				buildLineDecorations,
+				buildExtraDecoration,
+			);
+		}
+
+		update(
+			update: ViewUpdate,
+		) {
+			if ((update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown)
+				this.decorations = buildFenceCodeDecorations(
+					update.state,
+					plugin,
+					buildHeaderDecorations,
+					buildLineDecorations,
+					buildExtraDecoration,
+				);
+		}
+
+		destroy() {
+			return;
+		}
+	}
+
+	return ViewPlugin.fromClass(
+		InlineCodeDecorationsViewPlugin,
+		{
+			decorations: (
+				value: InlineCodeDecorationsViewPlugin,
+			) => value.decorations,
+		}
+	);
 }
 
 function createFenceCodeDecorationsStateField(
@@ -121,78 +169,12 @@ function buildExtraDecoration(
 ): Array<Range<Decoration>> {
 	if (syntaxNode.type.name.includes("comment_hmd-codeblock") && (syntaxNode.from >= line.from)  && (syntaxNode.to <= line.to)) {
 		const commentText = state.sliceDoc(syntaxNode.from, syntaxNode.to);
-		const linksInfo = parseLinks(commentText)
 
-		const commentInfo = linksInfo.map((linkInfo: LinkInfo) => {
-			return {
-				...linkInfo,
-				fullLink: linkInfo.match,
-				from: syntaxNode.from + linkInfo.offset,
-				to: syntaxNode.from + linkInfo.offset + linkInfo.match.length,
-			}
-		})
-
-		const decorations = commentInfo.reduce(
-			(result: Array<Range<Decoration>>, extendedLinkInfo) => {
-				if (isSourceMode(state) || areRangesInteracting(state, extendedLinkInfo.from, extendedLinkInfo.to)) {
-					if (extendedLinkInfo.type === "wiki")
-						result.push({
-							from: extendedLinkInfo.from + 2,
-							to: extendedLinkInfo.to - 2,
-							value: Decoration.mark({
-								class: `cm-hmd-internal-link ${PREFIX}-source-link`,
-								attributes: {
-									destination: extendedLinkInfo.reference,
-								},
-							}),
-						})
-
-					else {
-						console.log("foo")
-						let startSpaceCount = extendedLinkInfo.fullLink.slice(1).search(/\S/) + 1
-						let endSpaceCount = extendedLinkInfo.fullLink.slice(1 + startSpaceCount + extendedLinkInfo.title.length).search(/\S/)
-
-						const splitIndex = 1 + startSpaceCount + extendedLinkInfo.title.length + endSpaceCount
-
-						console.log(extendedLinkInfo)
-						result.push({
-							from: extendedLinkInfo.from + 1,
-							to: extendedLinkInfo.from + splitIndex + 1,
-							value: Decoration.mark({
-								class: `"cm-link ${PREFIX}-source-link`,
-								attributes: {
-									destination: extendedLinkInfo.reference,
-								},
-							}),
-						})
-
-						result.push({
-							from: extendedLinkInfo.from + splitIndex + 1,
-							to: extendedLinkInfo.to - 1,
-							value: Decoration.mark({
-								class: "cm-sttring cm-url",
-							})
-						})
-					}
-
-				} else
-					result.push({
-						from: extendedLinkInfo.from,
-						to: extendedLinkInfo.to,
-						value: Decoration.replace({
-							widget: new CommentLinkWidget(
-								extendedLinkInfo.type === "wiki"
-									? `[[${extendedLinkInfo.reference}|${extendedLinkInfo.title}]]`
-									: `[${extendedLinkInfo.title}](${extendedLinkInfo.reference})`,
-								state.field(editorInfoField)?.file?.path ?? "",
-								plugin,
-							)
-						}),
-					})
-
-				return result
-			},
-			[],
+		const decorations = getCommentDecorations(
+			state,
+			syntaxNode.from,
+			commentText,
+			plugin,
 		)
 
 		return decorations
