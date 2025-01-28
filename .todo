@@ -2,13 +2,16 @@ Refactor:
 	☐ Live Preview (Fence)
 	☐ SettingsTabs
 	☐ Style (!Inline)s + CSS (!Inline) + Applying settings (All)
-		☐ Use https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses
+		☐ Use https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses and https://docs.obsidian.md/Reference/CSS+variables/Editor/Code and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Colors and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Typography
+		☐ https://docs.obsidian.md/Themes/App+themes/Embed+fonts+and+images+in+your+theme
 	☐ Settings interfaces
+	☐ Check reference with no internet
 	☐ Canvas parsing
 	☐ Adjust for special languages
 	☐ Sort files
 	☐ README and documentation
 	☐ setitins modifiers: Set inline syntax highlighting for file in frontmatter
+	☐ Consistent syntax highlighting
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

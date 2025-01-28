@@ -23,7 +23,7 @@ export function parseFenceCodeParameters(
 	if (separatedParameters.every(
 		(parameterSection: string, idx: number, separatedParameters: Array<string>) => parameterSection.endsWith(",") || (idx === (separatedParameters.length - 1)) || (idx === 0),
 	))
-		separatedParameters = separatedParameters.map((parameterSection: string, idx: number, separatedParameters: Array<string>) => idx === (separatedParameters.length - 1) ? parameterSection : parameterSection.slice(0,-1))
+		separatedParameters = separatedParameters.map((parameterSection: string, idx: number, separatedParameters: Array<string>) => ((idx === (separatedParameters.length - 1)) || idx === 0) ? parameterSection : parameterSection.slice(0,-1))
 
 	const fenceCodeParametersParsed = separatedParameters.reduce(
 		(result: Partial<FenceCodeParameters>, parameterSection: string, idx: number) => {

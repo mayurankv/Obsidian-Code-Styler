@@ -16,6 +16,8 @@ export function parseReferenceParameters(
 	if (typeof filePath === "undefined")
 		throw Error("No file specified");
 
+
+
 	const referenceParameters = new ReferenceParameters({
 		filePath: filePath,
 		language: passedParameters?.language ?? passedParameters?.lang ?? getLanguage(filePath),

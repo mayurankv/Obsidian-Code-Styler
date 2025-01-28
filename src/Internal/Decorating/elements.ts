@@ -157,7 +157,6 @@ function createNamedTitle(
 				PREFIX + "title",
 				...(codeParameters.title !== "" ? [] : [PREFIX + "hidden"]),
 			],
-			text: title,
 		},
 	)
 
@@ -171,6 +170,8 @@ function createNamedTitle(
 			sourcePath,
 			plugin,
 		);
+	else
+		namedTitleContainer.innerText = title;
 
 	return namedTitleContainer
 }
@@ -186,7 +187,7 @@ function createExternalReferenceTitle(
 		tagName,
 		{
 			cls: [
-				"code-styler-header-external-reference",
+				PREFIX+"external-reference",
 				...((fence && (codeParameters as FenceCodeParameters)?.externalReference) ? [] : [PREFIX + "hidden"])
 			],
 		},
@@ -274,6 +275,8 @@ function createExternalReferenceTitle(
 								event.target,
 								plugin,
 							)
+
+							new Notice("Updated External Reference");
 						}
 					);
 				},

@@ -11,7 +11,6 @@ import CodeStylerPlugin from "src/main";
 import { visitParents } from "unist-util-visit-parents";
 import { parseFenceCodeParameters, referenceAdjustParameters, toDecorateFenceCode } from "../../Parsing/fenced";
 import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
-import { getReference } from "src/Internal/utils/reference";
 import { createHeaderElement } from "../elements";
 
 export async function renderedFencedCodeDecorating(
