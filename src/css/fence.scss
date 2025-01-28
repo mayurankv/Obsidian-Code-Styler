@@ -8,13 +8,9 @@ body.cs-plugin {
 			display: grid;
 			grid-template-columns: calc(100% - var(--size-4-12)) var(--size-4-12);
 
-			margin-right: var(--size-4-4);
+			// margin-right: var(--size-4-4);
 			background-color: var(--cs-code-background-colour);
-			box-shadow: var(--size-4-4) 0px var(--cs-code-background-colour);
-			// grid-template-areas:
-			// 	"child-1 child-3"
-			// 	"child-2 child-2";
-			// display: flex;
+			// box-shadow: var(--size-4-4) 0px var(--cs-code-background-colour);
 			// align-items: flex-start;
 
 			> div.cs-header {
@@ -25,14 +21,24 @@ body.cs-plugin {
 				position: sticky;
 				left: 0;
 				grid-row: 1;
-				// top: 0;
-				// flex-wrap: nowrap;
-				// overflow-x: overlay;
-				overflow-x: hidden;
 				justify-content: flex-start;
 				align-items: center;
-				padding-bottom: var(--size-4-2);
+				border-bottom: var(--size-4-2) red;
 				background-color: var(--cs-code-header-background-color);
+				// box-shadow: var(--size-4-4) 0px var(--cs-code-header-background-color);
+
+				&::before {
+					content: "";
+					position: absolute;
+
+					top: calc(-1 * var(--size-4-3));
+					left: calc(-1 * var(--size-4-4));
+					right: calc(-1 * calc(var(--size-4-16)));
+					bottom: 0;
+					background-color: inherit;
+					z-index: -5;
+					// box-shadow: var(--size-4-4) 0px var(--cs-code-header-background-color);
+				}
 
 				> div {
 					display: flex;
@@ -115,6 +121,7 @@ body.cs-plugin {
 				// left: 0;
 				// min-width: 100%;
 				width: max-content;
+				// margin-left: var(--size-4-4);
 
 				> div.cs-line {
 					display: contents;
