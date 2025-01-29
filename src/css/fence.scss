@@ -13,6 +13,16 @@ body.cs-plugin {
 			// box-shadow: var(--size-4-4) 0px var(--cs-code-background-colour);
 			// align-items: flex-start;
 
+			&::before {
+				content: "";
+				background-color: red;
+				position: sticky;
+				left: 100%;
+				width: var(--size-4-4);
+				height: 100%;
+				z-index: 1;
+			}
+
 			> div.cs-header {
 				box-sizing: content-box;
 				user-select: none;
@@ -26,6 +36,7 @@ body.cs-plugin {
 				border-bottom: var(--size-4-2) red;
 				background-color: var(--cs-code-header-background-color);
 				// box-shadow: var(--size-4-4) 0px var(--cs-code-header-background-color);
+				z-index: 4;
 
 				&::before {
 					content: "";
@@ -36,7 +47,7 @@ body.cs-plugin {
 					right: calc(-1 * calc(var(--size-4-16)));
 					bottom: 0;
 					background-color: inherit;
-					z-index: -5;
+					z-index: 2;
 					// box-shadow: var(--size-4-4) 0px var(--cs-code-header-background-color);
 				}
 
@@ -46,6 +57,7 @@ body.cs-plugin {
 					flex: 0 0 auto;
 					// overflow: overlay;
 					white-space: nowrap;
+					z-index: inherit;
 
 					&:not(:first-child):not(.cs-separator) {
 						margin-left: 0.5em
@@ -54,7 +66,7 @@ body.cs-plugin {
 
 				> div.cs-icon-container {
 					height: 100%;
-					align-content: stretch;
+					// align-content: stretch;
 					// vertical-align: top;
 
 					img.cs-icon {
@@ -170,10 +182,12 @@ body.cs-plugin {
 				margin: 0;
 				margin-left: var(--size-4-4);
 				margin-bottom: var(--size-4-2);
+				z-index: 4;
 
 				> svg {
 					// position: sticky;
 					// left: 0;
+					z-index: inherit;
 				}
 			}
 		}

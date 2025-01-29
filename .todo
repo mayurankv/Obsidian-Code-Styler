@@ -12,6 +12,8 @@ Refactor:
 	☐ README and documentation
 	☐ setitins modifiers: Set inline syntax highlighting for file in frontmatter
 	☐ Consistent syntax highlighting
+	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
+	☐ Hide delimiter lines
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting
