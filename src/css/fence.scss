@@ -1,27 +1,41 @@
 body.cs-plugin {
+	--cs-fixed-left-fence: var(--size-4-3);
+	--cs-fixed-gradient-1: 10%;
+
 	.cs-pre-parent {
 		> pre.cs-pre {
 			border-radius: var(--cs-code-fence-radius);
 			overflow-x: auto;
 			position: relative;
-
 			display: grid;
 			grid-template-columns: calc(100% - var(--size-4-12)) var(--size-4-12);
-
 			background-color: var(--cs-code-background-colour);
-			white-space: no-wrap;
+			padding-right: var(--cs-fixed-left-fence);
+
+			// &::before {
+			// 	content: "";
+			// 	background-color: orange;
+			// 	// background: linear-gradient(to right, transparent, 20%, var(--cs-code-background-colour));
+			// 	position: sticky;
+			// 	left: 0;
+			// 	margin-left: calc(-1 * var(--size-4-4));
+			// 	width: var(--size-4-4);
+			// 	height: 100%;
+			// 	z-index: 3;
+			// 	// grid-row: 2;
+			// 	padding-bottom: var(--size-4-3);
+			// }
 
 			&::after {
 				content: "";
-				background-color: var(--cs-code-background-colour);
+				background: linear-gradient(to right, transparent, var(--cs-fixed-gradient-1), var(--cs-code-background-colour));
 				position: sticky;
 				left: 100%;
-				margin-right: calc(-1 * var(--size-4-4));
-				width: var(--size-4-4);
+				margin-right: calc(-1 * var(--size-4-3));
+				width: var(--size-4-3);
 				height: 100%;
 				z-index: 3;
 				grid-row: 2;
-				padding-bottom: var(--size-4-3);
 			}
 
 			> div.cs-header {
@@ -34,20 +48,31 @@ body.cs-plugin {
 				grid-row: 1;
 				justify-content: flex-start;
 				align-items: center;
-				border-bottom: var(--size-4-2) red;
+				border-bottom: var(--size-2-1) solid transparent;
 				background-color: var(--cs-code-header-background-color);
 				z-index: 4;
+				padding-bottom: var(--size-4-3);
 
 				&::before {
 					content: "";
 					position: absolute;
-
 					top: calc(-1 * var(--size-4-3));
 					left: calc(-1 * var(--size-4-4));
-					right: calc(-1 * calc(var(--size-4-16)));
+					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fixed-left-fence)));
 					bottom: 0;
-					background-color: inherit;
+					background: inherit;
 					z-index: 2;
+				}
+
+				&::after {
+					content: "";
+					position: absolute;
+					bottom: calc(-1 * var(--size-2-1));
+					top: 0;
+					left: calc(-1 * var(--size-4-4));
+					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fixed-left-fence)));
+					z-index: 1;
+					background: var(--cs-header-separator-color);
 				}
 
 				> div {
@@ -59,14 +84,12 @@ body.cs-plugin {
 					z-index: inherit;
 
 					&:not(:first-child):not(.cs-separator) {
-						margin-left: 0.5em
+						margin-left: 1em
 					}
 				}
 
 				> div.cs-icon-container {
 					height: 100%;
-					// align-content: stretch;
-					// vertical-align: top;
 
 					img.cs-icon {
 						width: var(--cs-language-icon-size);
@@ -76,13 +99,14 @@ body.cs-plugin {
 				}
 
 				> div.cs-language-title {
-
+					font-weight: var(--cs-language-title-weight);
 				}
 
 				> div.cs-title {
 					overflow-x: auto;
 					max-width: 100%;
 					flex: 0 1 auto;
+					font-weight: var(--cs-title-weight);
 
 					&::-webkit-scrollbar {
 						display: none;
@@ -95,7 +119,13 @@ body.cs-plugin {
 				}
 
 				> div.cs-external-reference {
+					overflow-x: auto;
+					max-width: 100%;
+					flex: 0 1 auto;
 
+					&::-webkit-scrollbar {
+						display: none;
+					}
 
 					button {
 						background-color: transparent;
@@ -109,9 +139,7 @@ body.cs-plugin {
 				}
 
 				> div.cs-separator {
-					// display: flex !important;
-					// visibility: hidden;
-					// width: var(--size-4-8)
+
 				}
 			}
 
@@ -120,19 +148,11 @@ body.cs-plugin {
 				grid-row: 2;
 				grid-template-columns: min-content auto;
 				grid-template-rows: auto;
-				// position: sticky;
-				// left: 0;
-				// overflow-x: visible;
-				// overflow-y: auto;
-				// overflow: visible;
 				overflow: visible;
-				// overflow-x: scroll;
 				white-space: pre;
-				// position: relative;
-				// left: 0;
-				// min-width: 100%;
 				width: max-content;
-				// margin-left: var(--size-4-4);
+				padding-right: var(--cs-fixed-left-fence);
+				padding-top: var(--size-4-1);
 
 				> div.cs-line {
 					display: contents;
@@ -144,8 +164,8 @@ body.cs-plugin {
 						grid-column: 1;
 						user-select: none;
 						text-align: right;
-						padding-right: var(--size-4-2);
-						margin-right: var(--size-4-2);
+						padding-right: var(--size-4-3);
+						margin-right: var(--size-4-3);
 						background-color: var(--cs-code-gutter-background-color);
 						// box-shadow: calc(var(--size-4-4) * -1) 0px var(--cs-code-gutter-background-color);
 
@@ -153,7 +173,7 @@ body.cs-plugin {
 							content: "";
 							position: absolute;
 							// box-shadow: -10px calc(-1 * 10px) var(--cs-code-gutter-background-color);
-							top: 0px;
+							top: calc(-1 * var(--size-4-1));
 							bottom: -100%;
 							left: -100%;
 							right: 0;
@@ -161,6 +181,20 @@ body.cs-plugin {
 							z-index: -5;
 							// box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
 							// border-radius: 8px;
+						}
+
+						&::after {
+							content: "";
+							position: absolute;
+							top: 0px;
+							bottom: 0px;
+							left: 100%;
+							right: calc(-1 * var(--size-4-3));
+							// background: linear-gradient(to left, transparent, 50%, var(--cs-code-background-colour));
+							background: linear-gradient(to left, transparent, var(--cs-fixed-gradient-1), var(--cs-code-background-colour));
+							// mask-image: linear-gradient(to right, black, transparent);
+							// backdrop-filter: blur(2px);
+							z-index: 10;
 						}
 					}
 

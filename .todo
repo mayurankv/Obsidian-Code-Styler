@@ -15,6 +15,8 @@ Refactor:
 	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
 	☐ Hide delimiter lines
 	☐ code styler compatibility
+	☐ Minor in built styling, expose more to style settings
+		☐ Guide to styling by css variables as well
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting
