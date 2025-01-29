@@ -8,19 +8,20 @@ body.cs-plugin {
 			display: grid;
 			grid-template-columns: calc(100% - var(--size-4-12)) var(--size-4-12);
 
-			// margin-right: var(--size-4-4);
 			background-color: var(--cs-code-background-colour);
-			// box-shadow: var(--size-4-4) 0px var(--cs-code-background-colour);
-			// align-items: flex-start;
+			white-space: no-wrap;
 
-			&::before {
+			&::after {
 				content: "";
-				background-color: red;
+				background-color: var(--cs-code-background-colour);
 				position: sticky;
 				left: 100%;
+				margin-right: calc(-1 * var(--size-4-4));
 				width: var(--size-4-4);
 				height: 100%;
-				z-index: 1;
+				z-index: 3;
+				grid-row: 2;
+				padding-bottom: var(--size-4-3);
 			}
 
 			> div.cs-header {
@@ -35,7 +36,6 @@ body.cs-plugin {
 				align-items: center;
 				border-bottom: var(--size-4-2) red;
 				background-color: var(--cs-code-header-background-color);
-				// box-shadow: var(--size-4-4) 0px var(--cs-code-header-background-color);
 				z-index: 4;
 
 				&::before {
@@ -48,7 +48,6 @@ body.cs-plugin {
 					bottom: 0;
 					background-color: inherit;
 					z-index: 2;
-					// box-shadow: var(--size-4-4) 0px var(--cs-code-header-background-color);
 				}
 
 				> div {
