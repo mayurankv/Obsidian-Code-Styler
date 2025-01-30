@@ -285,7 +285,10 @@ function markupFenceCodeElement(
 		},
 	)
 
-	fenceCodeElement.classList.add(`${PREFIX}code`)
+	fenceCodeElement.addClass(`${PREFIX}code`)
+	if (fenceCodeParameters.language !== "")
+		fenceCodeElement.addClass(`language-${fenceCodeParameters.language}`);
+
 	fenceCodeElement.replaceChildren(...lineContainers)
 }
 

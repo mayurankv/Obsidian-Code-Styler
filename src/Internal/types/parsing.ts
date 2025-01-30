@@ -13,6 +13,8 @@ export class CodeParameters {
 	language: string = "";
 	title: string = "";
 	reference: string = "";
+	theme: string = "";
+	dark: boolean | null = null;
 	icon: boolean = true;
 	ignore: boolean = false;
 }

@@ -1,0 +1,30 @@
+body.cs-plugin.theme-light {
+	code.cs-shiki:not([class*=blur]):not(.cs-shiki-dark):not(.cs-shiki-light),
+	code.cs-shiki:not([class*=blur]):not(.cs-shiki-dark):not(.cs-shiki-light) > span:not(.cs-header):not(.cs-footer) > span:not(.cs-icon-container) {
+		color: var(--cs-shiki-light);
+		background-color: var(--cs-shiki-light-bg);
+		font-style: var(--cs-shiki-light-font-style);
+		font-weight: var(--cs-shiki-light-font-weight);
+		text-decoration: var(--cs-shiki-light-text-decoration);
+	}
+}
+
+body.cs-plugin.theme-dark {
+	code.cs-shiki:not([class*=blur]):not(.cs-shiki-dark):not(.cs-shiki-light),
+	code.cs-shiki:not([class*=blur]):not(.cs-shiki-dark):not(.cs-shiki-light) > span:not(.cs-header):not(.cs-footer) > span:not(.cs-icon-container) {
+		color: var(--cs-shiki-dark);
+		background-color: var(--cs-shiki-dark-bg);
+		font-style: var(--cs-shiki-dark-font-style);
+		font-weight: var(--cs-shiki-dark-font-weight);
+		text-decoration: var(--cs-shiki-dark-text-decoration);
+	}
+}
+
+// code.cs-shiki > span.cs-header,
+// code.cs-shiki > span.cs-header > span,
+// code.cs-shiki > span.cs-header > button > svg,
+// code.cs-shiki > span.cs-footer,
+// code.cs-shiki > span.cs-footer > span,
+// code.cs-shiki > span.cs-footer > button > svg {
+// 	color: var();
+// }

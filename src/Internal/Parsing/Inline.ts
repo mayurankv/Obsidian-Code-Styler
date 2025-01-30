@@ -57,7 +57,7 @@ function inferInlineValue(
 	parameterKey: keyof InlineCodeParameters,
 	parameterValue: string,
 ): Partial<InlineCodeParameters> {
-	if (["icon", "ignore"].includes(parameterKey)) {
+	if (["icon", "ignore", "dark"].includes(parameterKey)) {
 		const booleanParameterValue = convertBoolean(parameterValue)
 		return booleanParameterValue === null ? {} : { [parameterKey]: booleanParameterValue };
 	}
@@ -68,7 +68,7 @@ function inferInlineValue(
 function inferInlineShorthand(
 	parameterShorthand: keyof InlineCodeParameters,
 ): Partial<InlineCodeParameters> {
-	if (["icon", "ignore"].includes(parameterShorthand))
+	if (["icon", "ignore", "dark"].includes(parameterShorthand))
 		return { [parameterShorthand]: true }
 
 	throw new Error("Unmanaged inline shorthand parameter")

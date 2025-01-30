@@ -1,3 +1,8 @@
+external reference
+get shiki base theme to class names
+add shiki to fence rendered and codemirror both
+add not shiki clauses for decorating colours
+
 Refactor:
 	☐ Live Preview (Fence)
 	☐ SettingsTabs
@@ -15,8 +20,17 @@ Refactor:
 	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
 	☐ Hide delimiter lines
 	☐ code styler compatibility
+	☐ Look into tokenising wiht textmate tokeniser
+		☐ https://shiki.style
+			☐ https://github.com/mProjectsCode/obsidian-shiki-plugin/issues/25
+		☐ Textmate tokeniser
+		☐ https://github.com/wooorm/starry-night
+		☐ https://github.com/highlightjs/highlight.js
+	☐ Add codemirror to work syntax highlighting with rmarkdown block and py -> python
 	☐ Minor in built styling, expose more to style settings
 		☐ Guide to styling by css variables as well
+	☐ Proper diff notation
+	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting
@@ -48,6 +62,16 @@ Understand:
 		// 		? "width: var(--line-number-gutter-width);"
 		// 		: ""
 		// },
+
+----------------
+
+Syntax Highlighting:
+	☐ https://lezer.codemirror.net/examples/highlight/#running-a-highlighter
+	☐ https://marijnhaverbeke.nl/blog/codemirror-mode-system.html
+	☐ https://tivac.com/2020/02/28/codemirror-static-highlighting/
+	☐ https://github.com/tivac/modular-css/blob/469c8597d0535a2e1b723ee8ebb974326cddefdb/packages/www/build/rollup-plugin-md.js
+	☐ https://github.com/tivac/modular-css/blob/469c8597d0535a2e1b723ee8ebb974326cddefdb/packages/www/build/codemirror-mcss-mime.js
+	☐ https://shiki.style/guide/install
 
 ----------------
 

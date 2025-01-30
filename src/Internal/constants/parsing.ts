@@ -1,9 +1,9 @@
-export const FENCE_PARAMETERS_KEY_VALUE = ["title", "fold", "ln", "unwrap", "icon", "reference", "ref", "ignore", "hl"]
-export const FENCE_PARAMETERS_SHORTHAND = ["fold", "wrap", "unwrap", "ignore", "icon", "ln"]
+export const FENCE_PARAMETERS_KEY_VALUE = ["title", "theme", "dark", "fold", "ln", "unwrap", "icon", "reference", "ref", "ignore", "hl"]
+export const FENCE_PARAMETERS_SHORTHAND = ["fold", "wrap", "unwrap", "light", "dark", "ignore", "icon", "ln"]
 export const FENCE_PARAMETERS = [...new Set([...FENCE_PARAMETERS_KEY_VALUE, ...FENCE_PARAMETERS_SHORTHAND])];
 
-export const INLINE_PARAMETERS_KEY_VALUE = ["title", "icon", "language", "ignore"]
-export const INLINE_PARAMETERS_SHORTHAND = ["icon", "ignore"]
+export const INLINE_PARAMETERS_KEY_VALUE = ["title", "theme", "icon", "language", "ignore", "dark"]
+export const INLINE_PARAMETERS_SHORTHAND = ["icon", "ignore", "light", "dark"]
 export const INLINE_PARAMETERS = [...new Set([...INLINE_PARAMETERS_KEY_VALUE, ...INLINE_PARAMETERS_SHORTHAND])];
 
 export const PLUGIN_CODEBLOCK_WHITELIST = ["reference"]

@@ -36,7 +36,7 @@ export function parseFenceCodeParameters(
 			)
 				return { ...result, language: parameterSection.toLowerCase() }
 
-			if ((idx === 1) && rmarkdownParameters)
+			if ((idx === 1) && rmarkdownParameters && (parameterSection.indexOf(":") === -1) && (parameterSection.indexOf("=") === -1))
 				parameterSection = "title:" + parameterSection
 
 			for (const parameterKey of ["title", "reference", "ref"])
@@ -245,7 +245,7 @@ function inferFenceValue(
 			}
 		}
 
-	} else if (["ignore", "icon"].includes(parameterKey)) {
+	} else if (["ignore", "icon", "dark"].includes(parameterKey)) {
 		const booleanParameterValue = convertBoolean(parameterValue) //TODO:
 
 		return booleanParameterValue === null ? {} : { [parameterKey]: booleanParameterValue };
@@ -294,7 +294,7 @@ function inferFenceShorthand(
 			}
 		}
 
-	else if (["ignore", "icon"].includes(parameterShorthand))
+	else if (["ignore", "icon", "dark"].includes(parameterShorthand))
 		return { [parameterShorthand]: true }
 
 	throw new Error("Unmanaged inline shorthand parameter")

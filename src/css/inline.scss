@@ -12,6 +12,8 @@ body.cs-plugin {
 		}
 	}
 
+	code 
+
 	span.cm-formatting.cm-inline-code ~ span.cs-header {
 		border-radius: 0px !important;
 	}
@@ -79,9 +81,8 @@ body.cs-plugin {
 		button.cs-copy-icon {
 			--icon-size: var(--icon-xs);
 			padding: 0.15em;
-			margin-left: 0.25em;
+			margin-left: var(--size-4-2);
 			background-color: transparent;
-			color: var(--text-muted);
 			box-shadow: none;
 			height: 100%;
 			display: inline-block;
@@ -94,6 +95,11 @@ body.cs-plugin {
 				display: inline;
 				height: 100%;
 				vertical-align: text-top;
+				color: var(--code-comment)
+			}
+
+			&:hover > svg {
+				color: var(--code-normal)
 			}
 		}
 	}

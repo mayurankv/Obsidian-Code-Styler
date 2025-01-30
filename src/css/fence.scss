@@ -1,6 +1,8 @@
 body.cs-plugin {
 	--cs-fixed-left-fence: var(--size-4-3);
 	--cs-fixed-gradient-1: 10%;
+	--cs-language-border: var(--size-4-1);
+	--cs-gutter-border-width: var(--size-2-1);
 
 	.cs-pre-parent {
 		> pre.cs-pre {
@@ -18,11 +20,14 @@ body.cs-plugin {
 			// 	// background: linear-gradient(to right, transparent, 20%, var(--cs-code-background-colour));
 			// 	position: sticky;
 			// 	left: 0;
-			// 	margin-left: calc(-1 * var(--size-4-4));
+			// 	top: 0;
+			// 	// margin-left: calc(-1 * var(--size-4-4));
 			// 	width: var(--size-4-4);
+			// 	padding-right: 0px;
+			// 	margin-right: 0px;
 			// 	height: 100%;
 			// 	z-index: 3;
-			// 	// grid-row: 2;
+			// 	grid-row: 2;
 			// 	padding-bottom: var(--size-4-3);
 			// }
 
@@ -51,17 +56,18 @@ body.cs-plugin {
 				border-bottom: var(--size-2-1) solid transparent;
 				background-color: var(--cs-code-header-background-color);
 				z-index: 4;
-				padding-bottom: var(--size-4-3);
+				padding-bottom: var(--size-4-2);
 
 				&::before {
 					content: "";
 					position: absolute;
 					top: calc(-1 * var(--size-4-3));
-					left: calc(-1 * var(--size-4-4));
+					left: calc(-1 * calc(var(--size-4-4) - var(--cs-language-border)));
 					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fixed-left-fence)));
 					bottom: 0;
 					background: inherit;
 					z-index: 2;
+					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-header-colour);
 				}
 
 				&::after {
@@ -69,10 +75,11 @@ body.cs-plugin {
 					position: absolute;
 					bottom: calc(-1 * var(--size-2-1));
 					top: 0;
-					left: calc(-1 * var(--size-4-4));
+					left: calc(-1 * calc(var(--size-4-4) - var(--cs-language-border)));
 					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fixed-left-fence)));
 					z-index: 1;
 					background: var(--cs-header-separator-color);
+					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-separator-colour);
 				}
 
 				> div {
@@ -100,6 +107,7 @@ body.cs-plugin {
 
 				> div.cs-language-title {
 					font-weight: var(--cs-language-title-weight);
+					color: var(--cs-language-title-color);
 				}
 
 				> div.cs-title {
@@ -107,6 +115,7 @@ body.cs-plugin {
 					max-width: 100%;
 					flex: 0 1 auto;
 					font-weight: var(--cs-title-weight);
+					color: var(--cs-title-color);
 
 					&::-webkit-scrollbar {
 						display: none;
@@ -166,20 +175,21 @@ body.cs-plugin {
 						text-align: right;
 						padding-right: var(--size-4-3);
 						margin-right: var(--size-4-3);
+						color: var(--cs-code-gutter-color);
 						background-color: var(--cs-code-gutter-background-color);
+						border-right: var(--cs-gutter-border-width) solid var(--cs-gutter-border-colour);
 						// box-shadow: calc(var(--size-4-4) * -1) 0px var(--cs-code-gutter-background-color);
 
 						&::before {
 							content: "";
 							position: absolute;
-							// box-shadow: -10px calc(-1 * 10px) var(--cs-code-gutter-background-color);
 							top: calc(-1 * var(--size-4-1));
 							bottom: -100%;
-							left: -100%;
+							left: calc(-1 * calc(var(--size-4-4) - var(--cs-language-border)));
 							right: 0;
 							background-color: inherit;
 							z-index: -5;
-							// box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+							box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-background-colour);
 							// border-radius: 8px;
 						}
 
@@ -188,7 +198,7 @@ body.cs-plugin {
 							position: absolute;
 							top: 0px;
 							bottom: 0px;
-							left: 100%;
+							left: calc(100% + var(--cs-gutter-border));
 							right: calc(-1 * var(--size-4-3));
 							// background: linear-gradient(to left, transparent, 50%, var(--cs-code-background-colour));
 							background: linear-gradient(to left, transparent, var(--cs-fixed-gradient-1), var(--cs-code-background-colour));
