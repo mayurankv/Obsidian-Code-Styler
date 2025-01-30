@@ -33,8 +33,8 @@ export const OBSIDIAN_THEME_STYLES: Record<string, ThemeStyle> = {
 
 export const DECORATED_ATTRIBUTE = DATA_PREFIX + PREFIX + "decorated"
 export const DEFAULT_FOLD_ATTRIBUTE = DATA_PREFIX + PREFIX + "fold-default"
-export const FOLD_ATTRIBUTE = PREFIX + "fold"
-export const WRAP_ATTRIBUTE = PREFIX + "wrap"
+export const FOLD_ATTRIBUTE = DATA_PREFIX + PREFIX + "fold"
+export const WRAP_ATTRIBUTE = DATA_PREFIX + PREFIX + "wrap"
 
 export const FOLD_PLACEHOLDER = "Folded Code";
 

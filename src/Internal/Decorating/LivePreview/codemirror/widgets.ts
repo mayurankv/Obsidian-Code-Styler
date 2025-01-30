@@ -155,7 +155,7 @@ export class LineNumberWidget extends WidgetType {
 				cls: [
 					PREFIX + "line-number",
 				],
-				text: (this.lineNumber + this.lineNumbers.offset).toString(),
+				text: (this.lineNumber + (this.lineNumbers.offset ?? 0)).toString(),
 			});
 	}
 }

@@ -1,4 +1,5 @@
-import { CodeStylerThemeModeColours, Colour } from "../types/settings";
+import { Colour } from "../types/decoration";
+import { CodeStylerThemeModeColours } from "../types/settings";
 
 const DEFAULT_THEME: Record<string, Colour> = {
 	backgroundColour: "--code-background",

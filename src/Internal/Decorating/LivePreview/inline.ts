@@ -80,7 +80,7 @@ function buildInlineCodeDecoration(
 			}),
 		});
 
-	if (toHighlightInlineCode(plugin))
+	if (toHighlightInlineCode(inlineCodeInfo.parameters.value, plugin))
 		decorations = [
 			...decorations,
 			...inlineSyntaxHighlight(
@@ -132,11 +132,14 @@ function buildInlineCodeDecoration(
 
 function inlineSyntaxHighlight(
 	state: EditorState,
-	language: string,
+	language: string | null,
 	content: string,
 	start: number,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
+	if (language === null)
+		return []
+
 	const decorations: Array<{from: number, to: number, value: Decoration}> = []
 
 	// @ts-expect-error Undocumented Obsidian API

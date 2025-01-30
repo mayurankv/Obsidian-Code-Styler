@@ -113,10 +113,8 @@ export async function referenceAdjustParameters(
 		if (reference.external)
 			fenceCodeParameters.externalReference = reference;
 
-		if (!fenceCodeParameters.lineNumbers.alwaysDisabled && !fenceCodeParameters.lineNumbers.alwaysEnabled) {
+		if (fenceCodeParameters.lineNumbers.offset === null)
 			fenceCodeParameters.lineNumbers.offset = reference.startLine - 1;
-			fenceCodeParameters.lineNumbers.alwaysEnabled = Boolean(reference.startLine !== 1);
-		}
 	}
 
 	return fenceCodeParameters;
@@ -136,7 +134,7 @@ function externalPluginAdjustFenceCodeParameters(
 		if (fenceCodeParameters.title === "")
 			adjustedParameters.title = executeCodeCodeblockArgs?.label ?? fenceCodeParameters.title
 
-		if (fenceCodeParameters.language.startsWith("run-")) {
+		if (fenceCodeParameters.language?.startsWith("run-")) {
 			const executeCodeLanguage = fenceCodeParameters.language.slice(4)
 			if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(executeCodeLanguage) && !isLanguageMatched(fenceCodeParameters.language, plugin.settings.processedCodeblocksWhitelist))
 				adjustedParameters.language = executeCodeLanguage
@@ -195,26 +193,7 @@ function inferFenceValue(
 	parameterValue: string,
 ): Partial<FenceCodeParameters> {
 	if (parameterKey === "unwrap") {
-		if (parameterValue === "incactive")
-			return {
-				lineUnwrap: {
-					alwaysEnabled: true,
-					alwaysDisabled: false,
-					activeWrap: true
-				}
-			}
-
-		const booleanParameterValue = convertBoolean(parameterValue)
-
-		return booleanParameterValue === null
-			? {}
-			: {
-				lineUnwrap: {
-					alwaysEnabled: booleanParameterValue,
-					alwaysDisabled: !booleanParameterValue,
-					activeWrap: false
-				}
-			}
+		return { lineUnwrap: (parameterValue === "inactive") ? "inactive" : convertBoolean(parameterValue)}
 
 	} else if (parameterKey === "fold") {
 		return {
@@ -229,18 +208,16 @@ function inferFenceValue(
 		if (/^\d+$/.test(parameterValue))
 			return {
 				lineNumbers: {
-					alwaysEnabled: true,
-					alwaysDisabled: false,
+					enabled: true,
 					offset: parseInt(parameterValue) - 1,
 				}
 			}
 
 		const booleanParameterValue = convertBoolean(parameterValue)
 
-		return booleanParameterValue === null ? {} : {
+		return {
 			lineNumbers: {
-				alwaysEnabled: booleanParameterValue,
-				alwaysDisabled: !booleanParameterValue,
+				enabled: booleanParameterValue,
 				offset: 0
 			}
 		}
@@ -268,28 +245,15 @@ function inferFenceShorthand(
 		}
 
 	else if (parameterShorthand === "wrap")
-		return {
-			lineUnwrap: {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
-				activeWrap: false
-			}
-		}
+		return { lineUnwrap: false }
 
 	else if (parameterShorthand === "unwrap")
-		return {
-			lineUnwrap: {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
-				activeWrap: false
-			}
-		}
+		return { lineUnwrap: true }
 
 	else if (parameterShorthand === "ln")
 		return {
 			lineNumbers: {
-				alwaysEnabled: true,
-				alwaysDisabled: false,
+				enabled: true,
 				offset: 0,
 			}
 		}

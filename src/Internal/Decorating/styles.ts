@@ -48,16 +48,16 @@ function getBodyClasses(
 	const themeSettings = plugin.settings.currentTheme.settings
 
 	return Object.entries({
-		"code-styler-style-inline": themeSettings.inline.style,
-		"code-styler-gutter-highlight": themeSettings.gutter.highlight,
-		"code-styler-gutter-active-line": themeSettings.gutter.activeLine,
-		"code-styler-active-line-highlight": themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine, // Inside and outside of codeblocks with different colours
-		"code-styler-active-line-highlight-editor": themeSettings.highlights.activeEditorLine && !themeSettings.highlights.activeCodeblockLine, // Only outside codeblocks
-		"code-styler-active-line-highlight-codeblock": !themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine, // Only inside codeblocks
+		"line-numbers-enabled-false": !themeSettings.codeblock.lineNumbers,
+		// "code-styler-gutter-highlight": themeSettings.gutter.highlight,
+		// "code-styler-gutter-active-line": themeSettings.gutter.activeLine,
+		// "code-styler-active-line-highlight": themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine, // Inside and outside of codeblocks with different colours
+		// "code-styler-active-line-highlight-editor": themeSettings.highlights.activeEditorLine && !themeSettings.highlights.activeCodeblockLine, // Only outside codeblocks
+		// "code-styler-active-line-highlight-codeblock": !themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine, // Only inside codeblocks
 	}).filter(
 		([cssclass, setting]) => setting,
 	).map(
-		([cssclass, setting]) => cssclass,
+		([cssclass, setting]) => PREFIX + cssclass,
 	)
 }
 

@@ -134,7 +134,7 @@ function createLanguageTitle(
 		{
 			cls: [
 				PREFIX + "language-title",
-				...(codeParameters.language !== "" ? [] : [PREFIX + "hidden"]),
+				...(codeParameters.language !== null ? [] : [PREFIX + "hidden"]),
 			],
 			text: getLanguageName(codeParameters.language)
 		},
@@ -148,19 +148,19 @@ function createNamedTitle(
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	const title = fence
-		? codeParameters.title || (codeParameters as FenceCodeParameters).fold.placeholder || plugin.settings.currentTheme.settings.header.foldPlaceholder || FOLD_PLACEHOLDER || ""
+		? codeParameters.title || ((codeParameters as FenceCodeParameters).fold.placeholder ?? plugin.settings.currentTheme.settings.header.foldPlaceholder) || FOLD_PLACEHOLDER || ""
 		: codeParameters.title || ""
 	const namedTitleContainer = createEl(
 		fence ? "div" : "span",
 		{
 			cls: [
 				PREFIX + "title",
-				...(codeParameters.title !== "" ? [] : [PREFIX + "hidden"]),
+				...(codeParameters.title !== null ? [] : [PREFIX + "hidden"]),
 			],
 		},
 	)
 
-	if (codeParameters.reference !== "")
+	if (codeParameters.reference !== null)
 		MarkdownRenderer.render( //TODO (@mayurankv) Add links to metadata cache properly
 			plugin.app,
 			isUrl(codeParameters.reference)
@@ -292,7 +292,7 @@ function createExternalReferenceTitle(
 		{
 			cls: [
 				PREFIX + "reference-title",
-				...(codeParameters.title !== ""  ? [] : [PREFIX + "hidden"]),
+				...(codeParameters.title !== null  ? [] : [PREFIX + "hidden"]),
 			],
 			text: fence
 				? codeParameters.title || (codeParameters as FenceCodeParameters).fold.placeholder || plugin.settings.currentTheme.settings.header.foldPlaceholder || FOLD_PLACEHOLDER || ""
@@ -329,7 +329,7 @@ function createHeaderSeparator(
 		{
 			cls: [
 				PREFIX + "separator",
-				...((!fence && ((codeParameters.title !== "") || (codeParameters.language !== "" && (codeParameters.icon || true)))) ? [] : [PREFIX + "hidden"]), //TODO: true should be setting if to add language title
+				...((!fence && ((codeParameters.title !== null) || (codeParameters.language !== null && (codeParameters.icon || true)))) ? [] : [PREFIX + "hidden"]), //TODO: true should be setting if to add language title
 			],
 			text: '\uff5c',
 		},

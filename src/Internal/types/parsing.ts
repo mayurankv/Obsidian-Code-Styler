@@ -10,32 +10,29 @@ export interface LinkInfo {
 }
 
 export class CodeParameters {
-	language: string = "";
-	title: string = "";
-	reference: string = "";
-	theme: string = "";
+	language: string | null = null;
+	title: string | null = null;
+	reference: string | null = null;
+	theme: string | null = null;
 	dark: boolean | null = null;
 	icon: boolean = true;
 	ignore: boolean = false;
 }
 
 export interface LineParameters {
-	alwaysEnabled: boolean;
-	alwaysDisabled: boolean;
-	offset: number;
+	enabled: boolean | null;
+	offset: number | null;
+}
+
+export interface FoldParameters {
+	enabled: boolean | null;
+	placeholder: string | null;
 }
 
 export class FenceCodeParameters extends CodeParameters {
-	fold: {
-		enabled: boolean;
-		placeholder: string;
-	} = {enabled: false, placeholder: ""};
-	lineNumbers: LineParameters = {alwaysEnabled: false, alwaysDisabled: false, offset: 0};
-	lineUnwrap: {
-		alwaysEnabled: boolean;
-		alwaysDisabled: boolean;
-		activeWrap: boolean;
-	} = {alwaysEnabled: false, alwaysDisabled: false, activeWrap: false};
+	fold: FoldParameters = {enabled: null, placeholder: null};
+	lineNumbers: LineParameters = {enabled: null, offset: null};
+	lineUnwrap: boolean | null | "inactive" = null;
 	highlights: {
 		default: Highlights;
 		alternative: Record<string, Highlights>

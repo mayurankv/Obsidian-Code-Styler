@@ -229,18 +229,14 @@ function markupFencePreElement(
 
 	fencePreElement.classList.add(...classList);
 
-	fencePreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, fenceCodeParameters.fold.enabled.toString());
+	if (fenceCodeParameters.fold.enabled !== null)
+		fencePreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, fenceCodeParameters.fold.enabled.toString());
 
 	if (staticRender)
 		return;
 
 	if (fenceCodeParameters.fold.enabled)
 		fencePreElement.setAttribute(FOLD_ATTRIBUTE, "true");
-
-	if (fenceCodeParameters.lineUnwrap.alwaysEnabled)
-		fencePreElement.setAttribute(WRAP_ATTRIBUTE, fenceCodeParameters.lineUnwrap.activeWrap ? "unwrapped-inactive" : "unwrapped");
-	else if (fenceCodeParameters.lineUnwrap.alwaysDisabled)
-		fencePreElement.setAttribute(WRAP_ATTRIBUTE, "wrapped");
 }
 
 function markupFenceCodeElement(
@@ -272,13 +268,22 @@ function markupFenceCodeElement(
 		(line, idx, fenceCodeLines) => idx !== fenceCodeLines.length - 1,
 	).map(
 		(line, idx) => {
-			const lineNumber = idx + fenceCodeParameters.lineNumbers.offset + 1
+			const lineNumber = idx + (fenceCodeParameters.lineNumbers.offset ?? 0) + 1
 			const lineContainer = createDiv({
 				cls: getLineClasses(fenceCodeParameters, lineNumber, line)
 			});
 			lineContainer.append(
-				createDiv({ cls: PREFIX + "line-number", text: lineNumber.toString() }),
-				createDiv({ cls: PREFIX + "line-text", text: sanitizeHTMLToDom(line !== "" ? line : "<br>") }),
+				createDiv({
+					cls: [
+						PREFIX + "line-number",
+						...((fenceCodeParameters.lineNumbers.enabled === null) ? [] : [PREFIX + "line-numbers-enabled-" + fenceCodeParameters.lineNumbers.enabled]),
+					],
+					text: lineNumber.toString(),
+				}),
+				createDiv({
+					cls: PREFIX + "line-text",
+					text: sanitizeHTMLToDom(line !== "" ? line : "<br>"),
+				}),
 			);
 
 			return lineContainer
@@ -286,8 +291,18 @@ function markupFenceCodeElement(
 	)
 
 	fenceCodeElement.addClass(`${PREFIX}code`)
-	if (fenceCodeParameters.language !== "")
+	if (fenceCodeParameters.language)
 		fenceCodeElement.addClass(`language-${fenceCodeParameters.language}`);
+
+	if (fenceCodeParameters.lineUnwrap !== null)
+		fenceCodeElement.setAttribute(
+			WRAP_ATTRIBUTE,
+			fenceCodeParameters.lineUnwrap === "inactive"
+				? "unwrapped-inactive"
+				: fenceCodeParameters.lineUnwrap
+				? "unwrapped"
+				: "wrapped",
+		);
 
 	fenceCodeElement.replaceChildren(...lineContainers)
 }

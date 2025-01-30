@@ -4,6 +4,10 @@ body.cs-plugin {
 	--cs-language-border: var(--size-4-1);
 	--cs-gutter-border-width: var(--size-2-1);
 
+	.markdown-source-view.mod-cm6 .cm-embed-block:not(.cm-table-widget):has(> .cs-pre-parent) {
+		border-radius: var(--cs-code-fence-radius);
+	}
+
 	.cs-pre-parent {
 		> pre.cs-pre {
 			border-radius: var(--cs-code-fence-radius);
@@ -13,23 +17,6 @@ body.cs-plugin {
 			grid-template-columns: calc(100% - var(--size-4-12)) var(--size-4-12);
 			background-color: var(--cs-code-background-colour);
 			padding-right: var(--cs-fixed-left-fence);
-
-			// &::before {
-			// 	content: "";
-			// 	background-color: orange;
-			// 	// background: linear-gradient(to right, transparent, 20%, var(--cs-code-background-colour));
-			// 	position: sticky;
-			// 	left: 0;
-			// 	top: 0;
-			// 	// margin-left: calc(-1 * var(--size-4-4));
-			// 	width: var(--size-4-4);
-			// 	padding-right: 0px;
-			// 	margin-right: 0px;
-			// 	height: 100%;
-			// 	z-index: 3;
-			// 	grid-row: 2;
-			// 	padding-bottom: var(--size-4-3);
-			// }
 
 			&::after {
 				content: "";
@@ -155,13 +142,21 @@ body.cs-plugin {
 			> code.cs-code {
 				display: grid;
 				grid-row: 2;
+				grid-column: span 2;
+				// grid-column-start: 1;
+				// grid-column-end: 2;
 				grid-template-columns: min-content auto;
 				grid-template-rows: auto;
 				overflow: visible;
-				white-space: pre;
 				width: max-content;
 				padding-right: var(--cs-fixed-left-fence);
 				padding-top: var(--size-4-1);
+
+				&[data-cs-wrap = "wrapped"],
+				&[data-cs-wrap = "unwrapped-inactive"]:active {
+					width: unset;
+					padding-right: 0;
+				}
 
 				> div.cs-line {
 					display: contents;
@@ -206,6 +201,14 @@ body.cs-plugin {
 							// backdrop-filter: blur(2px);
 							z-index: 10;
 						}
+
+						&.cs-line-numbers-enabled-false {
+							display: none;
+						}
+
+						&.cs-line-numbers-enabled-true {
+							display: block;
+						}
 					}
 
 					> div.cs-line-text {
@@ -235,5 +238,42 @@ body.cs-plugin {
 			}
 		}
 	}
-
 }
+
+body.cs-plugin.line-numbers-enabled-false {
+	.cs-pre-parent {
+		> pre.cs-pre {
+			> code.cs-code {
+				> div.cs-line {
+					> div.cs-line-number {
+						&:not(.cs-line-numbers-enabled-true) {
+							display: none;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+// body.cs-plugin {
+// 	.cs-pre-parent {
+// 		> pre.cs-pre:not(:active) {
+// 			> code.cs-code {
+// 				> div.cs-line {
+// 					> div.cs-line-number {
+// 						&:not(.cs-line-numbers-enabled-true) {
+// 							display: none;
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
+// 				&[data-cs-wrap = "unwrapped-inactive"]:not(:active) {
+// 					width: unset;
+// 					padding-right: 0;
+// 				}

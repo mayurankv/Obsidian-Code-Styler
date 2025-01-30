@@ -6,7 +6,7 @@ export function foldOnClick(
 	view: EditorView,
 	target: HTMLElement,
 	folded: boolean,
-	language: string,
+	language: string | null,
 ) {
 	codeblockFoldCallback(
 		view.posAtDOM(target),

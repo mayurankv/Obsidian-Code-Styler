@@ -3,10 +3,10 @@ import { CodeStylerThemeSettings } from "src/Internal/types/settings";
 
 export function isHeaderHidden(
 	codeParameters: CodeParameters,
-	themeSettings: CodeStylerThemeSettings,
+	plugin: CodeStylerPlugin,
 	iconURL: string | undefined,
 ): boolean {
-	return !isHeaderRequired(codeParameters) && (codeParameters.language === "" || (themeSettings.header.languageTag.display !== "always" && (themeSettings.header.languageIcon.display !== "always" || (typeof iconURL == "undefined"))));
+	return !isHeaderRequired(codeParameters) && (codeParameters.language === "" || (plugin.settings.header.languageTag.display !== "always" && (themeSettings.header.languageIcon.display !== "always" || (typeof iconURL == "undefined"))));
 }
 
 function isLanguageIconShown(
@@ -31,5 +31,5 @@ function isLanguageTagShown(
 function isHeaderRequired(
 	codeParameters: CodeParameters,
 ): boolean {
-	return codeParameters.fold.enabled || codeParameters.title !== "";
+	return codeParameters.fold.enabled || codeParameters.title !== null;
 }

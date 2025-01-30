@@ -17,7 +17,7 @@ export function getLineClasses(
 	const classList = [
 		PREFIX + "line",
 		...Object.entries({ default: fenceCodeParameters.highlights.default, ...fenceCodeParameters.highlights.alternative }).filter(
-			([highlightName, highlights]: [string, Highlights]) => toHighlight(highlights, lineNumber + fenceCodeParameters.lineNumbers.offset, line)
+			([highlightName, highlights]: [string, Highlights]) => toHighlight(highlights, lineNumber + (fenceCodeParameters.lineNumbers.offset ?? 0), line)
 		).map(
 			([highlightName, highlights]: [string, Highlights]) => `${PREFIX}highlighted-${toKebabCase(highlightName)}`
 		),
@@ -27,15 +27,21 @@ export function getLineClasses(
 }
 
 export function getLanguageIcon(
-	language: string,
+	language: string | null,
 	plugin: CodeStylerPlugin,
 ): string | null {
+	if (language === null)
+		return null
+
 	return plugin.resources.languageIcons?.[getLanguageName(language)] ?? null;
 }
 
 export function getLanguageName(
-	language: string,
+	language: string | null,
 ): string {
+	if (language === null)
+		return ""
+
 	return LANGUAGE_NAMES?.[language] ?? ((language.charAt(0).toUpperCase() + language.slice(1)) || "");
 }
 

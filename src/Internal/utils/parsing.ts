@@ -114,9 +114,12 @@ function getLinks(
 }
 
 export function isLanguageMatched(
-	language: string,
+	language: string | null,
 	languagesString: string,
 ): boolean {
+	if (language === null)
+		return false
+
 	return languagesString.split(",").filter(
 		regexLanguage => regexLanguage !== ""
 	).map(

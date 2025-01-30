@@ -82,9 +82,10 @@ export function toDecorateInlineCode(
 }
 
 export function toHighlightInlineCode(
+	inlineCodeParameters: InlineCodeParameters,
 	plugin: CodeStylerPlugin,
 ): boolean {
-	return plugin.settings.currentTheme.settings.inline.syntaxHighlight
+	return plugin.settings.currentTheme.settings.inline.syntaxHighlight && (inlineCodeParameters.language !== null)
 }
 
 export function splitInlineCodeRaw(

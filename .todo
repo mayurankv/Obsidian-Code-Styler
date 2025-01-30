@@ -1,4 +1,6 @@
-external reference
+blur end of title if scrollable
+blur end of reference if scrollable
+external reference styling
 get shiki base theme to class names
 add shiki to fence rendered and codemirror both
 add not shiki clauses for decorating colours
@@ -20,7 +22,7 @@ Refactor:
 	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
 	☐ Hide delimiter lines
 	☐ code styler compatibility
-	☐ Look into tokenising wiht textmate tokeniser
+	☐ Look into tokenising with textmate tokeniser
 		☐ https://shiki.style
 			☐ https://github.com/mProjectsCode/obsidian-shiki-plugin/issues/25
 		☐ Textmate tokeniser

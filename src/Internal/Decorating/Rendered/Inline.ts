@@ -86,32 +86,17 @@ async function markupInlineCodeElement(
 	inlineCodeParameters: InlineCodeParameters,
 	plugin: CodeStylerPlugin,
 ): Promise<void> {
-	if (toHighlightInlineCode(plugin)) {
-		if (!USE_SHIKI) {
-			const temporaryRenderingContainer = createDiv();
-			await MarkdownRenderer.render(
-				plugin.app,
-				["```", inlineCodeParameters.language, "\n", inlineCodeElement.getAttribute(CONTENT_ATTRIBUTE) ?? "", "\n", "```"].join(""),
-				temporaryRenderingContainer,
-				TEMPORARY_SOURCEPATH,
-				plugin,
-			);
-
-			const renderedCodeElement = temporaryRenderingContainer.querySelector("code");
-			if (!renderedCodeElement)
-				throw new Error("Could not render highlighted code");
-
-			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML + '&ZeroWidthSpace;';
-		} else {
+	if (toHighlightInlineCode(inlineCodeParameters, plugin)) {
+		if (USE_SHIKI) {
 			try {
 				const htmlSections = (
 					await codeToHtml(
 						inlineCodeElement.getAttribute(CONTENT_ATTRIBUTE) ?? "",
 						{
-							lang: inlineCodeParameters.language,
+							lang: inlineCodeParameters.language ?? "",
 							themes: {
-								light: (inlineCodeParameters.theme === "") ? 'github-light' : inlineCodeParameters.theme, //TODO: Replace github with settings default theme
-								dark: (inlineCodeParameters.theme === "") ? 'github-dark' : inlineCodeParameters.theme, //TODO: Replace github with settings default theme
+								light: inlineCodeParameters.theme ?? 'github-light', //TODO: Replace github with settings default theme
+								dark: inlineCodeParameters.theme ?? 'github-dark', //TODO: Replace github with settings default theme
 							},
 							defaultColor: inlineCodeParameters.dark === null
 								? false
@@ -133,7 +118,24 @@ async function markupInlineCodeElement(
 				if (inlineCodeParameters.dark !== null)
 					inlineCodeElement.addClass(`${PREFIX}shiki-${inlineCodeParameters.dark ? 'dark' : 'light'}`)
 			} catch (error) { }
+		} else {
+			const temporaryRenderingContainer = createDiv();
+			await MarkdownRenderer.render(
+				plugin.app,
+				["```", inlineCodeParameters.language ?? "", "\n", inlineCodeElement.getAttribute(CONTENT_ATTRIBUTE) ?? "", "\n", "```"].join(""),
+				temporaryRenderingContainer,
+				TEMPORARY_SOURCEPATH,
+				plugin,
+			);
+
+			const renderedCodeElement = temporaryRenderingContainer.querySelector("code");
+			if (!renderedCodeElement)
+				throw new Error("Could not render highlighted code");
+
+			inlineCodeElement.innerHTML = renderedCodeElement.innerHTML + '&ZeroWidthSpace;';
 		}
+	} else {
+		inlineCodeElement.innerHTML = inlineCodeElement.getAttribute(CONTENT_ATTRIBUTE) ?? "";
 	}
 
 	inlineCodeElement.addClass(`${PREFIX}code-inline`)
