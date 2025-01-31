@@ -7,6 +7,7 @@ import { createFooterElement, createHeaderElement } from "../../elements";
 import { foldOnClick } from "./actions";
 import CodeStylerPlugin from "src/main";
 import { getLanguageIcon } from "src/Internal/utils/decorating";
+import { getTheme } from "src/Internal/utils/themes";
 
 export class HeaderWidget extends WidgetType {
 	codeParameters: CodeParameters;
@@ -38,9 +39,7 @@ export class HeaderWidget extends WidgetType {
 			this.codeParameters.reference === other.codeParameters.reference &&
 			this.codeParameters.icon === other.codeParameters.icon &&
 			this.codeParameters.ignore === other.codeParameters.ignore &&
-			getLanguageIcon(this.codeParameters.language, this.plugin) == getLanguageIcon(other.codeParameters.language, other.plugin) &&
-			(this.codeParameters as FenceCodeParameters)?.fold?.placeholder === (other.codeParameters as FenceCodeParameters)?.fold?.placeholder &&
-			(!("fold" in this.codeParameters) || this.plugin.settings.currentTheme.settings.header.foldPlaceholder === other.plugin.settings.currentTheme.settings.header.foldPlaceholder)
+			(this.codeParameters as FenceCodeParameters)?.fold?.placeholder === (other.codeParameters as FenceCodeParameters)?.fold?.placeholder
 		);
 	}
 
@@ -54,6 +53,7 @@ export class HeaderWidget extends WidgetType {
 			this.plugin,
 		);
 
+		const folded = true //TODO: Fix
 		if (this.fence)
 			headerElement.onclick = (event) => {
 				if ((event.target as HTMLElement)?.hasClass("internal-link") || (event.target as HTMLElement)?.hasClass("external-link"))
@@ -105,9 +105,7 @@ export class FooterWidget extends WidgetType {
 			this.codeParameters.reference === other.codeParameters.reference &&
 			this.codeParameters.icon === other.codeParameters.icon &&
 			this.codeParameters.ignore === other.codeParameters.ignore &&
-			getLanguageIcon(this.codeParameters.language, this.plugin) == getLanguageIcon(other.codeParameters.language, other.plugin) &&
-			(this.codeParameters as FenceCodeParameters)?.fold?.placeholder === (other.codeParameters as FenceCodeParameters)?.fold?.placeholder &&
-			(!("fold" in this.codeParameters) || this.plugin.settings.currentTheme.settings.header.foldPlaceholder === other.plugin.settings.currentTheme.settings.header.foldPlaceholder)
+			(this.codeParameters as FenceCodeParameters)?.fold?.placeholder === (other.codeParameters as FenceCodeParameters)?.fold?.placeholder
 		);
 	}
 

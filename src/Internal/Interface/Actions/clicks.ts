@@ -1,5 +1,6 @@
 import { MarkdownView } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
+import { rerender } from "src/Internal/Decorating/LivePreview/codemirror/stateEffects";
 import CodeStylerPlugin from "src/main";
 
 export function rerenderCodeElement(
