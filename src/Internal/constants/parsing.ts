@@ -1,9 +1,12 @@
-export const FENCE_PARAMETERS_KEY_VALUE = ["title", "theme", "dark", "fold", "ln", "unwrap", "icon", "reference", "ref", "ignore", "hl"]
-export const FENCE_PARAMETERS_SHORTHAND = ["fold", "wrap", "unwrap", "light", "dark", "ignore", "icon", "ln"]
+export const CODE_PARAMETERS_KEY_VALUE = ["title", "label", "name", "reference", "theme", "icon", "language", "dark", "ignore"]
+export const CODE_PARAMETERS_SHORTHAND = ["icon", "ignore", "light", "dark", "language", "dark"]
+
+export const FENCE_PARAMETERS_KEY_VALUE = [...CODE_PARAMETERS_KEY_VALUE, "fold", "ln", "unwrap", "ref", "hl"]
+export const FENCE_PARAMETERS_SHORTHAND = [...CODE_PARAMETERS_SHORTHAND, "fold", "wrap", "unwrap", "ln"]
 export const FENCE_PARAMETERS = [...new Set([...FENCE_PARAMETERS_KEY_VALUE, ...FENCE_PARAMETERS_SHORTHAND])];
 
-export const INLINE_PARAMETERS_KEY_VALUE = ["title", "theme", "icon", "language", "ignore", "dark"]
-export const INLINE_PARAMETERS_SHORTHAND = ["icon", "ignore", "light", "dark"]
+export const INLINE_PARAMETERS_KEY_VALUE = [...CODE_PARAMETERS_KEY_VALUE]
+export const INLINE_PARAMETERS_SHORTHAND = [...CODE_PARAMETERS_SHORTHAND]
 export const INLINE_PARAMETERS = [...new Set([...INLINE_PARAMETERS_KEY_VALUE, ...INLINE_PARAMETERS_SHORTHAND])];
 
 export const PLUGIN_CODEBLOCK_WHITELIST = ["reference"]
