@@ -2,6 +2,7 @@ import CodeStylerPlugin from "src/main";
 import { CodeStylerSettings } from "../types/settings";
 import { BODY_CLASS, STYLE_ELEMENT_ID } from "../constants/decoration";
 import { PREFIX } from "../constants/general";
+import { getTheme } from "../utils/themes";
 
 const BODY_CLASSES = [
 	PREFIX+"active-line-highlight",
@@ -37,6 +38,7 @@ function getStyleText(
 	plugin: CodeStylerPlugin,
 	obsidianTheme: string,
 ): string {
+
 	// TODO:
 	// styleThemeColours(plugin.settings.currentTheme.colours) + styleThemeSettings(plugin.settings.currentTheme.settings, obsidianTheme) + styleLanguageColours(plugin.settings.currentTheme.settings, plugin.settings.redirectLanguages, obsidianTheme)
 	return ""
@@ -45,15 +47,16 @@ function getStyleText(
 function getBodyClasses(
 	plugin: CodeStylerPlugin,
 ): Array<string> {
-	const themeSettings = plugin.settings.currentTheme.settings
+	const themeSettings = getTheme(plugin).settings
 
 	return Object.entries({
-		"line-numbers-enabled-false": !themeSettings.codeblock.lineNumbers,
-		// "code-styler-gutter-highlight": themeSettings.gutter.highlight,
-		// "code-styler-gutter-active-line": themeSettings.gutter.activeLine,
-		// "code-styler-active-line-highlight": themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine, // Inside and outside of codeblocks with different colours
-		// "code-styler-active-line-highlight-editor": themeSettings.highlights.activeEditorLine && !themeSettings.highlights.activeCodeblockLine, // Only outside codeblocks
-		// "code-styler-active-line-highlight-codeblock": !themeSettings.highlights.activeEditorLine && themeSettings.highlights.activeCodeblockLine, // Only inside codeblocks
+		"line-numbers-enabled-false": !themeSettings.fence.gutter.lineNumbers,
+		"unwrap-false": themeSettings.fence.lineUnwrap === false,
+		"unwrap-inactive": themeSettings.fence.lineUnwrap === "inactive",
+		"gutter-highlight": themeSettings.fence.gutter.highlight,
+		"fence-line-highlight": themeSettings.fence.highlights.active === "fence",
+		"editor-line-highlight": themeSettings.fence.highlights.active === "editor",
+		"language-border-disabled": themeSettings.fence.gutter.languageBorder,
 	}).filter(
 		([cssclass, setting]) => setting,
 	).map(

@@ -8,28 +8,31 @@ export function foldOnClick(
 	folded: boolean,
 	language: string | null,
 ) {
-	codeblockFoldCallback(
-		view.posAtDOM(target),
-		view.state,
-		(foldStart, foldEnd) => {
-			view.dispatch(
-				{
-					effects: foldLines(
-						!folded,
-						{
-							from: foldStart.from,
-							to: foldEnd.to,
-							value: {
-								spec: {
-									language: language
-								}
-							}
-						})
-				},
-			);
-			view.requestMeasure();
-		},
-	);
+	if (language === null)
+		return
+
+	// codeblockFoldCallback(
+	// 	view.posAtDOM(target),
+	// 	view.state,
+	// 	(foldStart, foldEnd) => {
+	// 		view.dispatch(
+	// 			{
+	// 				effects: foldLines(
+	// 					!folded,
+	// 					{
+	// 						from: foldStart.from,
+	// 						to: foldEnd.to,
+	// 						value: {
+	// 							spec: {
+	// 								language: language
+	// 							}
+	// 						}
+	// 					})
+	// 			},
+	// 		);
+	// 		view.requestMeasure();
+	// 	},
+	// );
 }
 
 function foldLines(
