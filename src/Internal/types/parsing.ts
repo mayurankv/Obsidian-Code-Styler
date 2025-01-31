@@ -29,10 +29,12 @@ export interface FoldParameters {
 	placeholder: string | null;
 }
 
+export type LineUnwrap = boolean | null | "inactive"
+
 export class FenceCodeParameters extends CodeParameters {
 	fold: FoldParameters = {enabled: null, placeholder: null};
 	lineNumbers: LineParameters = {enabled: null, offset: null};
-	lineUnwrap: boolean | null | "inactive" = null;
+	lineUnwrap: LineUnwrap = null;
 	highlights: {
 		default: Highlights;
 		alternative: Record<string, Highlights>

@@ -1,129 +1,184 @@
-import { Colour } from "./decoration";
+import { Colour, CSS, FontFamily, FontStyle, FontWeight, Percentage, Size } from "./decoration";
+import { LineUnwrap } from "./parsing";
 
-export type Percentage = `${number}%`;
-export type Display = "none" | "if_header_shown" | "always";
+// export type Display = "none" | "if_header_shown" | "always";
 
-export interface CodeStylerThemeModeColours {
-	codeblock: {
-		backgroundColour: Colour;
-		textColour: Colour;
-	},
-	gutter: {
-		backgroundColour: Colour;
-		textColour: Colour;
-		activeTextColour: Colour;
-	},
-	header: {
-		backgroundColour: Colour;
-		title: {
-			textColour: Colour;
-		},
-		languageTag: {
-			backgroundColour: Colour;
-			textColour: Colour;
-		},
-		externalReference: {
-			displayRepositoryColour: Colour;
-			displayVersionColour: Colour;
-			displayTimestampColour: Colour;
-		}
-		lineColour: Colour;
-	},
-	highlights: {
-		activeCodeblockLineColour: Colour;
-		activeEditorLineColour: Colour;
-		defaultColour: Colour;
-		alternativeHighlights: Record<string,Colour>;
-	},
-	inline: {
-		backgroundColour: Colour;
-		textColour: Colour;
-		activeTextColour: Colour;
-		titleTextColour: Colour
-	}
-	advanced: {
-		buttonColour: Colour;
-		buttonActiveColour: Colour;
-	}
+interface ElementStyles {
+	backgroundColour: Colour;
 }
-export interface CodeStylerThemeSettings {
-	codeblock: {
-		lineNumbers: boolean;
-		unwrapLines: boolean;
-		wrapLinesActive: boolean;
-		curvature: number;
-	},
+
+interface TextStyles extends ElementStyles {
+	textColour: Colour;
+	fontFamily: FontFamily;
+	fontStyle: FontStyle;
+	fontWeight: FontWeight;
+}
+
+interface TextElementStyles extends TextStyles, ElementStyles {
+
+}
+
+interface ActiveTextElementStyles extends TextElementStyles {
+	activeTextColour: Colour,
+}
+
+interface GutterStyles extends ActiveTextElementStyles {
+	languageBorderSize: Size,
+}
+
+interface IconStyles {
+	size: Size;
+	grayScale: Boolean;
+}
+
+interface ExternalReferenceStyles extends TextElementStyles {
+	repositoryColour: Colour;
+	versionColour: Colour;
+	timestampColour: Colour;
+}
+
+interface HeaderStyles extends ElementStyles {
+	icon: IconStyles,
+	languageTitle: TextElementStyles;
+	namedTitle: TextElementStyles;
+	externalReferenceTitle: ExternalReferenceStyles;
+	executeCodeTitle: TextElementStyles;
+	separator: ElementStyles;
+}
+
+interface HighlightsStyles {
+	activeLineColour: Colour;
+	defaultHighlightColour: Colour;
+	alternativeHighlightColours: Record<string, Colour>;
+	gradientHighlightsColourStop: Percentage;
+}
+
+interface ButtonStyle extends ElementStyles {
+	colour: Colour;
+}
+
+interface ButtonStyles {
+	inactive: ButtonStyle;
+	hover: ButtonStyle;
+	active: ButtonStyle;
+}
+
+interface CodeStyles extends ElementStyles {
+	curvature: number | CSS;
+	header: HeaderStyles;
+	button: ButtonStyles;
+}
+
+interface FenceStyles extends CodeStyles {
+	gutter: GutterStyles;
+	highlights: HighlightsStyles;
+}
+
+interface InlineStyles extends CodeStyles {
+	parameters: TextStyles,
+}
+
+export interface CodeStylerThemeModeStyles {
+	fence: FenceStyles;
+	inline: InlineStyles;
+}
+
+export interface CodeStylerThemeStyles {
+	light: CodeStylerThemeModeStyles;
+	dark: CodeStylerThemeModeStyles;
+}
+
+interface HeaderSettings {
+	display: {
+		icon: boolean | null,
+		languageTitle: boolean | null,
+		namedTitle: boolean | null,
+		externalReferenceTitle: {
+			repository: boolean | null;
+			version: boolean | null;
+			timestamp: boolean | null;
+		},
+		executeCodeTitle: boolean | null,
+		separator: boolean | null,
+	};
+
+}
+
+interface CodeSettings {
+	syntaxHighlight: boolean;
+	header: HeaderSettings;
+}
+
+interface FenceSettings extends CodeSettings {
+	foldPlaceholder: string;
+	lineUnwrap: LineUnwrap
 	gutter: {
-		highlight: boolean;
-		activeLine: boolean;
-	},
-	header: {
-		title: {
-			textFont: string;
-			textBold: boolean;
-			textItalic: boolean;
-		},
-		languageTag: {
-			display: Display;
-			textFont: string;
-			textBold: boolean;
-			textItalic: boolean;
-		},
-		languageIcon: {
-			display: Display;
-			displayColour: boolean;
-		},
-		externalReference: {
-			displayRepository: boolean;
-			displayVersion: boolean;
-			displayTimestamp: boolean;
-		}
-		fontSize: number;
-		foldPlaceholder: string;
-	},
+		lineNumbers: boolean,
+		languageBorder: boolean,
+		highlight: boolean,
+	}
 	highlights: {
-		activeCodeblockLine: boolean;
-		activeEditorLine: boolean;
-	},
-	inline: {
-		syntaxHighlight: boolean;
-		style: boolean;
-		fontWeight: number;
-		curvature: number;
-		paddingVertical: number;
-		paddingHorizontal: number;
-		marginHorizontal: number;
-		titleFontWeight: number;
-	},
-	advanced: {
-		gradientHighlights: boolean;
-		gradientHighlightsColourStop: Percentage;
-		languageBorderColour: boolean;
-		languageBorderWidth: number;
-		iconSize: number;
+		active: "editor" | "fence" | false,
 	};
 }
-export interface CodeStylerThemeColours {
-	light: CodeStylerThemeModeColours;
-	dark: CodeStylerThemeModeColours;
+
+interface inlineSettings extends CodeSettings {
+
 }
+
+export interface CodeStylerThemeSettings {
+	fence: FenceSettings;
+	inline: inlineSettings;
+}
+
 export interface CodeStylerTheme {
 	settings: CodeStylerThemeSettings;
-	colours: CodeStylerThemeColours;
+	colours: CodeStylerThemeStyles;
 }
+
+type CodeStylerThemes = Record<string, CodeStylerTheme>
+
 export interface CodeStylerSettings {
-	themes: Record<string,CodeStylerTheme>;
-	selectedTheme: string;
-	currentTheme: CodeStylerTheme;
+	detecting: {
+		languages: {
+			addedLanguages: Record<string, { colour?: Colour, icon?: string }>;
+			processedCodeblocksWhitelist: string;
+			blacklist: string;
+		}
+		contexts: {
+			admonition: boolean;
+			canvas: boolean;
+			slides: boolean;
+			export: boolean;
+		};
+	};
+	decorating: {
+		theme: string;
+		themes: CodeStylerThemes;
+	};
+	settings: {
+		examples: {
+			fence: {
+				content: string;
+				parameters: string;
+			};
+			inline: {
+				content: string;
+				parameters: string;
+			};
+		};
+	};
+	reference: {
+		updateExternalOnLoad: boolean;
+	};
+
+	internal: {
+		version: string;
+		themes: CodeStylerThemes;
+	};
+}
+
+export interface CodeStylerTemporarySettings {
 	newTheme: string;
 	newHighlight: string;
-	exampleCodeblockParameters: string;
-	exampleCodeblockContent: string;
-	exampleInlineCode: string;
-	decoratePrint: boolean;
-	excludedLanguages: string;
-	externalReferenceUpdateOnLoad: boolean;
-	processedCodeblocksWhitelist: string;
-	redirectLanguages: Record<string,{colour?: Colour, icon?: string}>;
-	version: string;
 }
