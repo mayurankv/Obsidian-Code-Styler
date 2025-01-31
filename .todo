@@ -4,6 +4,8 @@ external reference styling
 get shiki base theme to class names
 add shiki to fence rendered and codemirror both
 add not shiki clauses for decorating colours
+fix reference
+EventListener codemirror
 
 Refactor:
 	☐ Live Preview (Fence)

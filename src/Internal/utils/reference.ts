@@ -89,6 +89,7 @@ export async function manageExternalReferencedFiles(
 	sourcePath: string | null = null,
 	update: boolean = true,
 ): Promise<void> {
+	return; //TODO: Fix
 	await cleanExternalReferencedFiles(plugin);
 
 	if (update) {
