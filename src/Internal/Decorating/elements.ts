@@ -8,6 +8,7 @@ import { isUrl } from "../utils/parsing";
 import { rerenderCodeElement } from "src/Internal/Interface/Actions/clicks";
 import { updateExternalReference } from "../utils/reference";
 import { Reference } from "../types/reference";
+import { getTheme } from "../utils/themes";
 
 export function createHeaderElement(
 	codeParameters: CodeParameters,
@@ -147,9 +148,7 @@ function createNamedTitle(
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
-	const title = fence
-		? codeParameters.title || ((codeParameters as FenceCodeParameters).fold.placeholder ?? plugin.settings.currentTheme.settings.header.foldPlaceholder) || FOLD_PLACEHOLDER || ""
-		: codeParameters.title || ""
+	const title = codeParameters.title ?? (fence && (codeParameters as FenceCodeParameters).fold.enabled ? ((codeParameters as FenceCodeParameters).fold.placeholder ?? getTheme(plugin).settings.fence.foldPlaceholder) : "")
 	const namedTitleContainer = createEl(
 		fence ? "div" : "span",
 		{
@@ -295,7 +294,7 @@ function createExternalReferenceTitle(
 				...(codeParameters.title !== null  ? [] : [PREFIX + "hidden"]),
 			],
 			text: fence
-				? codeParameters.title || (codeParameters as FenceCodeParameters).fold.placeholder || plugin.settings.currentTheme.settings.header.foldPlaceholder || FOLD_PLACEHOLDER || ""
+				? codeParameters.title || (codeParameters as FenceCodeParameters).fold.placeholder || getTheme(plugin).settings.fence.foldPlaceholder || FOLD_PLACEHOLDER || ""
 				: ""
 		},
 	)

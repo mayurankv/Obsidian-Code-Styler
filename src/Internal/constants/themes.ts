@@ -1,5 +1,23 @@
 import { Colour } from "../types/decoration";
-import { CodeStylerThemeModeColours } from "../types/settings";
+import { CodeStylerThemeModeStyles } from "../types/settings";
+
+// const BASE_THEME: CodeStylerThemeModeStyles = {
+// 	fence: {
+// 		curvature: "--code-radius",
+// 		header: {},
+// 		button: {},
+// 		gutter: {},
+// 		highlights: {},
+// 	},
+// 	inline: {
+// 		curvature: "--code-radius",
+// 		header: {},
+// 		button: {},
+// 		parameters: {
+
+// 		},
+// 	},
+// }
 
 const DEFAULT_THEME: Record<string, Colour> = {
 	backgroundColour: "--code-background",
@@ -419,49 +437,51 @@ function mapThemeColours(
 export function convertColoursToTheme(
 	theme: string,
 	mode: string,
-): CodeStylerThemeModeColours {
+): CodeStylerThemeModeStyles {
 	const mappedThemeColours = {...mapThemeColours("default", "light"), ...mapThemeColours(theme, mode)}
+
+	//@ts-ignore TODO: Temporary
 	return {
-		codeblock: {
-			backgroundColour: mappedThemeColours.backgroundPrimary,
-			textColour: mappedThemeColours.foregroundPrimary,
-		},
-		gutter: {
-			backgroundColour: mappedThemeColours.backgroundSecondary,
-			textColour: mappedThemeColours.foregroundSecondary,
-			activeTextColour: mappedThemeColours.foregroundFocus,
-		},
-		header: {
-			backgroundColour: mappedThemeColours.backgroundTertiary,
-			title: {
-				textColour: mappedThemeColours.titlePrimary,
-			},
-			languageTag: {
-				backgroundColour: mappedThemeColours.backgroundQuartary,
-				textColour: mappedThemeColours.titleSecondary,
-			},
-			externalReference: {
-				displayRepositoryColour: mappedThemeColours.standoutPrimary,
-				displayVersionColour: mappedThemeColours.standoutSecondary,
-				displayTimestampColour: mappedThemeColours.subtlePrimary,
-			},
-			lineColour: mappedThemeColours.separator,
-		},
-		highlights: {
-			activeCodeblockLineColour: mappedThemeColours.highlightSecondary,
-			activeEditorLineColour: mappedThemeColours.highlightTertiary,
-			defaultColour: mappedThemeColours.highlightPrimary,
-			alternativeHighlights: {},
-		},
-		inline: {
-			backgroundColour: mappedThemeColours.backgroundPrimary,
-			textColour: mappedThemeColours.foregroundPrimary,
-			activeTextColour: mappedThemeColours.foregroundFocus,
-			titleTextColour: mappedThemeColours.titlePrimary,
-		},
-		advanced: {
-			buttonColour: mappedThemeColours.inactiveElement,
-			buttonActiveColour: mappedThemeColours.activeElement,
-		},
+		// codeblock: {
+		// 	backgroundColour: mappedThemeColours.backgroundPrimary,
+		// 	textColour: mappedThemeColours.foregroundPrimary,
+		// },
+		// gutter: {
+		// 	backgroundColour: mappedThemeColours.backgroundSecondary,
+		// 	textColour: mappedThemeColours.foregroundSecondary,
+		// 	activeTextColour: mappedThemeColours.foregroundFocus,
+		// },
+		// header: {
+		// 	backgroundColour: mappedThemeColours.backgroundTertiary,
+		// 	title: {
+		// 		textColour: mappedThemeColours.titlePrimary,
+		// 	},
+		// 	languageTag: {
+		// 		backgroundColour: mappedThemeColours.backgroundQuartary,
+		// 		textColour: mappedThemeColours.titleSecondary,
+		// 	},
+		// 	externalReference: {
+		// 		displayRepositoryColour: mappedThemeColours.standoutPrimary,
+		// 		displayVersionColour: mappedThemeColours.standoutSecondary,
+		// 		displayTimestampColour: mappedThemeColours.subtlePrimary,
+		// 	},
+		// 	lineColour: mappedThemeColours.separator,
+		// },
+		// highlights: {
+		// 	activeCodeblockLineColour: mappedThemeColours.highlightSecondary,
+		// 	activeEditorLineColour: mappedThemeColours.highlightTertiary,
+		// 	defaultColour: mappedThemeColours.highlightPrimary,
+		// 	alternativeHighlights: {},
+		// },
+		// inline_old: {
+		// 	backgroundColour: mappedThemeColours.backgroundPrimary,
+		// 	textColour: mappedThemeColours.foregroundPrimary,
+		// 	activeTextColour: mappedThemeColours.foregroundFocus,
+		// 	titleTextColour: mappedThemeColours.titlePrimary,
+		// },
+		// advanced: {
+		// 	buttonColour: mappedThemeColours.inactiveElement,
+		// 	buttonActiveColour: mappedThemeColours.activeElement,
+		// },
 	}
 }
