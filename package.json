@@ -54,6 +54,7 @@
 		"hast": "^1.0.0",
 		"hast-util-from-html": "^2.0.3",
 		"hast-util-to-html": "^9.0.4",
+		"lodash": "^4.17.21",
 		"remark-parse": "^11.0.0",
 		"request": "^2.88.2",
 		"shiki": "^2.1.0",

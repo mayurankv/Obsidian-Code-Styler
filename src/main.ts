@@ -92,9 +92,10 @@ export default class CodeStylerPlugin extends Plugin {
 	addStyling(
 		load: boolean = true,
 	): void {
-		if (load)
+		if (load) {
+			// this.app.workspace.trigger("parse-style-settings");
 			applyStyling(this);
-		else
+		} else
 			removeStyling()
 	}
 
@@ -199,7 +200,7 @@ export default class CodeStylerPlugin extends Plugin {
 	): void {
 		if (load)
 			this.app.workspace.onLayoutReady(
-				async () => await manageExternalReferencedFiles(this, null, this.settings.externalReferenceUpdateOnLoad),
+				async () => await manageExternalReferencedFiles(this, null, this.settings.reference.updateExternalOnLoad),
 			);
 	}
 
