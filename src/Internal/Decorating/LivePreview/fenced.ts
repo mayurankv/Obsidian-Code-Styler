@@ -34,7 +34,8 @@ export function createFenceCodeDecorationsViewPlugin(
 				plugin,
 				buildHeaderDecorations,
 				buildLineDecorations,
-				buildExtraDecoration,
+				buildIntraLineDecoration,
+				buildFooterDecorations,
 			);
 		}
 
@@ -47,7 +48,8 @@ export function createFenceCodeDecorationsViewPlugin(
 					plugin,
 					buildHeaderDecorations,
 					buildLineDecorations,
-					buildExtraDecoration,
+					buildIntraLineDecoration,
+					buildFooterDecorations,
 				);
 		}
 
@@ -72,11 +74,6 @@ function buildHeaderDecorations(
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
-	// TODO: Check if these are needed?
-	// !isLanguageIgnored(codeblockParameters.language, settings.excludedLanguages) &&
-	// !isCodeblockIgnored(codeblockParameters.language, settings.processedCodeblocksWhitelist) &&
-	// !SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language))
-
 	return [{
 		from: position,
 		to: position,
@@ -123,7 +120,7 @@ function buildLineDecorations(
 	]
 }
 
-function buildExtraDecoration(
+function buildIntraLineDecoration(
 	state: EditorState,
 	syntaxNode: SyntaxNodeRef,
 	line: Line,
@@ -143,4 +140,23 @@ function buildExtraDecoration(
 	}
 
 	return []
+}
+
+function buildFooterDecorations(
+	state: EditorState,
+	startPosition: number,
+	endPosition: number,
+	fenceCodeParameters: FenceCodeParameters,
+	plugin: CodeStylerPlugin,
+): Array<Range<Decoration>> {
+	return [{
+		from: startPosition,
+		to: endPosition,
+		value: Decoration.line({
+			attributes: {
+				style: "",
+				class: "cs-codemirror-fence-code",
+			}
+		}),
+	}]
 }

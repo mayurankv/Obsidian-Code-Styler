@@ -3,7 +3,7 @@ import { EditorState, Line, Range, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, DecorationSet } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { isFileIgnored, isSourceMode } from "src/Internal/Decorating/LivePreview/codemirror/utils";
-import { parseFenceCodeParameters } from "src/Internal/Parsing/fenced";
+import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/fenced";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
 import { cleanFenceCodeParametersLine } from "src/Internal/utils/detecting";
 import CodeStylerPlugin from "src/main";
@@ -25,38 +25,52 @@ export function buildFenceCodeDecorations(
 		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
-	buildExtraDecorations: (
+	buildIntraLineDecorations: (
 		state: EditorState,
 		syntaxNode: SyntaxNodeRef,
 		line: Line,
+		plugin: CodeStylerPlugin,
+	) => Array<Range<Decoration>>,
+	buildFooterDecorations: (
+		state: EditorState,
+		startPosition: number,
+		endPosition: number,
+		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
 ): DecorationSet {
 	if (isFileIgnored(state))
 		return Decoration.none;
 
+	const sourceMode = isSourceMode(state);
+
 	let builder = new RangeSetBuilder<Decoration>();
 
 	let fenceCodeParameters: FenceCodeParameters = new FenceCodeParameters({})
 	let lineNumber = 0
+	let startPosition: number
+	let toDecorate: boolean
 	let line: Line
+	const decorations: Array<Range<Decoration>> = []
 
 	syntaxTree(state).iterate({
 		enter: (syntaxNode) => {
-			const decorations = []
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock"))
 				line = state.doc.lineAt(syntaxNode.from);
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
 				lineNumber = 0;
+				startPosition = syntaxNode.from
 
 				fenceCodeParameters = parseFenceCodeParameters(
 					cleanFenceCodeParametersLine(line.text.toString()),
 					plugin,
 				)
 
-				if (!isSourceMode(state) || !fenceCodeParameters.ignore)
+				toDecorate = toDecorateFenceCode(fenceCodeParameters, plugin) && !sourceMode
+
+				if (toDecorate)
 					decorations.push(
 						...buildHeaderDecorations(
 							state,
@@ -69,10 +83,20 @@ export function buildFenceCodeDecorations(
 			} else if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
 				lineNumber = -1;
 
+				// if (toDecorate)
+				// 	decorations.push(
+				// 		...buildFooterDecorations(
+				// 			state,
+				// 			startPosition,
+				// 			syntaxNode.to,
+				// 			fenceCodeParameters,
+				// 			plugin,
+				// 		)
+				// 	)
 			}
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
-				if (!isSourceMode(state) || !fenceCodeParameters.ignore)
+				if (toDecorate)
 					decorations.push(
 						...buildLineDecorations(
 							state,
@@ -88,23 +112,25 @@ export function buildFenceCodeDecorations(
 			}
 
 			if (lineNumber !== 0)
-				decorations.push(
-					...buildExtraDecorations(
-						state,
-						syntaxNode,
-						line,
-						plugin,
+				if (toDecorate)
+					decorations.push(
+						...buildIntraLineDecorations(
+							state,
+							syntaxNode,
+							line,
+							plugin,
+						)
 					)
-				)
 
-			if (decorations.length > 0)
-				decorations.sort(
-					(a, b) => (a.from === b.from)
-						? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
-						: a.from < b.from ? -1 : 1
-				).forEach((range) => builder.add(range.from, range.to, range.value))
 		}
 	});
+
+	if (decorations.length > 0)
+		decorations.sort(
+			(a, b) => (a.from === b.from)
+				? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
+				: a.from < b.from ? -1 : 1
+		).forEach((range) => builder.add(range.from, range.to, range.value))
 
 	return builder.finish();
 }

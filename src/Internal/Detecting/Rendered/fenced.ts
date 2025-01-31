@@ -41,7 +41,7 @@ export async function renderedFencedCodeDetecting(
 			element,
 			context,
 		)
-	} else if ((codeDetectingContext === "slides") || (codeDetectingContext === "export" && plugin.settings.decoratePrint)) {
+	} else if ((codeDetectingContext === "slides" && plugin.settings.detecting.contexts.slides) || (codeDetectingContext === "export" && plugin.settings.detecting.contexts.export)) {
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
@@ -52,7 +52,7 @@ export async function renderedFencedCodeDetecting(
 			fileContentLines,
 			codeDetectingContext,
 		)
-	} else if ((codeDetectingContext === "admonition") && embeddedContent) { //NOTE: Possibly inefficient?
+	} else if ((codeDetectingContext === "admonition" && plugin.settings.detecting.contexts.admonition) && embeddedContent) { //NOTE: Possibly inefficient?
 		const fileContentLines = await getFileContentLines(
 			context.sourcePath,
 			plugin.app.vault.adapter
@@ -113,6 +113,7 @@ export async function renderedFencedCodeDetecting(
 			context,
 		)
 	}
+	//TODO: Add canvas and use  && plugin.settings.detecting.contexts.canvas
 }
 
 export async function applyStandaloneFencedDetecting(
