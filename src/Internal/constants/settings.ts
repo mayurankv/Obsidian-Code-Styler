@@ -1,5 +1,5 @@
 import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeSettings } from "../types/settings";
-import { EXAMPLE_CODEBLOCK_CONTENT, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_INLINE_CODE } from "./interface";
+import { EXAMPLE_CODEBLOCK_CONTENT, EXAMPLE_CODEBLOCK_PARAMETERS, EXAMPLE_INLINE_CODE_CONTENT as EXAMPLE_INLINE_CODE } from "./interface";
 import { convertColoursToTheme, THEME_COLOURS } from "./themes";
 
 export const USE_SHIKI = true;
