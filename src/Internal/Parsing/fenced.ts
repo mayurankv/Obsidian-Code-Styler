@@ -1,15 +1,15 @@
-import CodeStylerPlugin from "src/main";
-import { FenceCodeParameters, Highlights } from "../types/parsing";
-import { isLanguageMatched, separateParameters, setTitleAndReference } from "../utils/parsing";
-import { FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND, PLUGIN_CODEBLOCK_WHITELIST } from "../constants/parsing";
-import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
-import { MarkdownPostProcessorContext, MarkdownPreviewRenderer, MarkdownSectionInformation, Plugin } from "obsidian";
-import { getArgs } from "src/External/ExecuteCode/CodeBlockArgs";
-import { EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../constants/external";
-import { Reference } from "../types/reference";
+import { MarkdownPreviewRenderer, Plugin } from "obsidian";
 import { basename } from "path";
-import { getReference } from "../utils/reference";
+import { getArgs } from "src/External/ExecuteCode/CodeBlockArgs";
+import CodeStylerPlugin from "src/main";
+import { EXECUTE_CODE_SUPPORTED_LANGUAGES } from "../constants/external";
+import { PLUGIN_CODEBLOCK_WHITELIST as BASE_PLUGIN_CODEBLOCK_WHITELIST, FENCE_PARAMETERS_KEY_VALUE, FENCE_PARAMETERS_SHORTHAND } from "../constants/parsing";
 import { REFERENCE_ATTRIBUTE } from "../constants/reference";
+import { EXCLUDED_LANGUAGES } from "../constants/settings";
+import { FenceCodeParameters, Highlights } from "../types/parsing";
+import { Reference } from "../types/reference";
+import { isLanguageMatched, separateParameters, setTitleAndReference } from "../utils/parsing";
+import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
 
 export function parseFenceCodeParameters(
 	fenceCodeParametersLine: string,
@@ -136,7 +136,7 @@ function externalPluginAdjustFenceCodeParameters(
 
 		if (fenceCodeParameters.language?.startsWith("run-")) {
 			const executeCodeLanguage = fenceCodeParameters.language.slice(4)
-			if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(executeCodeLanguage) && !isLanguageMatched(fenceCodeParameters.language, plugin.settings.processedCodeblocksWhitelist))
+			if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(executeCodeLanguage) && !isLanguageMatched(fenceCodeParameters.language, plugin.settings.detecting.languages.blacklist))
 				adjustedParameters.language = executeCodeLanguage
 		}
 	}
@@ -192,7 +192,11 @@ function inferFenceValue(
 	parameterKey: string,
 	parameterValue: string,
 ): Partial<FenceCodeParameters> {
-	if (parameterKey === "unwrap") {
+	if (parameterKey === "label" || parameterKey === "name")
+		parameterKey = "title"
+
+
+	else if (parameterKey === "unwrap") {
 		return { lineUnwrap: (parameterValue === "inactive") ? "inactive" : convertBoolean(parameterValue)}
 
 	} else if (parameterKey === "fold") {
@@ -338,13 +342,13 @@ export function toDecorateFenceCode(
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
 ): boolean {
-	if (isLanguageMatched(fenceCodeParameters.language, plugin.settings.excludedLanguages))
+	if (isLanguageMatched(fenceCodeParameters.language, plugin.settings.detecting.languages.blacklist + "," + EXCLUDED_LANGUAGES))
 		return false
 
 	if (
 		// @ts-expect-error Undocumented Obsidian API
 		(fenceCodeParameters.language in MarkdownPreviewRenderer.codeBlockPostProcessors) &&
-		!isLanguageMatched(fenceCodeParameters.language, plugin.settings.processedCodeblocksWhitelist + "," + PLUGIN_CODEBLOCK_WHITELIST)
+		!isLanguageMatched(fenceCodeParameters.language, plugin.settings.detecting.languages.processedCodeblocksWhitelist + "," + BASE_PLUGIN_CODEBLOCK_WHITELIST)
 	)
 		return false
 
