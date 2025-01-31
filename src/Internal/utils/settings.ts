@@ -2,17 +2,18 @@
 
 import { DEFAULT_SETTINGS, THEME_DEFAULT_SETTINGS } from "../constants/settings";
 import { convertColoursToTheme } from "../constants/themes";
-import { CodeStylerSettings, CodeStylerTheme, Colour } from "../types/settings";
+import { Colour } from "../types/decoration";
+import { CodeStylerSettings, CodeStylerTheme } from "../types/settings";
 
 export function convertSettings(
 	settings: CodeStylerSettings
 ): CodeStylerSettings {
-	if (typeof settings?.version === "undefined")
+	if (typeof settings?.internal?.version === "undefined")
 		return settingsClear();
 
-	while (semverNewer(DEFAULT_SETTINGS.version, settings.version)) {
-		if (settings.version in settingsUpdaters)
-			settings = settingsUpdaters[settings.version](settings);
+	while (semverNewer(DEFAULT_SETTINGS.internal.version, settings.internal.version)) {
+		if (settings.internal.version in settingsUpdaters)
+			settings = settingsUpdaters[settings.internal.version](settings);
 		else
 			settings = settingsClear();
 	}
@@ -32,21 +33,23 @@ function settingsVersionUpdate(
 	otherSettingsUpdater: (settings: CodeStylerSettings) => CodeStylerSettings = (settings) => settings,
 	redirectLanguagesUpdater: (redirectLanguages: Record<string, { colour?: Colour, icon?: string }>) => Record<string, { colour?: Colour, icon?: string }> = (redirectLanguages) => redirectLanguages
 ): CodeStylerSettings {
-	for (const [name, theme] of Object.entries(settings.themes))
-		settings.themes[name] = themeUpdater(theme);
+	for (const [name, theme] of Object.entries(settings.decorating.themes))
+		settings.decorating.themes[name] = themeUpdater(theme);
 
-	settings.currentTheme = structuredClone(settings.themes[settings.selectedTheme]);
-	settings.redirectLanguages = redirectLanguagesUpdater(settings.redirectLanguages);
+	for (const [name, theme] of Object.entries(settings.internal.themes))
+		settings.decorating.themes[name] = themeUpdater(theme);
+
+	settings.detecting.languages.addedLanguages = redirectLanguagesUpdater(settings.detecting.languages.addedLanguages);
 	settings = otherSettingsUpdater(settings);
-	settings.version = Object.keys(settingsUpdaters).find((value,index,array)=>array?.[index-1]===settings.version) ?? "1.0.0";
+	settings.internal.version = Object.keys(settingsUpdaters).find((value,index,array)=>array?.[index-1]===settings.internal.version) ?? "1.0.0";
 	return settings;
 }
 
 function settingsPreserve(
 	settings: CodeStylerSettings
 ): CodeStylerSettings {
-	settings.version = Object.keys(settingsUpdaters).find(
-		(value, index, array) => array?.[index - 1] === settings.version
+	settings.internal.version = Object.keys(settingsUpdaters).find(
+		(value, index, array) => array?.[index - 1] === settings.internal.version
 	) ?? "1.0.0";
 
 	return settings;
@@ -68,6 +71,7 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.0.8": settingsPreserve,
 	"1.0.9": settingsPreserve,
 	"1.0.10": (settings)=>settingsVersionUpdate(settings,(theme)=>{ // To 1.0.10
+		//@ts-expect-error Older interface versions
 		theme.settings.inline.style = true;
 		return theme;
 	},(settings)=>{//@ts-expect-error Older interface versions
@@ -80,14 +84,19 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 	"1.1.2": settingsPreserve,
 	"1.1.3": settingsPreserve,
 	"1.1.4": (settings) => settingsVersionUpdate(settings,(theme)=>{ // To 1.1.5
+		//@ts-expect-error Older interface versions
 		theme.settings.header.externalReference = structuredClone(THEME_DEFAULT_SETTINGS.header.externalReference);
+		//@ts-expect-error Older interface versions
 		theme.colours.light.header.externalReference = structuredClone(convertColoursToTheme("default", "light").header.externalReference);
+		//@ts-expect-error Older interface versions
 		theme.colours.dark.header.externalReference = structuredClone(convertColoursToTheme("default", "light").header.externalReference);
 		return theme;
 	}, (settings) => {
+		//@ts-expect-error Older interface versions
 		settings.externalReferenceUpdateOnLoad = false;
 		return settings;
 	}),
 	"1.1.5": settingsPreserve,
 	"1.1.6": settingsPreserve,
+	"1.1.7": settingsClear,
 };

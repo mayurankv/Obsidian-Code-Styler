@@ -11,9 +11,9 @@ function viewFold(
 	if (activeView) {
 		if (activeView.getMode() === "preview")
 			renderedViewFold(activeView.contentEl, fold);
-		else if (activeView.getMode() === "source")
-			// // @ts-expect-error Undocumented Obsidian API //TODO: Fix livePreviewFold and then uncomment expect error
-			livePreviewFold(activeView.editor.cm.docView.view, fold);
+		// else if (activeView.getMode() === "source")
+		// 	// // @ts-expect-error Undocumented Obsidian API //TODO: Fix livePreviewFold and then uncomment expect error
+		// 	livePreviewFold(activeView.editor.cm.docView.view, fold);
 	}
 }
 

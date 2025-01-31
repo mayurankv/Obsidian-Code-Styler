@@ -3,6 +3,7 @@ import { InlineCodeParameters } from "../types/parsing";
 import { separateParameters, setTitleAndReference } from "../utils/parsing";
 import { INLINE_PARAMETERS_KEY_VALUE, INLINE_PARAMETERS_SHORTHAND } from "../constants/parsing";
 import { convertBoolean, removeBoundaryQuotes } from "../utils/text";
+import { getTheme } from "../utils/themes";
 
 export function parseInlineCodeParameters(
 	inlineCodeParametersLine: string,
@@ -54,9 +55,12 @@ export function parseInlineCodeParameters(
 }
 
 function inferInlineValue(
-	parameterKey: keyof InlineCodeParameters,
+	parameterKey: string,
 	parameterValue: string,
 ): Partial<InlineCodeParameters> {
+	if (parameterKey === "label" || parameterKey === "name")
+		parameterKey = "title"
+
 	if (["icon", "ignore", "dark"].includes(parameterKey)) {
 		const booleanParameterValue = convertBoolean(parameterValue)
 		return booleanParameterValue === null ? {} : { [parameterKey]: booleanParameterValue };
@@ -85,7 +89,7 @@ export function toHighlightInlineCode(
 	inlineCodeParameters: InlineCodeParameters,
 	plugin: CodeStylerPlugin,
 ): boolean {
-	return plugin.settings.currentTheme.settings.inline.syntaxHighlight && (inlineCodeParameters.language !== null)
+	return getTheme(plugin).settings.inline.syntaxHighlight && (inlineCodeParameters.language !== null)
 }
 
 export function splitInlineCodeRaw(
