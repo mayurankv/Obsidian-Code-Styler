@@ -33,6 +33,7 @@ Refactor:
 		☐ Guide to styling by css variables as well
 	☐ Proper diff notation
 	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
+	☐ Add styles not exposed to style settings or settings for padding and margin settings
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

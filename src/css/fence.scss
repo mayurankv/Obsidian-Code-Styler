@@ -152,6 +152,12 @@ body.cs-plugin {
 				padding-right: var(--cs-fixed-left-fence);
 				padding-top: var(--size-4-1);
 
+				&[data-cs-wrap = "unwrapped"],
+				&[data-cs-wrap = "unwrapped-inactive"]:not(:active) {
+					width: max-content;
+					padding-right: var(--cs-fixed-left-fence);
+				}
+
 				&[data-cs-wrap = "wrapped"],
 				&[data-cs-wrap = "unwrapped-inactive"]:active {
 					width: unset;
@@ -193,6 +199,7 @@ body.cs-plugin {
 							position: absolute;
 							top: 0px;
 							bottom: 0px;
+							width: var(--size-4-3);
 							left: calc(100% + var(--cs-gutter-border));
 							right: calc(-1 * var(--size-4-3));
 							// background: linear-gradient(to left, transparent, 50%, var(--cs-code-background-colour));
@@ -240,7 +247,7 @@ body.cs-plugin {
 	}
 }
 
-body.cs-plugin.line-numbers-enabled-false {
+body.cs-plugin.cs-line-numbers-enabled-false {
 	.cs-pre-parent {
 		> pre.cs-pre {
 			> code.cs-code {
@@ -256,24 +263,24 @@ body.cs-plugin.line-numbers-enabled-false {
 	}
 }
 
+body.cs-plugin.cs-unwrap-false {
+	.cs-pre-parent {
+		> pre.cs-pre {
+			> code.cs-code:not([cs-data-wrap]) {
+				width: unset;
+				padding-right: 0;
+			}
+		}
+	}
+}
 
-// body.cs-plugin {
-// 	.cs-pre-parent {
-// 		> pre.cs-pre:not(:active) {
-// 			> code.cs-code {
-// 				> div.cs-line {
-// 					> div.cs-line-number {
-// 						&:not(.cs-line-numbers-enabled-true) {
-// 							display: none;
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
-
-// 				&[data-cs-wrap = "unwrapped-inactive"]:not(:active) {
-// 					width: unset;
-// 					padding-right: 0;
-// 				}
+body.cs-plugin.cs-unwrap-inactive {
+	.cs-pre-parent {
+		> pre.cs-pre {
+			> code.cs-code:not([cs-data-wrap]):active {
+				width: unset;
+				padding-right: 0;
+			}
+		}
+	}
+}
