@@ -3,6 +3,7 @@ import { EditorState, Line, Range, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, DecorationSet } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { isFileIgnored, isSourceMode } from "src/Internal/Decorating/LivePreview/codemirror/utils";
+import { FillerWidget } from "src/Internal/Decorating/LivePreview/codemirror/widgets";
 import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/fenced";
 import { FenceCodeParameters } from "src/Internal/types/parsing";
 import { cleanFenceCodeParametersLine } from "src/Internal/utils/detecting";
@@ -24,7 +25,7 @@ export function buildFenceCodeDecorations(
 		lineNumber: number,
 		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
-	) => Array<Range<Decoration>>,
+	) => Array<Range<any>>,
 	buildIntraLineDecorations: (
 		state: EditorState,
 		syntaxNode: SyntaxNodeRef,
@@ -48,10 +49,11 @@ export function buildFenceCodeDecorations(
 
 	let fenceCodeParameters: FenceCodeParameters = new FenceCodeParameters({})
 	let lineNumber = 0
+	let maxChars = 0
 	let startPosition: number
 	let toDecorate: boolean
 	let line: Line
-	const decorations: Array<Range<Decoration>> = []
+	let decorations: Array<Range<Decoration>> = []
 
 	syntaxTree(state).iterate({
 		enter: (syntaxNode) => {
@@ -80,19 +82,6 @@ export function buildFenceCodeDecorations(
 						)
 					)
 
-			} else if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
-				lineNumber = -1;
-
-				// if (toDecorate)
-				// 	decorations.push(
-				// 		...buildFooterDecorations(
-				// 			state,
-				// 			startPosition,
-				// 			syntaxNode.to,
-				// 			fenceCodeParameters,
-				// 			plugin,
-				// 		)
-				// 	)
 			}
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
@@ -111,6 +100,58 @@ export function buildFenceCodeDecorations(
 				lineNumber += 1
 			}
 
+			if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
+				lineNumber = 0;
+				maxChars = decorations.reduce(
+					(result: number, decoration: Range<any>) => (("chars" in decoration.value) && (decoration.value.chars > result))
+						? decoration.value
+						: result,
+					0,
+				)
+
+				// console.log()
+				// decorations = decorations.filter(
+				// 	(decoration: Range<any>) => {
+				// 		if ("chars" in decoration.value)
+				// 			return false
+				// 			// return {
+				// 			// ...decoration, value: Decoration.widget({
+				// 			// 	widget: new FillerWidget(
+				// 			// 		maxChars - decoration.value.chars
+				// 			// 	)
+				// 			// })}
+
+				// 		// return decoration
+				// 		return true
+				// 	}
+				// )
+				// decorations = decorations.map(
+				// 	(decoration: Range<any>) => {
+				// 		if ("chars" in decoration.value)
+				// 			return {
+				// 			...decoration, value: Decoration.widget({
+				// 				widget: new FillerWidget(
+				// 					maxChars - decoration.value.chars
+				// 				)
+				// 			})}
+
+				// 		return decoration
+				// 	}
+				// )
+				// console.log(decorations.filter(a => "chars" in a.value))
+
+				// if (toDecorate)
+				// 	decorations.push(
+				// 		...buildFooterDecorations(
+				// 			state,
+				// 			startPosition,
+				// 			syntaxNode.to,
+				// 			fenceCodeParameters,
+				// 			plugin,
+				// 		)
+				// 	)
+			}
+
 			if (lineNumber !== 0)
 				if (toDecorate)
 					decorations.push(
@@ -125,12 +166,11 @@ export function buildFenceCodeDecorations(
 		}
 	});
 
-	if (decorations.length > 0)
-		decorations.sort(
-			(a, b) => (a.from === b.from)
-				? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
-				: a.from < b.from ? -1 : 1
-		).forEach((range) => builder.add(range.from, range.to, range.value))
+	decorations.sort(
+		(a, b) => (a.from === b.from)
+			? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
+			: a.from < b.from ? -1 : 1
+	).forEach((range) => builder.add(range.from, range.to, range.value))
 
 	return builder.finish();
 }
