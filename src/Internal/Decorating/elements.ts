@@ -202,7 +202,7 @@ function createExternalReferenceTitle(
 						PREFIX + "external-reference-repository-icon",
 					],
 				},
-				(element) => element.innerHTML = SITE_ICONS?.[(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.site as string]?? SITE_ICONS["generic"],
+				(element) => setIcon(element, SITE_ICONS?.[(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.site as string]?? SITE_ICONS["generic"]),
 			),
 			createEl(
 				tagName,
@@ -223,7 +223,7 @@ function createExternalReferenceTitle(
 						PREFIX + "external-reference-version-icon",
 					],
 				},
-				(element) => element.innerHTML = GIT_ICONS?.[(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.refInfo?.type as string] ?? GIT_ICONS["branch"],
+				(element) => setIcon(element, GIT_ICONS?.[(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.refInfo?.type as string] ?? GIT_ICONS["branch"]),
 			),
 			createEl(
 				tagName,
@@ -240,7 +240,7 @@ function createExternalReferenceTitle(
 						PREFIX + "external-reference-timestamp-icon",
 					],
 				},
-				(element) => element.innerHTML = STAMP_ICON,
+				(element) => setIcon(element, STAMP_ICON),
 			),
 			createEl(
 				tagName,
@@ -259,8 +259,9 @@ function createExternalReferenceTitle(
 					],
 				},
 				(buttonElement) => {
-					buttonElement.innerHTML = UPDATE_ICON;
+					setIcon(buttonElement, UPDATE_ICON);
 					buttonElement.title = "Update Reference";
+
 					buttonElement.addEventListener(
 						"click",
 						async (event) => {

@@ -1,8 +1,6 @@
-reference adjusts incorrect
-blur end of title if scrollable
-blur end of reference if scrollable
-external reference styling
+add transitions
 style live preview
+reference adjusts incorrect
 fix reference update on load
 
 get shiki base theme to class names

@@ -41,19 +41,19 @@ export const FOLD_PLACEHOLDER = "Folded Code";
 export const TEMPORARY_SOURCEPATH = `@${PREFIX}-temporary-sourcepath`
 
 export const GIT_ICONS: { [key: string]: string } = {
-	"branch": "&#xe0a0;",
-	"tree": "&#xeafc;", // commit
+	"branch": "git-branch",
+	"tree": "git-commit-vertical", // commit
 };
 export const SITE_ICONS: { [key: string]: string } = {
-	"github": "&#xf09b;",
-	"gitlab": "&#xe65c;",
-	"bitbucket": "&#xe703;",
-	"sourceforge": "&#xf0238;",
-	"generic": "&#xf059f;",
+	"github": "github",
+	"gitlab": "gitlab",
+	"bitbucket": "paint-bucket",
+	"sourceforge": "flame",
+	"generic": "folder-git-2",
 };
 
-export const STAMP_ICON = "&#xf00f0;";
-export const UPDATE_ICON = "&#xe348;";
+export const STAMP_ICON = "calendar-clock";
+export const UPDATE_ICON = "refresh-ccw";
 
 export const LANGUAGES: {[key: string]: Language} = {
 	".gitignore": {

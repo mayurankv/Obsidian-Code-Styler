@@ -16,7 +16,7 @@ body.cs-plugin {
 
 			&::after {
 				content: "";
-				background: linear-gradient(to right, transparent, var(--cs-fence-fade-width), var(--cs-fence-background-colour));
+				background: linear-gradient(to right, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-background-colour));
 				position: sticky;
 				left: 100%;
 				margin-right: calc(-1 * var(--size-4-3));
@@ -75,7 +75,7 @@ body.cs-plugin {
 					z-index: inherit;
 
 					&:not(:first-child):not(.cs-separator) {
-						margin-left: 1em
+						margin-left: var(--size-4-3);
 					}
 				}
 
@@ -136,6 +136,30 @@ body.cs-plugin {
 					overflow-x: auto;
 					flex: 0 1 auto;
 
+					&::before {
+						content: "";
+						display: block;
+						position: sticky;
+						left: 0;
+						background: linear-gradient(to left, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-header-background-colour));
+						min-width: var(--size-4-3);
+						height: 100%;
+					}
+
+					&::after {
+						content: "";
+						display: block;
+						position: sticky;
+						right: 0;
+						background: linear-gradient(to right, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-header-background-colour));
+						min-width: var(--size-4-3);
+						height: 100%;
+					}
+
+					&:not(:first-child) {
+						margin-left: var(--size-4-1);
+					}
+
 					&::-webkit-scrollbar {
 						display: none;
 					}
@@ -161,18 +185,23 @@ body.cs-plugin {
 					overflow-x: auto;
 					flex: 0 1 auto;
 
-					.cs-external-reference-repository,
-					.cs-external-reference-repository-icon {
+					> div {
+						padding-left: var(--size-4-2);
+						display: flex;
+					}
+
+					div.cs-external-reference-repository,
+					div.cs-external-reference-repository-icon {
 						color: var(--cs-fence-header-external-reference-title-repository-colour);
 					}
 
-					.cs-external-reference-version,
-					.cs-external-reference-version-icon {
+					div.cs-external-reference-version,
+					div.cs-external-reference-version-icon {
 						color: var(--cs-fence-header-external-reference-title-version-colour);
 					}
 
-					.cs-external-reference-timestamp,
-					.cs-external-reference-timestamp-icon {
+					div.cs-external-reference-timestamp,
+					div.cs-external-reference-timestamp-icon {
 						color: var(--cs-fence-header-external-reference-title-timestamp-colour);
 					}
 
@@ -183,6 +212,9 @@ body.cs-plugin {
 					button {
 						box-shadow: none;
 						height: 100%;
+						margin-left: var(--size-4-1);
+						padding-left: var(--size-4-2);
+						padding-right: var(--size-4-2);
 
 						background-color: var(--cs-fence-button-inactive-background-colour);
 						color: var(--cs-fence-button-inactive-colour);
@@ -196,6 +228,30 @@ body.cs-plugin {
 							background-color: var(--cs-fence-button-active-background-colour);
 							color: var(--cs-fence-button-active-colour);
 						}
+					}
+
+					&::before {
+						content: "";
+						display: block;
+						position: sticky;
+						left: 0;
+						background: linear-gradient(to left, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-header-background-colour));
+						min-width: var(--size-4-3);
+						height: 100%;
+					}
+
+					&::after {
+						content: "";
+						display: block;
+						position: sticky;
+						right: 0;
+						background: linear-gradient(to right, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-header-background-colour));
+						min-width: var(--size-4-3);
+						height: 100%;
+					}
+
+					&:not(:first-child) {
+						margin-left: var(--size-4-1);
 					}
 				}
 

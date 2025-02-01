@@ -62,15 +62,9 @@ body.cs-plugin {
 	}
 
 	.cs-pre-parent {
-		pre.cs-pre > code.cs-code {
-			padding-top: var(--code-padding) !important;
-			padding-bottom: var(--code-padding) !important;
-		}
 
 		pre.cs-pre {
-			overflow: hidden !important;
 			min-height: unset;
-			padding: 0px !important;
 			background: var(--code-styler-codeblock-background-colour) !important;
 
 			[class*='language-'] {
@@ -80,12 +74,6 @@ body.cs-plugin {
 
 			> code {
 				max-height: unset;
-				padding-top: var(--code-padding) !important;
-				padding-right: 0px !important;
-				padding-bottom: var(--code-padding) !important;
-				padding-left: 0px !important;
-				border-radius: 0px !important;
-				background: none !important;
 				transition-duration: var(--duration-button);
 				transition-property: max-height, padding-top, padding-bottom, border-top;
 				transition-timing-function: ease-in-out;
@@ -93,30 +81,10 @@ body.cs-plugin {
 			}
 		}
 
-		// pre.cs-pre.wrapped > code {
-		// 	--line-wrapping: pre-wrap;
-		// 	--line-active-wrapping: pre-wrap;
-		// }
-		// pre.code-styler-pre.unwrapped > code {
-		// 	--line-wrapping: pre;
-		// 	--line-active-wrapping: pre;
-		// }
-		// pre.code-styler-pre.unwrapped-inactive > code {
-		// 	--line-wrapping: pre;
-		// 	--line-active-wrapping: pre-wrap;
-		// }
-		// pre.code-styler-pre code:not(:has( > input[style*="display: inline;"])):active {
-		// 	--line-wrapping: var(--line-active-wrapping) !important;
-		// }
 		pre.code-styler-pre.code-styler-folded > code {
 			max-height: 0 !important;
 			padding-top: 0 !important;
 			padding-bottom: 0 !important;
-		}
-
-		pre.cs-pre::before,
-		pre.cs-pre::after {
-			content: none !important;
 		}
 
 		.markdown-source-view.mod-cm6 .cm-embed-block pre.code-styler-pre {
@@ -342,13 +310,6 @@ body.cs-plugin {
 		.markdown-source-view .HyperMD-codeblock-end .code-styler-line-number {
 			width: var(--line-number-gutter-width);
 		}
-		pre.code-styler-pre .code-styler-line-number {
-			position: sticky;
-			top: -1px;
-			left: 0;
-			border-top: var(--line-number-height-correction) solid transparent;
-			white-space: nowrap;
-		}
 		pre.code-styler-pre div:last-child > .code-styler-line-number {
 			width: unset;
 		}
@@ -389,43 +350,6 @@ body.cs-plugin {
 			display: none !important;
 		}
 
-		/** Buttons */
-		@keyframes outdent {
-			from {
-				margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
-				clip-path: var(--polygon-in);
-			}
-			to {
-				margin-right: var(--copy-code-header-right-margin);
-				clip-path: var(--polygon-out);
-			}
-		}
-		@keyframes indent {
-			from {
-				margin-right: var(--copy-code-header-right-margin);
-				clip-path: var(--polygon-out);
-			}
-			to {
-				margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
-				clip-path: var(--polygon-in);
-			}
-		}
-		@keyframes reverse-outdent {
-			from {
-				clip-path: var(--polygon-in);
-			}
-			to {
-				clip-path: var(--polygon-out);
-			}
-		}
-		@keyframes reverse-indent {
-			from {
-				clip-path: var(--polygon-out);
-			}
-			to {
-				clip-path: var(--polygon-in);
-			}
-		}
 		pre.code-styler-pre button {
 			display: unset !important;
 			padding: 0 !important;
