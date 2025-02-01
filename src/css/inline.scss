@@ -120,7 +120,7 @@ body.cs-plugin {
 			border-radius: 0px var(--cs-inline-curvature) var(--cs-inline-curvature) 0px !important;
 		}
 
-		button.cs-copy-icon {
+		button.cs-copy-code-button {
 			--icon-size: var(--icon-xs);
 			padding: 0.15em;
 			margin-left: var(--size-4-1);
@@ -129,6 +129,9 @@ body.cs-plugin {
 			height: 100%;
 			display: inline-block;
 			color: var(--cs-inline-button-inactive-colour);
+			
+			transition: opacity, background-color, color;
+			transition-duration: var(--cs-transition-length-button);
 
 			> svg {
 				display: inline;
@@ -148,7 +151,7 @@ body.cs-plugin {
 		}
 	}
 
-	code:not(:hover) span.cs-footer button.cs-copy-icon {
+	code:not(:hover) span.cs-footer button.cs-copy-code-button {
 		// visibility: hidden;
 	}
 

@@ -1,10 +1,13 @@
-reference adjusts incorrect
-fix reference update on load
+add highlights
 style live preview
+	copy button
+vertical alignemnt of rendered copy button
+
 fix folds
 add transitions to folds
 add default code icon svg based on < > icon
-fix issue with startup
+fix issue with startup reference
+viewplugin where if cursor not in view, move to cursor
 
 get shiki base theme to class names
 add shiki to fence rendered and codemirror both

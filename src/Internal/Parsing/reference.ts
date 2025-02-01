@@ -53,11 +53,17 @@ function getLineIdentifier(lineIdentifier: string | number | null): LineIdentifi
 	return null;
 }
 
-function getLanguage(filePath: string): string {
+function getLanguage(
+	filePath: string,
+): string {
 	if (filePath.startsWith("[[") && filePath.endsWith("]]"))
 		filePath = filePath.slice(2, -2);
 
-	return filePath.slice((filePath.lastIndexOf(".") - 1 >>> 0) + 2);
+	filePath = filePath.split("/").pop() ?? "";
+	filePath = filePath.split(".").pop() ?? "";
+	// filePath = filePath.slice((filePath.lastIndexOf(".") - 1 >>> 0) + 2);
+
+	return filePath;
 }
 
 export async function parseExternalReference(

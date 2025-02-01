@@ -9,7 +9,7 @@ import { rerenderCodeElement } from "src/Internal/Interface/Actions/clicks";
 import { updateExternalReference } from "../utils/reference";
 import { Reference } from "../types/reference";
 import { getTheme } from "../utils/themes";
-import { BUTTON_TIMEOUT } from "../constants/interface";
+import { BUTTON_TIMEOUT, BUTTON_TRANSITION } from "../constants/interface";
 
 export function createHeaderElement(
 	codeParameters: CodeParameters,
@@ -89,6 +89,12 @@ export function createFooterElement(
 			plugin,
 		),
 		createCopyIcon(
+			codeParameters,
+			content,
+			fence,
+			plugin,
+		),
+		createFoldIcon(
 			codeParameters,
 			content,
 			fence,
@@ -365,14 +371,12 @@ function createCopyIcon(
 		"button",
 		{
 			cls: [
-				PREFIX + "copy-icon",
-				// "copy-code-button",
-				...(true ? [] : [PREFIX + "hidden"]),
+				PREFIX + "copy-code-button",
+				...(!fence ? [] : [PREFIX + "hidden"]),
 			],
 		},
+		(element) => setIcon(element, "copy"),
 	)
-
-	setIcon(copyElement, "copy")
 
 	copyElement.onclick = async (event: MouseEvent) => {
 		await navigator.clipboard.writeText(content)
@@ -380,16 +384,45 @@ function createCopyIcon(
 
 		setIcon(copyElement, "check")
 		copyElement.style.color = "var(--text-success)"
-		copyElement.style.visibility = "visible"
-		copyElement.style.display = "inline-block"
+		copyElement.style.transition = "opacity, background-color"
+		copyElement.style.transitionDuration = `${BUTTON_TRANSITION}ms`
 
-		setTimeout(() => {
-			setIcon(copyElement, "copy")
-			copyElement.style.color = ""
-			copyElement.style.visibility = ""
-			copyElement.style.display = ""
-		}, BUTTON_TIMEOUT);
+		setTimeout(
+			() => {
+				copyElement.style.color = ""
+			},
+			BUTTON_TIMEOUT - 1,
+		);
+
+		setTimeout(
+			() => {
+				setIcon(copyElement, "copy")
+				copyElement.style.transition = ""
+				copyElement.style.transitionDuration = ""
+			},
+			BUTTON_TIMEOUT,
+		);
 	}
 
 	return copyElement
+}
+
+function createFoldIcon(
+	codeParameters: CodeParameters,
+	content: string,
+	fence: boolean,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	const foldElement = createEl(
+		"button",
+		{
+			cls: [
+				PREFIX + "fold-code-button",
+				...(fence ? [] : [PREFIX + "hidden"]),
+			],
+		},
+		(element) => setIcon(element, "chevron-up"),
+	)
+
+	return foldElement
 }

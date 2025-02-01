@@ -11,7 +11,7 @@ import CodeStylerPlugin from "src/main";
 import { visitParents } from "unist-util-visit-parents";
 import { parseFenceCodeParameters, referenceAdjustParameters, toDecorateFenceCode } from "../../Parsing/fenced";
 import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
-import { createHeaderElement } from "../elements";
+import { createFooterElement, createHeaderElement } from "../elements";
 import { BUTTON_TIMEOUT, BUTTON_TRANSITION } from "src/Internal/constants/interface";
 
 export async function renderedFencedCodeDecorating(
@@ -188,6 +188,16 @@ function decorateFenceCodeElement(
 			() => { foldFencePreElement(fencePreElement); },
 		);
 
+
+
+	const fenceFooterElement = createFooterElement(
+		fenceCodeParameters,
+		"",
+		true,
+		sourcePath,
+		plugin,
+	);
+
 	markupFencePreParentElement(
 		fencePreParentElement,
 		fenceCodeParameters,
@@ -204,6 +214,7 @@ function decorateFenceCodeElement(
 		plugin,
 	)
 	fencePreElement.insertBefore(fenceHeaderElement, fencePreElement.childNodes[0]);
+	fencePreElement.appendChild(fenceFooterElement)
 }
 
 function markupFencePreParentElement(

@@ -14,7 +14,8 @@ export function buildFenceCodeDecorations(
 	plugin: CodeStylerPlugin,
 	buildHeaderDecorations: (
 		state: EditorState,
-		position: number,
+		startPosition: number,
+		endPosition: number,
 		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
 	) => Array<Range<Decoration>>,
@@ -36,8 +37,15 @@ export function buildFenceCodeDecorations(
 		state: EditorState,
 		startPosition: number,
 		endPosition: number,
+		codeStartPosition: number,
 		fenceCodeParameters: FenceCodeParameters,
 		plugin: CodeStylerPlugin,
+	) => Array<Range<Decoration>>,
+	modifyIntermediateDecorations: (
+		decorations: Array<Range<any>>,
+	) => Array<Range<any>>,
+	filterBadDecorations: (
+		decorations: Array<Range<any>>,
 	) => Array<Range<Decoration>>,
 ): DecorationSet {
 	if (isFileIgnored(state))
@@ -49,7 +57,6 @@ export function buildFenceCodeDecorations(
 
 	let fenceCodeParameters: FenceCodeParameters = new FenceCodeParameters({})
 	let lineNumber = 0
-	let maxChars = 0
 	let startPosition: number
 	let toDecorate: boolean
 	let line: Line
@@ -77,6 +84,7 @@ export function buildFenceCodeDecorations(
 						...buildHeaderDecorations(
 							state,
 							syntaxNode.from,
+							syntaxNode.to,
 							fenceCodeParameters,
 							plugin,
 						)
@@ -105,33 +113,15 @@ export function buildFenceCodeDecorations(
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
 				lineNumber = 0;
-				maxChars = decorations.reduce(
-					(result: number, decoration: Range<any>) => ((typeof decoration.value?.chars === "number") && (decoration.value.chars > result))
-						? decoration.value.chars
-						: result,
-					0,
-				)
-
-				decorations = decorations.map(
-					(decoration: Range<any>) => {
-						if (typeof decoration.value?.chars === "number")
-							return {
-							...decoration, value: Decoration.widget({
-								widget: new FillerWidget(
-									maxChars - decoration.value.chars
-								)
-							})}
-
-						return decoration
-					}
-				)
+				decorations = modifyIntermediateDecorations(decorations)
 
 				if (toDecorate)
 					decorations.push(
 						...buildFooterDecorations(
 							state,
-							startPosition,
+							syntaxNode.from,
 							syntaxNode.to,
+							startPosition,
 							fenceCodeParameters,
 							plugin,
 						)
@@ -152,14 +142,7 @@ export function buildFenceCodeDecorations(
 		}
 	});
 
-	decorations = decorations.filter(
-		(decoration: Range<any>) => {
-			if (typeof decoration.value?.chars === "number")
-				return false
-
-			return true
-		}
-	)
+	decorations = filterBadDecorations(decorations)
 
 	decorations.sort(
 		(a, b) => (a.from === b.from)

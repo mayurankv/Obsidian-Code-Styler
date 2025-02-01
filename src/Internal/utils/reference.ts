@@ -73,8 +73,8 @@ export async function getReference(
 		parsedReference.startLine = codeSectionInfo.startLine
 		parsedReference.code = `\`\`\`${referenceParameters.language} ${cleanFenceCodeParametersLine(codeblockLines[0]).substring(REFERENCE_CODEBLOCK.length).trim()}\n${codeSectionInfo.codeSection}\n\`\`\``
 		parsedReference.path = referenceParameters.filePath.startsWith("[[") && referenceParameters.filePath.endsWith("]]")
-			? parsedReference.path
-			: vaultPath
+			? vaultPath
+			: parsedReference.path
 
 		return new Reference(parsedReference);
 
@@ -90,7 +90,7 @@ export async function manageExternalReferencedFiles(
 	sourcePath: string | null = null,
 	update: boolean = true,
 ): Promise<void> {
-	return; //TODO: Fix
+	return;
 	await cleanExternalReferencedFiles(plugin);
 
 	if (update) {

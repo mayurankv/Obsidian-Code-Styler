@@ -9,8 +9,8 @@ import { getLineClasses } from "src/Internal/utils/decorating";
 import { parseLinks } from "src/Internal/utils/parsing";
 import CodeStylerPlugin from "src/main";
 import { areRangesInteracting, getCommentDecorations, isSourceMode, hasContentChanged } from "./codemirror/utils";
-import { CommentLinkWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
-import { createScrollEventObservers, getWrappedCodeblocks } from "./codemirror/eventListeners";
+import { CommentLinkWidget, FillerWidget, FooterWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
+import { createScrollEventObservers } from "./codemirror/eventListeners";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,
@@ -38,6 +38,8 @@ export function createFenceCodeDecorationsViewPlugin(
 				buildLineDecorations,
 				buildIntraLineDecoration,
 				buildFooterDecorations,
+				modifyIntermediateDecorations,
+				filterBadDecorations,
 			);
 		}
 
@@ -52,13 +54,16 @@ export function createFenceCodeDecorationsViewPlugin(
 					buildLineDecorations,
 					buildIntraLineDecoration,
 					buildFooterDecorations,
+					modifyIntermediateDecorations,
+					filterBadDecorations,
 				);
+			// TODO: Attempt and reading and writing measure cycle
 			// if (hasContentChanged(update))
 			// 	update.view.requestMeasure({
 			// 		read: (view) => getWrappedCodeblocks(view).map((codeblocks) => codeblocks.reduce((result: number, line: HTMLElement) => result >= line.scrollWidth ? result : line.scrollWidth, 0)),
 			// 		write: (measure, view) => getWrappedCodeblocks(view).forEach((codeblocks, index) => codeblocks.forEach((element: HTMLElement) => { element.style.width = `${measure[index]}px`; console.log(element.style, measure[index])}))
 			// 	})
-			update.view.contentDOM.querySelector(".cs-filler")?.addEventListener("scroll",console.log)
+			// update.view.contentDOM.querySelector(".cs-filler")?.addEventListener("scroll",console.log)
 		}
 
 		destroy() {
@@ -78,13 +83,17 @@ export function createFenceCodeDecorationsViewPlugin(
 
 function buildHeaderDecorations(
 	state: EditorState,
-	position: number,
+	startPosition: number,
+	endPosition: number,
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
+	if (areRangesInteracting(state, startPosition, endPosition))
+		return [];
+
 	return [{
-		from: position,
-		to: position,
+		from: startPosition,
+		to: endPosition,
 		value: Decoration.widget({
 			widget: new HeaderWidget(
 				fenceCodeParameters,
@@ -105,16 +114,18 @@ function buildLineDecorations(
 	plugin: CodeStylerPlugin,
 ): Array<Range<any>> {
 	return [
-		{
-			from: position,
-			to: position,
-			value: Decoration.widget({
-				widget: new LineNumberWidget(
-					lineNumber,
-					fenceCodeParameters,
-				)
-			}),
-		},
+		...(lineNumber === 0 ? [] : [
+			{
+				from: position,
+				to: position,
+				value: Decoration.widget({
+					widget: new LineNumberWidget(
+						lineNumber,
+						fenceCodeParameters,
+					)
+				}),
+			},
+		]),
 		{
 			from: position,
 			to: position,
@@ -163,18 +174,67 @@ function buildFooterDecorations(
 	state: EditorState,
 	startPosition: number,
 	endPosition: number,
+	codeStartPosition: number,
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
-	return []
+	if (areRangesInteracting(state, startPosition, endPosition))
+		return [];
+
 	return [{
 		from: startPosition,
 		to: endPosition,
-		value: Decoration.line({
-			attributes: {
-				// style: "",
-				class: PREFIX + "codemirror-fence-code",
-			}
+		value: Decoration.widget({
+			widget: new FooterWidget(
+				fenceCodeParameters,
+				"",
+				state.field(editorInfoField)?.file?.path ?? "",
+				true,
+				plugin,
+			)
 		}),
 	}]
+}
+
+function modifyIntermediateDecorations(
+	decorations: Array<Range<any>>,
+): Array<Range<any>> {
+	const maxChars = decorations.reduce(
+		(result: number, decoration: Range<any>) => ((typeof decoration.value?.chars === "number") && (decoration.value.chars > result))
+			? decoration.value.chars
+			: result,
+		0,
+	)
+
+	decorations = decorations.map(
+		(decoration: Range<any>) => {
+			if (typeof decoration.value?.chars === "number")
+				return {
+				...decoration, value: Decoration.widget({
+					widget: new FillerWidget(
+						maxChars - decoration.value.chars
+					),
+					side: 100,
+				})}
+
+			return decoration
+		}
+	)
+
+	return decorations
+}
+
+function filterBadDecorations(
+	decorations: Array<Range<any>>,
+): Array<Range<Decoration>> {
+	decorations = decorations.filter(
+		(decoration: Range<any>) => {
+			if (typeof decoration.value?.chars === "number")
+				return false
+
+			return true
+		}
+	)
+
+	return decorations
 }

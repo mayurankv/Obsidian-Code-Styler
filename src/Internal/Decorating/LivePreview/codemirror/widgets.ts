@@ -127,6 +127,7 @@ export class FooterWidget extends WidgetType {
 export class LineNumberWidget extends WidgetType {
 	lineNumbers: LineParameters;
 	lineNumber: number;
+	reference: boolean;
 
 	constructor(
 		lineNumber: number,
@@ -136,6 +137,7 @@ export class LineNumberWidget extends WidgetType {
 
 		this.lineNumbers = structuredClone(fenceCodeParameters.lineNumbers);
 		this.lineNumber = lineNumber;
+		this.reference = fenceCodeParameters.language === "reference";
 	}
 
 	eq(
@@ -153,7 +155,7 @@ export class LineNumberWidget extends WidgetType {
 				cls: [
 					PREFIX + "line-number",
 				],
-				text: (this.lineNumber + (this.lineNumbers.offset ?? 0)).toString(),
+				text: (this.lineNumber + (this.reference ? 0 : (this.lineNumbers.offset ?? 0))).toString(),
 			});
 	}
 }

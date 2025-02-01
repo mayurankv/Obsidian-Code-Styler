@@ -21,6 +21,9 @@ export function createScrollEventObservers(
 
 			let scrollLine: Element | null = event.target
 
+			if (scrollLine?.hasClass("HyperMD-codeblock-begin") || scrollLine?.hasClass("HyperMD-codeblock-end"))
+				return;
+
 			const scrolledLines: Array<Element> = [scrollLine]
 
 			while (scrollLine !== null) {
@@ -56,49 +59,7 @@ export function createScrollEventObservers(
 
 	return EditorView.domEventObservers({
 		scroll: (event: Event, view: EditorView) => {
-			// console.log(event)
-		},
-	})
-}
-
-export function getWrappedCodeblocks(
-	view: EditorView,
-) {
-	const wrappedCodeblocks = Array.from(view.contentDOM.querySelectorAll("div.HyperMD-codeblock-begin.cm-line")).map(
-		(element: Element): Array<Element> => {
-			if (element.hasAttribute(UNWRAPPED_ATTRIBUTE))
-				return []
-
-			let wrappedLine: Element | null = element
-
-			const wrappedLineElements: Array<Element> = [wrappedLine]
-
-			while (wrappedLine !== null) {
-				wrappedLine = wrappedLine.nextElementSibling
-				if (wrappedLine?.hasClass("HyperMD-codeblock"))
-					wrappedLineElements.push(wrappedLine)
-				else
-					return []
-
-				if (wrappedLine?.hasClass("HyperMD-codeblock-end"))
-					return wrappedLineElements
-			}
-
-			return []
 
 		},
-	).filter(
-		(wrappedLineElements: Array<Element>): boolean => wrappedLineElements.length !== 0,
-	)
-
-	return wrappedCodeblocks
-}
-
-function unwrapCodeblocks(
-	wrappedCodeblocks: Array<Array<Element>>,
-) {
-	wrappedCodeblocks.forEach((codeblockLineElements: Array<Element>): void => {
-		codeblockLineElements
-		console.log(codeblockLineElements)
 	})
 }
