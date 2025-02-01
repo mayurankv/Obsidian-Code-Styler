@@ -1,26 +1,22 @@
 body.cs-plugin {
-	--cs-fixed-left-fence: var(--size-4-3);
-	--cs-fixed-gradient-1: 10%;
-	--cs-language-border: var(--size-4-1);
-	--cs-gutter-border-width: var(--size-2-1);
 
 	.markdown-source-view.mod-cm6 .cm-embed-block:not(.cm-table-widget):has(> .cs-pre-parent) {
-		border-radius: var(--cs-code-fence-radius);
+		border-radius: var(--cs-fence-curvature);
 	}
 
 	.cs-pre-parent {
 		> pre.cs-pre {
-			border-radius: var(--cs-code-fence-radius);
+			border-radius: var(--cs-fence-curvature);
+			background-color: var(--cs-fence-background-colour);
 			overflow-x: auto;
 			position: relative;
 			display: grid;
 			grid-template-columns: calc(100% - var(--size-4-12)) var(--size-4-12);
-			background-color: var(--cs-code-background-colour);
-			padding-right: var(--cs-fixed-left-fence);
+			padding-right: var(--cs-fence-fade-width);
 
 			&::after {
 				content: "";
-				background: linear-gradient(to right, transparent, var(--cs-fixed-gradient-1), var(--cs-code-background-colour));
+				background: linear-gradient(to right, transparent, var(--cs-fence-fade-width), var(--cs-fence-background-colour));
 				position: sticky;
 				left: 100%;
 				margin-right: calc(-1 * var(--size-4-3));
@@ -41,7 +37,7 @@ body.cs-plugin {
 				justify-content: flex-start;
 				align-items: center;
 				border-bottom: var(--size-2-1) solid transparent;
-				background-color: var(--cs-code-header-background-color);
+				background-color: var(--cs-fence-header-background-colour);
 				z-index: 4;
 				padding-bottom: var(--size-4-2);
 				// overflow-y: hidden;
@@ -50,12 +46,12 @@ body.cs-plugin {
 					content: "";
 					position: absolute;
 					top: calc(-1 * var(--size-4-3));
-					left: calc(-1 * calc(var(--size-4-4) - var(--cs-language-border)));
-					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fixed-left-fence)));
+					left: calc(-1 * calc(var(--size-4-4) - var(--cs-fence-gutter-language-border-size)));
+					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
 					bottom: 0;
 					background: inherit;
 					z-index: 2;
-					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-header-colour);
+					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-header-colour);
 				}
 
 				&::after {
@@ -63,11 +59,11 @@ body.cs-plugin {
 					position: absolute;
 					bottom: calc(-1 * var(--size-2-1));
 					top: 0;
-					left: calc(-1 * calc(var(--size-4-4) - var(--cs-language-border)));
-					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fixed-left-fence)));
+					left: calc(-1 * calc(var(--size-4-4) - var(--cs-fence-gutter-language-border-size)));
+					right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
 					z-index: 1;
-					background: var(--cs-header-separator-color);
-					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-separator-colour);
+					background: var(--cs-fence-header-separator-background-colour);
+					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-separator-colour);
 				}
 
 				> div {
@@ -87,45 +83,58 @@ body.cs-plugin {
 					height: 100%;
 
 					img.cs-icon {
-						width: var(--cs-language-icon-size);
-						height: var(--cs-language-icon-size);
-						filter: var(--cs-language-icon-filter, none);
+						width: var(--cs-fence-header-icon-size);
+						height: var(--cs-fence-header-icon-size);
+						filter: var(--cs-fence-header-icon-gray-scale);
 					}
 				}
 
 				> div.cs-language-title {
-					font-weight: var(--cs-language-title-weight);
-					color: var(--cs-language-title-color);
+					--cs-fence-header-language-title-background-colour: var(--color-base-30);
+					background-color: var(--cs-fence-header-language-title-background-colour);
+					color: var(--cs-fence-header-language-title-text-colour);
+					font-family: var(--cs-fence-header-language-title-font-family);
+					font-style: var(--cs-fence-header-language-title-font-style);
+					font-weight: var(--cs-fence-header-language-title-font-weight);
+
 					position: relative;
-					// height: 100%;
+					align-items: center;
+					height: 100%;
 					padding-left: var(--size-4-2);
 					padding-right: var(--size-4-2);
+					border-radius: var(--cs-fence-curvature);
 
-					// &::after {
-					// 	content: "";
-					// 	background: var(--cs-language-title-background-color);
-					// 	position: absolute;
-					// 	left: 0;
-					// 	right: 0;
-					// 	top: 0;
-					// 	bottom: 0;
-					// 	width: 100%;
-					// 	height: 100%;
-					// 	border-radius: var(--cs-code-fence-radius) var(--cs-code-fence-radius) 0 0;
-					// 	padding-bottom: var(--size-4-1);
-					// 	z-index: -1;
-					// 	box-shadow: 0 calc(-1 * var(--size-4-2)) var(--cs-language-title-background-color)
-					// 	// padding-top: var(--size-4-3);
-					// }
+					&::after {
+						content: "";
+						background: var(--cs-fence-header-language-title-background-colour);
+						position: absolute;
+						left: 0;
+						right: 0;
+						top: 0;
+						bottom: 0;
+						width: 100%;
+						height: 100%;
+						border-radius: var(--cs-fence-curvature) var(--cs-fence-curvature) 0 0;
+						padding-bottom: var(--size-4-2);
+						z-index: -1;
+						box-shadow: 0 calc(-1 * var(--size-4-2)) var(--cs-fence-header-language-title-background-colour)
+					}
 				}
 
-				> div.cs-title {
-					overflow-x: auto;
-					// height: 100%;
+				> div.cs-named-title {
+					background-color: var(--cs-fence-header-named-title-background-colour);
+					color: var(--cs-fence-header-named-title-text-colour);
+					font-family: var(--cs-fence-header-named-title-font-family);
+					font-style: var(--cs-fence-header-named-title-font-style);
+					font-weight: var(--cs-fence-header-named-title-font-weight);
+
+					position: relative;
+					align-items: center;
+					height: 100%;
 					max-width: 100%;
+
+					overflow-x: auto;
 					flex: 0 1 auto;
-					font-weight: var(--cs-title-weight);
-					color: var(--cs-title-color);
 
 					&::-webkit-scrollbar {
 						display: none;
@@ -138,27 +147,72 @@ body.cs-plugin {
 				}
 
 				> div.cs-external-reference {
-					overflow-x: auto;
+					background-color: var(--cs-fence-header-external-reference-title-background-colour);
+					color: var(--cs-fence-header-external-reference-title-text-colour);
+					font-family: var(--cs-fence-header-external-reference-title-font-family);
+					font-style: var(--cs-fence-header-external-reference-title-font-style);
+					font-weight: var(--cs-fence-header-external-reference-title-font-weight);
+
+					position: relative;
+					align-items: center;
+					height: 100%;
 					max-width: 100%;
+
+					overflow-x: auto;
 					flex: 0 1 auto;
+
+					.cs-external-reference-repository,
+					.cs-external-reference-repository-icon {
+						color: var(--cs-fence-header-external-reference-title-repository-colour);
+					}
+
+					.cs-external-reference-version,
+					.cs-external-reference-version-icon {
+						color: var(--cs-fence-header-external-reference-title-version-colour);
+					}
+
+					.cs-external-reference-timestamp,
+					.cs-external-reference-timestamp-icon {
+						color: var(--cs-fence-header-external-reference-title-timestamp-colour);
+					}
 
 					&::-webkit-scrollbar {
 						display: none;
 					}
 
 					button {
-						background-color: transparent;
 						box-shadow: none;
 						height: 100%;
+
+						background-color: var(--cs-fence-button-inactive-background-colour);
+						color: var(--cs-fence-button-inactive-colour);
+
+						&:hover {
+							background-color: var(--cs-fence-button-hover-background-colour);
+							color: var(--cs-fence-button-hover-colour);
+						}
+
+						&:active {
+							background-color: var(--cs-fence-button-active-background-colour);
+							color: var(--cs-fence-button-active-colour);
+						}
 					}
 				}
 
 				> div.cs-execute-code-title {
+					background-color: var(--cs-fence-header-execute-code-title-background-colour);
+					color: var(--cs-fence-header-execute-code-title-text-colour);
+					font-family: var(--cs-fence-header-execute-code-title-font-family);
+					font-style: var(--cs-fence-header-execute-code-title-font-style);
+					font-weight: var(--cs-fence-header-execute-code-title-font-weight);
 
+					position: relative;
+					align-items: center;
+					height: 100%;
 				}
 
 				> div.cs-separator {
-
+					color: var(--cs-fence-header-separator-background-colour);
 				}
 			}
 
@@ -172,13 +226,13 @@ body.cs-plugin {
 				grid-template-rows: auto;
 				overflow: visible;
 				width: max-content;
-				padding-right: var(--cs-fixed-left-fence);
+				padding-right: var(--cs-fence-fade-width);
 				padding-top: var(--size-4-1);
 
 				&[data-cs-wrap = "unwrapped"],
 				&[data-cs-wrap = "unwrapped-inactive"]:not(:active) {
 					width: max-content;
-					padding-right: var(--cs-fixed-left-fence);
+					padding-right: var(--cs-fence-fade-width);
 				}
 
 				&[data-cs-wrap = "wrapped"],
@@ -191,6 +245,12 @@ body.cs-plugin {
 					display: contents;
 
 					> div.cs-line-number {
+						background-color: var(--cs-fence-gutter-background-colour);
+						color: var(--cs-fence-gutter-text-colour);
+						font-family: var(--cs-fence-gutter-font-family);
+						font-style: var(--cs-fence-gutter-font-style);
+						font-weight: var(--cs-fence-gutter-font-weight);
+
 						position: sticky;
 						// top: auto;
 						left: 0;
@@ -199,21 +259,19 @@ body.cs-plugin {
 						text-align: right;
 						padding-right: var(--size-4-3);
 						margin-right: var(--size-4-3);
-						color: var(--cs-code-gutter-color);
-						background-color: var(--cs-code-gutter-background-color);
-						border-right: var(--cs-gutter-border-width) solid var(--cs-gutter-border-colour);
-						// box-shadow: calc(var(--size-4-4) * -1) 0px var(--cs-code-gutter-background-color);
+						border-right: var(--cs-fence-gutter-border-width) solid var(--cs-fence-gutter-border-colour);
+						// box-shadow: calc(var(--size-4-4) * -1) 0px var(--cs-fence-gutter-background-colour);
 
 						&::before {
 							content: "";
 							position: absolute;
 							top: calc(-1 * var(--size-4-1));
 							bottom: -100%;
-							left: calc(-1 * calc(var(--size-4-4) - var(--cs-language-border)));
+							left: calc(-1 * calc(var(--size-4-4) - var(--cs-fence-gutter-language-border-size)));
 							right: 0;
 							background-color: inherit;
 							z-index: -5;
-							box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-background-colour);
+							box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-gutter-colour);
 							// border-radius: 8px;
 						}
 
@@ -223,10 +281,10 @@ body.cs-plugin {
 							top: 0px;
 							bottom: 0px;
 							width: var(--size-4-3);
-							left: calc(100% + var(--cs-gutter-border));
+							left: calc(100% + var(--cs-fence-gutter-border-width));
 							right: calc(-1 * var(--size-4-3));
-							// background: linear-gradient(to left, transparent, 50%, var(--cs-code-background-colour));
-							background: linear-gradient(to left, transparent, var(--cs-fixed-gradient-1), var(--cs-code-background-colour));
+							// background: linear-gradient(to left, transparent, 50%, var(--cs-fence-background-colour));
+							background: linear-gradient(to left, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-background-colour));
 							// mask-image: linear-gradient(to right, black, transparent);
 							// backdrop-filter: blur(2px);
 							z-index: 10;
@@ -245,6 +303,7 @@ body.cs-plugin {
 						overflow: visible;
 						// overflow: /;
 						grid-column: 2;
+						color: var(--cs-fence-text-colour);
 					}
 				}
 			}
@@ -260,10 +319,23 @@ body.cs-plugin {
 				margin-bottom: var(--size-4-2);
 				z-index: 4;
 
+				background-color: var(--cs-fence-button-inactive-background-colour);
+				color: var(--cs-fence-button-inactive-colour);
+
 				> svg {
 					// position: sticky;
 					// left: 0;
 					z-index: inherit;
+				}
+
+				&:hover {
+					background-color: var(--cs-fence-button-hover-background-colour);
+					color: var(--cs-fence-button-hover-colour);
+				}
+
+				&:active {
+					background-color: var(--cs-fence-button-active-background-colour);
+					color: var(--cs-fence-button-active-colour);
 				}
 			}
 		}

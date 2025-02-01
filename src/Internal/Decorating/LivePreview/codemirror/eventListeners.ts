@@ -26,11 +26,11 @@ export function createScrollEventObservers(
 			while (scrollLine !== null) {
 				scrollLine = scrollLine.nextElementSibling
 
-				if (scrollLine?.hasClass("HyperMD-codeblock"))
-					scrolledLines.push(scrollLine)
-
 				if (scrollLine?.hasClass("HyperMD-codeblock-end"))
 					break
+
+				if (scrollLine?.hasClass("HyperMD-codeblock"))
+					scrolledLines.push(scrollLine)
 			}
 
 			scrollLine = event.target
@@ -38,11 +38,11 @@ export function createScrollEventObservers(
 			while (scrollLine !== null) {
 				scrollLine = scrollLine.previousElementSibling
 
+				if (scrollLine?.hasClass("HyperMD-codeblock-begin"))
+					break
+
 				if (scrollLine?.hasClass("HyperMD-codeblock"))
 					scrolledLines.push(scrollLine)
-
-				if (scrollLine?.hasClass("HyperMD-codeblock-start"))
-					break
 			}
 
 			scrolledLines.forEach(

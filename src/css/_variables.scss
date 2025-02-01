@@ -1,24 +1,14 @@
 body.cs-plugin {
+	--cs-language-border-header-colour: var(--cs-fence-header-language-title-background-colour);
+	--cs-language-border-separator-colour: var(--cs-fence-header-separator-background-colour);
+	--cs-language-border-gutter-colour: var(--cs-fence-gutter-background-colour);
+}
 
-	// --cs-code-background-colour: var(--code-background);
-	// --cs-code-parameters-colour: var(--code-comment);
-	// --cs-code-colour: var(--code-normal);
-	// --cs-code-fence-radius: 30px;
-	// --cs-code-inline-radius: 10px;
-	// --cs-title-color: var(--code-comment);
-	// --cs-title-weight: 400;
-	// --cs-language-title-color: var(--code-comment);
-	// --cs-language-title-background-color: var(--cs-code-background-colour);
-	// --cs-language-title-weight: 800;
-	// --cs-code-gutter-background-color: var(--cs-code-background-colour);
-	// --cs-code-gutter-color: var(--code-comment);
-	// --cs-code-header-background-color: var(--cs-code-background-colour);
-	// --cs-header-separator-color: var(--color-base-30);
-	// --cs-language-colour: red;
-	// --cs-language-background-colour: var(--cs-language-colour);
-	// --cs-language-separator-colour: var(--cs-language-colour);
-	// --cs-language-header-colour: var(--cs-language-colour);
-	// --cs-gutter-border-colour: var(--cs-code-gutter-background-color);
 
-	// --cs-language-icon-size: 2em;
+body.cs-plugin{
+	--cs-fence-gutter-active-text-colour: var(--code-normal);
+
+	--cs-fence-highlights-active-line-colour: var(--background-modifier-hover);
+	--cs-fence-highlights-default-highlight-colour: var(--text-highlight-bg);
+	--cs-fence-highlights-gradient-highlights-colour-stop: 30%;
 }

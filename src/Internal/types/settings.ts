@@ -22,6 +22,8 @@ export interface ActiveTextElementStyles extends TextElementStyles {
 
 export interface GutterStyles extends ActiveTextElementStyles {
 	languageBorderSize: Size,
+	borderColour: Colour,
+	borderWidth: Size,
 }
 
 export interface IconStyles {
@@ -69,6 +71,8 @@ export interface CodeStyles extends ElementStyles {
 }
 
 export interface FenceStyles extends CodeStyles {
+	fadeWidth: Size,
+	fadeGradientStop: Percentage,
 	gutter: GutterStyles;
 	highlights: HighlightsStyles;
 }

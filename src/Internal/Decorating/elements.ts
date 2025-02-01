@@ -9,6 +9,7 @@ import { rerenderCodeElement } from "src/Internal/Interface/Actions/clicks";
 import { updateExternalReference } from "../utils/reference";
 import { Reference } from "../types/reference";
 import { getTheme } from "../utils/themes";
+import { BUTTON_TIMEOUT } from "../constants/interface";
 
 export function createHeaderElement(
 	codeParameters: CodeParameters,
@@ -153,7 +154,7 @@ function createNamedTitle(
 		fence ? "div" : "span",
 		{
 			cls: [
-				PREFIX + "title",
+				PREFIX + "named-title",
 				...(codeParameters.title !== null ? [] : [PREFIX + "hidden"]),
 			],
 		},
@@ -198,7 +199,7 @@ function createExternalReferenceTitle(
 				tagName,
 				{
 					cls: [
-						PREFIX + "external-reference-repo-icon",
+						PREFIX + "external-reference-repository-icon",
 					],
 				},
 				(element) => element.innerHTML = SITE_ICONS?.[(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.site as string]?? SITE_ICONS["generic"],
@@ -207,7 +208,7 @@ function createExternalReferenceTitle(
 				tagName,
 				{
 					cls: [
-						PREFIX + "external-reference-repo",
+						PREFIX + "external-reference-repository",
 					],
 					text: [
 						(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.author,
@@ -219,7 +220,7 @@ function createExternalReferenceTitle(
 				tagName,
 				{
 					cls: [
-						PREFIX + "external-reference-ref-icon",
+						PREFIX + "external-reference-version-icon",
 					],
 				},
 				(element) => element.innerHTML = GIT_ICONS?.[(codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.refInfo?.type as string] ?? GIT_ICONS["branch"],
@@ -228,7 +229,7 @@ function createExternalReferenceTitle(
 				tagName,
 				{
 					cls: [
-						PREFIX + "external-reference-ref",
+						PREFIX + "external-reference-version",
 					],
 					text: (codeParameters as FenceCodeParameters)?.externalReference?.external?.info?.refInfo?.ref as string,
 				}),
@@ -375,6 +376,18 @@ function createCopyIcon(
 	copyElement.onclick = async (event: MouseEvent) => {
 		await navigator.clipboard.writeText(content)
 		new Notice("Copied to your clipboard");
+
+		setIcon(copyElement, "check")
+		copyElement.style.color = "var(--text-success)"
+		copyElement.style.visibility = "visible"
+		copyElement.style.display = "inline-block"
+
+		setTimeout(() => {
+			setIcon(copyElement, "copy")
+			copyElement.style.color = ""
+			copyElement.style.visibility = ""
+			copyElement.style.display = ""
+		}, BUTTON_TIMEOUT);
 	}
 
 	return copyElement

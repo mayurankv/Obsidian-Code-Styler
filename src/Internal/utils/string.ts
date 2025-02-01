@@ -8,7 +8,7 @@ export function camelCaseToKebabCase(
 	text: string,
 ): string {
 	return text.split('').map(
-		(letter: string, idx: number) => letter.toUpperCase() === letter
+		(letter: string, idx: number) => (letter.toUpperCase() === letter && letter !== "-")
 			? `${idx !== 0 ? '-' : ''}${letter.toLowerCase()}`
 			: letter,
 	).join('');

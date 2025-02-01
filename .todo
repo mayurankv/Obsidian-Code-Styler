@@ -1,4 +1,4 @@
-colour of title background
+reference adjusts incorrect
 blur end of title if scrollable
 blur end of reference if scrollable
 external reference styling
@@ -39,6 +39,9 @@ Refactor:
 	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
 	☐ Add styles not exposed to style settings or settings for padding and margin settings
 	☐ Option to make all live preview codeblocks a reading codeblock
+
+Next Refactor:
+	☐ Colour of title backgrounds and variable padding widths and margin widths and other sizes added to styles (for consistent sizing)
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

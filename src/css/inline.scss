@@ -2,9 +2,9 @@ body.cs-plugin {
 
 	.markdown-rendered :not(pre) > code:not([class*="blur"]) {
 		display: inline;
-		border-radius: var(--cs-code-inline-radius);
+		border-radius: var(--cs-inline-curvature);
 		color: var(--cs-inline-text-colour);
-		background-color: var(--cs-code-background-colour);
+		background-color: var(--cs-inline-background-colour);
 
 		span.cm-inline-code {
 			padding-left: 0 !important;
@@ -19,11 +19,12 @@ body.cs-plugin {
 	span.cs-header {
 		display: inline;
 		user-select: none;
+		background-color: --cs-inline-header-background-colour;
 
 		&.cm-inline-code {
 			padding-left: 0.25em; // Obsidian default value
 			padding-right: 0px;
-			border-radius: var(--cs-code-inline-radius) 0px 0px var(--cs-code-inline-radius) !important;
+			border-radius: var(--cs-inline-curvature) 0px 0px var(--cs-inline-curvature) !important;
 		}
 
 		~ span.cm-inline-code:not(.cs-footer) {
@@ -45,26 +46,68 @@ body.cs-plugin {
 
 		> span.cs-icon-container > img.cs-icon:not([class*="emoji"]) {
 			display: inline;
-			width: auto;
+			width: var(--cs-inline-header-icon-size);
+			height: var(--cs-inline-header-icon-size);
 			margin: unset;
+			filter: var(--cs-inline-header-icon-gray-scale)
 		}
 
-		span.cs-title {
-			color: var(--cs-title-color);
-			font-weight: var(--cs-title-weight);
+		span.cs-named-title {
+			background-color: var(--cs-inline-header-named-title-background-colour);
+			color: var(--cs-inline-header-named-title-text-colour);
+			font-weight: var(--cs-inline-header-named-title-font-weight);
+			font-style: var(--cs-inline-header-named-title-font-style);
+			font-family: var(--cs-inline-header-named-title-font-family);
 		}
 
 		span.cs-language-title {
-			color: var(--cs-language-title-color);
-			font-weight: var(--cs-language-title-weight);
+			background-color: var(--cs-inline-header-language-title-background-colour);
+			color: var(--cs-inline-header-languaage-title-text-colour);
+			font-weight: var(--cs-inline-header-language-title-font-weight);
+			font-style: var(--cs-inline-header-language-title-font-style);
+			font-family: var(--cs-inline-header-language-title-font-family);
+		}
+
+		span.cs-external-reference {
+			background-color: var(--cs-inline-header-external-reference-title-background-colour);
+			color: var(--cs-inline-header-external-reference-title-text-colour);
+			font-weight: var(--cs-inline-header-external-reference-title-font-weight);
+			font-style: var(--cs-inline-header-external-reference-title-font-style);
+			font-family: var(--cs-inline-header-external-reference-title-font-family);
+
+			.cs-external-reference-repository,
+			.cs-external-reference-repository-icon {
+				color: var(--cs-inline-header-external-reference-title-repository-colour);
+			}
+
+			.cs-external-reference-version,
+			.cs-external-reference-version-icon {
+				color: var(--cs-inline-header-external-reference-title-version-colour);
+			}
+
+			.cs-external-reference-timestamp,
+			.cs-external-reference-timestamp-icon {
+				color: var(--cs-inline-header-external-reference-title-timestamp-colour);
+			}
+		}
+
+		span.cs-execute-code-title {
+			background-color: var(--cs-inline-header-execute-code-title-background-colour);
+			color: var(--cs-inline-header-execute-code-title-text-colour);
+			font-weight: var(--cs-inline-header-execute-code-title-font-weight);
+			font-style: var(--cs-inline-header-execute-code-title-font-style);
+			font-family: var(--cs-inline-header-execute-code-title-font-family);
 		}
 
 		span.cs-separator {
-			color: var(--cs-title-color);
+			color: var(--cs-inline-header-separator-background-colour);
 		}
 
 		span.cs-parameters {
-			color: var(--cs-code-parameters-colour)
+			color: var(--cs-inline-parameters-text-colour);
+			font-weight: var(--cs-inline-parameters-font-weight);
+			font-style: var(--cs-inline-parameters-font-style);
+			font-family: var(--cs-inline-parameters-font-family);
 		}
 	}
 
@@ -74,33 +117,39 @@ body.cs-plugin {
 		&.cm-inline-code {
 			padding-left: 0px !important;
 			padding-right: 0.25em; // Obsidian default value
-			border-radius: 0px var(--cs-code-inline-radius) var(--cs-code-inline-radius) 0px !important;
+			border-radius: 0px var(--cs-inline-curvature) var(--cs-inline-curvature) 0px !important;
 		}
 
 		button.cs-copy-icon {
 			--icon-size: var(--icon-xs);
 			padding: 0.15em;
-			margin-left: var(--size-4-2);
-			background-color: transparent;
+			margin-left: var(--size-4-1);
+			background-color: var(--cs-inline-button-inactive-background-colour);
 			box-shadow: none;
 			height: 100%;
 			display: inline-block;
-
-			&:hover {
-				background-color: var(--background-modifier-hover)
-			}
+			color: var(--cs-inline-button-inactive-colour);
 
 			> svg {
 				display: inline;
 				height: 100%;
 				vertical-align: text-top;
-				color: var(--code-comment)
 			}
 
-			&:hover > svg {
-				color: var(--code-normal)
+			&:hover {
+				background-color: var(--cs-inline-button-hover-background-colour);
+				color: var(--cs-inline-button-hover-colour);
+			}
+
+			&:active {
+				background-color: var(--cs-inline-button-active-background-colour);
+				color: var(--cs-inline-button-active-colour);
 			}
 		}
+	}
+
+	code:not(:hover) span.cs-footer button.cs-copy-icon {
+		// visibility: hidden;
 	}
 
 	span.cs-inline-parameters {
@@ -125,8 +174,8 @@ body.cs-plugin {
 
 	// Overwrite Obsidian Defaults
 	.cm-s-obsidian span.cm-inline-code {
-		color: var(--cs-code-colour);
-		background-color: var(--cs-code-background-colour);
+		color: var(--cs-inline-text-colour);
+		background-color: var(--cs-inline-background-colour);
 
 		span.cm-inline-code {
 			&.cm-hmd-indented-code {
@@ -134,22 +183,22 @@ body.cs-plugin {
 			}
 
 			&:not(.cm-formatting):not(.cm-hmd-indented-code):not(.obsidian-search-match-highlight) {
-				background-color: var(--cs-code-background-colour);
+				background-color: var(--cs-inline-background-colour);
 			}
 		}
 
 		&:not(.cm-formatting) {
-			border-radius: var(--cs-code-inline-radius);
+			border-radius: var(--cs-inline-curvature);
 		}
 
 		&.cm-formatting {
-			border-start-start-radius: var(--cs-code-inline-radius);
-			border-end-start-radius: var(--cs-code-inline-radius);
+			border-start-start-radius: var(--cs-inline-curvature);
+			border-end-start-radius: var(--cs-inline-curvature);
 		}
 
 		&:not(.cm-formatting) + .cm-formatting.cm-inline-code {
-			border-start-end-radius: var(--cs-code-inline-radius);
-			border-end-end-radius: var(--cs-code-inline-radius);
+			border-start-end-radius: var(--cs-inline-curvature);
+			border-end-end-radius: var(--cs-inline-curvature);
 		}
 	}
 

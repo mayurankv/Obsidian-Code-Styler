@@ -45,7 +45,9 @@ function getStyleText(
 
 	styleString += convertStylesToVars(BASE_THEME_MODE_STYLES)
 
+
 	// TODO:
+	console.log(styleString)
 	// styleThemeColours(plugin.settings.currentTheme.colours) + styleThemeSettings(plugin.settings.currentTheme.settings, obsidianTheme) + styleLanguageColours(plugin.settings.currentTheme.settings, plugin.settings.redirectLanguages, obsidianTheme)
 
 	return styleString

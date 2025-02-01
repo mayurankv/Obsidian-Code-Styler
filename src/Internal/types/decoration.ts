@@ -1,8 +1,8 @@
 export type HEX = `#${string}`;
 export type CSS = `--${string}`;
-export type Colour = HEX | CSS;
+export type Colour = HEX | "transparent" | "inherit" | CSS;
 export type Percentage = `${number}%` | CSS;
-export type Size = `${number}em` | `${number}rem` | `${number}px` | Percentage
+export type Size = "auto" | `${number}em` | `${number}rem` | `${number}px` | Percentage
 export type FontFamily = string
 export type FontStyle = string
 export type FontWeight = Size

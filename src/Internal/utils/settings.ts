@@ -11,14 +11,14 @@ import { camelCaseToKebabCase } from "./string";
 export function convertStylesToVars(
 	styles: CodeStylerThemeModeStyles,
 ): string {
-	const flattenedStyles = flattenObject(styles, "--" + PREFIX)
+	const flattenedStyles = flattenObject(styles, "--" + PREFIX.slice(0,-1))
 
 	let styleString = ""
 
 	styleString += "body.cs-plugin{\n";
 
 	for (const key in flattenedStyles)
-		styleString += `\t${camelCaseToKebabCase(key)}: ${flattenedStyles[key].startsWith("--") ? ("var(" + flattenedStyles[key] + ")")  : flattenedStyles[key]}\n`
+		styleString += `${camelCaseToKebabCase(key)}: ${flattenedStyles[key].startsWith("--") ? ("var(" + flattenedStyles[key] + ")")  : flattenedStyles[key]};\n`
 
 	styleString += "}\n"
 

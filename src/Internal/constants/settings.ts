@@ -16,21 +16,21 @@ const BASE_TEXT_STYLES: TextStyles = {
 }
 
 const BASE_ICON_STYLES: IconStyles = {
-	size: "--icon-xl",
+	size: "auto",
 	grayScale: "none"
 }
 
 const BASE_BUTTON_STYLES: ButtonStyles = {
 	inactive: {
-		backgroundColour: "--code-background",
+		backgroundColour: "transparent",
 		colour: "--code-comment",
 	},
 	hover: {
-		backgroundColour: "--color-base-30",
+		backgroundColour: "--background-modifier-hover",
 		colour: "--code-normal",
 	},
 	active: {
-		backgroundColour: "--code-background",
+		backgroundColour: "--background-modifier-hover",
 		colour: "--code-normal",
 	},
 }
@@ -74,11 +74,22 @@ const BASE_CODE_STYLES: CodeStyles = {
 export const BASE_THEME_MODE_STYLES: CodeStylerThemeModeStyles = {
 	fence: {
 		...BASE_CODE_STYLES,
+		fadeWidth: "--size-4-3",
+		fadeGradientStop: "10%",
+		header: {
+			...BASE_HEADER_STYLES,
+			icon: {
+				...BASE_ICON_STYLES,
+				size: "--icon-xl",
+			}
+		},
 		gutter: {
 			...BASE_ELEMENT_STYLES,
 			...BASE_TEXT_STYLES,
 			activeTextColour: "--code-normal",
 			languageBorderSize: "--size-4-1",
+			borderColour: "--cs-fence-gutter-background-colour",
+			borderWidth: "--size-2-1",
 		},
 		highlights: {
 			activeLineColour: "--background-modifier-hover",
