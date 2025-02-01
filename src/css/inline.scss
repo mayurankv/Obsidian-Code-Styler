@@ -3,7 +3,7 @@ body.cs-plugin {
 	.markdown-rendered :not(pre) > code:not([class*="blur"]) {
 		display: inline;
 		border-radius: var(--cs-code-inline-radius);
-		color: var(--cs-code-colour);
+		color: var(--cs-inline-text-colour);
 		background-color: var(--cs-code-background-colour);
 
 		span.cm-inline-code {

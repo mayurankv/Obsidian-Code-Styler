@@ -9,7 +9,7 @@ import { EXCLUDED_LANGUAGES } from "../constants/settings";
 import { FenceCodeParameters, Highlights } from "../types/parsing";
 import { Reference } from "../types/reference";
 import { isLanguageMatched, separateParameters, setTitleAndReference } from "../utils/parsing";
-import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/text";
+import { convertBoolean, removeBoundaryQuotes, removeCurlyBraces } from "../utils/string";
 
 export function parseFenceCodeParameters(
 	fenceCodeParametersLine: string,

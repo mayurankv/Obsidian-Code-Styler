@@ -1,23 +1,5 @@
 import { Colour } from "../types/decoration";
-import { CodeStylerThemeModeStyles } from "../types/settings";
-
-// const BASE_THEME: CodeStylerThemeModeStyles = {
-// 	fence: {
-// 		curvature: "--code-radius",
-// 		header: {},
-// 		button: {},
-// 		gutter: {},
-// 		highlights: {},
-// 	},
-// 	inline: {
-// 		curvature: "--code-radius",
-// 		header: {},
-// 		button: {},
-// 		parameters: {
-
-// 		},
-// 	},
-// }
+import { ButtonStyles, CodeStylerThemeModeStyles, CodeStyles, ElementStyles, HeaderStyles, IconStyles, TextStyles } from "../types/settings";
 
 const DEFAULT_THEME: Record<string, Colour> = {
 	backgroundColour: "--code-background",

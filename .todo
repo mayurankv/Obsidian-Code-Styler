@@ -1,26 +1,27 @@
+colour of title background
 blur end of title if scrollable
 blur end of reference if scrollable
 external reference styling
+style live preview
+fix reference update on load
+
 get shiki base theme to class names
 add shiki to fence rendered and codemirror both
 add not shiki clauses for decorating colours
-fix reference
-EventListener codemirror
+
 Consider line numbers as gutter
 
 Refactor:
-	☐ Live Preview (Fence)
 	☐ SettingsTabs
 	☐ Style (!Inline)s + CSS (!Inline) + Applying settings (All)
 		☐ Use https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses and https://docs.obsidian.md/Reference/CSS+variables/Editor/Code and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Colors and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Typography
 		☐ https://docs.obsidian.md/Themes/App+themes/Embed+fonts+and+images+in+your+theme
-	☐ Settings interfaces
+	☐ Folding
 	☐ Check reference with no internet
 	☐ Canvas parsing
-	☐ Adjust for special languages
 	☐ Sort files
 	☐ README and documentation
-	☐ setitins modifiers: Set inline syntax highlighting for file in frontmatter
+	☐ setitins modifiers: Set inline syntax highlighting language for file in frontmatter, all options as frontmatter affect code parsing (code-styler- and fence-/inline- prefixes)
 	☐ Consistent syntax highlighting
 	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
 	☐ Hide delimiter lines

@@ -93,7 +93,7 @@ export default class CodeStylerPlugin extends Plugin {
 		load: boolean = true,
 	): void {
 		if (load) {
-			// this.app.workspace.trigger("parse-style-settings");
+			this.app.workspace.trigger("parse-style-settings");
 			applyStyling(this);
 		} else
 			removeStyling()

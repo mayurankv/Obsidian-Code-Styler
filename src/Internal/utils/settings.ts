@@ -1,9 +1,29 @@
 // TODO: Update
 
+import { PREFIX } from "../constants/general";
 import { DEFAULT_SETTINGS, THEME_DEFAULT_SETTINGS } from "../constants/settings";
 import { convertColoursToTheme } from "../constants/themes";
 import { Colour } from "../types/decoration";
-import { CodeStylerSettings, CodeStylerTheme } from "../types/settings";
+import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeModeStyles, CodeStylerThemeStyles } from "../types/settings";
+import { flattenObject } from "./objects";
+import { camelCaseToKebabCase } from "./string";
+
+export function convertStylesToVars(
+	styles: CodeStylerThemeModeStyles,
+): string {
+	const flattenedStyles = flattenObject(styles, "--" + PREFIX)
+
+	let styleString = ""
+
+	styleString += "body.cs-plugin{\n";
+
+	for (const key in flattenedStyles)
+		styleString += `\t${camelCaseToKebabCase(key)}: ${flattenedStyles[key].startsWith("--") ? ("var(" + flattenedStyles[key] + ")")  : flattenedStyles[key]}\n`
+
+	styleString += "}\n"
+
+	return styleString
+}
 
 export function convertSettings(
 	settings: CodeStylerSettings

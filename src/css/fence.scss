@@ -44,6 +44,7 @@ body.cs-plugin {
 				background-color: var(--cs-code-header-background-color);
 				z-index: 4;
 				padding-bottom: var(--size-4-2);
+				// overflow-y: hidden;
 
 				&::before {
 					content: "";
@@ -95,10 +96,32 @@ body.cs-plugin {
 				> div.cs-language-title {
 					font-weight: var(--cs-language-title-weight);
 					color: var(--cs-language-title-color);
+					position: relative;
+					// height: 100%;
+					padding-left: var(--size-4-2);
+					padding-right: var(--size-4-2);
+
+					// &::after {
+					// 	content: "";
+					// 	background: var(--cs-language-title-background-color);
+					// 	position: absolute;
+					// 	left: 0;
+					// 	right: 0;
+					// 	top: 0;
+					// 	bottom: 0;
+					// 	width: 100%;
+					// 	height: 100%;
+					// 	border-radius: var(--cs-code-fence-radius) var(--cs-code-fence-radius) 0 0;
+					// 	padding-bottom: var(--size-4-1);
+					// 	z-index: -1;
+					// 	box-shadow: 0 calc(-1 * var(--size-4-2)) var(--cs-language-title-background-color)
+					// 	// padding-top: var(--size-4-3);
+					// }
 				}
 
 				> div.cs-title {
 					overflow-x: auto;
+					// height: 100%;
 					max-width: 100%;
 					flex: 0 1 auto;
 					font-weight: var(--cs-title-weight);

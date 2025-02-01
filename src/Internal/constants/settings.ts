@@ -1,9 +1,98 @@
-import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeSettings } from "../types/settings";
+import { ButtonStyles, CodeStylerSettings, CodeStylerTheme, CodeStylerThemeModeStyles, CodeStylerThemeSettings, CodeStyles, ElementStyles, HeaderStyles, IconStyles, TextStyles } from "../types/settings";
 import { FOLD_PLACEHOLDER } from "./decoration";
 import { EXAMPLE_CODEBLOCK_CONTENT as EXAMPLE_FENCE_CODE_CONTENT, EXAMPLE_CODEBLOCK_PARAMETERS as EXAMPLE_FENCE_CODE_PARAMETERS, EXAMPLE_INLINE_CODE_CONTENT, EXAMPLE_INLINE_CODE_PARAMETERS } from "./interface";
 import { convertColoursToTheme, THEME_COLOURS } from "./themes";
 
 export const USE_SHIKI = false;
+
+const BASE_ELEMENT_STYLES: ElementStyles = {
+	backgroundColour: "--code-background"
+}
+const BASE_TEXT_STYLES: TextStyles = {
+	textColour: "--code-comment",
+	fontFamily: "--font-monospace",
+	fontStyle: "normal",
+	fontWeight: "--font-weight",
+}
+
+const BASE_ICON_STYLES: IconStyles = {
+	size: "--icon-xl",
+	grayScale: "none"
+}
+
+const BASE_BUTTON_STYLES: ButtonStyles = {
+	inactive: {
+		backgroundColour: "--code-background",
+		colour: "--code-comment",
+	},
+	hover: {
+		backgroundColour: "--color-base-30",
+		colour: "--code-normal",
+	},
+	active: {
+		backgroundColour: "--code-background",
+		colour: "--code-normal",
+	},
+}
+
+const BASE_HEADER_STYLES: HeaderStyles = {
+	...BASE_ELEMENT_STYLES,
+	icon: BASE_ICON_STYLES,
+	languageTitle: {
+		...BASE_ELEMENT_STYLES,
+		...BASE_TEXT_STYLES,
+		fontWeight: "--bold-weight",
+	},
+	namedTitle: {
+		...BASE_ELEMENT_STYLES,
+		...BASE_TEXT_STYLES,
+	},
+	externalReferenceTitle: {
+		...BASE_ELEMENT_STYLES,
+		...BASE_TEXT_STYLES,
+		repositoryColour: "--sync-avatar-color-5",
+		versionColour: "--sync-avatar-color-8",
+		timestampColour: "--sync-avatar-color-3",
+	},
+	executeCodeTitle: {
+		...BASE_ELEMENT_STYLES,
+		...BASE_TEXT_STYLES,
+	},
+	separator: {
+		backgroundColour: "--color-base-30",
+	},
+}
+
+const BASE_CODE_STYLES: CodeStyles = {
+	...BASE_ELEMENT_STYLES,
+	textColour: "--code-normal",
+	curvature: "--code-radius",
+	header: BASE_HEADER_STYLES,
+	button: BASE_BUTTON_STYLES,
+}
+
+export const BASE_THEME_MODE_STYLES: CodeStylerThemeModeStyles = {
+	fence: {
+		...BASE_CODE_STYLES,
+		gutter: {
+			...BASE_ELEMENT_STYLES,
+			...BASE_TEXT_STYLES,
+			activeTextColour: "--code-normal",
+			languageBorderSize: "--size-4-1",
+		},
+		highlights: {
+			activeLineColour: "--background-modifier-hover",
+			defaultHighlightColour: "--text-highlight-bg",
+			alternativeHighlightColours: {},
+			gradientHighlightsColourStop: "30%",
+		},
+	},
+	inline: {
+		...BASE_CODE_STYLES,
+		parameters: BASE_TEXT_STYLES,
+	},
+}
+
 
 const HEADER_DISPLAY_SETTINGS = {
 	icon: true,

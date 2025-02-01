@@ -2,7 +2,7 @@ import CodeStylerPlugin from "src/main";
 import { InlineCodeParameters } from "../types/parsing";
 import { separateParameters, setTitleAndReference } from "../utils/parsing";
 import { INLINE_PARAMETERS_KEY_VALUE, INLINE_PARAMETERS_SHORTHAND } from "../constants/parsing";
-import { convertBoolean, removeBoundaryQuotes } from "../utils/text";
+import { convertBoolean, removeBoundaryQuotes } from "../utils/string";
 import { getTheme } from "../utils/themes";
 
 export function parseInlineCodeParameters(

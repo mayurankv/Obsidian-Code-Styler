@@ -1,43 +1,41 @@
-import { Colour, CSS, FontFamily, FontStyle, FontWeight, Percentage, Size } from "./decoration";
+import { Colour, CSS, FontFamily, FontStyle, FontWeight, Percentage, Size, Filter } from "./decoration";
 import { LineUnwrap } from "./parsing";
 
-// export type Display = "none" | "if_header_shown" | "always";
-
-interface ElementStyles {
+export interface ElementStyles {
 	backgroundColour: Colour;
 }
 
-interface TextStyles extends ElementStyles {
+export interface TextStyles {
 	textColour: Colour;
 	fontFamily: FontFamily;
 	fontStyle: FontStyle;
 	fontWeight: FontWeight;
 }
 
-interface TextElementStyles extends TextStyles, ElementStyles {
+export interface TextElementStyles extends TextStyles, ElementStyles {
 
 }
 
-interface ActiveTextElementStyles extends TextElementStyles {
+export interface ActiveTextElementStyles extends TextElementStyles {
 	activeTextColour: Colour,
 }
 
-interface GutterStyles extends ActiveTextElementStyles {
+export interface GutterStyles extends ActiveTextElementStyles {
 	languageBorderSize: Size,
 }
 
-interface IconStyles {
+export interface IconStyles {
 	size: Size;
-	grayScale: Boolean;
+	grayScale: Filter;
 }
 
-interface ExternalReferenceStyles extends TextElementStyles {
+export interface ExternalReferenceStyles extends TextElementStyles {
 	repositoryColour: Colour;
 	versionColour: Colour;
 	timestampColour: Colour;
 }
 
-interface HeaderStyles extends ElementStyles {
+export interface HeaderStyles extends ElementStyles {
 	icon: IconStyles,
 	languageTitle: TextElementStyles;
 	namedTitle: TextElementStyles;
@@ -46,35 +44,36 @@ interface HeaderStyles extends ElementStyles {
 	separator: ElementStyles;
 }
 
-interface HighlightsStyles {
+export interface HighlightsStyles {
 	activeLineColour: Colour;
 	defaultHighlightColour: Colour;
 	alternativeHighlightColours: Record<string, Colour>;
 	gradientHighlightsColourStop: Percentage;
 }
 
-interface ButtonStyle extends ElementStyles {
+export interface ButtonStyle extends ElementStyles {
 	colour: Colour;
 }
 
-interface ButtonStyles {
+export interface ButtonStyles {
 	inactive: ButtonStyle;
 	hover: ButtonStyle;
 	active: ButtonStyle;
 }
 
-interface CodeStyles extends ElementStyles {
+export interface CodeStyles extends ElementStyles {
+	textColour: Colour,
 	curvature: number | CSS;
 	header: HeaderStyles;
 	button: ButtonStyles;
 }
 
-interface FenceStyles extends CodeStyles {
+export interface FenceStyles extends CodeStyles {
 	gutter: GutterStyles;
 	highlights: HighlightsStyles;
 }
 
-interface InlineStyles extends CodeStyles {
+export interface InlineStyles extends CodeStyles {
 	parameters: TextStyles,
 }
 

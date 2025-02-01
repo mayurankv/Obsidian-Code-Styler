@@ -6,6 +6,7 @@ export type Size = `${number}em` | `${number}rem` | `${number}px` | Percentage
 export type FontFamily = string
 export type FontStyle = string
 export type FontWeight = Size
+export type Filter = `none` | `grayscale(${Size})` | CSS
 
 export interface ThemeStyle {
 	border?: {

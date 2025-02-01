@@ -1,5 +1,5 @@
 import { CodeParameters, FenceCodeParameters, LinkInfo, LinkType } from "../types/parsing";
-import { removeBoundaryQuotes } from "./text";
+import { removeBoundaryQuotes } from "./string";
 
 const MARKDOWN_REGEX = /\[(.*?)\]\((.+?)\)/;
 const WIKI_REGEX = /\[\[([^\]|\r\n]+?)(?:\|([^\]|\r\n]+?))?\]\]/;
