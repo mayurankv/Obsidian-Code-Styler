@@ -8,14 +8,16 @@ import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
 import { getLineClasses } from "src/Internal/utils/decorating";
 import { parseLinks } from "src/Internal/utils/parsing";
 import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, getCommentDecorations, isSourceMode } from "./codemirror/utils";
+import { areRangesInteracting, getCommentDecorations, isSourceMode, hasContentChanged } from "./codemirror/utils";
 import { CommentLinkWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
+import { createScrollEventObservers, getWrappedCodeblocks } from "./codemirror/eventListeners";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
 		createFenceCodeDecorationsViewPlugin(plugin),
+		createScrollEventObservers(plugin),
 	]
 }
 
@@ -42,7 +44,7 @@ export function createFenceCodeDecorationsViewPlugin(
 		update(
 			update: ViewUpdate,
 		) {
-			if ((update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown)
+			if (hasContentChanged(update))
 				this.decorations = buildFenceCodeDecorations(
 					update.state,
 					plugin,
@@ -51,6 +53,11 @@ export function createFenceCodeDecorationsViewPlugin(
 					buildIntraLineDecoration,
 					buildFooterDecorations,
 				);
+			// if (hasContentChanged(update))
+			// 	update.view.requestMeasure({
+			// 		read: (view) => getWrappedCodeblocks(view).map((codeblocks) => codeblocks.reduce((result: number, line: HTMLElement) => result >= line.scrollWidth ? result : line.scrollWidth, 0)),
+			// 		write: (measure, view) => getWrappedCodeblocks(view).forEach((codeblocks, index) => codeblocks.forEach((element: HTMLElement) => { element.style.width = `${measure[index]}px`; console.log(element.style, measure[index])}))
+			// 	})
 		}
 
 		destroy() {
@@ -95,7 +102,7 @@ function buildLineDecorations(
 	lineNumber: number,
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
-): Array<Range<Decoration>> {
+): Array<Range<any>> {
 	return [
 		{
 			from: position,
@@ -117,6 +124,11 @@ function buildLineDecorations(
 				}
 			}),
 		},
+		// {
+		// 	from: position + lineText.length,
+		// 	to: position + lineText.length,
+		// 	value: {chars: lineText.length},
+		// },
 	]
 }
 
