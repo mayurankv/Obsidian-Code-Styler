@@ -1,7 +1,5 @@
 /** Import stylesheets */
 @import url("./css/_settings.scss");
-@import url("./css/_variables.scss");
-
 @import url("./css/_style_settings.css");
 
 @import url("./css/fence.scss");
@@ -13,3 +11,6 @@
 // @import url("./css/pluginCompatibility.scss");
 
 @import url("./css/shiki.scss");
+
+//TODO: Remove
+@import url("./css/_old_variables.scss");

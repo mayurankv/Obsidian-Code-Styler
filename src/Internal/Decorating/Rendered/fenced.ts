@@ -12,6 +12,7 @@ import { visitParents } from "unist-util-visit-parents";
 import { parseFenceCodeParameters, referenceAdjustParameters, toDecorateFenceCode } from "../../Parsing/fenced";
 import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
 import { createHeaderElement } from "../elements";
+import { BUTTON_TIMEOUT, BUTTON_TRANSITION } from "src/Internal/constants/interface";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
@@ -228,6 +229,28 @@ function markupFencePreElement(
 		classList.push(`${PREFIX}pre-${fenceCodeParameters.language}`);
 
 	fencePreElement.classList.add(...classList);
+
+	const copyCodeButton: HTMLElement | null = fencePreElement.querySelector("button.copy-code-button")
+	copyCodeButton?.addEventListener(
+		"click",
+		(event: Event) => {
+			copyCodeButton.style.transition = "opacity, background-color"
+			copyCodeButton.style.transitionDuration = `${BUTTON_TRANSITION}ms`
+			setTimeout(
+				() => {
+					copyCodeButton.style.color = ""
+				},
+				BUTTON_TIMEOUT - 1,
+			)
+			setTimeout(
+				() => {
+					copyCodeButton.style.transition = ""
+					copyCodeButton.style.transitionDuration = ""
+				},
+				BUTTON_TIMEOUT,
+			)
+		}
+	)
 
 	if (fenceCodeParameters.fold.enabled !== null)
 		fencePreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, fenceCodeParameters.fold.enabled.toString());

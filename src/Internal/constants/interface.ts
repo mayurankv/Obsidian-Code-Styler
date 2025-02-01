@@ -10,3 +10,4 @@ export const EXAMPLE_INLINE_CODE_CONTENT = "print(\"This is true\" if x > 1 else
 export const EXAMPLE_INLINE_CODE_PARAMETERS = "python icon title:foo";
 
 export const BUTTON_TIMEOUT = 1000
+export const BUTTON_TRANSITION = 200

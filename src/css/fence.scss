@@ -66,6 +66,10 @@ body.cs-plugin {
 					box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-separator-colour);
 				}
 
+				&:hover button{
+					opacity: 1 !important;
+				}
+
 				> div {
 					display: flex;
 					flex-direction: row;
@@ -74,9 +78,7 @@ body.cs-plugin {
 					white-space: nowrap;
 					z-index: inherit;
 
-					&:not(:first-child):not(.cs-separator) {
-						margin-left: var(--size-4-3);
-					}
+					margin-right: var(--size-4-3);
 				}
 
 				> div.cs-icon-container {
@@ -135,6 +137,7 @@ body.cs-plugin {
 
 					overflow-x: auto;
 					flex: 0 1 auto;
+					margin-right: var(--size-4-1);
 
 					&::before {
 						content: "";
@@ -154,10 +157,6 @@ body.cs-plugin {
 						background: linear-gradient(to right, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-header-background-colour));
 						min-width: var(--size-4-3);
 						height: 100%;
-					}
-
-					&:not(:first-child) {
-						margin-left: var(--size-4-1);
 					}
 
 					&::-webkit-scrollbar {
@@ -184,6 +183,7 @@ body.cs-plugin {
 
 					overflow-x: auto;
 					flex: 0 1 auto;
+					margin-right: var(--size-4-1);
 
 					> div {
 						padding-left: var(--size-4-2);
@@ -210,9 +210,10 @@ body.cs-plugin {
 					}
 
 					button {
+						opacity: 0;
 						box-shadow: none;
 						height: 100%;
-						margin-left: var(--size-4-1);
+						margin-left: var(--size-4-2);
 						padding-left: var(--size-4-2);
 						padding-right: var(--size-4-2);
 
@@ -248,10 +249,6 @@ body.cs-plugin {
 						background: linear-gradient(to right, transparent, var(--cs-fence-fade-gradient-stop), var(--cs-fence-header-background-colour));
 						min-width: var(--size-4-3);
 						height: 100%;
-					}
-
-					&:not(:first-child) {
-						margin-left: var(--size-4-1);
 					}
 				}
 
@@ -374,6 +371,8 @@ body.cs-plugin {
 				margin-left: var(--size-4-4);
 				margin-bottom: var(--size-4-2);
 				z-index: 4;
+				display: block;
+				opacity: 0;
 
 				background-color: var(--cs-fence-button-inactive-background-colour);
 				color: var(--cs-fence-button-inactive-colour);
@@ -394,6 +393,14 @@ body.cs-plugin {
 					color: var(--cs-fence-button-active-colour);
 				}
 			}
+		}
+		pre.cs-pre button {
+			transition: opacity, background-color, color;
+			transition-duration: var(--cs-transition-length-button);
+		}
+
+		pre.cs-pre:hover button {
+			opacity: 1;
 		}
 	}
 }

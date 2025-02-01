@@ -1,7 +1,10 @@
-add transitions
-style live preview
 reference adjusts incorrect
 fix reference update on load
+style live preview
+fix folds
+add transitions to folds
+add default code icon svg based on < > icon
+fix issue with startup
 
 get shiki base theme to class names
 add shiki to fence rendered and codemirror both

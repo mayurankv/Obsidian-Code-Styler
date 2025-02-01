@@ -10,7 +10,7 @@ export interface LinkInfo {
 }
 
 export class CodeParameters {
-	language: string | null = null;
+	language: string | null = "code";
 	title: string | null = null;
 	reference: string | null = null;
 	theme: string | null = null;

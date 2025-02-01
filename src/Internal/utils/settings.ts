@@ -1,6 +1,7 @@
 // TODO: Update
 
 import { PREFIX } from "../constants/general";
+import { BUTTON_TRANSITION } from "../constants/interface";
 import { DEFAULT_SETTINGS, THEME_DEFAULT_SETTINGS } from "../constants/settings";
 import { convertColoursToTheme } from "../constants/themes";
 import { Colour } from "../types/decoration";
@@ -19,6 +20,18 @@ export function convertStylesToVars(
 
 	for (const key in flattenedStyles)
 		styleString += `${camelCaseToKebabCase(key)}: ${flattenedStyles[key].startsWith("--") ? ("var(" + flattenedStyles[key] + ")")  : flattenedStyles[key]};\n`
+
+	styleString += "}\n"
+
+	return styleString
+}
+
+export function addExtraVars(): string {
+	let styleString = ""
+
+	styleString += "body.cs-plugin{\n";
+
+	styleString += `--cs-transition-length-button: ${BUTTON_TRANSITION}ms;\n`
 
 	styleString += "}\n"
 
