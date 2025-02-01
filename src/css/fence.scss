@@ -4,13 +4,7 @@ body.cs-plugin {
 		div.cs-header {
 			box-sizing: content-box;
 			user-select: none;
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-app-region: no-drag;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
+			cursor: default;
 			width: 100%;
 			display: flex;
 			position: sticky;
@@ -346,13 +340,6 @@ body.cs-plugin {
 						left: 0;
 						grid-column: 1;
 						user-select: none;
-						-webkit-touch-callout: none;
-						-webkit-user-select: none;
-						-webkit-user-drag: none;
-						-webkit-app-region: no-drag;
-						-khtml-user-select: none;
-						-moz-user-select: none;
-						-ms-user-select: none;
 						text-align: right;
 						padding-right: var(--size-4-3);
 						margin-right: var(--size-4-3);

@@ -44,7 +44,7 @@ export class ExternalReferenceInfo {
 		type: string;
 		hash: string;
 	} = undefined;
-	
+
     public constructor(init?:Partial<ReferenceParameters>) {
         Object.assign(this, init);
     }

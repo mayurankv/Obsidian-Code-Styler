@@ -127,16 +127,19 @@ export class FooterWidget extends WidgetType {
 export class LineNumberWidget extends WidgetType {
 	lineNumbers: LineParameters;
 	lineNumber: number;
+	maxLineNumber: number;
 	reference: boolean;
 
 	constructor(
 		lineNumber: number,
+		maxLineNumber: number,
 		fenceCodeParameters: FenceCodeParameters,
 	) {
 		super();
 
 		this.lineNumbers = structuredClone(fenceCodeParameters.lineNumbers);
 		this.lineNumber = lineNumber;
+		this.maxLineNumber = maxLineNumber;
 		this.reference = fenceCodeParameters.language === "reference";
 	}
 
@@ -155,7 +158,7 @@ export class LineNumberWidget extends WidgetType {
 				cls: [
 					PREFIX + "line-number",
 				],
-				text: (this.lineNumber + (this.reference ? 0 : (this.lineNumbers.offset ?? 0))).toString(),
+				text: " ".repeat(this.maxLineNumber.toString().length-this.lineNumber.toString().length)+(this.lineNumber + (this.reference ? 0 : (this.lineNumbers.offset ?? 0))).toString(),
 			});
 	}
 }
