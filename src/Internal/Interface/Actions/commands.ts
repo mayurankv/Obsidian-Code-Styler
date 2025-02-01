@@ -1,4 +1,4 @@
-import { MarkdownView } from "obsidian";
+import { MarkdownView, WorkspaceLeaf } from "obsidian";
 import { renderedViewFold } from "src/Internal/Decorating/Rendered/fenced";
 import { manageExternalReferencedFiles } from "src/Internal/utils/reference";
 import CodeStylerPlugin from "src/main";

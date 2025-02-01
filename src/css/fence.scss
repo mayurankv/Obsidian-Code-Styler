@@ -290,7 +290,13 @@ div.HyperMD-codeblock.cm-line {
 	white-space: nowrap;
 	overflow-x: auto;
 
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
 	.cs-filler {
 		user-select: none;
+		visibility: hidden;
+		// display: none;
 	}
 }

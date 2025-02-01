@@ -84,6 +84,9 @@ export function buildFenceCodeDecorations(
 
 			}
 
+			if (syntaxNode.type.name.includes("HyperMD-codeblock-end"))
+				lineNumber = 0;
+
 			if (syntaxNode.type.name.includes("HyperMD-codeblock")) {
 				if (toDecorate)
 					decorations.push(
@@ -104,18 +107,11 @@ export function buildFenceCodeDecorations(
 				lineNumber = 0;
 				maxChars = decorations.reduce(
 					(result: number, decoration: Range<any>) => ((typeof decoration.value?.chars === "number") && (decoration.value.chars > result))
-						? decoration.value
+						? decoration.value.chars
 						: result,
 					0,
 				)
 
-				// decorations = decorations.filter(
-				// 	(decoration: Range<any>) => {
-				// 		if (typeof decoration.value?.chars === "number")
-				// 			return false
-				// 		return true
-				// 	}
-				// )
 				decorations = decorations.map(
 					(decoration: Range<any>) => {
 						if (typeof decoration.value?.chars === "number")

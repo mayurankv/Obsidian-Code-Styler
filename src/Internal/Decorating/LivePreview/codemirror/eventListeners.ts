@@ -1,7 +1,7 @@
 import { EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
 import CodeStylerPlugin from "src/main";
-import { livePreviewState } from "obsidian";
+import { livePreviewState, MarkdownEditView, MarkdownView, WorkspaceLeaf } from "obsidian";
 import { DATA_PREFIX, UNWRAPPED_ATTRIBUTE } from "src/Internal/constants/detecting";
 import { PREFIX } from "src/Internal/constants/general";
 import { hasContentChanged } from "./utils";
@@ -9,54 +9,56 @@ import { hasContentChanged } from "./utils";
 export function createScrollEventObservers(
 	plugin: CodeStylerPlugin,
 ): Extension {
-	// plugin.registerDomEvent(document, 'scroll', (event: Event) => {
-	// 	if (!(event.target instanceof HTMLElement))
-	// 		return;
+	plugin.registerDomEvent(
+		document.body,
+		'scroll',
+		(event: Event) => {
+			if (!(event.target instanceof HTMLElement))
+				return;
 
-	// 	if (!event.target.matches('div.HyperMD-codeblock.cm-line'))
-	// 		return;
+			if (!event.target.matches('div.cm-line.cs-line'))
+				return;
 
-	// 	// your logic
-	// });
+			let scrollLine: Element | null = event.target
 
-	class InlineCodeDecorationsViewPlugin implements PluginValue {
-		codeblocksLines: Array<Array<Element>>;
-		plugin: CodeStylerPlugin;
+			const scrolledLines: Array<Element> = [scrollLine]
 
-		constructor(
-			view: EditorView,
-		) {
-			// unwrapCodeblocks(getWrappedCodeblocks(view))
-		}
+			while (scrollLine !== null) {
+				scrollLine = scrollLine.nextElementSibling
 
-		update(
-			update: ViewUpdate,
-		) {
-			// if (hasContentChanged(update) || update.viewportChanged)
-			// 	unwrapCodeblocks(getWrappedCodeblocks(update.view))
-		}
+				if (scrollLine?.hasClass("HyperMD-codeblock"))
+					scrolledLines.push(scrollLine)
 
-		destroy() {
-			return;
-		}
-	}
+				if (scrollLine?.hasClass("HyperMD-codeblock-end"))
+					break
+			}
 
-	return ViewPlugin.fromClass(
-		InlineCodeDecorationsViewPlugin,
-		{ },
-		// 	eventObservers: {
-		// 		scroll: (event: Event, view: EditorView) => {
-		// 			console.log(event)
-		// 		 }
-		// 	}
-		// },
+			scrollLine = event.target
+
+			while (scrollLine !== null) {
+				scrollLine = scrollLine.previousElementSibling
+
+				if (scrollLine?.hasClass("HyperMD-codeblock"))
+					scrolledLines.push(scrollLine)
+
+				if (scrollLine?.hasClass("HyperMD-codeblock-start"))
+					break
+			}
+
+			scrolledLines.forEach(
+				(scrollLine: Element) => scrollLine.scrollLeft = (event.target as HTMLElement).scrollLeft
+			)
+		},
+		{
+			capture: true,
+		},
 	);
 
-	// return EditorView.domEventObservers({
-	// 	scroll: (event: Event, view: EditorView) => {
-
-	// 	},
-	// })
+	return EditorView.domEventObservers({
+		scroll: (event: Event, view: EditorView) => {
+			// console.log(event)
+		},
+	})
 }
 
 export function getWrappedCodeblocks(

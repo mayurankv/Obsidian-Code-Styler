@@ -58,6 +58,7 @@ export function createFenceCodeDecorationsViewPlugin(
 			// 		read: (view) => getWrappedCodeblocks(view).map((codeblocks) => codeblocks.reduce((result: number, line: HTMLElement) => result >= line.scrollWidth ? result : line.scrollWidth, 0)),
 			// 		write: (measure, view) => getWrappedCodeblocks(view).forEach((codeblocks, index) => codeblocks.forEach((element: HTMLElement) => { element.style.width = `${measure[index]}px`; console.log(element.style, measure[index])}))
 			// 	})
+			update.view.contentDOM.querySelector(".cs-filler")?.addEventListener("scroll",console.log)
 		}
 
 		destroy() {
@@ -124,11 +125,15 @@ function buildLineDecorations(
 				}
 			}),
 		},
-		{
-			from: position + lineText.length,
-			to: position + lineText.length,
-			value: {chars: lineText.length},
-		},
+		...(
+			lineNumber !== 0
+				? [{
+					from: position + lineText.length,
+					to: position + lineText.length,
+					value: {chars: lineText.length},
+				}]
+				: []
+		),
 	]
 }
 

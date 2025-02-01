@@ -233,7 +233,7 @@ export class FillerWidget extends WidgetType {
 					PREFIX + "filler",
 					"cm-inline-code",
 				],
-				text: " ".repeat(this.chars),
+				text: ".".repeat(this.chars),
 			},
 		);
 	}
