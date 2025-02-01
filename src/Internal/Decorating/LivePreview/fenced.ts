@@ -124,11 +124,11 @@ function buildLineDecorations(
 				}
 			}),
 		},
-		// {
-		// 	from: position + lineText.length,
-		// 	to: position + lineText.length,
-		// 	value: {chars: lineText.length},
-		// },
+		{
+			from: position + lineText.length,
+			to: position + lineText.length,
+			value: {chars: lineText.length},
+		},
 	]
 }
 
@@ -161,13 +161,14 @@ function buildFooterDecorations(
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
 ): Array<Range<Decoration>> {
+	return []
 	return [{
 		from: startPosition,
 		to: endPosition,
 		value: Decoration.line({
 			attributes: {
-				style: "",
-				class: "cs-codemirror-fence-code",
+				// style: "",
+				class: PREFIX + "codemirror-fence-code",
 			}
 		}),
 	}]

@@ -103,53 +103,43 @@ export function buildFenceCodeDecorations(
 			if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
 				lineNumber = 0;
 				maxChars = decorations.reduce(
-					(result: number, decoration: Range<any>) => (("chars" in decoration.value) && (decoration.value.chars > result))
+					(result: number, decoration: Range<any>) => ((typeof decoration.value?.chars === "number") && (decoration.value.chars > result))
 						? decoration.value
 						: result,
 					0,
 				)
 
-				// console.log()
 				// decorations = decorations.filter(
 				// 	(decoration: Range<any>) => {
-				// 		if ("chars" in decoration.value)
+				// 		if (typeof decoration.value?.chars === "number")
 				// 			return false
-				// 			// return {
-				// 			// ...decoration, value: Decoration.widget({
-				// 			// 	widget: new FillerWidget(
-				// 			// 		maxChars - decoration.value.chars
-				// 			// 	)
-				// 			// })}
-
-				// 		// return decoration
 				// 		return true
 				// 	}
 				// )
-				// decorations = decorations.map(
-				// 	(decoration: Range<any>) => {
-				// 		if ("chars" in decoration.value)
-				// 			return {
-				// 			...decoration, value: Decoration.widget({
-				// 				widget: new FillerWidget(
-				// 					maxChars - decoration.value.chars
-				// 				)
-				// 			})}
+				decorations = decorations.map(
+					(decoration: Range<any>) => {
+						if (typeof decoration.value?.chars === "number")
+							return {
+							...decoration, value: Decoration.widget({
+								widget: new FillerWidget(
+									maxChars - decoration.value.chars
+								)
+							})}
 
-				// 		return decoration
-				// 	}
-				// )
-				// console.log(decorations.filter(a => "chars" in a.value))
+						return decoration
+					}
+				)
 
-				// if (toDecorate)
-				// 	decorations.push(
-				// 		...buildFooterDecorations(
-				// 			state,
-				// 			startPosition,
-				// 			syntaxNode.to,
-				// 			fenceCodeParameters,
-				// 			plugin,
-				// 		)
-				// 	)
+				if (toDecorate)
+					decorations.push(
+						...buildFooterDecorations(
+							state,
+							startPosition,
+							syntaxNode.to,
+							fenceCodeParameters,
+							plugin,
+						)
+					)
 			}
 
 			if (lineNumber !== 0)
@@ -165,6 +155,15 @@ export function buildFenceCodeDecorations(
 
 		}
 	});
+
+	decorations = decorations.filter(
+		(decoration: Range<any>) => {
+			if (typeof decoration.value?.chars === "number")
+				return false
+
+			return true
+		}
+	)
 
 	decorations.sort(
 		(a, b) => (a.from === b.from)
