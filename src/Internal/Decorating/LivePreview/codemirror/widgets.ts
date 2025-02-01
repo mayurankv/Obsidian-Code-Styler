@@ -205,3 +205,36 @@ export class CommentLinkWidget extends WidgetType {
 		return linkParentElement;
 	}
 }
+
+export class FillerWidget extends WidgetType {
+	chars: number;
+
+	constructor(
+		chars: number,
+	) {
+		super();
+
+		this.chars = chars;
+	}
+
+	eq(
+		other: LineNumberWidget,
+	): boolean {
+		return isDeepStrictEqual(this, other);
+	}
+
+	toDOM(
+		view: EditorView,
+	): HTMLElement {
+		return createEl(
+			"span",
+			{
+				cls: [
+					PREFIX + "filler",
+					"cm-inline-code",
+				],
+				text: " ".repeat(this.chars),
+			},
+		);
+	}
+}

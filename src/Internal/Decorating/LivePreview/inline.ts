@@ -6,7 +6,7 @@ import { buildInlineDecorations as buildInlineCodeDecorations } from "src/Intern
 import { toDecorateInlineCode, toHighlightInlineCode } from "src/Internal/Parsing/inline";
 import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, getCommentDecorations, isSourceMode } from "./codemirror/utils";
+import { areRangesInteracting, getCommentDecorations, isSourceMode, hasContentChanged } from "./codemirror/utils";
 import { FooterWidget, HeaderWidget } from "./codemirror/widgets";
 
 export function getInlineCodeMirrorExtensions(
@@ -38,7 +38,7 @@ export function createInlineCodeDecorationsViewPlugin(
 		update(
 			update: ViewUpdate,
 		) {
-			if ((update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown)
+			if (hasContentChanged(update))
 				this.decorations = buildInlineCodeDecorations(
 					update.state,
 					plugin,
@@ -57,7 +57,7 @@ export function createInlineCodeDecorationsViewPlugin(
 			decorations: (
 				value: InlineCodeDecorationsViewPlugin,
 			) => value.decorations,
-		}
+		},
 	);
 }
 

@@ -12,14 +12,13 @@ body.cs-plugin {
 		}
 	}
 
-	code 
-
 	span.cm-formatting.cm-inline-code ~ span.cs-header {
 		border-radius: 0px !important;
 	}
 
 	span.cs-header {
 		display: inline;
+		user-select: none;
 
 		&.cm-inline-code {
 			padding-left: 0.25em; // Obsidian default value

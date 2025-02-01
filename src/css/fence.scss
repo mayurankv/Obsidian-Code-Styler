@@ -284,3 +284,13 @@ body.cs-plugin.cs-unwrap-inactive {
 		}
 	}
 }
+
+//! Temp
+div.HyperMD-codeblock.cm-line {
+	white-space: nowrap;
+	overflow-x: auto;
+
+	.cs-filler {
+		user-select: none;
+	}
+}

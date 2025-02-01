@@ -1,6 +1,6 @@
 import { tokenClassNodeProp } from "@codemirror/language";
-import { EditorState, Range, SelectionRange } from "@codemirror/state";
-import { Decoration, EditorView } from "@codemirror/view";
+import { EditorState, Range, SelectionRange, Transaction } from "@codemirror/state";
+import { Decoration, EditorView, ViewUpdate } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { editorInfoField, editorLivePreviewField, livePreviewState } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
@@ -146,4 +146,10 @@ export function getInlineDelimiterSize(
 		return null;
 
 	return previousSibling.to - previousSibling.from;
+}
+
+export function hasContentChanged(
+	update: ViewUpdate,
+) {
+	return (update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown
 }

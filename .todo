@@ -6,6 +6,7 @@ add shiki to fence rendered and codemirror both
 add not shiki clauses for decorating colours
 fix reference
 EventListener codemirror
+Consider line numbers as gutter
 
 Refactor:
 	☐ Live Preview (Fence)
@@ -36,6 +37,7 @@ Refactor:
 	☐ Proper diff notation
 	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
 	☐ Add styles not exposed to style settings or settings for padding and margin settings
+	☐ Option to make all live preview codeblocks a reading codeblock
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting
