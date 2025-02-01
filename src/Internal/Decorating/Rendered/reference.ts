@@ -5,6 +5,7 @@ import { PREFIX } from "../../constants/general";
 import { REFERENCE_ATTRIBUTE } from "../../constants/reference";
 import { Reference } from "../../types/reference";
 import { getReference } from "../../utils/reference";
+import { renderedFencedCodeDecorating } from "./fenced";
 
 export async function referenceCodeblockProcessor(
 	source: string,
@@ -26,7 +27,7 @@ export async function referenceCodeblockProcessor(
 		plugin,
 	);
 
-	MarkdownRenderer.render(
+	await MarkdownRenderer.render(
 		plugin.app,
 		reference.code,
 		codeblockElement,
@@ -34,15 +35,21 @@ export async function referenceCodeblockProcessor(
 		plugin,
 	);
 
+	const fenceCodeElement = codeblockElement.querySelector("pre > code")
+	if (!fenceCodeElement)
+		throw new Error("Missing rendered code element")
+
 	await applyStandaloneFencedDetecting(
 		codeblockElement,
 		context
 	)
 
-	const fenceCodeElement = codeblockElement.querySelector("pre > code")
-	if (!fenceCodeElement)
-		throw new Error("Missing rendered code element")
-
 	codeblockElement.addClass(`${PREFIX}-reference`)
-	fenceCodeElement.setAttribute(REFERENCE_ATTRIBUTE, JSON.stringify(reference))
+	fenceCodeElement.setAttribute(REFERENCE_ATTRIBUTE, JSON.stringify({ ...reference, code: "" }))
+
+	await renderedFencedCodeDecorating(
+		codeblockElement,
+		context,
+		plugin
+	)
 }

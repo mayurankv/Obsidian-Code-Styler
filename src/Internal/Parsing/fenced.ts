@@ -103,10 +103,10 @@ export async function referenceAdjustParameters(
 
 		fenceCodeParameters.language = reference.language;
 
-		if (fenceCodeParameters.title === "")
+		if (fenceCodeParameters.title === null)
 			fenceCodeParameters.title = reference.external?.info?.title ?? basename(reference.path);
 
-		if (fenceCodeParameters.reference === "")
+		if (fenceCodeParameters.reference === null)
 			//@ts-expect-error Undocumented Obsidian API
 			fenceCodeParameters.reference = reference.external?.info?.displayUrl ?? reference.external?.info?.url ?? plugin.app.vault.adapter.getFilePath(reference.path);
 

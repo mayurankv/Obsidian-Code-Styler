@@ -7,6 +7,7 @@ import { getLineLimits, parseExternalReference, parseReferenceParameters } from 
 import { getFileContentLines } from "./rendered";
 import { rerenderRenderedView } from "src/Internal/Interface/View/rendered";
 import { isUrl } from "./parsing";
+import { cleanFenceCodeParametersLine } from "./detecting";
 
 export async function getReference(
 	codeblockLines: Array<string>,
@@ -70,7 +71,7 @@ export async function getReference(
 		);
 
 		parsedReference.startLine = codeSectionInfo.startLine
-		parsedReference.code = `\`\`\`${referenceParameters.language} ${codeblockLines[0].substring(REFERENCE_CODEBLOCK.length).trim()}\n${codeSectionInfo.codeSection}\n\`\`\``
+		parsedReference.code = `\`\`\`${referenceParameters.language} ${cleanFenceCodeParametersLine(codeblockLines[0]).substring(REFERENCE_CODEBLOCK.length).trim()}\n${codeSectionInfo.codeSection}\n\`\`\``
 		parsedReference.path = referenceParameters.filePath.startsWith("[[") && referenceParameters.filePath.endsWith("]]")
 			? parsedReference.path
 			: vaultPath
