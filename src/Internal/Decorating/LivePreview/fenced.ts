@@ -46,7 +46,7 @@ export function createFenceCodeDecorationsViewPlugin(
 		update(
 			update: ViewUpdate,
 		) {
-			if (hasContentChanged(update))
+			if (hasContentChanged(update) || update.viewportChanged)
 				this.decorations = buildFenceCodeDecorations(
 					update.state,
 					plugin,
@@ -91,56 +91,51 @@ function buildHeaderDecorations(
 	if (areRangesInteracting(state, startPosition, endPosition))
 		return [];
 
-	return [{
-		from: startPosition,
-		to: endPosition,
-		value: Decoration.widget({
-			widget: new HeaderWidget(
-				fenceCodeParameters,
-				state.field(editorInfoField)?.file?.path ?? "",
-				true,
-				plugin,
-			)
-		}),
-	}]
+	return [
+		{
+			from: startPosition,
+			to: endPosition,
+			value: Decoration.widget({
+				widget: new HeaderWidget(
+					fenceCodeParameters,
+					state.field(editorInfoField)?.file?.path ?? "",
+					true,
+					plugin,
+				),
+				side: -10,
+			}),
+		},
+	]
 }
 
 function buildLineDecorations(
 	state: EditorState,
-	position: number,
+	startPosition: number,
+	endPosition: number,
 	lineText: string,
 	lineNumber: number,
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
 ): Array<Range<any>> {
+	// if ((areRangesInteracting(state, endPosition, endPosition)))
+	// 	return []
+
 	return [
-		...(lineNumber === 0 ? [] : [
-			{
-				from: position,
-				to: position,
-				value: Decoration.widget({
-					widget: new LineNumberWidget(
-						lineNumber,
-						fenceCodeParameters,
-					)
-				}),
-			},
-		]),
 		{
-			from: position,
-			to: position,
-			value: Decoration.line({
-				attributes: {
-					style: "",
-					class: getLineClasses(fenceCodeParameters, lineNumber, lineText).join(" "),
-				}
-			}),
+			from: startPosition,
+			to: startPosition,
+			value: {lineNumber: lineNumber},
+		},
+		{
+			from: startPosition,
+			to: startPosition,
+			value: {lineNumber: lineNumber, lineText: lineText},
 		},
 		...(
-			lineNumber !== 0
+			(lineNumber !== 0) && (!areRangesInteracting(state, endPosition, endPosition))
 				? [{
-					from: position + lineText.length,
-					to: position + lineText.length,
+					from: endPosition,
+					to: endPosition,
 					value: {chars: lineText.length},
 				}]
 				: []
@@ -177,27 +172,31 @@ function buildFooterDecorations(
 	codeStartPosition: number,
 	fenceCodeParameters: FenceCodeParameters,
 	plugin: CodeStylerPlugin,
-): Array<Range<Decoration>> {
+): Array<Range<any>> {
 	if (areRangesInteracting(state, startPosition, endPosition))
 		return [];
 
-	return [{
-		from: startPosition,
-		to: endPosition,
-		value: Decoration.widget({
-			widget: new FooterWidget(
-				fenceCodeParameters,
-				"",
-				state.field(editorInfoField)?.file?.path ?? "",
-				true,
-				plugin,
-			)
-		}),
-	}]
+	return [
+		{
+			from: startPosition,
+			to: endPosition,
+			value: Decoration.widget({
+				widget: new FooterWidget(
+					fenceCodeParameters,
+					"",
+					state.field(editorInfoField)?.file?.path ?? "",
+					true,
+					plugin,
+				),
+				side: -10,
+			}),
+		},
+	]
 }
 
 function modifyIntermediateDecorations(
 	decorations: Array<Range<any>>,
+	fenceCodeParameters: FenceCodeParameters,
 ): Array<Range<any>> {
 	const maxChars = decorations.reduce(
 		(result: number, decoration: Range<any>) => ((typeof decoration.value?.chars === "number") && (decoration.value.chars > result))
@@ -206,16 +205,50 @@ function modifyIntermediateDecorations(
 		0,
 	)
 
+	const maxLineNumber = decorations.reduce(
+		(result: number, decoration: Range<any>) => ((typeof decoration.value?.lineNumber === "number") && (decoration.value.lineNumber > result))
+			? decoration.value.lineNumber
+			: result,
+		0,
+	)
+
 	decorations = decorations.map(
 		(decoration: Range<any>) => {
 			if (typeof decoration.value?.chars === "number")
 				return {
-				...decoration, value: Decoration.widget({
-					widget: new FillerWidget(
-						maxChars - decoration.value.chars
-					),
-					side: 100,
-				})}
+					...decoration,
+					value: Decoration.widget({
+						widget: new FillerWidget(
+							maxChars - decoration.value.chars
+						),
+						side: 10000,
+					}),
+				}
+
+			else if ((typeof decoration.value?.lineNumber === "number") && (typeof decoration.value?.lineText === "string"))
+				return {
+					...decoration,
+					value: Decoration.line({
+						attributes: {
+							style: `--cs-gutter-char-size: ${(maxLineNumber + (fenceCodeParameters.language === "reference" ? 0 : (fenceCodeParameters.lineNumbers.offset ?? 0))).toString().length}ch`,
+							class: getLineClasses(fenceCodeParameters, decoration.value.lineNumber, decoration.value.lineText).join(" "),
+
+						}
+					}),
+				}
+
+			else if (typeof decoration.value?.lineNumber === "number")
+				return {
+					...decoration,
+					value: Decoration.widget({
+						widget: new LineNumberWidget(
+							decoration.value.lineNumber,
+							maxLineNumber,
+							fenceCodeParameters,
+						),
+						side: -5,
+					}),
+				}
 
 			return decoration
 		}
@@ -230,6 +263,10 @@ function filterBadDecorations(
 	decorations = decorations.filter(
 		(decoration: Range<any>) => {
 			if (typeof decoration.value?.chars === "number")
+				return false
+			else if (typeof decoration.value?.lineText === "string")
+				return false
+			else if (typeof decoration.value?.lineNumber === "number")
 				return false
 
 			return true

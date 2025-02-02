@@ -38,7 +38,7 @@ export function createInlineCodeDecorationsViewPlugin(
 		update(
 			update: ViewUpdate,
 		) {
-			if (hasContentChanged(update))
+			if (hasContentChanged(update) || update.viewportChanged)
 				this.decorations = buildInlineCodeDecorations(
 					update.state,
 					plugin,

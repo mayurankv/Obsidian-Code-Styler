@@ -21,7 +21,8 @@ export function buildFenceCodeDecorations(
 	) => Array<Range<Decoration>>,
 	buildLineDecorations: (
 		state: EditorState,
-		position: number,
+		startPosition: number,
+		endPosition: number,
 		lineText: string,
 		lineNumber: number,
 		fenceCodeParameters: FenceCodeParameters,
@@ -43,6 +44,7 @@ export function buildFenceCodeDecorations(
 	) => Array<Range<Decoration>>,
 	modifyIntermediateDecorations: (
 		decorations: Array<Range<any>>,
+		fenceCodeParameters: FenceCodeParameters,
 	) => Array<Range<any>>,
 	filterBadDecorations: (
 		decorations: Array<Range<any>>,
@@ -101,6 +103,7 @@ export function buildFenceCodeDecorations(
 						...buildLineDecorations(
 							state,
 							syntaxNode.from,
+							syntaxNode.to,
 							line.text.toString(),
 							lineNumber,
 							fenceCodeParameters,
@@ -113,7 +116,7 @@ export function buildFenceCodeDecorations(
 
 			if (syntaxNode.type.name.includes("HyperMD-codeblock-end")) {
 				lineNumber = 0;
-				decorations = modifyIntermediateDecorations(decorations)
+				decorations = modifyIntermediateDecorations(decorations, fenceCodeParameters)
 
 				if (toDecorate)
 					decorations.push(

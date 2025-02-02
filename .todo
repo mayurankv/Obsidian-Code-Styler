@@ -2,7 +2,13 @@ make line numbers and header not selectable
 add highlights
 style live preview
 	copy button
+	fading lines if scroll
+	check wrapped
+	long codeblocks? statefield instead?
 vertical alignemnt of rendered copy button
+footer element functionality
+add footer styles
+add setting for me to toggle between statefields and viewplugins
 
 fix folds
 add transitions to folds

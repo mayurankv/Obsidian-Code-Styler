@@ -39,23 +39,23 @@ const BASE_HEADER_STYLES: HeaderStyles = {
 	...BASE_ELEMENT_STYLES,
 	icon: BASE_ICON_STYLES,
 	languageTitle: {
-		...BASE_ELEMENT_STYLES,
+		backgroundColour: "inherit",
 		...BASE_TEXT_STYLES,
 		fontWeight: "--bold-weight",
 	},
 	namedTitle: {
-		...BASE_ELEMENT_STYLES,
+		backgroundColour: "inherit",
 		...BASE_TEXT_STYLES,
 	},
 	externalReferenceTitle: {
-		...BASE_ELEMENT_STYLES,
+		backgroundColour: "inherit",
 		...BASE_TEXT_STYLES,
 		repositoryColour: "--sync-avatar-color-5",
 		versionColour: "--sync-avatar-color-8",
 		timestampColour: "--sync-avatar-color-3",
 	},
 	executeCodeTitle: {
-		...BASE_ELEMENT_STYLES,
+		backgroundColour: "inherit",
 		...BASE_TEXT_STYLES,
 	},
 	separator: {
@@ -88,7 +88,7 @@ export const BASE_THEME_MODE_STYLES: CodeStylerThemeModeStyles = {
 			...BASE_TEXT_STYLES,
 			activeTextColour: "--code-normal",
 			languageBorderSize: "--size-4-1",
-			borderColour: "--cs-fence-gutter-background-colour",
+			borderColour: "--cs-fence-background-colour",
 			borderWidth: "--size-2-1",
 		},
 		highlights: {

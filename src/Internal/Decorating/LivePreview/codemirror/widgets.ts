@@ -152,13 +152,17 @@ export class LineNumberWidget extends WidgetType {
 	toDOM(
 		view: EditorView,
 	): HTMLElement {
+		const lineNumber = this.lineNumber + (this.reference ? 0 : (this.lineNumbers.offset ?? 0))
+
 		return createEl(
 			"span",
 			{
 				cls: [
 					PREFIX + "line-number",
 				],
-				text: " ".repeat(this.maxLineNumber.toString().length-this.lineNumber.toString().length)+(this.lineNumber + (this.reference ? 0 : (this.lineNumbers.offset ?? 0))).toString(),
+				text: this.lineNumber === 0
+					? " ".repeat((this.maxLineNumber - this.lineNumber + lineNumber).toString().length)
+					: " ".repeat((this.maxLineNumber - this.lineNumber + lineNumber).toString().length - lineNumber.toString().length) + lineNumber.toString(),
 			});
 	}
 }
