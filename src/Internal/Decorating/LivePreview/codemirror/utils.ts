@@ -1,6 +1,6 @@
 import { tokenClassNodeProp } from "@codemirror/language";
-import { EditorState, Range, SelectionRange, Transaction } from "@codemirror/state";
-import { Decoration, EditorView, ViewUpdate } from "@codemirror/view";
+import { EditorState, Range, RangeSet, SelectionRange, StateField, Transaction } from "@codemirror/state";
+import { Decoration, DecorationSet, EditorView, ViewUpdate } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { editorInfoField, editorLivePreviewField, livePreviewState } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
@@ -8,13 +8,16 @@ import { LinkInfo } from "src/Internal/types/parsing";
 import { parseLinks } from "src/Internal/utils/parsing";
 import { CommentLinkWidget } from "./widgets";
 import CodeStylerPlugin from "src/main";
+import { visualStateUpdate } from "./stateEffects";
+import { AnyRange, BaseRange } from "src/Internal/types/decoration";
 
 export function getCommentDecorations(
 	state: EditorState,
 	from: number,
+	lineNumber: number | null,
 	commentText: string,
 	plugin: CodeStylerPlugin,
-): Array<Range<Decoration>> {
+): Array<Range<any>> {
 	const linksInfo = parseLinks(commentText)
 	const commentInfo = linksInfo.map((linkInfo: LinkInfo) => {
 		return {
@@ -26,7 +29,7 @@ export function getCommentDecorations(
 	})
 
 	const decorations = commentInfo.reduce(
-		(result: Array<Range<Decoration>>, extendedLinkInfo) => {
+		(result: Array<Range<any>>, extendedLinkInfo) => {
 			if (isSourceMode(state) || areRangesInteracting(state, extendedLinkInfo.from, extendedLinkInfo.to)) {
 				if (extendedLinkInfo.type === "wiki")
 					result.push({
@@ -51,7 +54,7 @@ export function getCommentDecorations(
 							},
 						}),
 					})
-				}  else {
+				} else {
 					let startSpaceCount = extendedLinkInfo.fullLink.slice(1).search(/\S/) + 1
 					let endSpaceCount = extendedLinkInfo.fullLink.slice(1 + startSpaceCount + extendedLinkInfo.title.length).search(/\S/)
 
@@ -77,20 +80,33 @@ export function getCommentDecorations(
 					})
 				}
 
-			} else
-				result.push({
-					from: extendedLinkInfo.from,
-					to: extendedLinkInfo.to,
-					value: Decoration.replace({
-						widget: new CommentLinkWidget(
-							extendedLinkInfo.type === "wiki"
-								? `[[${extendedLinkInfo.reference}|${extendedLinkInfo.title}]]`
-								: `[${extendedLinkInfo.title}](${extendedLinkInfo.reference})`,
-							state.field(editorInfoField)?.file?.path ?? "",
-							plugin,
-						)
-					}),
-				})
+			} else {
+				result.push(
+					{
+						from: extendedLinkInfo.from,
+						to: extendedLinkInfo.to,
+						value: Decoration.replace({
+							widget: new CommentLinkWidget(
+								extendedLinkInfo.type === "wiki"
+									? `[[${extendedLinkInfo.reference}|${extendedLinkInfo.title}]]`
+									: `[${extendedLinkInfo.title}](${extendedLinkInfo.reference})`,
+								state.field(editorInfoField)?.file?.path ?? "",
+								plugin,
+							)
+						}),
+					},
+				)
+
+				if (lineNumber !== null)
+					result.push(
+						{
+							from: extendedLinkInfo.from,
+							to: extendedLinkInfo.to,
+							value: { lineNumber: lineNumber, subtractChars: extendedLinkInfo.match.length - extendedLinkInfo.title.length , remove: true }
+						},
+					)
+
+			}
 
 			return result
 		},
@@ -100,6 +116,35 @@ export function getCommentDecorations(
 	return decorations
 }
 
+export function getStateFieldsViewDecorations(
+	view: EditorView,
+	stateFields: Array<StateField<DecorationSet>>,
+): DecorationSet {
+	return RangeSet.join(stateFields.map((stateField: StateField<DecorationSet>) => getStateFieldViewDecorations(view, stateField)))
+}
+
+export function getStateFieldViewDecorations(
+	view: EditorView,
+	stateField: StateField<DecorationSet>,
+): DecorationSet {
+	return view.state.field(stateField)?.update({
+		filter: (
+			from: number,
+			to: number,
+			value: Decoration,
+		) => !areRangesInteracting(view.state, from, to) && isRangeInteracting(from, to, view.viewport)
+	}) ?? Decoration.none
+}
+
+// export function updateStateFieldDecorations( //TODO: This should be the function that properly maps decorations between docchanged eveents and rewrites
+// 	state: EditorState,
+// 	decorations: DecorationSet,
+// ) {
+// 	decorations.between()
+
+// 	return state.selection.ranges.some((range: SelectionRange) => isRangeInteracting(from, to, range))
+// }
+
 export function areRangesInteracting(
 	state: EditorState,
 	from: number,
@@ -108,13 +153,13 @@ export function areRangesInteracting(
 	return state.selection.ranges.some((range: SelectionRange) => isRangeInteracting(from, to, range))
 }
 
-export function isRangeInteracting(
+export function isRangeInteracting<T extends BaseRange>(
 	from: number,
 	to: number,
-	range: SelectionRange,
+	range: T,
 ): boolean {
 	return (
-		(from <= range.head && range.head <= to) || (from <= range.anchor && range.anchor <= to) ||
+		(from <= range.from && range.from <= to) || (from <= range.to && range.to <= to) ||
 		(range.from <= from && from <= range.to) || (range.from <= to && to <= range.to)
 	);
 }
@@ -148,8 +193,35 @@ export function getInlineDelimiterSize(
 	return previousSibling.to - previousSibling.from;
 }
 
-export function hasContentChanged(
+export function updateViewPlugin(
 	update: ViewUpdate,
+): boolean {
+	return update.docChanged || update.viewportChanged || (update.selectionSet && !update.view.plugin(livePreviewState)?.mousedown)
+}
+
+export function updateBaseStateField(
+	transaction: Transaction,
 ) {
-	return (update.docChanged || update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown
+	return transaction.docChanged
+}
+
+export function updateStateField(
+	transaction: Transaction,
+) {
+	return updateBaseStateField(transaction) || transaction.effects.some(effect => effect.is(visualStateUpdate))
+}
+
+export function cursorInView(
+	view: EditorView,
+) {
+	const cursorPos = view.state.selection.main.head;
+	const cursorCoords = view.coordsAtPos(cursorPos);
+
+	if (!cursorCoords)
+		return false;
+
+	const viewportRect = view.contentDOM.getBoundingClientRect();
+	const inView = (cursorCoords.left >= viewportRect.left && cursorCoords.right <= viewportRect.right);
+
+	return inView
 }

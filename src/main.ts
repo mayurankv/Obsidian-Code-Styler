@@ -12,7 +12,7 @@ import { EXTERNAL_REFERENCE_CACHE, EXTERNAL_REFERENCE_PATH, REFERENCE_CODEBLOCK 
 import { registerCommands } from "./Internal/Interface/Actions/commands";
 import { loadLanguageIcons, unloadLanguageIcons } from "./Resources/icons";
 import { registerRerenderingOnWorkspaceChange, rerenderRenderedView } from "./Internal/Interface/View/rendered";
-import { addModes } from "./Internal/Decorating/LivePreview/codemirror/modes";
+import { addModes, parseObsidianMarkdown } from "./Internal/Decorating/LivePreview/codemirror/modes";
 import { applyStyling, removeStyling } from "./Internal/Decorating/styles";
 import { manageExternalReferencedFiles } from "./Internal/utils/reference";
 import { getReferenceCodeMirrorExtensions as getReferenceCodemirrorExtensions } from "./Internal/Decorating/LivePreview/reference";

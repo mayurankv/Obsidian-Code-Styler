@@ -6,7 +6,7 @@ import { buildInlineDecorations as buildInlineCodeDecorations } from "src/Intern
 import { toDecorateInlineCode, toHighlightInlineCode } from "src/Internal/Parsing/inline";
 import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, getCommentDecorations, isSourceMode, hasContentChanged } from "./codemirror/utils";
+import { areRangesInteracting, getCommentDecorations, isSourceMode, updateViewPlugin } from "./codemirror/utils";
 import { FooterWidget, HeaderWidget } from "./codemirror/widgets";
 
 export function getInlineCodeMirrorExtensions(
@@ -38,7 +38,7 @@ export function createInlineCodeDecorationsViewPlugin(
 		update(
 			update: ViewUpdate,
 		) {
-			if (hasContentChanged(update) || update.viewportChanged)
+			if (updateViewPlugin(update))
 				this.decorations = buildInlineCodeDecorations(
 					update.state,
 					plugin,
@@ -140,7 +140,7 @@ function inlineSyntaxHighlight(
 	if (language === null)
 		return []
 
-	const decorations: Array<{from: number, to: number, value: Decoration}> = []
+	const decorations: Array<Range<Decoration>> = []
 
 	// @ts-expect-error Undocumented Obsidian API
 	const mode = window.CodeMirror.getMode(window.CodeMirror.defaults,window.CodeMirror.findModeByName(language)?.mime);
@@ -164,11 +164,11 @@ function inlineSyntaxHighlight(
 					...getCommentDecorations(
 						state,
 						start + stream.start,
+						null,
 						stream.string.slice(stream.start, stream.pos),
 						plugin,
 					),
 				)
-
 
 			stream.start = stream.pos;
 		}

@@ -20,7 +20,7 @@ export function registerRerenderingOnWorkspaceChange(
 					plugin.watchedValues[valueName] = currentValue;
 					clearTimeout(rerenderTimeout);
 					rerenderTimeout = setTimeout(() => {
-						this.rerenderRenderedView();
+						rerenderRenderedView(plugin);
 					}, 1000);
 				}
 			},

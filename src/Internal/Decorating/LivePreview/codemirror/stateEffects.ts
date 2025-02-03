@@ -1,8 +1,20 @@
 
 import { Range, StateEffect, StateEffectType } from "@codemirror/state";
 import { Decoration } from "@codemirror/view";
+import { AnyRange } from "src/Internal/types/decoration";
 
-export const fold: StateEffectType<{
+export const visualStateUpdate: StateEffectType<boolean> = StateEffect.define();
+
+export const createFold: StateEffectType<AnyRange<{ fold: boolean, language: string | null }>> = StateEffect.define();
+export const applyFold: StateEffectType<{ currentFold: boolean | null, position: number | null }> = StateEffect.define();
+
+export const fenceScroll: StateEffectType<number> = StateEffect.define();
+
+
+//!==============
+
+export const fold: StateEffectType<
+	{
 	from: number,
 	to: number,
 	value: {

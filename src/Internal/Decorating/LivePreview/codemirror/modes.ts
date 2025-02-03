@@ -30,6 +30,43 @@ export function addModes(
 		});
 }
 
+export function parseObsidianMarkdown(
+	content: string,
+	CodeMirror: typeof window.CodeMirror,
+) {
+	const tokens = [];
+	const mode = CodeMirror.getMode(
+		{},
+		{
+			name: "hypermd",
+			fencedCodeBlockHighlighting: false,
+            // fencedCodeBlockHighlighting: 1,
+            // taskLists: !1,
+            // headers: !1,
+            // blockquotes: !1,
+            // indentedCode: !1,
+		},
+	);
+	const startState = CodeMirror.startState(mode);
+
+	if (mode?.token) {
+		const stream = new window.CodeMirror.StringStream(content);
+		while (!stream.eol()) {
+			const style = mode.token(stream, startState);
+			if (style)
+				tokens.push({
+					from: stream.start,
+					to: stream.pos,
+					value: style,
+				});
+
+			stream.start = stream.pos;
+		}
+	}
+
+	return tokens
+}
+
 export function addReferenceSyntaxHighlight(
 	CodeMirror: typeof window.CodeMirror,
 ) {

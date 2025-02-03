@@ -1,12 +1,17 @@
-make line numbers and header not selectable
 add highlights
 style live preview
 	copy button
-	fading lines if scroll
+	fading lines on edge of pre equivalent if scroll
 	check wrapped
 	long codeblocks? statefield instead?
+	line comment variable width?? subtract removed chracters form characters listed
+	scroll into view long lines
+style rendered
+	vertically align copy button
+	make lines numbers and header not selectable
 vertical alignemnt of rendered copy button
 footer element functionality
+Add reference icon
 add footer styles
 add setting for me to toggle between statefields and viewplugins
 
@@ -20,7 +25,9 @@ get shiki base theme to class names
 add shiki to fence rendered and codemirror both
 add not shiki clauses for decorating colours
 
+Make references saved in settings
 Consider line numbers as gutter
+Use cm6 highlighters for syntax highlighting
 
 Refactor:
 	☐ SettingsTabs
@@ -32,11 +39,12 @@ Refactor:
 	☐ Canvas parsing
 	☐ Sort files
 	☐ README and documentation
-	☐ setitins modifiers: Set inline syntax highlighting language for file in frontmatter, all options as frontmatter affect code parsing (code-styler- and fence-/inline- prefixes)
+	☐ settings modifiers: Set inline syntax highlighting language for file in frontmatter, all options as frontmatter affect code parsing (code-styler- and fence-/inline- prefixes)
 	☐ Consistent syntax highlighting
 	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
 	☐ Hide delimiter lines
-	☐ code styler compatibility
+	☐ code emitter compatibility
+	☐ execute code compatibility
 	☐ Look into tokenising with textmate tokeniser
 		☐ https://shiki.style
 			☐ https://github.com/mProjectsCode/obsidian-shiki-plugin/issues/25
@@ -47,12 +55,14 @@ Refactor:
 	☐ Minor in built styling, expose more to style settings
 		☐ Guide to styling by css variables as well
 	☐ Proper diff notation
+		☐ Set highlight lines using base highlight techniques (overriden by actual highlights)
 	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
 	☐ Add styles not exposed to style settings or settings for padding and margin settings
 	☐ Option to make all live preview codeblocks a reading codeblock
 
 Next Refactor:
 	☐ Colour of title backgrounds and variable padding widths and margin widths and other sizes added to styles (for consistent sizing)
+	☐ Add command to select whole codeblock in editing mode
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

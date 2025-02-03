@@ -54,6 +54,11 @@ export function createHeaderElement(
 			fence,
 			plugin,
 		),
+		createHeaderCopyIcon(
+			codeParameters,
+			fence,
+			plugin,
+		),
 		createHeaderSeparator(
 			codeParameters,
 			fence,
@@ -88,7 +93,7 @@ export function createFooterElement(
 			fence,
 			plugin,
 		),
-		createCopyIcon(
+		createFooterCopyIcon(
 			codeParameters,
 			content,
 			fence,
@@ -326,6 +331,62 @@ function createExecuteCodeTitle(
 	)
 }
 
+function createHeaderCopyIcon(
+	codeParameters: CodeParameters,
+	fence: boolean,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	const copyElement = createEl(
+		"button",
+		{
+			cls: [
+				PREFIX + "copy-code-button",
+				...(fence ? [] : [PREFIX + "hidden"]),
+			],
+		},
+		(element) => setIcon(element, "copy"),
+	)
+
+	copyElement.onclick = async (event: MouseEvent) => {
+		event.stopImmediatePropagation();
+
+		console.log(copyElement.parentElement)
+		console.log(copyElement.parentElement?.parentElement)
+		console.log(copyElement.parentElement?.parentElement?.querySelector("span.code-block-flair"))
+		copyElement.parentElement?.parentElement?.querySelector("span.code-block-flair")?.dispatchEvent(
+			new MouseEvent("click", {
+				bubbles: true,
+				cancelable: true,
+			})
+		);
+		// await navigator.clipboard.writeText(content)
+		// new Notice("Copied to your clipboard");
+
+		// setIcon(copyElement, "check")
+		// copyElement.style.color = "var(--text-success)"
+		// copyElement.style.transition = "opacity, background-color"
+		// copyElement.style.transitionDuration = `${BUTTON_TRANSITION}ms`
+
+		// setTimeout(
+		// 	() => {
+		// 		copyElement.style.color = ""
+		// 	},
+		// 	BUTTON_TIMEOUT - 1,
+		// );
+
+		// setTimeout(
+		// 	() => {
+		// 		setIcon(copyElement, "copy")
+		// 		copyElement.style.transition = ""
+		// 		copyElement.style.transitionDuration = ""
+		// 	},
+		// 	BUTTON_TIMEOUT,
+		// );
+	}
+
+	return copyElement
+}
+
 function createHeaderSeparator(
 	codeParameters: CodeParameters,
 	fence: boolean,
@@ -361,7 +422,7 @@ function createFooterSeparator(
 	)
 }
 
-function createCopyIcon(
+function createFooterCopyIcon(
 	codeParameters: CodeParameters,
 	content: string,
 	fence: boolean,
