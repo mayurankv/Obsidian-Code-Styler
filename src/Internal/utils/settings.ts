@@ -1,39 +1,65 @@
 // TODO: Update
 
+import CodeStylerPlugin from "src/main";
 import { PREFIX } from "../constants/general";
-import { BUTTON_TRANSITION } from "../constants/interface";
+import { BUTTON_TRANSITION, FOLD_TRANSITION } from "../constants/interface";
 import { DEFAULT_SETTINGS, THEME_DEFAULT_SETTINGS } from "../constants/settings";
-import { convertColoursToTheme } from "../constants/themes";
+import { getThemeModeStyles } from "../constants/themes";
 import { Colour } from "../types/decoration";
 import { CodeStylerSettings, CodeStylerTheme, CodeStylerThemeModeStyles, CodeStylerThemeStyles } from "../types/settings";
 import { flattenObject } from "./objects";
 import { camelCaseToKebabCase } from "./string";
+import { LANGUAGE_NAMES } from "../constants/parsing";
+import { LANGUAGES } from "../constants/decoration";
+import { getThemeStyles } from "./themes";
 
 export function convertStylesToVars(
-	styles: CodeStylerThemeModeStyles,
+	plugin: CodeStylerPlugin,
+	mode: "light" | "dark",
 ): string {
+	const styles = getThemeStyles(plugin, mode)
+
 	const flattenedStyles = flattenObject(styles, "--" + PREFIX.slice(0,-1))
 
 	let styleString = ""
 
-	styleString += "body.cs-plugin{\n";
+	styleString += `body.cs-plugin.theme-${mode}{\n`;
 
 	for (const key in flattenedStyles)
-		styleString += `${camelCaseToKebabCase(key)}: ${flattenedStyles[key].startsWith("--") ? ("var(" + flattenedStyles[key] + ")")  : flattenedStyles[key]};\n`
+		styleString += `\t${camelCaseToKebabCase(key)}: ${flattenedStyles[key].startsWith("--") ? ("var(" + flattenedStyles[key] + ")")  : flattenedStyles[key]};\n`
 
-	styleString += "}\n"
+	styleString += "}";
 
 	return styleString
+}
+
+export function addLanguageColourVars(
+	plugin: CodeStylerPlugin,
+) {
+	return Object.entries(LANGUAGE_NAMES).reduce(
+		(
+			result: string,
+			[languageName, languageDisplayName]: [string,string],
+		) => {
+			const languageColour = LANGUAGES?.[languageDisplayName]?.colour ?? plugin.settings.detecting.languages.addedLanguages?.[languageName]?.colour
+			if (languageColour)
+				result += `.language-${languageName} {
+					--cs-language-colour: ${languageColour};
+				}`
+
+			return result
+		},
+		``,
+	)
 }
 
 export function addExtraVars(): string {
 	let styleString = ""
 
 	styleString += "body.cs-plugin{\n";
-
 	styleString += `--cs-transition-length-button: ${BUTTON_TRANSITION}ms;\n`
-
-	styleString += "}\n"
+	styleString += `--cs-transition-length-fold: ${FOLD_TRANSITION}ms;\n`
+	styleString += "}";
 
 	return styleString
 }
@@ -120,9 +146,9 @@ const settingsUpdaters: Record<string,(settings: CodeStylerSettings)=>CodeStyler
 		//@ts-expect-error Older interface versions
 		theme.settings.header.externalReference = structuredClone(THEME_DEFAULT_SETTINGS.header.externalReference);
 		//@ts-expect-error Older interface versions
-		theme.colours.light.header.externalReference = structuredClone(convertColoursToTheme("default", "light").header.externalReference);
+		theme.colours.light.header.externalReference = structuredClone(getThemeModeStyles("default", "light").header.externalReference);
 		//@ts-expect-error Older interface versions
-		theme.colours.dark.header.externalReference = structuredClone(convertColoursToTheme("default", "light").header.externalReference);
+		theme.colours.dark.header.externalReference = structuredClone(getThemeModeStyles("default", "light").header.externalReference);
 		return theme;
 	}, (settings) => {
 		//@ts-expect-error Older interface versions

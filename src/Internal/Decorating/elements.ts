@@ -2,32 +2,44 @@ import CodeStylerPlugin from "src/main";
 import { PREFIX } from "../constants/general";
 import { CodeParameters, FenceCodeParameters, InlineCodeParameters } from "../types/parsing";
 import { getLanguageIcon, getLanguageName } from "../utils/decorating";
-import { FOLD_PLACEHOLDER, GIT_ICONS, SITE_ICONS, STAMP_ICON, UPDATE_ICON } from "../constants/decoration";
-import { MarkdownPostProcessorContext, MarkdownRenderer, Notice, setIcon } from "obsidian";
+import { FOLD_ATTRIBUTE, FOLD_PLACEHOLDER, GIT_ICONS, SITE_ICONS, STAMP_ICON, UPDATE_ICON } from "../constants/decoration";
+import { editorLivePreviewField, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Notice, setIcon } from "obsidian";
 import { isUrl } from "../utils/parsing";
 import { rerenderCodeElement } from "src/Internal/Interface/Actions/clicks";
 import { updateExternalReference } from "../utils/reference";
 import { Reference } from "../types/reference";
 import { getTheme } from "../utils/themes";
 import { BUTTON_TIMEOUT, BUTTON_TRANSITION } from "../constants/interface";
+import { viewDependentCallback } from "../utils/interface";
+import { EditorView } from "@codemirror/view";
+import { renderedFoldFence } from "./Rendered/fenced";
+import { applyFold } from "./LivePreview/codemirror/stateEffects";
+import { DATA_PREFIX } from "../constants/detecting";
+import { convertBoolean } from "../utils/string";
+import { copyButton } from "../utils/elements";
 
 export function createHeaderElement(
 	codeParameters: CodeParameters,
+	foldStatus: boolean,
+	content: string | null,
 	fence: boolean,
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
-	const fenceHeaderElement = createEl(
+	const headerElement = createEl(
 		fence ? "div" : "span",
 		{
 			cls: [
 				PREFIX + "header",
 				...( fence ? [] : ["cm-inline-code"])
 			],
+			attr: {
+				[FOLD_ATTRIBUTE]: foldStatus.toString(),
+			},
 		},
 	);
 
-	fenceHeaderElement.append(
+	headerElement.append(
 		createIcon(
 			codeParameters,
 			fence,
@@ -54,9 +66,11 @@ export function createHeaderElement(
 			fence,
 			plugin,
 		),
-		createHeaderCopyIcon(
+		createCopyIcon(
 			codeParameters,
+			content,
 			fence,
+			true,
 			plugin,
 		),
 		createHeaderSeparator(
@@ -66,17 +80,54 @@ export function createHeaderElement(
 		)
 	)
 
-	return fenceHeaderElement
+	if (fence)
+		headerElement.onClickEvent(
+			(event: Event) => {
+				if (!event.target || !(event.target instanceof Element) || (event.target.tagName === "button") || event.target.hasClass("internal-link") || event.target.hasClass("external-link"))
+					return
+
+				if ((event.target?.tagName === "BUTTON") || (event.target.matchParent("button")))
+					return
+
+				viewDependentCallback(
+					plugin,
+					(view: MarkdownView, plugin: CodeStylerPlugin) => {
+						const fencePreElement = headerElement.parentElement
+						if (!fencePreElement || !(fencePreElement.tagName.toLowerCase() === "pre"))
+							return false
+
+						renderedFoldFence(fencePreElement)
+						return true
+					},
+					(view: EditorView, plugin: CodeStylerPlugin) => {
+						view.dispatch({
+							effects: applyFold.of({
+								foldStatus: convertBoolean(headerElement.getAttribute(FOLD_ATTRIBUTE) ?? ""),
+								position: view.posAtDOM(headerElement),
+							})
+						});
+						console.log("Fold live preview")
+						// view.requestMeasure();
+					},
+				)
+			},
+			{
+				capture: true,
+			}
+		);
+
+	return headerElement
 }
 
 export function createFooterElement(
 	codeParameters: CodeParameters,
-	content: string,
+	foldStatus: boolean,
+	content: string | null,
 	fence: boolean,
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
-	const fenceFooterElement = createEl(
+	const footerElement = createEl(
 		fence ? "div" : "span",
 		{
 			cls: [
@@ -86,28 +137,28 @@ export function createFooterElement(
 		},
 	);
 
-	fenceFooterElement.append(
+	footerElement.append(
 		createFooterSeparator(
 			codeParameters,
-			content,
 			fence,
 			plugin,
 		),
-		createFooterCopyIcon(
+		createCopyIcon(
 			codeParameters,
 			content,
 			fence,
+			false,
 			plugin,
 		),
 		createFoldIcon(
 			codeParameters,
-			content,
+			foldStatus,
 			fence,
 			plugin,
 		),
 	)
 
-	return fenceFooterElement
+	return footerElement
 }
 
 function createIcon(
@@ -331,61 +382,6 @@ function createExecuteCodeTitle(
 	)
 }
 
-function createHeaderCopyIcon(
-	codeParameters: CodeParameters,
-	fence: boolean,
-	plugin: CodeStylerPlugin,
-): HTMLElement {
-	const copyElement = createEl(
-		"button",
-		{
-			cls: [
-				PREFIX + "copy-code-button",
-				...(fence ? [] : [PREFIX + "hidden"]),
-			],
-		},
-		(element) => setIcon(element, "copy"),
-	)
-
-	copyElement.onclick = async (event: MouseEvent) => {
-		event.stopImmediatePropagation();
-
-		console.log(copyElement.parentElement)
-		console.log(copyElement.parentElement?.parentElement)
-		console.log(copyElement.parentElement?.parentElement?.querySelector("span.code-block-flair"))
-		copyElement.parentElement?.parentElement?.querySelector("span.code-block-flair")?.dispatchEvent(
-			new MouseEvent("click", {
-				bubbles: true,
-				cancelable: true,
-			})
-		);
-		// await navigator.clipboard.writeText(content)
-		// new Notice("Copied to your clipboard");
-
-		// setIcon(copyElement, "check")
-		// copyElement.style.color = "var(--text-success)"
-		// copyElement.style.transition = "opacity, background-color"
-		// copyElement.style.transitionDuration = `${BUTTON_TRANSITION}ms`
-
-		// setTimeout(
-		// 	() => {
-		// 		copyElement.style.color = ""
-		// 	},
-		// 	BUTTON_TIMEOUT - 1,
-		// );
-
-		// setTimeout(
-		// 	() => {
-		// 		setIcon(copyElement, "copy")
-		// 		copyElement.style.transition = ""
-		// 		copyElement.style.transitionDuration = ""
-		// 	},
-		// 	BUTTON_TIMEOUT,
-		// );
-	}
-
-	return copyElement
-}
 
 function createHeaderSeparator(
 	codeParameters: CodeParameters,
@@ -406,7 +402,6 @@ function createHeaderSeparator(
 
 function createFooterSeparator(
 	codeParameters: CodeParameters,
-	content: string,
 	fence: boolean,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
@@ -422,10 +417,11 @@ function createFooterSeparator(
 	)
 }
 
-function createFooterCopyIcon(
+function createCopyIcon(
 	codeParameters: CodeParameters,
-	content: string,
+	content: string | null,
 	fence: boolean,
+	header: boolean,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	const copyElement = createEl(
@@ -433,44 +429,21 @@ function createFooterCopyIcon(
 		{
 			cls: [
 				PREFIX + "copy-code-button",
-				...(!fence ? [] : [PREFIX + "hidden"]),
+				...(((fence && header && (content !== null)) || (!fence && !header)) ? [] : [PREFIX + "hidden"]),
 			],
 		},
 		(element) => setIcon(element, "copy"),
 	)
 
-	copyElement.onclick = async (event: MouseEvent) => {
-		await navigator.clipboard.writeText(content)
-		new Notice("Copied to your clipboard");
-
-		setIcon(copyElement, "check")
-		copyElement.style.color = "var(--text-success)"
-		copyElement.style.transition = "opacity, background-color"
-		copyElement.style.transitionDuration = `${BUTTON_TRANSITION}ms`
-
-		setTimeout(
-			() => {
-				copyElement.style.color = ""
-			},
-			BUTTON_TIMEOUT - 1,
-		);
-
-		setTimeout(
-			() => {
-				setIcon(copyElement, "copy")
-				copyElement.style.transition = ""
-				copyElement.style.transitionDuration = ""
-			},
-			BUTTON_TIMEOUT,
-		);
-	}
+	if (content !== null)
+		copyElement.onclick = async (event: MouseEvent) => await copyButton(copyElement, content)
 
 	return copyElement
 }
 
 function createFoldIcon(
 	codeParameters: CodeParameters,
-	content: string,
+	foldStatus: boolean,
 	fence: boolean,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
@@ -482,8 +455,33 @@ function createFoldIcon(
 				...(fence ? [] : [PREFIX + "hidden"]),
 			],
 		},
-		(element) => setIcon(element, "chevron-up"),
+		(element) => setIcon(element, `chevron-${foldStatus ? "down" : "up"}`),
 	)
 
 	return foldElement
+}
+
+
+export function ignoreActionEvents(
+	event: Event,
+	containerSelector: string,
+): boolean {
+	if (!event.target)
+		return false
+
+	const targetElement = event.target as HTMLElement
+	const containerElement = targetElement.closest(containerSelector)
+	if (!containerElement)
+		return false
+
+	if (
+		(targetElement.tagName.toLowerCase() === "button" && targetElement.hasClass(`${PREFIX}code-edit-button`)) ||
+		(targetElement.matchParent("button")?.hasClass(`${PREFIX}code-edit-button`))
+	)
+		return false
+
+	if (containerElement.contains(targetElement))
+		return true
+
+	return false
 }

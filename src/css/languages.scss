@@ -1,0 +1,10 @@
+body.cs-plugin {
+	--cs-language-border-header-colour: var(--cs-fence-header-background-colour);
+	--cs-language-border-separator-colour: var(--cs-fence-header-separator-background-colour);
+	--cs-language-border-gutter-colour: var(--cs-fence-gutter-background-colour);
+};
+body.cs-plugin *[class*="language-"]:not(.language-code) {
+	--cs-language-border-header-colour: var(--cs-language-colour) !important;
+	--cs-language-border-separator-colour: var(--cs-language-colour) !important;
+	--cs-language-border-gutter-colour: var(--cs-language-colour) !important;
+};

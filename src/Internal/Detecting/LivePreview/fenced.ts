@@ -28,8 +28,8 @@ export function updateFenceInfo(
 	if (isFenceStart(syntaxNode)) {
 		fenceInfo = {
 			...fenceInfo,
-			start: syntaxNode.from,
 			lineNumber: 0,
+			headerStart: syntaxNode.from,
 			parameters: parseFenceCodeParameters(
 				cleanFenceCodeParametersLine(fenceInfo.lineText),
 				plugin,
@@ -42,7 +42,12 @@ export function updateFenceInfo(
 
 	if (isFenceEnd(syntaxNode)) {
 		fenceInfo.lineNumber = 0
+		fenceInfo.bodyEnd = syntaxNode.from - 1
+		fenceInfo.footerEnd = syntaxNode.to
 	}
+
+	if (isFenceLine(syntaxNode) && fenceInfo.lineNumber === 1)
+		fenceInfo.bodyStart = syntaxNode.from
 
 	return fenceInfo
 }

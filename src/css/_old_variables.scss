@@ -3,27 +3,17 @@ body.cs-plugin {
 	//TODO: Testing
 	// --cs-fence-gutter-background-colour: red !important;
 	// --cs-fence-header-background-colour: yellow !important;
-	--cs-language-border-header-colour: green !important;
-	--cs-language-border-separator-colour: green !important;
-	--cs-language-border-gutter-colour: green !important;
 	// --cs-fence-background-colour: blue !important;
-	--cs-fence-gutter-border-colour: purple !important
+	// --cs-fence-gutter-border-colour: purple !important
 }
 
-.markdown-source-view div.cs-header button.cs-copy-code-button {
-	z-index: 10
-}
-
-body.cs-plugin {
-	//TODO: To convert to code
-	--cs-language-border-header-colour: var(--cs-fence-header-language-title-background-colour);
-	--cs-language-border-separator-colour: var(--cs-fence-header-separator-background-colour);
-	--cs-language-border-gutter-colour: var(--cs-fence-gutter-background-colour);
-}
-
+// .markdown-source-view div.cs-header button.cs-copy-code-button {
+// 	z-index: 10
+// }
 
 body.cs-plugin{
 	//TODO: To add directly
+	//TODO add: border colours, border sizes, margins and padding and heights and widths
 	--cs-fence-gutter-active-text-colour: var(--code-normal);
 
 	--cs-fence-highlights-active-line-colour: var(--background-modifier-hover);

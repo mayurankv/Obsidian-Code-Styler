@@ -3,7 +3,7 @@ import { MarkdownRenderer } from "obsidian";
 import { PREFIX } from "src/Internal/constants/general";
 import { CodeParameters, FenceCodeParameters, InlineCodeParameters, LineParameters } from "src/Internal/types/parsing";
 import { isDeepStrictEqual } from "util";
-import { createFooterElement, createHeaderElement } from "../../elements";
+import { createFooterElement, createHeaderElement, ignoreActionEvents } from "../../elements";
 import { foldOnClick } from "./actions";
 import CodeStylerPlugin from "src/main";
 import { getLanguageIcon } from "src/Internal/utils/decorating";
@@ -11,19 +11,25 @@ import { getTheme } from "src/Internal/utils/themes";
 
 export class HeaderWidget extends WidgetType {
 	codeParameters: CodeParameters;
+	foldStatus: boolean;
+	content: string;
 	sourcePath: string;
 	private fence: boolean;
 	private plugin: CodeStylerPlugin;
 
 	constructor(
 		codeParameters: CodeParameters,
-		sourcePath: string,
+		foldStatus: boolean,
+		content: string,
 		fence: boolean,
+		sourcePath: string,
 		plugin: CodeStylerPlugin,
 	) {
 		super();
 
 		this.codeParameters = structuredClone(codeParameters);
+		this.foldStatus = foldStatus;
+		this.content = content;
 		this.sourcePath = sourcePath;
 		this.fence = fence;
 		this.plugin = plugin;
@@ -34,6 +40,8 @@ export class HeaderWidget extends WidgetType {
 	): boolean {
 		return (
 			this.fence === other.fence &&
+			this.foldStatus === other.foldStatus &&
+			this.content === other.content &&
 			this.codeParameters.language === other.codeParameters.language &&
 			this.codeParameters.title === other.codeParameters.title &&
 			this.codeParameters.reference === other.codeParameters.reference &&
@@ -43,11 +51,19 @@ export class HeaderWidget extends WidgetType {
 		);
 	}
 
+	ignoreEvent(
+		event: Event,
+	): boolean {
+		return ignoreActionEvents(event, ".cs-header")
+	}
+
 	toDOM(
 		view: EditorView,
 	): HTMLElement {
 		const headerElement = createHeaderElement(
 			this.codeParameters,
+			this.foldStatus,
+			this.content,
 			this.fence,
 			this.sourcePath,
 			this.plugin,
@@ -56,9 +72,6 @@ export class HeaderWidget extends WidgetType {
 		const folded = true //TODO: Fix
 		if (this.fence)
 			headerElement.onclick = (event) => {
-				if ((event.target as HTMLElement)?.hasClass("internal-link") || (event.target as HTMLElement)?.hasClass("external-link"))
-					return;
-
 				foldOnClick(
 					view,
 					headerElement,
@@ -73,6 +86,7 @@ export class HeaderWidget extends WidgetType {
 
 export class FooterWidget extends WidgetType {
 	codeParameters: CodeParameters;
+	foldStatus: boolean;
 	content: string;
 	sourcePath: string;
 	private fence: boolean;
@@ -80,14 +94,16 @@ export class FooterWidget extends WidgetType {
 
 	constructor(
 		codeParameters: CodeParameters,
+		foldStatus: boolean,
 		content: string,
-		sourcePath: string,
 		fence: boolean,
+		sourcePath: string,
 		plugin: CodeStylerPlugin,
 	) {
 		super();
 
 		this.codeParameters = structuredClone(codeParameters);
+		this.foldStatus = foldStatus;
 		this.content = content;
 		this.sourcePath = sourcePath;
 		this.fence = fence;
@@ -99,6 +115,7 @@ export class FooterWidget extends WidgetType {
 	): boolean {
 		return (
 			this.fence === other.fence &&
+			this.foldStatus === other.foldStatus &&
 			this.content === other.content &&
 			this.codeParameters.language === other.codeParameters.language &&
 			this.codeParameters.title === other.codeParameters.title &&
@@ -109,11 +126,18 @@ export class FooterWidget extends WidgetType {
 		);
 	}
 
+	ignoreEvent(
+		event: Event,
+	): boolean {
+		return ignoreActionEvents(event, ".cs-footer")
+	}
+
 	toDOM(
 		view: EditorView,
 	): HTMLElement {
 		const footerElement = createFooterElement(
 			this.codeParameters,
+			this.foldStatus,
 			this.content,
 			this.fence,
 			this.sourcePath,

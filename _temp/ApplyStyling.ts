@@ -3,22 +3,22 @@
 // import { isCss } from "src/Internal/Decorating/css";
 // import { CodeStylerThemeStyles, CodeStylerThemeModeStyles, CodeStylerThemeSettings, Colour } from "src/Internal/types/settings";
 
-// function styleThemeColours (themeColours: CodeStylerThemeStyles): string {
-// 	return Object.keys(themeColours.light.highlights.alternativeHighlights).reduce((result: string, alternativeHighlight: string) => {
-// 		return result + `
-// 			body.code-styler .code-styler-line-highlighted-${alternativeHighlight.replace(/\s+/g,"-").toLowerCase()} {
-// 				--gradient-background-colour: var(--code-styler-${alternativeHighlight.replace(/\s+/g,"-").toLowerCase()}-highlight-colour) !important;
-// 			}
-// 		`;
-// 	},`
-// 		body.code-styler.theme-light {
-// 			${getThemeColours(themeColours.light)}
-// 		}
-// 		body.code-styler.theme-dark {
-// 			${getThemeColours(themeColours.dark)}
-// 		}
-// 	`);
-// }
+function styleThemeColours (themeColours: CodeStylerThemeStyles): string {
+	return Object.keys(themeColours.light.highlights.alternativeHighlights).reduce((result: string, alternativeHighlight: string) => {
+		return result + `
+			body.code-styler .code-styler-line-highlighted-${alternativeHighlight.replace(/\s+/g,"-").toLowerCase()} {
+				--gradient-background-colour: var(--code-styler-${alternativeHighlight.replace(/\s+/g,"-").toLowerCase()}-highlight-colour) !important;
+			}
+		`;
+	},`
+		body.code-styler.theme-light {
+			${getThemeColours(themeColours.light)}
+		}
+		body.code-styler.theme-dark {
+			${getThemeColours(themeColours.dark)}
+		}
+	`);
+}
 
 // function getThemeColours (themeModeColours: CodeStylerThemeModeStyles): string {
 // 	return Object.entries({
@@ -102,81 +102,29 @@
 // 	`;
 // }
 
-// function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectLanguages: Record<string,{colour?: Colour, icon?: string}>, currentTheme: string): string {
-// 	return Object.entries(LANGUAGE_NAMES).reduce((result: string,[languageName, languageDisplayName]: [string,string]): string => {
-// 		if (LANGUAGES?.[languageDisplayName]?.colour || (languageName in redirectLanguages && "colour" in redirectLanguages[languageName])) {
-// 			result += `
-// 				.language-${languageName} {
-// 					--language-border-colour: ${redirectLanguages?.[languageName]?.["colour"] ?? LANGUAGES[languageDisplayName].colour};
-// 					--language-border-width: ${themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth:0}px;
-// 				}
-// 			`;
-// 			if (OBSIDIAN_THEME_STYLES?.[currentTheme]?.border) {
-// 				result += `
-// 					.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.language-${languageName}  {
-// 						--language-border-width: ${ //@ts-expect-error Does exist
-// 	themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth+THEME_STYLES[currentTheme].border.size:0}px;
-// 					}`;
-// 			}
-// 		}
-// 		return result;
-// 	},"");
-// }
-
-
-
-// 	// codeblock: {
-// 	// 	lineNumbers: true,
-// 	// 	unwrapLines: true,
-// 	// 	wrapLinesActive: false,
-// 	// 	curvature: 4,
-// 	// },
-// 	// gutter: {
-// 	// 	highlight: true,
-// 	// 	activeLine: false,
-// 	// },
-// 	// header: {
-// 	// 	title: {
-// 	// 		textFont: "",
-// 	// 		textBold: false,
-// 	// 		textItalic: true,
-// 	// 	},
-// 	// 	languageTag: {
-// 	// 		display: "none",
-// 	// 		textFont: "",
-// 	// 		textBold: true,
-// 	// 		textItalic: false,
-// 	// 	},
-// 	// 	languageIcon: {
-// 	// 		display: "none",
-// 	// 		displayColour: true,
-// 	// 	},
-// 	// 	externalReference: {
-// 	// 		displayRepository: true,
-// 	// 		displayVersion: true,
-// 	// 		displayTimestamp: true,
-// 	// 	},
-// 	// 	fontSize: 14,
-// 	// 	foldPlaceholder: "",
-// 	// },
-// 	// highlights: {
-// 	// 	activeCodeblockLine: false,
-// 	// 	activeEditorLine: false,
-// 	// },
-// 	// inline: {
-// 	// 	syntaxHighlight: true,
-// 	// 	style: true,
-// 	// 	fontWeight: 4,
-// 	// 	curvature: 6,
-// 	// 	paddingVertical: 5,
-// 	// 	paddingHorizontal: 5,
-// 	// 	marginHorizontal: 0,
-// 	// 	titleFontWeight: 8,
-// 	// },
-// 	// advanced: {
-// 	// 	gradientHighlights: false,
-// 	// 	gradientHighlightsColourStop: "70%",
-// 	// 	languageBorderColour: false,
-// 	// 	languageBorderWidth: 5,
-// 	// 	iconSize: 28,
-// 	// },
+	// codeblock: {
+	// 	lineNumbers: true,
+	// 	unwrapLines: true,
+	// 	wrapLinesActive: false,
+	// },
+	// gutter: {
+	// 	highlight: true,
+	// 	activeLine: false,
+	// },
+	// header: {
+	// 	fontSize: 14,
+	// },
+	// highlights: {
+	// 	activeCodeblockLine: false,
+	// 	activeEditorLine: false,
+	// },
+	// inline: {
+	// 	paddingVertical: 5,
+	// 	paddingHorizontal: 5,
+	// 	marginHorizontal: 0,
+	// 	titleFontWeight: 8,
+	// },
+	// advanced: {
+	// 	languageBorderColour: false,
+	// 	languageBorderWidth: 5,
+	// },

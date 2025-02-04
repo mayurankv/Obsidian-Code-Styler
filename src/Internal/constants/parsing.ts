@@ -2,7 +2,7 @@ export const CODE_PARAMETERS_KEY_VALUE = ["title", "label", "name", "reference",
 export const CODE_PARAMETERS_SHORTHAND = ["icon", "ignore", "light", "dark", "language", "dark"]
 
 export const FENCE_PARAMETERS_KEY_VALUE = [...CODE_PARAMETERS_KEY_VALUE, "fold", "ln", "unwrap", "ref", "hl"]
-export const FENCE_PARAMETERS_SHORTHAND = [...CODE_PARAMETERS_SHORTHAND, "fold", "wrap", "unwrap", "ln"]
+export const FENCE_PARAMETERS_SHORTHAND = [...CODE_PARAMETERS_SHORTHAND, "fold", "unfold", "wrap", "unwrap", "ln"]
 export const FENCE_PARAMETERS = [...new Set([...FENCE_PARAMETERS_KEY_VALUE, ...FENCE_PARAMETERS_SHORTHAND])];
 
 export const INLINE_PARAMETERS_KEY_VALUE = [...CODE_PARAMETERS_KEY_VALUE]

@@ -1,43 +1,8 @@
 import { Colour } from "../types/decoration";
 import { ButtonStyles, CodeStylerThemeModeStyles, CodeStyles, ElementStyles, HeaderStyles, IconStyles, TextStyles } from "../types/settings";
-
-const DEFAULT_THEME: Record<string, Colour> = {
-	backgroundColour: "--code-background",
-	textColour: "--code-normal",
-	commentColour: "--code-comment",
-	faintColour: "--text-faint",
-	inactiveColour: "--text-muted",
-	activeColour: "--text-normal",
-	highlightColour: "--text-highlight-bg",
-	contrastColourFirst: "#00FFFF",
-	contrastColourSecond: "#FF00FF",
-	contrastColourThird: "#808080",
-	accentPrimary: "--color-base-30",
-	accentSecondary: "--color-base-20",
-
-	black: "--color-base-00",
-	white: "--color-base-100",
-	blue: "--color-blue",
-	red: "--color-red",
-	green: "--color-green",
-	yellow: "--color-yellow",
-	magenta: "--color-purple",
-	cyan: "--color-cyan",
-	lightBlack: "--color-base-30",
-	lightWhite: "--color-base-70",
-	lightBlue: "--color-blue",
-	lightRed: "--color-red",
-	lightGreen: "--color-green",
-	lightYellow: "--color-yellow",
-	lightMagenta: "--color-purple",
-	lightCyan: "--color-cyan",
-}
+import { BASE_THEME_MODE_STYLES } from "./settings";
 
 export const THEME_COLOURS: Record<string, Record<string, Record<string, Colour>>> = {
-	default: {
-		light: DEFAULT_THEME,
-		dark: DEFAULT_THEME,
-	},
 	solarized: {
 		light: {
 			textColour: "#bababa",
@@ -334,136 +299,68 @@ export const THEME_COLOURS: Record<string, Record<string, Record<string, Colour>
 	},
 }
 
-function mapThemeColours(
-	theme: string,
-	mode: string,
-): Record<string, Colour> {
-	const themeColours = THEME_COLOURS?.[theme]?.[mode]
-	if (!themeColours)
-		return {}
-
-	if (theme === "default")
-		return {
-			foregroundPrimary: themeColours.textColour,
-			foregroundSecondary: themeColours.faintColour,
-			foregroundFocus: themeColours.inactiveColour,
-			backgroundPrimary: themeColours.backgroundColour,
-			backgroundSecondary: themeColours.backgroundColour,
-			backgroundTertiary: themeColours.backgroundColour,
-			backgroundQuartary: themeColours.backgroundColour,
-			titlePrimary: themeColours.commentColour,
-			titleSecondary: themeColours.commentColour,
-			standoutPrimary: themeColours.contrastColourFirst,
-			standoutSecondary: themeColours.contrastColourSecond,
-			subtlePrimary: themeColours.contrastColourThird,
-			activeElement: themeColours.activeColour,
-			inactiveElement: themeColours.inactiveColour,
-			highlightPrimary: themeColours.highlightColour,
-			highlightSecondary: themeColours.accentPrimary,
-			highlightTertiary: themeColours.accentSecondary,
-			separator: themeColours.accentPrimary,
-		}
-	else if (theme === "solarized")
-		return {
-			foregroundPrimary: themeColours.textColour,
-			foregroundSecondary: themeColours.alt1,
-			foregroundFocus: themeColours.alt2,
-			backgroundPrimary: themeColours.base6,
-			backgroundSecondary: themeColours.base5,
-			backgroundTertiary: themeColours.base3,
-			backgroundQuartary: themeColours.base2,
-			titlePrimary: themeColours.active0,
-			titleSecondary: themeColours.active3,
-			standoutPrimary: themeColours.active4,
-			standoutSecondary: themeColours.active2,
-			subtlePrimary: themeColours.alt0,
-			// activeElement: themeColours.activeColour,
-			// inactiveElement: themeColours.inactiveColour,
-			highlightPrimary: themeColours.base4,
-			highlightSecondary: themeColours.base5,
-			highlightTertiary: themeColours.accentSecondary,
-			separator: themeColours.active1,
-		}
-	else if (theme === "gruvbox")
-		return {
-			backgroundPrimary: themeColours.base0,
-			backgroundSecondary: themeColours.base0_hard,
-			backgroundTertiary: themeColours.base0_soft,
-			backgroundQuartary: themeColours.base1,
-			standoutPrimary: themeColours.neutral_yellow,
-			standoutSecondary: themeColours.neutral_red,
-		}
-	else if (theme.startsWith("catpuccin"))
-		return {
-			foregroundPrimary: themeColours.foregroundColour,
-			foregroundSecondary: themeColours.selectionColour,
-			foregroundFocus: themeColours.selectionColour,
-			backgroundPrimary: themeColours.backgroundColour,
-			backgroundSecondary: themeColours.backgroundColour,
-			backgroundTertiary: themeColours.backgroundColour,
-			backgroundQuartary: themeColours.backgroundColour,
-			titlePrimary: themeColours.cursorColour,
-			titleSecondary: themeColours.cursorColour,
-			standoutPrimary: themeColours.cyan,
-			standoutSecondary: themeColours.magenta,
-			subtlePrimary: themeColours.selectionColour,
-			highlightPrimary: themeColours.lightYellow,
-			highlightSecondary: themeColours.white,
-			highlightTertiary: themeColours.lightWhite,
-			separator: themeColours.cursorColour,
-		}
-	else
-		return {}
-};
-
-export function convertColoursToTheme(
+export function getThemeModeStyles(
 	theme: string,
 	mode: string,
 ): CodeStylerThemeModeStyles {
-	const mappedThemeColours = {...mapThemeColours("default", "light"), ...mapThemeColours(theme, mode)}
+	const modeStyles = BASE_THEME_MODE_STYLES;
+	if (theme === "default")
+		return modeStyles
 
-	//@ts-ignore TODO: Temporary
-	return {
-		// codeblock: {
-		// 	backgroundColour: mappedThemeColours.backgroundPrimary,
-		// 	textColour: mappedThemeColours.foregroundPrimary,
-		// },
-		// gutter: {
-		// 	backgroundColour: mappedThemeColours.backgroundSecondary,
-		// 	textColour: mappedThemeColours.foregroundSecondary,
-		// 	activeTextColour: mappedThemeColours.foregroundFocus,
-		// },
-		// header: {
-		// 	backgroundColour: mappedThemeColours.backgroundTertiary,
-		// 	title: {
-		// 		textColour: mappedThemeColours.titlePrimary,
-		// 	},
-		// 	languageTag: {
-		// 		backgroundColour: mappedThemeColours.backgroundQuartary,
-		// 		textColour: mappedThemeColours.titleSecondary,
-		// 	},
-		// 	externalReference: {
-		// 		displayRepositoryColour: mappedThemeColours.standoutPrimary,
-		// 		displayVersionColour: mappedThemeColours.standoutSecondary,
-		// 		displayTimestampColour: mappedThemeColours.subtlePrimary,
-		// 	},
-		// 	lineColour: mappedThemeColours.separator,
-		// },
-		// highlights: {
-		// 	activeCodeblockLineColour: mappedThemeColours.highlightSecondary,
-		// 	activeEditorLineColour: mappedThemeColours.highlightTertiary,
-		// 	defaultColour: mappedThemeColours.highlightPrimary,
-		// 	alternativeHighlights: {},
-		// },
-		// inline_old: {
-		// 	backgroundColour: mappedThemeColours.backgroundPrimary,
-		// 	textColour: mappedThemeColours.foregroundPrimary,
-		// 	activeTextColour: mappedThemeColours.foregroundFocus,
-		// 	titleTextColour: mappedThemeColours.titlePrimary,
-		// },
-		// advanced: {
-		// 	buttonColour: mappedThemeColours.inactiveElement,
-		// 	buttonActiveColour: mappedThemeColours.activeElement,
-		// },
+	const themeColours = THEME_COLOURS?.[theme]?.[mode]
+	if (!themeColours)
+		return modeStyles
+
+	else if (theme === "solarized") {
+	// 	return {
+	// 		foregroundPrimary: themeColours.textColour,
+	// 		foregroundSecondary: themeColours.alt1,
+	// 		foregroundFocus: themeColours.alt2,
+	// 		backgroundPrimary: themeColours.base6,
+	// 		backgroundSecondary: themeColours.base5,
+	// 		backgroundTertiary: themeColours.base3,
+	// 		backgroundQuartary: themeColours.base2,
+	// 		titlePrimary: themeColours.active0,
+	// 		titleSecondary: themeColours.active3,
+	// 		standoutPrimary: themeColours.active4,
+	// 		standoutSecondary: themeColours.active2,
+	// 		subtlePrimary: themeColours.alt0,
+	// 		// activeElement: themeColours.activeColour,
+	// 		// inactiveElement: themeColours.inactiveColour,
+	// 		highlightPrimary: themeColours.base4,
+	// 		highlightSecondary: themeColours.base5,
+	// 		highlightTertiary: themeColours.accentSecondary,
+	// 		separator: themeColours.active1,
+	// 	}
+	} else if (theme === "gruvbox") {
+	// 	return {
+	// 		backgroundPrimary: themeColours.base0,
+	// 		backgroundSecondary: themeColours.base0_hard,
+	// 		backgroundTertiary: themeColours.base0_soft,
+	// 		backgroundQuartary: themeColours.base1,
+	// 		standoutPrimary: themeColours.neutral_yellow,
+	// 		standoutSecondary: themeColours.neutral_red,
+	// 	}
+	} else if (theme.startsWith("catpuccin")) {
+		// 	return {
+		// 		foregroundPrimary: themeColours.foregroundColour,
+		// 		foregroundSecondary: themeColours.selectionColour,
+		// 		foregroundFocus: themeColours.selectionColour,
+		// 		backgroundPrimary: themeColours.backgroundColour,
+		// 		backgroundSecondary: themeColours.backgroundColour,
+		// 		backgroundTertiary: themeColours.backgroundColour,
+		// 		backgroundQuartary: themeColours.backgroundColour,
+		// 		titlePrimary: themeColours.cursorColour,
+		// 		titleSecondary: themeColours.cursorColour,
+		// 		standoutPrimary: themeColours.cyan,
+		// 		standoutSecondary: themeColours.magenta,
+		// 		subtlePrimary: themeColours.selectionColour,
+		// 		highlightPrimary: themeColours.lightYellow,
+		// 		highlightSecondary: themeColours.white,
+		// 		highlightTertiary: themeColours.lightWhite,
+		// 		separator: themeColours.cursorColour,
+		// 	}
 	}
-}
+
+	return modeStyles
+};

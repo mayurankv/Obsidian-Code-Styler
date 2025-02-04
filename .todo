@@ -1,22 +1,29 @@
-add highlights
+flip footer icon
 style live preview
+	fold by clicking and commands
 	copy button
-	fading lines on edge of pre equivalent if scroll
-	check wrapped
-	long codeblocks? statefield instead?
-	line comment variable width?? subtract removed chracters form characters listed
+	edit button?
+	fading lines on edge of pre equivalent if scroll and edges of scrolls under other stuff broken
 	scroll into view long lines
+	check wrapped looks and works ok
+	edit button in header in lp
 style rendered
 	vertically align copy button
 	make lines numbers and header not selectable
-vertical alignemnt of rendered copy button
-footer element functionality
-Add reference icon
+	work out how to fold codeblocks
+	add transitions to folds
+	vertical alignemnt of rendered copy button
+header fold indicator like old version
 add footer styles
-add setting for me to toggle between statefields and viewplugins
+footer element functionality
+add highlights
+add border styling
+make external reference titles link but remain styled
+Add reference icon
+execute code and code emitter compatibility
+syntax highlight colour consistency
 
 fix folds
-add transitions to folds
 add default code icon svg based on < > icon
 fix issue with startup reference
 viewplugin where if cursor not in view, move to cursor

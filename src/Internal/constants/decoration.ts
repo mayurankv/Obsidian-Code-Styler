@@ -42,7 +42,7 @@ export const TEMPORARY_SOURCEPATH = `@${PREFIX}-temporary-sourcepath`
 
 export const GIT_ICONS: { [key: string]: string } = {
 	"branch": "git-branch",
-	"tree": "git-commit-vertical", // commit
+	"tree": "git-commit-vertical", //? commit
 };
 export const SITE_ICONS: { [key: string]: string } = {
 	"github": "github",
@@ -52,7 +52,7 @@ export const SITE_ICONS: { [key: string]: string } = {
 	"generic": "folder-git-2",
 };
 
-export const STAMP_ICON = "calendar-clock";
+export const STAMP_ICON = "calendar-arrow-down";
 export const UPDATE_ICON = "refresh-ccw";
 
 export const LANGUAGES: {[key: string]: Language} = {

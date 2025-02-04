@@ -136,7 +136,7 @@ export interface CodeStylerThemeSettings {
 
 export interface CodeStylerTheme {
 	settings: CodeStylerThemeSettings;
-	colours: CodeStylerThemeStyles;
+	styles: CodeStylerThemeStyles;
 }
 
 type CodeStylerThemes = Record<string, CodeStylerTheme>

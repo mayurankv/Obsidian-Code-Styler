@@ -203,8 +203,7 @@ function inferFenceValue(
 		return {
 			fold: {
 				enabled: true,
-				placeholder:
-					parameterValue
+				placeholder: parameterValue,
 			}
 		}
 
@@ -244,7 +243,15 @@ function inferFenceShorthand(
 		return {
 			[parameterShorthand]: {
 				enabled: true,
-				placeholder: ""
+				placeholder: null,
+			}
+		}
+
+	else if (parameterShorthand === "unfold")
+		return {
+			fold: {
+				enabled: false,
+				placeholder: null,
 			}
 		}
 

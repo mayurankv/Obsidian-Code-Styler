@@ -12,7 +12,9 @@ import { visitParents } from "unist-util-visit-parents";
 import { parseFenceCodeParameters, referenceAdjustParameters, toDecorateFenceCode } from "../../Parsing/fenced";
 import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils/decorating";
 import { createFooterElement, createHeaderElement } from "../elements";
-import { BUTTON_TIMEOUT, BUTTON_TRANSITION } from "src/Internal/constants/interface";
+import { BUTTON_TIMEOUT, BUTTON_TRANSITION, FOLD_TRANSITION } from "src/Internal/constants/interface";
+import { convertBoolean } from "src/Internal/utils/string";
+import { animateIconChange, copyButton } from "src/Internal/utils/elements";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
@@ -82,7 +84,7 @@ export function renderedViewFold(
 	const codeblockPreElements = contentEl.querySelectorAll(`pre.${PREFIX}pre`);
 	codeblockPreElements.forEach(
 		(codeblockPreElement: HTMLElement) => {
-			foldFencePreElement(
+			renderedFoldFence(
 				codeblockPreElement,
 				fold ?? (codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE) ?? "false") === "true",
 			);
@@ -138,13 +140,14 @@ async function asyncDecorateFenceCodeElement(
 		plugin,
 	)
 
-	const codeDetectingContext = (fenceCodeElement.getAttribute(DETECTING_CONTEXT) ?? "standalone") as CodeDetectingContext
-	const staticRender = (codeDetectingContext === "export") || (codeDetectingContext === "slides")
+	// const codeDetectingContext = (fenceCodeElement.getAttribute(DETECTING_CONTEXT) ?? "standalone") as CodeDetectingContext
+	// const staticRender = (codeDetectingContext === "export") || (codeDetectingContext === "slides")
+	const content = fenceCodeElement.getText()
 
 	decorateFenceCodeElement(
 		fenceCodeElement,
 		fenceCodeParameters,
-		staticRender,
+		content,
 		context.sourcePath,
 		plugin,
 	)
@@ -153,7 +156,7 @@ async function asyncDecorateFenceCodeElement(
 function decorateFenceCodeElement(
 	fenceCodeElement: HTMLElement,
 	fenceCodeParameters: FenceCodeParameters,
-	staticRender: boolean,
+	content: string,
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): void {
@@ -165,38 +168,15 @@ function decorateFenceCodeElement(
 	if (!fencePreParentElement)
 		return;
 
-	if (!staticRender)
-		plugin.mutationObservers.executeCode.observe(
-			fencePreElement,
-			{
-				childList: true,
-				subtree: true,
-				attributes: true,
-				characterData: true,
-			},
-		)
-
-	const fenceHeaderElement = createHeaderElement(
-		fenceCodeParameters,
-		true,
-		sourcePath,
-		plugin,
-	);
-	if (!staticRender)
-		fenceHeaderElement.addEventListener(
-			"click",
-			() => { foldFencePreElement(fencePreElement); },
-		);
-
-
-
-	const fenceFooterElement = createFooterElement(
-		fenceCodeParameters,
-		"",
-		true,
-		sourcePath,
-		plugin,
-	);
+	plugin.mutationObservers.executeCode.observe(
+		fencePreElement,
+		{
+			childList: true,
+			subtree: true,
+			attributes: true,
+			characterData: true,
+		},
+	)
 
 	markupFencePreParentElement(
 		fencePreParentElement,
@@ -205,7 +185,6 @@ function decorateFenceCodeElement(
 	markupFencePreElement(
 		fencePreElement,
 		fenceCodeParameters,
-		staticRender,
 	)
 	markupFenceCodeElement(
 		fenceCodeElement,
@@ -213,6 +192,25 @@ function decorateFenceCodeElement(
 		sourcePath,
 		plugin,
 	)
+
+	const foldStatus = convertBoolean(fencePreElement.getAttribute(FOLD_ATTRIBUTE) ?? "false") ?? false;
+
+	const fenceHeaderElement = createHeaderElement(
+		fenceCodeParameters,
+		foldStatus,
+		content,
+		true,
+		sourcePath,
+		plugin,
+	);
+	const fenceFooterElement = createFooterElement(
+		fenceCodeParameters,
+		foldStatus,
+		content,
+		true,
+		sourcePath,
+		plugin,
+	);
 	fencePreElement.insertBefore(fenceHeaderElement, fencePreElement.childNodes[0]);
 	fencePreElement.appendChild(fenceFooterElement)
 }
@@ -232,7 +230,6 @@ function markupFencePreParentElement(
 function markupFencePreElement(
 	fencePreElement: HTMLElement,
 	fenceCodeParameters: FenceCodeParameters,
-	staticRender: boolean,
 ): void {
 	const classList = [`${PREFIX}pre`];
 
@@ -241,33 +238,33 @@ function markupFencePreElement(
 
 	fencePreElement.classList.add(...classList);
 
-	const copyCodeButton: HTMLElement | null = fencePreElement.querySelector("button.copy-code-button")
-	copyCodeButton?.addEventListener(
-		"click",
-		(event: Event) => {
-			copyCodeButton.style.transition = "opacity, background-color"
-			copyCodeButton.style.transitionDuration = `${BUTTON_TRANSITION}ms`
-			setTimeout(
-				() => {
-					copyCodeButton.style.color = ""
-				},
-				BUTTON_TIMEOUT - 1,
-			)
-			setTimeout(
-				() => {
-					copyCodeButton.style.transition = ""
-					copyCodeButton.style.transitionDuration = ""
-				},
-				BUTTON_TIMEOUT,
-			)
-		}
-	)
+	// const copyCodeButton: HTMLButtonElement | null = fencePreElement.querySelector("button.copy-code-button")
+	// if (copyCodeButton)
+	// 	copyCodeButton.onclick = async (event: MouseEvent) => await copyButton(copyCodeButton, "foo")
+
+	// copyCodeButton?.o(
+	// 	"click",
+	// 	(event: Event) => {
+	// 		copyCodeButton.style.transition = "opacity, background-color"
+	// 		copyCodeButton.style.transitionDuration = `${BUTTON_TRANSITION}ms`
+	// 		setTimeout(
+	// 			() => {
+	// 				copyCodeButton.style.color = ""
+	// 			},
+	// 			BUTTON_TIMEOUT - 1,
+	// 		)
+	// 		setTimeout(
+	// 			() => {
+	// 				copyCodeButton.style.transition = ""
+	// 				copyCodeButton.style.transitionDuration = ""
+	// 			},
+	// 			BUTTON_TIMEOUT,
+	// 		)
+	// 	}
+	// )
 
 	if (fenceCodeParameters.fold.enabled !== null)
 		fencePreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, fenceCodeParameters.fold.enabled.toString());
-
-	if (staticRender)
-		return;
 
 	if (fenceCodeParameters.fold.enabled)
 		fencePreElement.setAttribute(FOLD_ATTRIBUTE, "true");
@@ -411,26 +408,54 @@ function getFenceCodeLines(
 	return codeblockLines;
 }
 
-async function foldFencePreElement(
+export function renderedFoldFence(
 	codeblockPreElement: HTMLElement,
-	fold?: boolean,
-): Promise<void> {
-	if (codeblockPreElement.firstElementChild?.classList?.contains(`${PREFIX}header`) && codeblockPreElement.firstElementChild?.classList?.contains(`${PREFIX}hidden`))
+	fold: boolean | null | "toggle" = "toggle",
+): void {
+	//TODO: Fix
+	console.log("fold reading")
+	if (codeblockPreElement.firstElementChild?.hasClass(`${PREFIX}header`) && codeblockPreElement.firstElementChild?.hasClass(`${PREFIX}hidden`))
 		return;
 
-	codeblockPreElement.querySelectorAll("pre > code").forEach(() => {(fenceCodeElement: HTMLElement) => fenceCodeElement.style.setProperty(
-		"max-height",
-		`calc(${Math.ceil(fenceCodeElement.scrollHeight + 0.01)}px + var(--code-padding) * ${fenceCodeElement.classList.contains("execute-code-output") ? "3.5 + var(--header-separator-width)" : "2"})`
-	)});
-	codeblockPreElement.classList.add(`${PREFIX}hide-scroll`);
+	codeblockPreElement.querySelectorAll("pre > code").forEach(
+		(fenceCodeElement: HTMLElement) => fenceCodeElement.style.setProperty(
+			"max-height",
+			`${Math.ceil(fenceCodeElement.scrollHeight)}px`
+		),
+	)
+	codeblockPreElement.addClass(`${PREFIX}hide-scroll`);
 
-	// await sleep(1); //TODO: Needed?
-	if (typeof fold === "undefined")
-		codeblockPreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, (!((codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE) ?? "false") === "true")).toString())
-	else
-		codeblockPreElement.setAttribute(DEFAULT_FOLD_ATTRIBUTE, fold.toString())
+	setTimeout(
+		() => {
+			if (fold === null)
+				codeblockPreElement.setAttribute(
+					FOLD_ATTRIBUTE,
+					(convertBoolean(codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE)) ?? false).toString(),
+				)
+			else if (fold === "toggle")
+				codeblockPreElement.setAttribute(
+					FOLD_ATTRIBUTE,
+					(!(convertBoolean(codeblockPreElement.getAttribute(FOLD_ATTRIBUTE)) ?? false)).toString(),
+				)
+			else
+				codeblockPreElement.setAttribute(
+					FOLD_ATTRIBUTE,
+					fold.toString(),
+				)
 
-	// await sleep(TRANSITION_LENGTH); //TODO: Needed?
-	codeblockPreElement.querySelectorAll("pre > code").forEach((codeblockCodeElement: HTMLElement)=>codeblockCodeElement.style.removeProperty("max-height"));
-	codeblockPreElement.classList.remove(`${PREFIX}hide-scroll`);
+			setTimeout(
+				() => {
+					codeblockPreElement.querySelectorAll("pre > code").forEach(
+						(codeblockCodeElement: HTMLElement) => codeblockCodeElement.style.removeProperty("max-height"),
+					); window
+					codeblockPreElement.removeClass(`${PREFIX}hide-scroll`);
+				},
+				FOLD_TRANSITION,
+			)
+
+			codeblockPreElement.querySelector("div.cs-header")?.setAttribute(FOLD_ATTRIBUTE, codeblockPreElement.getAttribute(FOLD_ATTRIBUTE) ?? "false")
+			// animateIconChange(codeblockPreElement.querySelector(`div.${PREFIX}header > button.${PREFIX}fold-code-button`), )
+		},
+		1,
+	)
 }

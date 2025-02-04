@@ -1,5 +1,7 @@
+import { EditorView } from "@codemirror/view";
 import { MarkdownView, WorkspaceLeaf } from "obsidian";
 import { renderedViewFold } from "src/Internal/Decorating/Rendered/fenced";
+import { viewDependentCallback } from "src/Internal/utils/interface";
 import { manageExternalReferencedFiles } from "src/Internal/utils/reference";
 import CodeStylerPlugin from "src/main";
 
@@ -7,14 +9,15 @@ function viewFold(
 	fold: boolean | null,
 	plugin: CodeStylerPlugin,
 ): void {
-	const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-	if (activeView) {
-		if (activeView.getMode() === "preview")
-			renderedViewFold(activeView.contentEl, fold);
-		// else if (activeView.getMode() === "source")
-		// 	// // @ts-expect-error Undocumented Obsidian API //TODO: Fix livePreviewFold and then uncomment expect error
-		// 	livePreviewFold(activeView.editor.cm.docView.view, fold);
-	}
+	viewDependentCallback(
+		plugin,
+		(view: MarkdownView, plugin: CodeStylerPlugin) => {
+			renderedViewFold(view.contentEl, fold);
+			
+			return false;
+		},
+		(view: EditorView, plugin: CodeStylerPlugin) => { return }, //TODO/
+	)
 }
 
 export function registerCommands(

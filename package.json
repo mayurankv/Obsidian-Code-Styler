@@ -50,6 +50,7 @@
 		"@lezer/highlight": "^1.2.1",
 		"@simonwep/pickr": "^1.9.1",
 		"@stylistic/stylelint-plugin": "^3.1.1",
+		"@types/gsap": "^1.20.2",
 		"colortranslator": "^4.1.0",
 		"hast": "^1.0.0",
 		"hast-util-from-html": "^2.0.3",

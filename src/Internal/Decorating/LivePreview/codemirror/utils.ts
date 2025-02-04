@@ -9,7 +9,7 @@ import { parseLinks } from "src/Internal/utils/parsing";
 import { CommentLinkWidget } from "./widgets";
 import CodeStylerPlugin from "src/main";
 import { visualStateUpdate } from "./stateEffects";
-import { AnyRange, BaseRange } from "src/Internal/types/decoration";
+import { AnyRange, BaseRange, FenceInfo } from "src/Internal/types/decoration";
 
 export function getCommentDecorations(
 	state: EditorState,
@@ -123,17 +123,70 @@ export function getStateFieldsViewDecorations(
 	return RangeSet.join(stateFields.map((stateField: StateField<DecorationSet>) => getStateFieldViewDecorations(view, stateField)))
 }
 
-export function getStateFieldViewDecorations(
-	view: EditorView,
+export function getStateFieldDecorations(
+	state: EditorState,
 	stateField: StateField<DecorationSet>,
 ): DecorationSet {
-	return view.state.field(stateField)?.update({
+	return state.field(stateField).update({ //TODO: Maybe update to between? Might update in place
 		filter: (
 			from: number,
 			to: number,
 			value: Decoration,
-		) => !areRangesInteracting(view.state, from, to) && isRangeInteracting(from, to, view.viewport)
-	}) ?? Decoration.none
+		) => (value.spec?.include !== false) &&
+			(value.spec?.viewPlugin === false) &&
+			!(
+				value.spec?.interactive === true &&
+				areRangesInteracting(state, value.spec?.interactStart ?? from, value.spec?.interactEnd ?? to)
+			),
+	})
+}
+
+export function getStateFieldViewDecorations(
+	view: EditorView,
+	stateField: StateField<DecorationSet>,
+): DecorationSet {
+	return view.state.field(stateField).update({ //TODO: Maybe update to between? Might update in place
+		filter: (
+			from: number,
+			to: number,
+			value: Decoration,
+		) => (value.spec?.include !== false) &&
+			(value.spec?.viewPlugin !== false) &&
+			!(
+				value.spec?.interactive === true &&
+				areRangesInteracting(view.state, value.spec?.interactStart ?? from, value.spec?.interactEnd ?? to) &&
+				!view.plugin(livePreviewState)?.mousedown &&
+				view.hasFocus
+			) &&
+			isRangeInteracting(from, to, view.viewport),
+		filterFrom: view.viewport.from,
+		filterTo: view.viewport.to,
+	})
+}
+
+export function getFoldStatuses(
+	value: DecorationSet,
+	fenceInfo: FenceInfo,
+): {currentFoldStatus: boolean, baseFoldStatus: boolean} | null {
+	let foldStatuses: {currentFoldStatus: boolean, baseFoldStatus: boolean} | null = null
+	value.between(
+		fenceInfo.headerStart,
+		fenceInfo.footerEnd,
+		(
+			from: number,
+			to: number,
+			value: Decoration,
+		) => {
+			if (value.spec?.fold !== "boolean")
+				return
+
+			foldStatuses = {currentFoldStatus: value.spec.currentFoldStatus, baseFoldStatus: value.spec.baseFoldStatus}
+
+			return false
+		},
+	)
+
+	return foldStatuses
 }
 
 // export function updateStateFieldDecorations( //TODO: This should be the function that properly maps decorations between docchanged eveents and rewrites
@@ -196,7 +249,7 @@ export function getInlineDelimiterSize(
 export function updateViewPlugin(
 	update: ViewUpdate,
 ): boolean {
-	return update.docChanged || update.viewportChanged || (update.selectionSet && !update.view.plugin(livePreviewState)?.mousedown)
+	return update.docChanged || update.viewportChanged || ((update.selectionSet) && !update.view.plugin(livePreviewState)?.mousedown)
 }
 
 export function updateBaseStateField(
@@ -205,7 +258,7 @@ export function updateBaseStateField(
 	return transaction.docChanged
 }
 
-export function updateStateField(
+export function updateStateField(  //NOTE: TODO: Ideally would map ranges on docchanged unless affected but quirks mean that statefield doesn'y actually get whole document so some decorations don't exist in create and thus this wouldn't work on scrolling; hence why the view updater is needed
 	transaction: Transaction,
 ) {
 	return updateBaseStateField(transaction) || transaction.effects.some(effect => effect.is(visualStateUpdate))

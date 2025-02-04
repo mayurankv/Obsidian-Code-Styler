@@ -15,8 +15,10 @@ export function camelCaseToKebabCase(
 }
 
 export function convertBoolean(
-	text: string,
+	text: string | null,
 ): boolean | null {
+	if (text === null)
+		return null
 	if (text.toLowerCase().trim() === "true")
 		return true
 	if (text.toLowerCase().trim() === "false")

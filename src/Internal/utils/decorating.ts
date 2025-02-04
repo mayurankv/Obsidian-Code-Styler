@@ -16,6 +16,7 @@ export function getLineClasses(
 ): Array<string> {
 	const classList = [
 		PREFIX + "line",
+		...(fenceCodeParameters.language ? [`language-${fenceCodeParameters.language}`] : []),
 		...Object.entries({ default: fenceCodeParameters.highlights.default, ...fenceCodeParameters.highlights.alternative }).filter(
 			([highlightName, highlights]: [string, Highlights]) => toHighlight(highlights, lineNumber + (fenceCodeParameters.lineNumbers.offset ?? 0), line)
 		).map(

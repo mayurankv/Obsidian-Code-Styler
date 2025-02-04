@@ -1,6 +1,6 @@
 body.cs-plugin {
 	.cs-pre-parent,
-	.markdown-source-view div.cm-line:not(.cm-embed-block) {
+	.markdown-source-view *:not(.cm-embed-block) > {
 		div.cs-header {
 			font-size: var(--font-text-size);
 			box-sizing: content-box;
@@ -16,6 +16,7 @@ body.cs-plugin {
 			background-color: var(--cs-fence-header-background-colour);
 			z-index: 4;
 			padding-bottom: var(--size-4-2);
+			grid-column: span 2;
 			// overflow-x: hidden;
 			// overflow-y: hidden;
 
@@ -28,7 +29,7 @@ body.cs-plugin {
 				bottom: 0;
 				background: inherit;
 				z-index: 2;
-				box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-header-colour);
+				box-shadow: calc(-1 * var(--cs-fence-gutter-language-border-size)) 0 0px var(--cs-language-border-header-colour);
 			}
 
 			&::after {
@@ -40,7 +41,7 @@ body.cs-plugin {
 				right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
 				z-index: 1;
 				background: var(--cs-fence-header-separator-background-colour);
-				box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-separator-colour);
+				box-shadow: calc(-1 * var(--cs-fence-gutter-language-border-size)) 0 0px var(--cs-language-border-separator-colour);
 			}
 
 			&:hover button{
@@ -240,6 +241,10 @@ body.cs-plugin {
 				height: 100%;
 			}
 
+			> button.cs-copy-code-button {
+  				margin-left: auto;
+			}
+
 			> div.cs-separator {
 				color: var(--cs-fence-header-separator-background-colour);
 			}
@@ -270,7 +275,7 @@ body.cs-plugin {
 				right: 0;
 				background-color: inherit;
 				z-index: -5;
-				box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-gutter-colour);
+				box-shadow: calc(-1 * var(--cs-fence-gutter-language-border-size)) 0 0px var(--cs-language-border-gutter-colour);
 			}
 		}
 
@@ -279,6 +284,10 @@ body.cs-plugin {
 			height: var(--size-4-4);
 			position: relative;
 			left: 0;
+
+			&[data-cs-fold="true"] {
+				height: unset;
+			}
 
 			button {
 				height: 100%;
@@ -306,6 +315,52 @@ body.cs-plugin {
 
 		.cs-comment {
 			padding: 0;
+		}
+	}
+
+	div.cs-header,
+	div.cs-footer {
+		button {
+			padding-left: var(--size-4-2);
+			padding-right: var(--size-4-2);
+			height: 100%;
+		}
+
+		button.copy-code-button {
+			display: none;
+		}
+
+		button.cs-copy-code-button {
+			display: block;
+			// position: sticky;
+			// top: 0;
+			// left: calc(100% - 32px);
+			// grid-row: 1;
+			// padding: 0;
+			// margin: 0;
+			// margin-left: var(--size-4-4);
+			// margin-bottom: var(--size-4-2);
+			z-index: 4;
+			opacity: 0;
+
+			background-color: var(--cs-fence-button-inactive-background-colour);
+			color: var(--cs-fence-button-inactive-colour);
+
+			> svg {
+				// position: sticky;
+				// left: 0;
+				z-index: inherit;
+			}
+
+			&:hover {
+				background-color: var(--cs-fence-button-hover-background-colour);
+				color: var(--cs-fence-button-hover-colour);
+			}
+
+			&:active {
+				background-color: var(--cs-fence-button-active-background-colour);
+				color: var(--cs-fence-button-active-colour);
+			}
 		}
 	}
 
@@ -350,6 +405,12 @@ body.cs-plugin {
 				padding-right: var(--cs-fence-fade-width);
 				padding-top: var(--size-4-1);
 
+				max-height: unset;
+				opacity: 1;
+				transition-property: max-height, opacity, color;
+				transition-duration: var(--cs-transition-length-fold);
+				transition-timing-function: ease-in-out;
+
 				&[data-cs-wrap = "unwrapped"],
 				&[data-cs-wrap = "unwrapped-inactive"]:not(:active) {
 					width: max-content;
@@ -364,6 +425,17 @@ body.cs-plugin {
 
 				> div.cs-line {
 					display: contents;
+
+					&,
+					* {
+						transition-property: opacity, color, background-color, border;
+						transition-duration: var(--cs-transition-length-fold);
+						transition-timing-function: ease-in-out;
+					}
+
+					// transition-property: opacity, color;
+					// transition-duration: var(--cs-transition-length-fold);
+					// transition-timing-function: ease-in-out;
 
 					> div.cs-line-number {
 						grid-column: 1;
@@ -402,50 +474,54 @@ body.cs-plugin {
 				}
 			}
 
-			button.copy-code-button {
-				position: sticky;
-				top: 0;
-				left: calc(100% - 32px);
-				grid-row: 1;
-				padding: 0;
-				margin: 0;
-				margin-left: var(--size-4-4);
-				margin-bottom: var(--size-4-2);
-				z-index: 4;
-				display: block;
-				opacity: 0;
-
-				background-color: var(--cs-fence-button-inactive-background-colour);
-				color: var(--cs-fence-button-inactive-colour);
-
-				> svg {
-					// position: sticky;
-					// left: 0;
-					z-index: inherit;
-				}
-
-				&:hover {
-					background-color: var(--cs-fence-button-hover-background-colour);
-					color: var(--cs-fence-button-hover-colour);
-				}
-
-				&:active {
-					background-color: var(--cs-fence-button-active-background-colour);
-					color: var(--cs-fence-button-active-colour);
-				}
-			}
-
 			> div.cs-footer {
 				grid-row: 3;
 				grid-column: span 2;
+
+				// &::before {
+				// 	content: "";
+				// 	position: absolute;
+				// 	// top: calc(-1 * var(--size-4-3));
+				// 	// left: calc(-1 * calc(var(--size-4-4) - var(--cs-fence-gutter-language-border-size)));
+				// 	// right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
+				// 	bottom: 0;
+				// 	background: inherit;
+				// 	z-index: 2;
+				// 	box-shadow: calc(-1 * var(--cs-fence-gutter-language-border-size)) 0 0px var(--cs-language-border-gutter-colour);
+				// }
+
+				button.cs-fold-button {
+
+				}
 			}
 		}
+
+		pre.cs-pre[data-cs-fold="true"] {
+			> code.cs-code {
+				max-height: 0 !important;
+				// opacity: 0;
+				// overflow: hidden;
+				// visibility: hidden;
+				// div.cs-line,
+				div.cs-line * {
+					color: rgba(0,0,0,0) !important;
+					--cs-fence-gutter-background-colour: var(--cs-fence-background-colour);
+					--cs-fence-gutter-border-colour: var(--cs-fence-background-colour);
+				}
+			}
+
+			button.cs-fold-code-button {
+				opacity: 1;
+			}
+		}
+
 		pre.cs-pre button {
 			transition: opacity, background-color, color;
 			transition-duration: var(--cs-transition-length-button);
+			box-shadow: none;
 		}
 
-		pre.cs-pre:hover button {
+		pre.cs-pre:hover div button {
 			opacity: 1;
 		}
 	}
@@ -470,7 +546,7 @@ body.cs-plugin {
 			--cs-fence-gutter-border-colour: var(--cs-fence-background-colour);
 
 			white-space: pre-wrap !important;
-			z-index: -10;
+			// z-index: -10;
 			// overflow: hidden;
 
 			span.cm-hmd-codeblock {
@@ -500,6 +576,11 @@ body.cs-plugin {
 			overflow-x: auto;
 			overflow-y: hidden;
 
+			padding-right: var(--cs-fence-fade-width);
+
+			font-family: var(--font-monospace);
+			font-size: var(--code-size);
+
 			// display: inline;
 
 			// &::before {
@@ -518,12 +599,14 @@ body.cs-plugin {
 				padding-top: var(--size-4-3);
 
 				&::before {
-					box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-header-colour);
+					box-shadow: none;
+					// box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-header-colour);
 					// box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-separator-colour), calc(-2 * var(--size-4-4)) 0 0px var(--cs-language-border-gutter-colour);
 				}
 
 				&::after {
-					box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-separator-colour)
+					box-shadow: none;
+					// box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-separator-colour)
 					// box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-header-colour);
 					// box-shadow: calc(-1 * var(--size-4-4)) 0 0px var(--cs-language-border-separator-colour), calc(-2 * var(--size-4-4)) 0 0px var(--cs-language-border-gutter-colour);
 				}
@@ -531,6 +614,7 @@ body.cs-plugin {
 
 			span.code-block-flair {
 				z-index: 5;
+				display: none;
 			}
 
 			span.cs-line-number {
@@ -544,8 +628,8 @@ body.cs-plugin {
 				left: calc(-1 * calc(var(--cs-gutter-char-size) + var(--size-4-3) + var(--size-2-1) + var(--size-4-3)));
 
 				&::before {
-					// box-shadow: none;
-					box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-gutter-colour);
+					box-shadow: none;
+					// box-shadow: calc(-1 * var(--size-4-1)) 0 0px var(--cs-language-border-gutter-colour);
 					z-index: -5;
 					bottom: 0;
 					// content: none;
@@ -577,6 +661,15 @@ body.cs-plugin {
 			&::-webkit-scrollbar {
 				display: none;
 			}
+
+			button {
+				opacity: 1;
+				box-shadow: none;
+			}
+		}
+
+		div.cs-line:has(div.cs-header):has( + div[contenteditable="false"] + div.cs-line > div.cs-footer) {
+			// --cs-fence-header-separator-background-colour: var(--cs-fence-header-background-colour)
 		}
 
 	}

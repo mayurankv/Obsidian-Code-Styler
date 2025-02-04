@@ -11,3 +11,4 @@ export const EXAMPLE_INLINE_CODE_PARAMETERS = "python icon title:foo";
 
 export const BUTTON_TIMEOUT = 1000
 export const BUTTON_TRANSITION = 200
+export const FOLD_TRANSITION = 240

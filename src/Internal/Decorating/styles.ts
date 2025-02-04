@@ -3,7 +3,7 @@ import { CodeStylerSettings } from "../types/settings";
 import { BODY_CLASS, STYLE_ELEMENT_ID } from "../constants/decoration";
 import { PREFIX } from "../constants/general";
 import { getTheme } from "../utils/themes";
-import { addExtraVars, convertStylesToVars } from "../utils/settings";
+import { addExtraVars, addLanguageColourVars, convertStylesToVars } from "../utils/settings";
 import { BASE_THEME_MODE_STYLES } from "../constants/settings";
 
 const BODY_CLASSES = [
@@ -43,8 +43,10 @@ function getStyleText(
 
 	let styleString = ""
 
-	styleString += convertStylesToVars(BASE_THEME_MODE_STYLES)
+	styleString += convertStylesToVars(plugin, "light")
+	styleString += convertStylesToVars(plugin, "dark")
 	styleString += addExtraVars()
+	styleString += addLanguageColourVars(plugin)
 
 	// TODO:
 	// styleThemeColours(plugin.settings.currentTheme.colours) + styleThemeSettings(plugin.settings.currentTheme.settings, obsidianTheme) + styleLanguageColours(plugin.settings.currentTheme.settings, plugin.settings.redirectLanguages, obsidianTheme)

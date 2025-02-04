@@ -57,12 +57,15 @@ async function decorateInlineCodeElement(
 	const inlineHeaderElement = createHeaderElement(
 		inlineCodeParameters,
 		false,
+		inlineCodeContent,
+		false,
 		sourcePath,
 		plugin,
 	);
 
 	const inlineFooterElement = createFooterElement(
 		inlineCodeParameters,
+		false,
 		inlineCodeContent,
 		false,
 		sourcePath,

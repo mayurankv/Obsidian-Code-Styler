@@ -1,7 +1,7 @@
 import { ButtonStyles, CodeStylerSettings, CodeStylerTheme, CodeStylerThemeModeStyles, CodeStylerThemeSettings, CodeStyles, ElementStyles, HeaderStyles, IconStyles, TextStyles } from "../types/settings";
 import { FOLD_PLACEHOLDER } from "./decoration";
 import { EXAMPLE_CODEBLOCK_CONTENT as EXAMPLE_FENCE_CODE_CONTENT, EXAMPLE_CODEBLOCK_PARAMETERS as EXAMPLE_FENCE_CODE_PARAMETERS, EXAMPLE_INLINE_CODE_CONTENT, EXAMPLE_INLINE_CODE_PARAMETERS } from "./interface";
-import { convertColoursToTheme, THEME_COLOURS } from "./themes";
+import { getThemeModeStyles, THEME_COLOURS } from "./themes";
 
 export const USE_SHIKI = false;
 
@@ -143,14 +143,14 @@ export const THEME_DEFAULT_SETTINGS: CodeStylerThemeSettings = {
 	},
 };
 
-export const INBUILT_THEMES: Record<string, CodeStylerTheme> = Object.fromEntries(Object.keys(THEME_COLOURS).map(
+export const INBUILT_THEMES: Record<string, CodeStylerTheme> = Object.fromEntries(["default", ...Object.keys(THEME_COLOURS)].map(
 	(theme) => [
 		theme,
 		{
 			settings: THEME_DEFAULT_SETTINGS,
-			colours: {
-				light: convertColoursToTheme(theme, "light"),
-				dark: convertColoursToTheme(theme, "dark"),
+			styles: {
+				light: getThemeModeStyles(theme, "light"),
+				dark: getThemeModeStyles(theme, "dark"),
 			}
 		}
 	]),

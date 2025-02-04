@@ -101,8 +101,10 @@ function buildInlineCodeDecoration(
 		value: Decoration.replace({
 			widget: new HeaderWidget(
 				inlineCodeInfo.parameters.value,
-				state.field(editorInfoField)?.file?.path ?? "",
 				false,
+				inlineCodeInfo.content.value,
+				false,
+				state.field(editorInfoField)?.file?.path ?? "",
 				plugin,
 			)
 		}),
@@ -119,9 +121,10 @@ function buildInlineCodeDecoration(
 		value: Decoration.replace({
 			widget: new FooterWidget(
 				inlineCodeInfo.parameters.value,
-				inlineCodeInfo.content.value,
-				state.field(editorInfoField)?.file?.path ?? "",
 				false,
+				inlineCodeInfo.content.value,
+				false,
+				state.field(editorInfoField)?.file?.path ?? "",
 				plugin,
 			)
 		}),
