@@ -34,6 +34,7 @@ viewplugin where if cursor not in view, move to cursor
 get shiki base theme to class names
 add shiki to fence rendered and codemirror both
 add not shiki clauses for decorating colours
+interesting, it exists: https://github.com/mProjectsCode/obsidian-shiki-plugin
 
 Make references saved in settings
 Consider line numbers as gutter

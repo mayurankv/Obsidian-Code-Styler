@@ -8,7 +8,7 @@ import { FenceInfo } from "src/Internal/types/decoration";
 import { getLineClasses } from "src/Internal/utils/decorating";
 import CodeStylerPlugin from "src/main";
 import { createScrollEventObservers, scrollListener } from "./codemirror/eventListeners";
-import { getCommentDecorations, getFenceLimits, getFoldStatuses, getScrollStatus, getStateFieldDecorations, getStateFieldScrollStates, getStateFieldsViewDecorations, isFileIgnored, lineDOMatPos, updateBaseStateField, updateInteractions, updateStateField, valueInRange } from "./codemirror/utils";
+import { getCommentDecorations, getFenceLimits, getFoldStatuses, getScrollStatus, getStateFieldDecorations, getStateFieldScrollStates, getStateFieldsViewDecorations, isFileIgnored, lineDOMatPos, updateBaseStateField, updateInteractions, updateStateField, updateViewPlugin, valueInRange } from "./codemirror/utils";
 import { FillerWidget, FooterWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
 import { RangeNumber } from "./codemirror/ranges";
 import { fenceScroll } from "./codemirror/stateEffects";
@@ -143,7 +143,7 @@ function createFenceCodeDecorations(
 		update(
 			update: ViewUpdate,
 		) {
-			if (updateInteractions(update))
+			if (updateViewPlugin(update) || updateInteractions(update))
 				this.addInteractions(
 					update.view,
 					update.transactions,
@@ -152,7 +152,7 @@ function createFenceCodeDecorations(
 
 		addInteractions(
 			view: EditorView,
-			transactions: Array<Transaction>,
+			transactions: readonly Transaction[],
 		) {
 			const scrollEffects = transactions.reduce(
 				(result: Array<StateEffect<any>>, transaction: Transaction) => {
@@ -481,135 +481,32 @@ function addScrollInteractions(
 	scrollEffects: Array<StateEffect<any>>,
 	stateField: StateField<RangeSet<any>>,
 ): void {
-	// if (!ticking) {
-	// 	window.requestAnimationFrame(
-	// 		() => {
-	// const scrollValues: Array<number> = []
-	// if (reset)
-	// 	scrollGroups = []
-	if (scrollEffects.length !== 1)
-		throw new Error("Unexpected scroll effects")
+	if (scrollEffects.length === 0)
+		return
+
+	else if (scrollEffects.length !== 1)
+		throw new Error(`Unexpected scroll effects`)
 
 	const position = scrollEffects[0].value.position
 
 	const scrollStates = getStateFieldScrollStates(view.state, stateField)
 	scrollStates.update({
-		filter: (from: number, to: number, value: any) => valueInRange(position, from, to),
+		filter: (from: number, to: number, value: any) => valueInRange(position, from, to) && (setScroll(view, from, value.number) ?? true),
 		filterFrom: view.viewport.from,
 		filterTo: view.viewport.to,
-	}).between(
-		view.viewport.from,
-		view.viewport.to,
-		(from: number, to: number, value: RangeNumber) => {
-			if (!valueInRange(position, from, to))
-				return
-
-
-			// 			ticking = false;
-			// 		}
-			// 	);
-			// 	ticking = true;
-			// }
-
-				// scrollGroups.push(scrollLines)
-			// }
-
-			// scrollValues.push(value.number)
-
-			// syntaxTree(view.state).iterate({
-			// 	enter: (syntaxNode: SyntaxNodeRef) => {
-			// 		if (!isFenceLine(syntaxNode))
-			// 			return
-
-			// 		// const scrollLine = view.domAtPos(syntaxNode.from).node as HTMLElement
-			// 		// if (lineDOMatPos(view, syntaxNode.from) === null)
-			// 			// console.log(scrollLine)
-			// 		// console.log(lineDOMatPos(view, syntaxNode.from))
-			// 		const scrollLine = lineDOMatPos(view, syntaxNode.from)
-			// 		if (!scrollLine)
-			// 			return
-
-			// 		const scrollLeft = value.number //* (scrollLine.scrollWidth - scrollLine.clientWidth)
-			// 		scrollLine.scrollLeft = scrollLeft
-			// 	},
-			// 	from: from,
-			// 	to: to,
-			// })
-		}
-	)
-	// 			ticking = false;
-	// 		}
-	// 	);
-	// 	ticking = true;
-	// }
-
-	// if (reset)
-	// 	reset = false
-
-	// scrollGroups.forEach(
-	// 	(scrollLines: Array<HTMLElement>, idx: number) => scrollLines.forEach(
-	// 		(scrolledLine: HTMLElement) => {
-	// 			scrolledLine.scrollLeft = scrollValues[idx]
-	// 		}
-	// 	)
-	// )
-
-	// clearTimeout(scrollTimeout)
-	// scrollTimeout = setTimeout(
-	// 	() => {
-	// 		reset = true
-	// 	},
-	// 	SCROLL_TIMEOUT,
-	// )
-
-	// syntaxTree(view.state).iterate({
-	// 	enter: (syntaxNode: SyntaxNodeRef) => {
-	// 		if (!isFenceLine(syntaxNode))
-	// 			return
-
-	// 		const scrollLine = view.domAtPos(syntaxNode.from).node as HTMLElement
-
-	// 		const { fenceLimit, fenceValue, filteredValue } = getFenceLimits(
-	// 			syntaxNode.from,
-	// 			scrollStates,
-	// 			false,
-	// 		)
-	// 		if (fenceValue === null)
-	// 			return
-
-	// 		const scrollLeft = fenceValue.number * (scrollLine.scrollWidth - scrollLine.clientWidth)
-
-	// 		// console.log(fenceValue.number)
-
-	// 		scrollLine.scrollLeft = scrollLeft
-	// 		console.log(scrollLine.scrollLeft, scrollLeft, scrollLine.scrollWidth)
-
-	// 		// console.log(scrollLine)
-
-	// 		return false
-	// 	},
-	// 	from: view.viewport.from,
-	// 	to: view.viewport.to,
-	// })
+	})
 }
 
 function setScroll(
 	view: EditorView,
-	position: number,
+	fenceStart: number,
 	scrollPosition: number,
 ): void {
-	const originalScrollLine = lineDOMatPos(view, position)
+	const originalScrollLine = lineDOMatPos(view, fenceStart)
 	if (!originalScrollLine)
 		return
 
-	// if (reset) {
 	const scrollLines: Array<Element> = [originalScrollLine]
-
-	// let previous = originalScrollLine.previousElementSibling
-	// while (previous && previous.hasClass("HyperMD-codeblock") && !previous.hasClass("HyperMD-codeblock-begin")) {
-	// 	scrollLines.push(previous)
-	// 	previous = previous.previousElementSibling
-	// }
 
 	let next = originalScrollLine.nextElementSibling
 	while (next && next.hasClass("HyperMD-codeblock") && !next.hasClass("HyperMD-codeblock-end")) {
@@ -618,10 +515,6 @@ function setScroll(
 		next = next.nextElementSibling
 	}
 
-	// if (!ticking) {
-	// 	window.requestAnimationFrame(
-	// 		() => {
-	// console.log(value.number)
 	scrollLines.forEach(
 		(scrolledLine: HTMLElement) => {
 			if (scrolledLine.scrollLeft !== scrollPosition)

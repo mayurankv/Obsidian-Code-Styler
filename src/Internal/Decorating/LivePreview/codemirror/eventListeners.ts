@@ -11,6 +11,7 @@ let scrollTimeout: NodeJS.Timeout = setTimeout(() => { });
 let reset: boolean = true
 let scrollLine: HTMLElement
 let position: number
+let scrollPosition: number = -1
 let view: EditorView
 let ticking = false;
 
@@ -33,48 +34,42 @@ export function scrollListener(
 			return;
 
 		const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-		if (!activeView)
-			return
-
-		if (activeView.getMode() === "preview")
+		if (!activeView || activeView.getMode() === "preview")
 			return
 
 		// @ts-expect-error Undocumented Obsidian API
 		view = activeView.editor.cm.docView.view
 		position = view.posAtDOM(scrollLine)
-		// scrollLine.setAttribute(SKIP_ATTRIBUTE, "true")
 	}
 
-	if (!ticking) {
-		window.requestAnimationFrame(
-			() => {
-				view.dispatch({
-					effects: fenceScroll.of({
-						scrollPosition: scrollLine.scrollLeft,
-						position: position
+	if (scrollLine.scrollLeft !== scrollPosition) {
+		scrollPosition = scrollLine.scrollLeft
+		if (!ticking) {
+
+			window.requestAnimationFrame(
+				() => {
+					view.dispatch({
+						effects: fenceScroll.of({
+							scrollPosition: scrollPosition,
+							position: position
+						})
 					})
-				})
-				ticking = false;
-			}
-		);
-		ticking = true;
+					ticking = false;
+				}
+			);
+			ticking = true;
+		}
+
+		clearTimeout(scrollTimeout)
+		scrollTimeout = setTimeout(
+			() => {
+				reset = true
+			},
+			SCROLL_TIMEOUT,
+		)
+	} else {
+		reset = true
 	}
-
-	clearTimeout(scrollTimeout)
-	scrollTimeout = setTimeout(
-		() => {
-			reset = true
-			// scrollLine.removeAttribute(SKIP_ATTRIBUTE)
-		},
-		SCROLL_TIMEOUT,
-	)
-
-	// clearTimeout(scrollTimeout)
-	// 	() => {
-
-	// 	},
-	// 	SCROLL_TIMEOUT,
-	// )
 }
 
 export function createScrollEventObservers(
