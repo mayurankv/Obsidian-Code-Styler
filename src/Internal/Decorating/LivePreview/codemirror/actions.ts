@@ -1,6 +1,6 @@
 import { StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { fold, unfold } from "./stateEffects";
+import { fold } from "./stateEffects";
 
 export function foldOnClick(
 	view: EditorView,
@@ -33,21 +33,4 @@ export function foldOnClick(
 	// 		view.requestMeasure();
 	// 	},
 	// );
-}
-
-function foldLines(
-	toFold: boolean,
-	foldInfo: {
-		from: number,
-		to: number,
-		value: {
-			spec: {
-				language: string
-			}
-		}
-	},
-): StateEffect<unknown> {
-	return toFold
-		? fold.of(foldInfo)
-		: unfold.of({ from: foldInfo.from, to: foldInfo.to });
 }

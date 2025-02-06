@@ -1,6 +1,8 @@
 import { Notice, setIcon } from "obsidian";
 import { BUTTON_TIMEOUT, BUTTON_TRANSITION, FOLD_TRANSITION } from "../constants/interface";
 import { Colour } from "../types/decoration";
+import { FOLD_ATTRIBUTE } from "../constants/decoration";
+import { convertBoolean } from "./string";
 
 export async function copyButton(
 	button: HTMLButtonElement,
@@ -23,7 +25,7 @@ export function clickIcon(
 	propertiesEarly: Record<string, string> = {},
 ): void {
 	button.style.setProperty("color", `var(${activeColour})`)
-	button.style.setProperty("transition", `opacity, background-color`)
+	button.style.setProperty("transition-property", `opacity, background-color, transform`)
 	button.style.setProperty("transition-duration", `${transitionDuration}ms`)
 	setIcon(button, newIcon)
 
@@ -38,11 +40,11 @@ export function clickIcon(
 				(property: string) => button.style.removeProperty(property),
 			)
 		},
-		clickTimeout - 1,
+		clickTimeout - 10,
 	)
 	setTimeout(
 		() => {
-			button.style.removeProperty("transition")
+			button.style.removeProperty("transition-property")
 			button.style.removeProperty("transition-duration")
 			Object.keys(properties).forEach(
 				(property: string) => button.style.removeProperty(property),
@@ -53,21 +55,65 @@ export function clickIcon(
 	)
 }
 
+export function toggleFoldIcon(
+	foldButton: HTMLButtonElement | null,
+	foldedIcon: string,
+	unfoldedIcon: string,
+): void {
+	if (!foldButton)
+		return
+
+	const fencePreElement = foldButton.closest("pre.cs-pre")
+	if (!fencePreElement)
+		return
+
+	const foldStatus = convertBoolean(fencePreElement?.getAttribute(FOLD_ATTRIBUTE) ?? null)
+	if (foldStatus === null)
+		return
+
+	animateIconChange(
+		foldButton,
+		foldStatus ? foldedIcon : unfoldedIcon,
+	)
+
+	// fencePreElement.setAttribute(FOLD_ATTRIBUTE, (!foldStatus).toString())
+}
+
 export function animateIconChange(
 	iconContainer: HTMLElement,
 	newIcon: string,
+	halfTransitionDuration: number = FOLD_TRANSITION / 2,
 ): void {
-	const oldPath = iconContainer.querySelector("svg path") as SVGPathElement | null;
-	if (!oldPath)
-		return
+	iconContainer.style.setProperty("transition-property", `opacity`)
+	iconContainer.style.setProperty("transition-duration", `${halfTransitionDuration}ms`)
+	iconContainer.style.setProperty("opacity", "0")
 
-	const newPath = createDiv(
-		{},
-		(element) => setIcon(element, newIcon)
-	).querySelector("svg path") as SVGPathElement | null;
-	if (!newPath)
-		return
+	setTimeout(
+		() => {
+			setIcon(iconContainer, newIcon)
+			iconContainer.style.setProperty("opacity", "1")
+		},
+		halfTransitionDuration,
+	)
+	setTimeout(
+		() => {
+			iconContainer.style.removeProperty("transition-property")
+			iconContainer.style.removeProperty("transition-duration")
+			iconContainer.style.removeProperty("opacity")
+		},
+		2 * halfTransitionDuration,
+	)
 
-	//TODO:
+	// const oldPath = iconContainer.querySelector("svg path") as SVGPathElement | null;
+	// if (!oldPath)
+	// 	return
+
+	// const newPath = createDiv(
+	// 	{},
+	// 	(element) => setIcon(element, newIcon)
+	// ).querySelector("svg path") as SVGPathElement | null;
+	// if (!newPath)
+	// 	return
+
+	// //TODO:
 }
-// lucide-chevron-up

@@ -19,6 +19,7 @@ import { getReferenceCodeMirrorExtensions as getReferenceCodemirrorExtensions } 
 import { getFenceCodemirrorExtensions } from "./Internal/Decorating/LivePreview/fenced";
 import { getInlineCodeMirrorExtensions as getInlineCodemirrorExtensions } from "./Internal/Decorating/LivePreview/inline";
 import { referenceCodeblockProcessor } from "./Internal/Decorating/Rendered/reference";
+import { createViewUpdater } from "./Internal/Decorating/LivePreview/codemirror/utils";
 
 export default class CodeStylerPlugin extends Plugin {
 	settings: CodeStylerSettings;
@@ -155,6 +156,7 @@ export default class CodeStylerPlugin extends Plugin {
 	): void {
 		if (load)
 			this.registerEditorExtension([
+				createViewUpdater(),
 				...getFenceCodemirrorExtensions(this),
 				...getInlineCodemirrorExtensions(this),
 				...getReferenceCodemirrorExtensions(this),

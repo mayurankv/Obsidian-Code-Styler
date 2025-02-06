@@ -1,5 +1,5 @@
 import { tokenClassNodeProp } from "@codemirror/language";
-import { EditorState, Range, RangeSet, SelectionRange, StateField, Transaction } from "@codemirror/state";
+import { EditorState, Range, RangeSet, RangeValue, SelectionRange, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, ViewUpdate } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { editorInfoField, editorLivePreviewField, livePreviewState } from "obsidian";
@@ -8,8 +8,19 @@ import { LinkInfo } from "src/Internal/types/parsing";
 import { parseLinks } from "src/Internal/utils/parsing";
 import { CommentLinkWidget } from "./widgets";
 import CodeStylerPlugin from "src/main";
-import { visualStateUpdate } from "./stateEffects";
+import { fenceScroll, visualStateUpdate } from "./stateEffects";
 import { AnyRange, BaseRange, FenceInfo } from "src/Internal/types/decoration";
+import { RangeNumber } from "./ranges";
+
+export function createViewUpdater() {
+	return EditorView.updateListener.of((update: ViewUpdate) => {
+		if (updateViewPlugin(update))
+			update.view.dispatch({effects: visualStateUpdate.of(true)})
+
+		// if (!cursorInView(update.view))
+		// 	console.log("TODO: Scroll to view, ensure only horizontal scrolls though (on selection change)")
+	})
+}
 
 export function getCommentDecorations(
 	state: EditorState,
@@ -92,7 +103,9 @@ export function getCommentDecorations(
 									: `[${extendedLinkInfo.title}](${extendedLinkInfo.reference})`,
 								state.field(editorInfoField)?.file?.path ?? "",
 								plugin,
-							)
+							),
+							interactive: true,
+							sourceMode: false,
 						}),
 					},
 				)
@@ -118,22 +131,24 @@ export function getCommentDecorations(
 
 export function getStateFieldsViewDecorations(
 	view: EditorView,
-	stateFields: Array<StateField<DecorationSet>>,
+	stateFields: Array<StateField<RangeSet<any>>>,
 ): DecorationSet {
 	return RangeSet.join(stateFields.map((stateField: StateField<DecorationSet>) => getStateFieldViewDecorations(view, stateField)))
 }
 
 export function getStateFieldDecorations(
 	state: EditorState,
-	stateField: StateField<DecorationSet>,
+	stateField: StateField<RangeSet<any>>,
 ): DecorationSet {
 	return state.field(stateField).update({ //TODO: Maybe update to between? Might update in place
 		filter: (
 			from: number,
 			to: number,
-			value: Decoration,
-		) => (value.spec?.include !== false) &&
+			value: any,
+		) => (typeof value?.spec === "object") &&
+			(value.spec?.include !== false) &&
 			(value.spec?.viewPlugin === false) &&
+			!(value.spec?.sourceMode === false && isSourceMode(state)) &&
 			!(
 				value.spec?.interactive === true &&
 				areRangesInteracting(state, value.spec?.interactStart ?? from, value.spec?.interactEnd ?? to)
@@ -145,13 +160,16 @@ export function getStateFieldViewDecorations(
 	view: EditorView,
 	stateField: StateField<DecorationSet>,
 ): DecorationSet {
+	// console.log(isSourceMode(view.state))
 	return view.state.field(stateField).update({ //TODO: Maybe update to between? Might update in place
 		filter: (
 			from: number,
 			to: number,
-			value: Decoration,
-		) => (value.spec?.include !== false) &&
+			value: any,
+		) => (typeof value?.spec === "object") &&
+			(value.spec?.include !== false) &&
 			(value.spec?.viewPlugin !== false) &&
+			!(value.spec?.sourceMode === false && isSourceMode(view.state)) &&
 			!(
 				value.spec?.interactive === true &&
 				areRangesInteracting(view.state, value.spec?.interactStart ?? from, value.spec?.interactEnd ?? to) &&
@@ -164,8 +182,22 @@ export function getStateFieldViewDecorations(
 	})
 }
 
+export function getStateFieldScrollStates(
+	state: EditorState,
+	stateField: StateField<RangeSet<any>>,
+): RangeSet<RangeNumber> {
+	return state.field(stateField).update({ //TODO: Maybe update to between? Might update in place
+		filter: (
+			from: number,
+			to: number,
+			value: any,
+		) => (value instanceof RangeNumber) &&
+			(typeof value?.number === "number"),
+	})
+}
+
 export function getFoldStatuses(
-	value: DecorationSet,
+	value: RangeSet<any>,
 	fenceInfo: FenceInfo,
 ): {currentFoldStatus: boolean, baseFoldStatus: boolean} | null {
 	let foldStatuses: {currentFoldStatus: boolean, baseFoldStatus: boolean} | null = null
@@ -175,9 +207,9 @@ export function getFoldStatuses(
 		(
 			from: number,
 			to: number,
-			value: Decoration,
+			value: any,
 		) => {
-			if (value.spec?.fold !== "boolean")
+			if (typeof value?.spec?.fold !== "boolean")
 				return
 
 			foldStatuses = {currentFoldStatus: value.spec.currentFoldStatus, baseFoldStatus: value.spec.baseFoldStatus}
@@ -187,6 +219,57 @@ export function getFoldStatuses(
 	)
 
 	return foldStatuses
+}
+
+export function getScrollStatus(
+	value: RangeSet<any>,
+	fenceInfo: FenceInfo,
+): number | null {
+	let scrollStatus: number | null = null
+	value.between(
+		fenceInfo.headerStart,
+		fenceInfo.footerEnd,
+		(
+			from: number,
+			to: number,
+			value: any,
+		) => {
+			if (!(value instanceof RangeNumber))
+				return
+
+			scrollStatus = value.number
+
+			return false
+		},
+	)
+
+	return scrollStatus
+}
+
+export function getFenceLimits(
+	position: number,
+	value: RangeSet<any>,
+	exclude: boolean = true,
+): { fenceLimit: {from: number, to: number} | null, fenceValue: any | null, filteredValue: RangeSet<any> } {
+	let fenceLimit: {from: number, to: number} | null = null
+	let fenceValue: any | null = null
+
+	const filteredValue = value.update({
+		filter: (from: number, to: number, value: any) => {
+			if (!(value instanceof RangeNumber))
+				return exclude
+
+			if (!((from <= position) && (position <= to)))
+				return exclude
+
+			fenceLimit = {from: from, to: to}
+			fenceValue = value
+
+			return !exclude
+		},
+	})
+
+	return {fenceLimit: fenceLimit, fenceValue: fenceValue, filteredValue: filteredValue}
 }
 
 // export function updateStateFieldDecorations( //TODO: This should be the function that properly maps decorations between docchanged eveents and rewrites
@@ -254,14 +337,20 @@ export function updateViewPlugin(
 
 export function updateBaseStateField(
 	transaction: Transaction,
-) {
+): boolean {
 	return transaction.docChanged
 }
 
 export function updateStateField(  //NOTE: TODO: Ideally would map ranges on docchanged unless affected but quirks mean that statefield doesn'y actually get whole document so some decorations don't exist in create and thus this wouldn't work on scrolling; hence why the view updater is needed
 	transaction: Transaction,
-) {
+): boolean {
 	return updateBaseStateField(transaction) || transaction.effects.some(effect => effect.is(visualStateUpdate))
+}
+
+export function updateInteractions(
+	update: ViewUpdate,
+): boolean {
+	return update.transactions.some((transaction) => transaction.effects.some((effect) => effect.is(fenceScroll)))
 }
 
 export function cursorInView(
@@ -277,4 +366,50 @@ export function cursorInView(
 	const inView = (cursorCoords.left >= viewportRect.left && cursorCoords.right <= viewportRect.right);
 
 	return inView
+}
+
+export function lineDOMatPos(
+	view: EditorView,
+	pos: number,
+): HTMLElement | null {
+	if (!isVisible(view, pos))
+		return null;
+
+	// @ts-expect-error private API
+	const children: Array<any> | undefined = view.docView?.children;
+
+	if (!children)
+		return null;
+
+	let from = 0;
+
+	for (let i = 0; i < children.length; i++) {
+		const child = children[i];
+		const to = from + child.length;
+
+		if ('addLineDeco' in child && pos >= from && pos <= to)
+			return (child.dom ?? null) as HTMLElement | null;
+
+		from = to + child.breakAfter;
+
+		if (pos < from)
+			break;
+	}
+
+	return null;
+}
+
+export function valueInRange(
+	position: number,
+	from: number,
+	to: number,
+): boolean {
+	return (from <= position) && (position <= to)
+}
+
+export function isVisible(
+	view: EditorView,
+	pos: number,
+): boolean {
+	return view.visibleRanges.some(range => isRangeInteracting(pos, pos, range))
 }

@@ -1,42 +1,37 @@
-import { EditorState, Extension, Line, Range, RangeSet, RangeSetBuilder, SelectionRange, StateEffect, StateField, Transaction } from "@codemirror/state";
+import { syntaxTree } from "@codemirror/language";
+import { EditorState, Extension, Range, RangeSet, StateEffect, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
-import { editorInfoField, livePreviewState } from "obsidian";
-import { PREFIX } from "src/Internal/constants/general";
-import { updateFenceInfo, isFenceStart, isFenceLine, isFenceEnd, isFenceComment } from "src/Internal/Detecting/LivePreview/fenced";
-import { FenceCodeParameters, LinkInfo } from "src/Internal/types/parsing";
+import { editorInfoField } from "obsidian";
+import { isFenceComment, isFenceEnd, isFenceLine, isFenceStart, updateFenceInfo } from "src/Internal/Detecting/LivePreview/fenced";
+import { FenceInfo } from "src/Internal/types/decoration";
 import { getLineClasses } from "src/Internal/utils/decorating";
-import { parseLinks } from "src/Internal/utils/parsing";
 import CodeStylerPlugin from "src/main";
-import { areRangesInteracting, getCommentDecorations, isSourceMode, isFileIgnored, updateStateField, updateViewPlugin, cursorInView, updateBaseStateField, isRangeInteracting, getStateFieldsViewDecorations, getStateFieldDecorations, getFoldStatuses } from "./codemirror/utils";
-import { CommentLinkWidget, FillerWidget, FooterWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
-import { createScrollEventObservers } from "./codemirror/eventListeners";
-import { syntaxTree } from "@codemirror/language";
-import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/fenced";
-import { cleanFenceCodeParametersLine } from "src/Internal/utils/detecting";
-import { FenceInfo, FenceState } from "src/Internal/types/decoration";
-import { fold, visualStateUpdate
-} from "./codemirror/stateEffects";
+import { createScrollEventObservers, scrollListener } from "./codemirror/eventListeners";
+import { getCommentDecorations, getFenceLimits, getFoldStatuses, getScrollStatus, getStateFieldDecorations, getStateFieldScrollStates, getStateFieldsViewDecorations, isFileIgnored, lineDOMatPos, updateBaseStateField, updateInteractions, updateStateField, valueInRange } from "./codemirror/utils";
+import { FillerWidget, FooterWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
+import { RangeNumber } from "./codemirror/ranges";
+import { fenceScroll } from "./codemirror/stateEffects";
+import { SCROLL_TIMEOUT } from "src/Internal/constants/interface";
+import { PREFIX } from "src/Internal/constants/general";
+import { DATA_PREFIX, SKIP_ATTRIBUTE } from "src/Internal/constants/detecting";
 
 export function getFenceCodemirrorExtensions(
 	plugin: CodeStylerPlugin,
 ) {
 	return [
-		createViewUpdater(),
 		...createFenceCodeDecorations(plugin),
 		createScrollEventObservers(plugin),
 	]
 }
 
-let i = 0
-
 function createFenceCodeDecorations(
 	plugin: CodeStylerPlugin,
 ) {
-	const fullStateField = StateField.define<DecorationSet>({
+	const fullStateField = StateField.define<RangeSet<any>>({
 		create(
 			state: EditorState,
-		): DecorationSet {
+		): RangeSet<any> {
 			return buildFenceCodeDecorations(
 				state,
 				Decoration.none,
@@ -45,17 +40,22 @@ function createFenceCodeDecorations(
 		},
 
 		update(
-			value: DecorationSet,
+			value: RangeSet<any>,
 			transaction: Transaction,
-		): DecorationSet {
+		): RangeSet<any> {
 			value = value.map(transaction.changes)
 
 			if (updateStateField(transaction)) //NOTE: TODO: Ideally would map ranges on docchanged unless affected but quirks mean that statefield doesn'y actually get whole document so some decorations don't exist in create and thus this wouldn't work on scrolling; hence why the view updater is needed
-				return buildFenceCodeDecorations(
+				value = buildFenceCodeDecorations(
 					transaction.state,
 					value.map(transaction.changes),
 					plugin,
 				);
+
+			value = transaction.effects.reduce(
+				(value: RangeSet<any>, effect: StateEffect<any>) => adjustTransactions(value, effect, transaction),
+				value,
+			)
 
 			return value
 		},
@@ -114,7 +114,9 @@ function createFenceCodeDecorations(
 			this.addDecorations(update.view)
 		}
 
-		addDecorations(view: EditorView) {
+		addDecorations(
+			view: EditorView,
+		) {
 			this.decorations = getStateFieldsViewDecorations(view, stateFields)
 		}
 
@@ -123,41 +125,126 @@ function createFenceCodeDecorations(
 		}
 	}
 
-	const viewPlugin = ViewPlugin.fromClass(
+	class FenceCodeInteractions implements PluginValue {
+		plugin: CodeStylerPlugin;
+
+		constructor(
+			view: EditorView,
+		) {
+			view.contentDOM.addEventListener(
+				"scroll",
+				(event: Event) => scrollListener(event, plugin),
+				{
+					capture: true,
+				},
+			)
+		}
+
+		update(
+			update: ViewUpdate,
+		) {
+			if (updateInteractions(update))
+				this.addInteractions(
+					update.view,
+					update.transactions,
+				)
+		}
+
+		addInteractions(
+			view: EditorView,
+			transactions: Array<Transaction>,
+		) {
+			const scrollEffects = transactions.reduce(
+				(result: Array<StateEffect<any>>, transaction: Transaction) => {
+					transaction.effects.forEach(
+						(effect: StateEffect<any>) => {
+							if (effect.is(fenceScroll))
+								result.push(effect)
+
+						}
+					)
+
+					return result
+				},
+				[],
+			)
+			addScrollInteractions(
+				view,
+				scrollEffects,
+				fullStateField,
+			)
+		}
+
+		destroy() {
+			return;
+		}
+	}
+
+	const decorationViewPlugin = ViewPlugin.fromClass(
 		FenceCodeDecorations,
 		{
 			decorations: (
 				value: FenceCodeDecorations,
 			) => value.decorations,
-		}
+		},
 	);
+
+	const interactionViewPlugin = ViewPlugin.fromClass(
+		FenceCodeInteractions,
+		{},
+	);
+
+	const viewPlugins = [
+		decorationViewPlugin,
+		interactionViewPlugin,
+	]
 
 	return [
 		...stateFields,
-		viewPlugin,
+		...viewPlugins,
 	]
 }
 
-function createViewUpdater() {
-	return EditorView.updateListener.of((update: ViewUpdate) => {
-		if (updateViewPlugin(update))
-			update.view.dispatch({effects: visualStateUpdate.of(true)})
+function adjustTransactions(
+	value: RangeSet<any>,
+	effect: StateEffect<any>,
+	transaction: Transaction,
+): RangeSet<any> {
+	if (effect.is(fenceScroll)) {
+		if (transaction.docChanged)
+			return value;
 
-		if (!cursorInView(update.view))
-			console.log("TODO: Scroll to view, ensure only horizontal scrolls though (on selection change)")
-	})
+		const { fenceLimit, fenceValue, filteredValue } = getFenceLimits(effect.value.position, value)
+		if (fenceLimit === null)
+			throw new Error("Missing fence range")
+
+		value = filteredValue.update({
+			add: [
+				new RangeNumber(effect.value.scrollPosition).range(
+					fenceLimit.from,
+					fenceLimit.to,
+				)
+			],
+			sort: true,
+
+		})
+
+		return value
+	}
+
+	return value
 }
 
 function buildFenceCodeDecorations(
 	state: EditorState,
-	value: DecorationSet,
+	value: RangeSet<any>,
 	plugin: CodeStylerPlugin,
-): DecorationSet {
+): RangeSet<any> {
 	if (isFileIgnored(state))
 		return Decoration.none;
 
 	let fenceInfo = new FenceInfo({sourcePath: state.field(editorInfoField)?.file?.path ?? ""})
-	let allDecorations: Array<Range<Decoration>> = []
+	let allDecorations: Array<Range<any>> = []
 
 	syntaxTree(state).iterate({ //TODO: Use `ensureSyntaxTree` to get more of document
 		enter: (syntaxNode: SyntaxNodeRef) => {
@@ -215,19 +302,20 @@ function buildFenceCodeDecorations(
 				}
 
 				if (isFenceEnd(syntaxNode)) {
-					fenceInfo.decorations.push({
-						from: syntaxNode.from,
-						to: syntaxNode.to,
-						value: "footer"
-					})
-
 					const previousFoldStatuses = getFoldStatuses(value, fenceInfo)
 					fenceInfo.baseFoldStatus = fenceInfo.parameters.fold.enabled === true
 					fenceInfo.currentFoldStatus = previousFoldStatuses !== null
 						? previousFoldStatuses.baseFoldStatus === fenceInfo.baseFoldStatus ? previousFoldStatuses.currentFoldStatus : fenceInfo.baseFoldStatus
 						: fenceInfo.baseFoldStatus
 
+					fenceInfo.scroll = getScrollStatus(value, fenceInfo) ?? 0
+
 					fenceInfo.decorations.push(
+						{
+							from: syntaxNode.from,
+							to: syntaxNode.to,
+							value: "footer"
+						},
 						{
 							from: fenceInfo.bodyStart,
 							to: fenceInfo.bodyEnd,
@@ -239,11 +327,17 @@ function buildFenceCodeDecorations(
 								interactEnd: fenceInfo.footerEnd,
 								include: fenceInfo.currentFoldStatus,
 								viewPlugin: false,
+								sourceMode: false,
 								fold: true,
 								currentFoldStatus: fenceInfo.currentFoldStatus,
 								baseFoldStatus: fenceInfo.baseFoldStatus,
 								language: fenceInfo.parameters.language,
 							}),
+						},
+						{
+							from: fenceInfo.bodyStart,
+							to: fenceInfo.bodyEnd,
+							value: new RangeNumber(fenceInfo.scroll),
 						},
 					)
 				}
@@ -256,13 +350,13 @@ function buildFenceCodeDecorations(
 
 	allDecorations.push(...convertFenceDecorations(fenceInfo, plugin))
 
-	return Decoration.set(allDecorations, true);
+	return RangeSet.of(allDecorations, true);
 }
 
 function convertFenceDecorations(
 	fenceInfo: FenceInfo,
 	plugin: CodeStylerPlugin,
-) {
+): Array<Range<any>> {
 	const maxChars = fenceInfo.decorations.reduce(
 		(result: number, decoration: Range<any>) => ((typeof decoration.value?.chars === "number") && (decoration.value.chars > result))
 			? decoration.value.chars
@@ -307,6 +401,7 @@ function convertFenceDecorations(
 						block: false,
 						side: -10,
 						interactive: true,
+						sourceMode: false,
 					}),
 				}
 
@@ -325,6 +420,7 @@ function convertFenceDecorations(
 						block: false,
 						side: -10,
 						interactive: true,
+						sourceMode: false,
 					}),
 				}
 
@@ -336,6 +432,7 @@ function convertFenceDecorations(
 							maxChars - decoration.value.chars
 						),
 						side: 10,
+						sourceMode: false,
 					}),
 				}
 
@@ -350,8 +447,8 @@ function convertFenceDecorations(
 								decoration.value.lineNumber,
 								decoration.value.lineText,
 							).join(" "),
-
-						}
+						},
+						sourceMode: false,
 					}),
 				}
 
@@ -365,10 +462,170 @@ function convertFenceDecorations(
 							fenceInfo.parameters,
 						),
 						side: -5,
+						sourceMode: false,
 					}),
 				}
 
 			return decoration
+		}
+	)
+}
+
+let scrollTimeout: NodeJS.Timeout = setTimeout(() => { });
+let reset: boolean = true
+let scrollGroups: Array<Array<HTMLElement>>
+let ticking = false;
+
+function addScrollInteractions(
+	view: EditorView,
+	scrollEffects: Array<StateEffect<any>>,
+	stateField: StateField<RangeSet<any>>,
+): void {
+	// if (!ticking) {
+	// 	window.requestAnimationFrame(
+	// 		() => {
+	// const scrollValues: Array<number> = []
+	// if (reset)
+	// 	scrollGroups = []
+	if (scrollEffects.length !== 1)
+		throw new Error("Unexpected scroll effects")
+
+	const position = scrollEffects[0].value.position
+
+	const scrollStates = getStateFieldScrollStates(view.state, stateField)
+	scrollStates.update({
+		filter: (from: number, to: number, value: any) => valueInRange(position, from, to),
+		filterFrom: view.viewport.from,
+		filterTo: view.viewport.to,
+	}).between(
+		view.viewport.from,
+		view.viewport.to,
+		(from: number, to: number, value: RangeNumber) => {
+			if (!valueInRange(position, from, to))
+				return
+
+
+			// 			ticking = false;
+			// 		}
+			// 	);
+			// 	ticking = true;
+			// }
+
+				// scrollGroups.push(scrollLines)
+			// }
+
+			// scrollValues.push(value.number)
+
+			// syntaxTree(view.state).iterate({
+			// 	enter: (syntaxNode: SyntaxNodeRef) => {
+			// 		if (!isFenceLine(syntaxNode))
+			// 			return
+
+			// 		// const scrollLine = view.domAtPos(syntaxNode.from).node as HTMLElement
+			// 		// if (lineDOMatPos(view, syntaxNode.from) === null)
+			// 			// console.log(scrollLine)
+			// 		// console.log(lineDOMatPos(view, syntaxNode.from))
+			// 		const scrollLine = lineDOMatPos(view, syntaxNode.from)
+			// 		if (!scrollLine)
+			// 			return
+
+			// 		const scrollLeft = value.number //* (scrollLine.scrollWidth - scrollLine.clientWidth)
+			// 		scrollLine.scrollLeft = scrollLeft
+			// 	},
+			// 	from: from,
+			// 	to: to,
+			// })
+		}
+	)
+	// 			ticking = false;
+	// 		}
+	// 	);
+	// 	ticking = true;
+	// }
+
+	// if (reset)
+	// 	reset = false
+
+	// scrollGroups.forEach(
+	// 	(scrollLines: Array<HTMLElement>, idx: number) => scrollLines.forEach(
+	// 		(scrolledLine: HTMLElement) => {
+	// 			scrolledLine.scrollLeft = scrollValues[idx]
+	// 		}
+	// 	)
+	// )
+
+	// clearTimeout(scrollTimeout)
+	// scrollTimeout = setTimeout(
+	// 	() => {
+	// 		reset = true
+	// 	},
+	// 	SCROLL_TIMEOUT,
+	// )
+
+	// syntaxTree(view.state).iterate({
+	// 	enter: (syntaxNode: SyntaxNodeRef) => {
+	// 		if (!isFenceLine(syntaxNode))
+	// 			return
+
+	// 		const scrollLine = view.domAtPos(syntaxNode.from).node as HTMLElement
+
+	// 		const { fenceLimit, fenceValue, filteredValue } = getFenceLimits(
+	// 			syntaxNode.from,
+	// 			scrollStates,
+	// 			false,
+	// 		)
+	// 		if (fenceValue === null)
+	// 			return
+
+	// 		const scrollLeft = fenceValue.number * (scrollLine.scrollWidth - scrollLine.clientWidth)
+
+	// 		// console.log(fenceValue.number)
+
+	// 		scrollLine.scrollLeft = scrollLeft
+	// 		console.log(scrollLine.scrollLeft, scrollLeft, scrollLine.scrollWidth)
+
+	// 		// console.log(scrollLine)
+
+	// 		return false
+	// 	},
+	// 	from: view.viewport.from,
+	// 	to: view.viewport.to,
+	// })
+}
+
+function setScroll(
+	view: EditorView,
+	position: number,
+	scrollPosition: number,
+): void {
+	const originalScrollLine = lineDOMatPos(view, position)
+	if (!originalScrollLine)
+		return
+
+	// if (reset) {
+	const scrollLines: Array<Element> = [originalScrollLine]
+
+	// let previous = originalScrollLine.previousElementSibling
+	// while (previous && previous.hasClass("HyperMD-codeblock") && !previous.hasClass("HyperMD-codeblock-begin")) {
+	// 	scrollLines.push(previous)
+	// 	previous = previous.previousElementSibling
+	// }
+
+	let next = originalScrollLine.nextElementSibling
+	while (next && next.hasClass("HyperMD-codeblock") && !next.hasClass("HyperMD-codeblock-end")) {
+		// if (!next.hasAttribute(SKIP_ATTRIBUTE))
+		scrollLines.push(next)
+		next = next.nextElementSibling
+	}
+
+	// if (!ticking) {
+	// 	window.requestAnimationFrame(
+	// 		() => {
+	// console.log(value.number)
+	scrollLines.forEach(
+		(scrolledLine: HTMLElement) => {
+			if (scrolledLine.scrollLeft !== scrollPosition)
+				scrolledLine.scrollLeft = scrollPosition
 		}
 	)
 }

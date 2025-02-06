@@ -7,38 +7,7 @@ import { parseInlineCodeParameters, splitInlineCodeRaw } from "src/Internal/Pars
 import { InlineCodeInfo } from "src/Internal/types/detecting";
 import CodeStylerPlugin from "src/main";
 
-export function buildInlineDecorations(
-	state: EditorState,
-	plugin: CodeStylerPlugin,
-	buildInlineDecoration: (
-		state: EditorState,
-		inlineCodeInfo: InlineCodeInfo | null,
-		plugin: CodeStylerPlugin,
-	) => Array<Range<Decoration>>,
-): DecorationSet {
-	if (isFileIgnored(state))
-		return Decoration.none;
-
-	let builder = new RangeSetBuilder<Decoration>();
-
-	syntaxTree(state).iterate({
-		enter: (syntaxNode) => buildInlineDecoration(
-			state,
-			getInlineCodeInfo(state, syntaxNode),
-			plugin,
-		).sort(
-			(a, b) => (a.from === b.from)
-				? a.value.startSide < b.value.startSide ? -1 : a.value.startSide > b.value.startSide ? 1 : 0
-				: a.from < b.from ? -1 : 1
-		).forEach(
-			({from, to, value}) => builder.add(from, to, value),
-		),
-	});
-
-	return builder.finish();
-}
-
-function getInlineCodeInfo(
+export function getInlineCodeInfo(
 	state: EditorState,
 	syntaxNode: SyntaxNodeRef,
 ): InlineCodeInfo | null {

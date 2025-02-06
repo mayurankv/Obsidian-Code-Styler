@@ -66,11 +66,23 @@ export function createHeaderElement(
 			fence,
 			plugin,
 		),
+		createEditButton(
+			codeParameters,
+			fence,
+			plugin,
+		),
 		createCopyIcon(
 			codeParameters,
 			content,
 			fence,
 			true,
+			plugin,
+		),
+		createFoldIcon(
+			codeParameters,
+			foldStatus,
+			fence,
+			`chevron-down`,//`chevron-${foldStatus ? "right" : "down"}`,
 			plugin,
 		),
 		createHeaderSeparator(
@@ -82,34 +94,14 @@ export function createHeaderElement(
 
 	if (fence)
 		headerElement.onClickEvent(
-			(event: Event) => {
+			async (event: Event) => {
 				if (!event.target || !(event.target instanceof Element) || (event.target.tagName === "button") || event.target.hasClass("internal-link") || event.target.hasClass("external-link"))
 					return
 
 				if ((event.target?.tagName === "BUTTON") || (event.target.matchParent("button")))
 					return
 
-				viewDependentCallback(
-					plugin,
-					(view: MarkdownView, plugin: CodeStylerPlugin) => {
-						const fencePreElement = headerElement.parentElement
-						if (!fencePreElement || !(fencePreElement.tagName.toLowerCase() === "pre"))
-							return false
-
-						renderedFoldFence(fencePreElement)
-						return true
-					},
-					(view: EditorView, plugin: CodeStylerPlugin) => {
-						view.dispatch({
-							effects: applyFold.of({
-								foldStatus: convertBoolean(headerElement.getAttribute(FOLD_ATTRIBUTE) ?? ""),
-								position: view.posAtDOM(headerElement),
-							})
-						});
-						console.log("Fold live preview")
-						// view.requestMeasure();
-					},
-				)
+				await foldFence(event.target as HTMLElement, plugin)
 			},
 			{
 				capture: true,
@@ -134,6 +126,9 @@ export function createFooterElement(
 				PREFIX + "footer",
 				...(fence ? [] : ["cm-inline-code"]),
 			],
+			attr: {
+				[FOLD_ATTRIBUTE]: foldStatus.toString(),
+			},
 		},
 	);
 
@@ -154,6 +149,7 @@ export function createFooterElement(
 			codeParameters,
 			foldStatus,
 			fence,
+			foldStatus ? "ellipsis" : "chevron-up",
 			plugin,
 		),
 	)
@@ -382,6 +378,52 @@ function createExecuteCodeTitle(
 	)
 }
 
+function createEditButton(
+	codeParameters: CodeParameters,
+	fence: boolean,
+	plugin: CodeStylerPlugin,
+): HTMLElement {
+	const editElement = createEl(
+		"button",
+		{
+			cls: [
+				PREFIX + "edit-code-button",
+				...(fence ? [] : [PREFIX + "hidden"]),
+			],
+		},
+		(element) => setIcon(element, `pencil`),
+	)
+
+	editElement.onclick = async (event: MouseEvent) => {
+		if (!event.target)
+			return
+
+		await viewDependentCallback(
+			plugin,
+			async (view: MarkdownView, plugin: CodeStylerPlugin) => {
+				// @ts-expect-error Undocumented Obsidian API
+				await plugin.app.workspace.getActiveFileView().setState({ mode: 'source', source: false }, {})
+
+				return false
+			},
+			async (view: EditorView, plugin: CodeStylerPlugin) => {
+				//TODO: How to get full fence position in codemirror now and select codeblock?
+				console.log("TO IMPLEMENT EDITING VIEW")
+				const position = view.posAtDOM(event.target as HTMLElement)
+				view.dispatch({
+					selection: {
+						head: position,
+						anchor: position,
+					}
+				})
+
+				view.focus()
+			},
+		)
+	}
+
+	return editElement
+}
 
 function createHeaderSeparator(
 	codeParameters: CodeParameters,
@@ -445,6 +487,7 @@ function createFoldIcon(
 	codeParameters: CodeParameters,
 	foldStatus: boolean,
 	fence: boolean,
+	icon: string,
 	plugin: CodeStylerPlugin,
 ): HTMLElement {
 	const foldElement = createEl(
@@ -455,12 +498,45 @@ function createFoldIcon(
 				...(fence ? [] : [PREFIX + "hidden"]),
 			],
 		},
-		(element) => setIcon(element, `chevron-${foldStatus ? "down" : "up"}`),
+		(element) => setIcon(element, icon),
 	)
+
+	foldElement.onclick = async (event: MouseEvent) => await foldFence(foldElement, plugin)
 
 	return foldElement
 }
 
+async function foldFence(
+	triggerElement: HTMLElement,
+	plugin: CodeStylerPlugin,
+): Promise<void> {
+	await viewDependentCallback(
+		plugin,
+		(view: MarkdownView, plugin: CodeStylerPlugin) => {
+			const fencePreElement = triggerElement.closest("pre.cs-pre") as HTMLElement | null
+			if (!fencePreElement || !(fencePreElement.tagName.toLowerCase() === "pre"))
+				return false
+
+			renderedFoldFence(fencePreElement)
+
+			return true
+		},
+		(view: EditorView, plugin: CodeStylerPlugin) => {
+			const parentElement = (triggerElement.closest(`.${PREFIX}header`) ?? triggerElement.closest(`.${PREFIX}footer`))
+			if (!parentElement)
+				return
+
+			view.dispatch({
+				effects: applyFold.of({
+					foldStatus: convertBoolean(parentElement.getAttribute(FOLD_ATTRIBUTE) ?? ""),
+					position: view.posAtDOM(parentElement),
+				})
+			});
+			console.log("Fold live preview should work but need to do recieving of effects")
+			// view.requestMeasure(); //TODO: needed?
+		},
+	)
+}
 
 export function ignoreActionEvents(
 	event: Event,

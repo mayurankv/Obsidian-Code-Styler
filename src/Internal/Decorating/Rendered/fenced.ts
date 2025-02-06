@@ -14,7 +14,7 @@ import { convertCommentLinks, getIndentation, getLineClasses } from "../../utils
 import { createFooterElement, createHeaderElement } from "../elements";
 import { BUTTON_TIMEOUT, BUTTON_TRANSITION, FOLD_TRANSITION } from "src/Internal/constants/interface";
 import { convertBoolean } from "src/Internal/utils/string";
-import { animateIconChange, copyButton } from "src/Internal/utils/elements";
+import { animateIconChange, copyButton, toggleFoldIcon } from "src/Internal/utils/elements";
 
 export async function renderedFencedCodeDecorating(
 	element: HTMLElement,
@@ -409,52 +409,64 @@ function getFenceCodeLines(
 }
 
 export function renderedFoldFence(
-	codeblockPreElement: HTMLElement,
+	fencePreElement: HTMLElement,
 	fold: boolean | null | "toggle" = "toggle",
 ): void {
 	//TODO: Fix
 	console.log("fold reading")
-	if (codeblockPreElement.firstElementChild?.hasClass(`${PREFIX}header`) && codeblockPreElement.firstElementChild?.hasClass(`${PREFIX}hidden`))
+	if (fencePreElement.firstElementChild?.hasClass(`${PREFIX}header`) && fencePreElement.firstElementChild?.hasClass(`${PREFIX}hidden`))
 		return;
 
-	codeblockPreElement.querySelectorAll("pre > code").forEach(
+	fencePreElement.querySelectorAll("pre > code").forEach(
 		(fenceCodeElement: HTMLElement) => fenceCodeElement.style.setProperty(
 			"max-height",
 			`${Math.ceil(fenceCodeElement.scrollHeight)}px`
 		),
 	)
-	codeblockPreElement.addClass(`${PREFIX}hide-scroll`);
+	// fencePreElement.querySelectorAll(`pre > div.${PREFIX}footer`).forEach(
+	// 	(fenceFooterElement: HTMLElement) => fenceFooterElement.style.setProperty(
+	// 		"max-height",
+	// 		`${Math.ceil(fenceFooterElement.scrollHeight)}px`
+	// 	),
+	// )
+	fencePreElement.addClass(`${PREFIX}hide-scroll`);
 
 	setTimeout(
 		() => {
 			if (fold === null)
-				codeblockPreElement.setAttribute(
+				fencePreElement.setAttribute(
 					FOLD_ATTRIBUTE,
-					(convertBoolean(codeblockPreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE)) ?? false).toString(),
+					(convertBoolean(fencePreElement.getAttribute(DEFAULT_FOLD_ATTRIBUTE)) ?? false).toString(),
 				)
 			else if (fold === "toggle")
-				codeblockPreElement.setAttribute(
+				fencePreElement.setAttribute(
 					FOLD_ATTRIBUTE,
-					(!(convertBoolean(codeblockPreElement.getAttribute(FOLD_ATTRIBUTE)) ?? false)).toString(),
+					(!(convertBoolean(fencePreElement.getAttribute(FOLD_ATTRIBUTE)) ?? false)).toString(),
 				)
 			else
-				codeblockPreElement.setAttribute(
+				fencePreElement.setAttribute(
 					FOLD_ATTRIBUTE,
 					fold.toString(),
 				)
 
 			setTimeout(
 				() => {
-					codeblockPreElement.querySelectorAll("pre > code").forEach(
+					fencePreElement.querySelectorAll("pre > code").forEach(
 						(codeblockCodeElement: HTMLElement) => codeblockCodeElement.style.removeProperty("max-height"),
-					); window
-					codeblockPreElement.removeClass(`${PREFIX}hide-scroll`);
+					);
+					// fencePreElement.querySelectorAll(`pre > div.${PREFIX}footer`).forEach(
+					// 	(fenceFooterElement: HTMLElement) => fenceFooterElement.style.removeProperty("max-height"),
+					// );
+					fencePreElement.removeClass(`${PREFIX}hide-scroll`);
 				},
 				FOLD_TRANSITION,
 			)
 
-			codeblockPreElement.querySelector("div.cs-header")?.setAttribute(FOLD_ATTRIBUTE, codeblockPreElement.getAttribute(FOLD_ATTRIBUTE) ?? "false")
-			// animateIconChange(codeblockPreElement.querySelector(`div.${PREFIX}header > button.${PREFIX}fold-code-button`), )
+			fencePreElement.querySelector(`.${PREFIX}header`)?.setAttribute(FOLD_ATTRIBUTE, fencePreElement.getAttribute(FOLD_ATTRIBUTE) ?? "false")
+			fencePreElement.querySelector(`.${PREFIX}footer`)?.setAttribute(FOLD_ATTRIBUTE, fencePreElement.getAttribute(FOLD_ATTRIBUTE) ?? "false")
+
+			// toggleFoldIcon(fencePreElement.querySelector(`.${PREFIX}header button.${PREFIX}fold-code-button`), "chevron-right", "chevron-down")
+			toggleFoldIcon(fencePreElement.querySelector(`.${PREFIX}footer button.${PREFIX}fold-code-button`), "ellipsis", "chevron-up")
 		},
 		1,
 	)

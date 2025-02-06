@@ -1,12 +1,7 @@
-import { syntaxTree } from "@codemirror/language";
-import { EditorState, Line, Range, RangeSetBuilder } from "@codemirror/state";
-import { Decoration, DecorationSet } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
 import { SyntaxNodeRef } from "@lezer/common";
-import { isFileIgnored, isSourceMode } from "src/Internal/Decorating/LivePreview/codemirror/utils";
-import { FillerWidget } from "src/Internal/Decorating/LivePreview/codemirror/widgets";
 import { parseFenceCodeParameters, toDecorateFenceCode } from "src/Internal/Parsing/fenced";
 import { FenceInfo } from "src/Internal/types/decoration";
-import { FenceCodeParameters } from "src/Internal/types/parsing";
 import { cleanFenceCodeParametersLine } from "src/Internal/utils/detecting";
 import CodeStylerPlugin from "src/main";
 
@@ -37,7 +32,7 @@ export function updateFenceInfo(
 			decorations: [],
 		}
 
-		fenceInfo.toDecorate = toDecorateFenceCode(fenceInfo.parameters, plugin) && !isSourceMode(state);
+		fenceInfo.toDecorate = toDecorateFenceCode(fenceInfo.parameters, plugin);
 	}
 
 	if (isFenceEnd(syntaxNode)) {

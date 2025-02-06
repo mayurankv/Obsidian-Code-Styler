@@ -1,4 +1,8 @@
 body.cs-plugin {
+	--cs-language-border-header-colour: var(--cs-fence-header-background-colour);
+	--cs-language-border-separator-colour: var(--cs-fence-header-separator-background-colour);
+	--cs-language-border-gutter-colour: var(--cs-fence-gutter-background-colour);
+
 	.cs-pre-parent,
 	.markdown-source-view *:not(.cm-embed-block) > {
 		div.cs-header {
@@ -25,7 +29,8 @@ body.cs-plugin {
 				position: absolute;
 				top: calc(-1 * var(--size-4-3));
 				left: calc(-1 * calc(var(--size-4-4) - var(--cs-fence-gutter-language-border-size)));
-				right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
+				// right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
+				right: calc(-1 * var(--cs-fence-fade-width));
 				bottom: 0;
 				background: inherit;
 				z-index: 2;
@@ -38,14 +43,19 @@ body.cs-plugin {
 				bottom: calc(-1 * var(--size-2-1));
 				top: 0;
 				left: calc(-1 * calc(var(--size-4-4) - var(--cs-fence-gutter-language-border-size)));
-				right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
+				// right: calc(-1 * calc(var(--size-4-12) + var(--cs-fence-fade-width)));
+				right: calc(-1 * var(--cs-fence-fade-width));
 				z-index: 1;
-				background: var(--cs-fence-header-separator-background-colour);
+				opacity: 1;
+				transition-property: opacity;
+				transition-timing-function: ease-in-out;
+				transition-duration: var(--cs-transition-length-fold);
+				background-color: var(--cs-fence-header-separator-background-colour);
 				box-shadow: calc(-1 * var(--cs-fence-gutter-language-border-size)) 0 0px var(--cs-language-border-separator-colour);
 			}
 
 			&:hover button{
-				opacity: 1 !important;
+				opacity: 1;
 			}
 
 			> div {
@@ -241,7 +251,8 @@ body.cs-plugin {
 				height: 100%;
 			}
 
-			> button.cs-copy-code-button {
+			// > button.cs-copy-code-button,
+			> button.cs-edit-code-button {
   				margin-left: auto;
 			}
 
@@ -282,11 +293,16 @@ body.cs-plugin {
 		div.cs-footer {
 			text-align: center;
 			height: var(--size-4-4);
+			// max-height: var(--size-4-4);
 			position: relative;
 			left: 0;
+			// transition-property: max-height;
+			// transition-duration: var(--cs-transition-length-fold);
+			// transition-timing-function: ease-in-out;
 
 			&[data-cs-fold="true"] {
-				height: unset;
+				// max-height: unset;
+				// padding-bottom: var(--size-4-3);
 			}
 
 			button {
@@ -318,6 +334,16 @@ body.cs-plugin {
 		}
 	}
 
+	div.cs-header {
+		button.cs-fold-code-button {
+			// transform:rotate(180deg);
+		}
+	}
+
+	div.cs-header[data-cs-fold="true"] button.cs-fold-code-button > svg {
+		transform: rotate(-90deg);
+	}
+
 	div.cs-header,
 	div.cs-footer {
 		button {
@@ -330,7 +356,9 @@ body.cs-plugin {
 			display: none;
 		}
 
-		button.cs-copy-code-button {
+		button.cs-edit-code-button,
+		button.cs-copy-code-button,
+		button.cs-fold-code-button {
 			display: block;
 			// position: sticky;
 			// top: 0;
@@ -361,6 +389,20 @@ body.cs-plugin {
 				background-color: var(--cs-fence-button-active-background-colour);
 				color: var(--cs-fence-button-active-colour);
 			}
+		}
+	}
+
+	pre.cs-pre button,
+	div.cm-line:not(.cm-embed-block).cs-line button {
+		transition-property: opacity, background-color, color, transform;
+		transition-duration: var(--cs-transition-length-button);
+		transition-timing-function: ease-in-out;
+		box-shadow: none;
+
+		& > svg{
+			transition-property: transform;
+			transition-duration: var(--cs-transition-length-button);
+			transition-timing-function: ease-in-out;
 		}
 	}
 
@@ -490,13 +532,19 @@ body.cs-plugin {
 				// 	box-shadow: calc(-1 * var(--cs-fence-gutter-language-border-size)) 0 0px var(--cs-language-border-gutter-colour);
 				// }
 
-				button.cs-fold-button {
-
+				button.cs-fold-code-button {
+					display: inline-flex;
 				}
 			}
 		}
 
 		pre.cs-pre[data-cs-fold="true"] {
+			div.cs-header[data-cs-fold="true"] {
+				&::after {
+					// opacity: 0.5;
+				}
+			}
+
 			> code.cs-code {
 				max-height: 0 !important;
 				// opacity: 0;
@@ -513,12 +561,6 @@ body.cs-plugin {
 			button.cs-fold-code-button {
 				opacity: 1;
 			}
-		}
-
-		pre.cs-pre button {
-			transition: opacity, background-color, color;
-			transition-duration: var(--cs-transition-length-button);
-			box-shadow: none;
 		}
 
 		pre.cs-pre:hover div button {
@@ -644,11 +686,13 @@ body.cs-plugin {
 
 			div.cs-footer {
 				margin-left: calc(-1 * calc(var(--cs-gutter-char-size) + var(--size-4-3) + var(--size-2-1) + var(--size-4-3)));
-				margin-right: var(--cs-fence-fade-width);
+				// margin-right: var(--cs-fence-fade-width);
 				// width: calc(100% - var(--cs-fence-fade-width));
 
 				button {
 					opacity: 1;
+					display: inline-flex;
+
 				}
 			}
 

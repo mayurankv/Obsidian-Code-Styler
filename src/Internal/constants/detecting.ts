@@ -6,3 +6,4 @@ export const EMPTY_PARAMETERS_ATTRIBUTE = DATA_PREFIX+PREFIX + "code-empty-param
 export const CONTENT_ATTRIBUTE = DATA_PREFIX+PREFIX + "code-content"
 export const DETECTING_CONTEXT = DATA_PREFIX+PREFIX + "detected-context"
 export const UNWRAPPED_ATTRIBUTE = DATA_PREFIX+PREFIX+"unwrapped"
+export const SKIP_ATTRIBUTE = DATA_PREFIX+PREFIX+"skip"

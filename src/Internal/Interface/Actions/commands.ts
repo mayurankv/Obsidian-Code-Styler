@@ -5,15 +5,15 @@ import { viewDependentCallback } from "src/Internal/utils/interface";
 import { manageExternalReferencedFiles } from "src/Internal/utils/reference";
 import CodeStylerPlugin from "src/main";
 
-function viewFold(
+async function viewFold(
 	fold: boolean | null,
 	plugin: CodeStylerPlugin,
-): void {
-	viewDependentCallback(
+): Promise<void> {
+	await viewDependentCallback(
 		plugin,
 		(view: MarkdownView, plugin: CodeStylerPlugin) => {
 			renderedViewFold(view.contentEl, fold);
-			
+
 			return false;
 		},
 		(view: EditorView, plugin: CodeStylerPlugin) => { return }, //TODO/
@@ -26,17 +26,17 @@ export function registerCommands(
 	plugin.addCommand({
 		id: "fold-all",
 		name: "Fold all codeblocks",
-		callback: () => viewFold(true, this),
+		callback: async () => await viewFold(true, this),
 	});
 	plugin.addCommand({
 		id: "unfold-all",
 		name: "Unfold all codeblocks",
-		callback: () => viewFold(false, this),
+		callback: async () => await viewFold(false, this),
 	});
 	plugin.addCommand({
 		id: "reset-all",
 		name: "Reset fold state for all codeblocks",
-		callback: () => viewFold(null, this),
+		callback: async() => await viewFold(null, this),
 	});
 	plugin.addCommand({
 		id: "update-references-vault",

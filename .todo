@@ -1,12 +1,15 @@
-flip footer icon
 style live preview
+	buttons only on hover
 	fold by clicking and commands
 	copy button
 	edit button?
+	scroll statefield state
+	viewplugin detecting hover (for buttons) and
 	fading lines on edge of pre equivalent if scroll and edges of scrolls under other stuff broken
 	scroll into view long lines
 	check wrapped looks and works ok
 	edit button in header in lp
+	selection lines don't include
 style rendered
 	vertically align copy button
 	make lines numbers and header not selectable
@@ -35,6 +38,7 @@ add not shiki clauses for decorating colours
 Make references saved in settings
 Consider line numbers as gutter
 Use cm6 highlighters for syntax highlighting
+semi-fold settings
 
 Refactor:
 	☐ SettingsTabs

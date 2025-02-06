@@ -46,6 +46,7 @@ export class FenceInfo {
 	lineText: string = "";
 
 	toDecorate: boolean = false;
+	scroll: number = 0;
 	baseFoldStatus: boolean = false;
 	currentFoldStatus: boolean = false;
 	content: string = "";

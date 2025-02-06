@@ -44,6 +44,9 @@ export function addLanguageColourVars(
 			const languageColour = LANGUAGES?.[languageDisplayName]?.colour ?? plugin.settings.detecting.languages.addedLanguages?.[languageName]?.colour
 			if (languageColour)
 				result += `.language-${languageName} {
+					--cs-language-border-header-colour: ${languageColour};
+					--cs-language-border-separator-colour: ${languageColour};
+					--cs-language-border-gutter-colour: ${languageColour};
 					--cs-language-colour: ${languageColour};
 				}`
 
