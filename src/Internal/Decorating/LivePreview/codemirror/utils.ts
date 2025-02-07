@@ -259,7 +259,7 @@ export function getFenceLimits(
 			if (!(value instanceof RangeNumber))
 				return exclude
 
-			if (!((from <= position) && (position <= to)))
+			if (!valueInRange(position, from, to))
 				return exclude
 
 			fenceLimit = {from: from, to: to}

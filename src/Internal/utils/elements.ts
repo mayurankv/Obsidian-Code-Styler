@@ -117,3 +117,30 @@ export function animateIconChange(
 
 	// //TODO:
 }
+
+export function getCodeblockLines(
+	lineElement: Element,
+	backward: boolean = false,
+	inclusive: boolean = false,
+): Array<Element> {
+	const lineElements: Array<Element> = [lineElement]
+
+	let next = lineElement.nextElementSibling
+	while (next && next.hasClass("HyperMD-codeblock") && (inclusive || !next.hasClass("HyperMD-codeblock-end"))) {
+		// if (!next.hasAttribute(SKIP_ATTRIBUTE))
+		lineElements.push(next)
+		next = next.nextElementSibling
+	}
+
+	if (backward) {
+		let prev = lineElement.previousElementSibling
+		while (prev && prev.hasClass("HyperMD-codeblock") && (inclusive || !prev.hasClass("HyperMD-codeblock-begin"))) {
+			// if (!next.hasAttribute(SKIP_ATTRIBUTE))
+			lineElements.push(prev)
+			prev = prev.previousElementSibling
+		}
+
+	}
+
+	return lineElements
+}

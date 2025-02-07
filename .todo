@@ -1,80 +1,75 @@
 style live preview
-	buttons only on hover
 	fold by clicking and commands
-	copy button
-	edit button?
-	scroll statefield state
-	viewplugin detecting hover (for buttons) and
-	fading lines on edge of pre equivalent if scroll and edges of scrolls under other stuff broken
-	scroll into view long lines
-	check wrapped looks and works ok
-	edit button in header in lp
-	selection lines don't include
-style rendered
-	vertically align copy button
-	make lines numbers and header not selectable
-	work out how to fold codeblocks
-	add transitions to folds
-	vertical alignemnt of rendered copy button
-header fold indicator like old version
-add footer styles
-footer element functionality
-add highlights
-add border styling
-make external reference titles link but remain styled
-Add reference icon
-execute code and code emitter compatibility
-syntax highlight colour consistency
-
-fix folds
-add default code icon svg based on < > icon
-fix issue with startup reference
-viewplugin where if cursor not in view, move to cursor
-
-get shiki base theme to class names
-add shiki to fence rendered and codemirror both
-add not shiki clauses for decorating colours
-interesting, it exists: https://github.com/mProjectsCode/obsidian-shiki-plugin
-
-Make references saved in settings
-Consider line numbers as gutter
-Use cm6 highlighters for syntax highlighting
-semi-fold settings
 
 Refactor:
+	☐ Add highlights in css
+	☐ make external reference titles link but remain styled
 	☐ SettingsTabs
-	☐ Style (!Inline)s + CSS (!Inline) + Applying settings (All)
-		☐ Use https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses and https://docs.obsidian.md/Reference/CSS+variables/Editor/Code and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Colors and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Typography
-		☐ https://docs.obsidian.md/Themes/App+themes/Embed+fonts+and+images+in+your+theme
-	☐ Folding
-	☐ Check reference with no internet
+	☐ Checks:
+		☐ Check wrapped and active unwrap looks and works ok in live preview
+	☐ Fixes:
+		☐ fold code then scroll doesn't work live preview
+		☐ Make edit button work as intended in rendering mode (how to get position of rendered element in codemirror)
+		☐ Folding when full codeblock isn't found
+		☐ Cursor disppears before live preview filler elements
+		☐ scroll into view long lines when cursor moves
+		☐ Mouse leaves for hover when focus goes
+		☐ issue with startup reference
+		☐ Live Preview selection of lines: right edges of filler elements are selected, shouldn't be though
+
+		Hard fixes:
+			☐ Scrolling is laggy
+
+	☐ Add active wrap setting to live preview
 	☐ Canvas parsing
-	☐ Sort files
+	☐ Compatibility
+		☐ Execute Code
+		☐ Code Emitter
+	☐ fix
 	☐ README and documentation
 	☐ settings modifiers: Set inline syntax highlighting language for file in frontmatter, all options as frontmatter affect code parsing (code-styler- and fence-/inline- prefixes)
-	☐ Consistent syntax highlighting
 	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
-	☐ Hide delimiter lines
 	☐ code emitter compatibility
 	☐ execute code compatibility
-	☐ Look into tokenising with textmate tokeniser
-		☐ https://shiki.style
-			☐ https://github.com/mProjectsCode/obsidian-shiki-plugin/issues/25
-		☐ Textmate tokeniser
-		☐ https://github.com/wooorm/starry-night
-		☐ https://github.com/highlightjs/highlight.js
 	☐ Add codemirror to work syntax highlighting with rmarkdown block and py -> python
 	☐ Minor in built styling, expose more to style settings
 		☐ Guide to styling by css variables as well
-	☐ Proper diff notation
-		☐ Set highlight lines using base highlight techniques (overriden by actual highlights)
 	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
-	☐ Add styles not exposed to style settings or settings for padding and margin settings
-	☐ Option to make all live preview codeblocks a reading codeblock
 
 Next Refactor:
+	☐ Add styles not exposed to style settings or settings for padding and margin settings
+	☐ add default code icon svg based on < > icon and reference code icon svg
+	☐ add mermaid icon
+	☐ Document what in CSS is needed for what
+	☐ Indentation and code folding in rendered mode
+	☐ Consider line numbers as gutter instead of in document
+	☐ Make references saved in settings instead of external cache
+	☐ Read https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses and https://docs.obsidian.md/Reference/CSS+variables/Editor/Code and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Colors and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Typography
 	☐ Colour of title backgrounds and variable padding widths and margin widths and other sizes added to styles (for consistent sizing)
 	☐ Add command to select whole codeblock in editing mode
+	☐ Codemirror fold transitions?
+	☐ Make lines numbers and header not selectable
+	☐ Add border styling
+	☐ Option to make all live preview codeblocks a reading codeblock
+	☐ Consistent syntax highlighting
+	☐ Use cm6 highlighters for syntax highlighting
+	☐ Clean files an dupdate all css to obsidian spacing and clean up css
+	☐ Semi fold setting
+	☐ Proper diff notation
+		☐ Set highlight lines using base highlight techniques (overriden by actual highlights)
+	☐ Check reference with no internet
+
+Later Refactors:
+	☐ Look into tokenising with textmate tokeniser
+		☐ https://shiki.style
+			☐ https://github.com/mProjectsCode/obsidian-shiki-plugin/issues/25
+			☐ get shiki base theme to class names
+			☐ add shiki to fence rendered and codemirror both
+			☐ add not shiki clauses for decorating colours
+			☐ interesting, it exists: https://github.com/mProjectsCode/obsidian-shiki-plugin
+		☐ Textmate tokeniser
+		☐ https://github.com/wooorm/starry-night
+		☐ https://github.com/highlightjs/highlight.js
 
 Refactor Issues:
 	☐ Admonitions: Aren't properly classified in exporting

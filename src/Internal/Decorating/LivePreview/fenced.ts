@@ -7,7 +7,7 @@ import { isFenceComment, isFenceEnd, isFenceLine, isFenceStart, updateFenceInfo 
 import { FenceInfo } from "src/Internal/types/decoration";
 import { getLineClasses } from "src/Internal/utils/decorating";
 import CodeStylerPlugin from "src/main";
-import { createScrollEventObservers, scrollListener } from "./codemirror/eventListeners";
+import { hoverListener, scrollListener, setScroll } from "./codemirror/eventListeners";
 import { getCommentDecorations, getFenceLimits, getFoldStatuses, getScrollStatus, getStateFieldDecorations, getStateFieldScrollStates, getStateFieldsViewDecorations, isFileIgnored, lineDOMatPos, updateBaseStateField, updateInteractions, updateStateField, updateViewPlugin, valueInRange } from "./codemirror/utils";
 import { FillerWidget, FooterWidget, HeaderWidget, LineNumberWidget } from "./codemirror/widgets";
 import { RangeNumber } from "./codemirror/ranges";
@@ -21,7 +21,6 @@ export function getFenceCodemirrorExtensions(
 ) {
 	return [
 		...createFenceCodeDecorations(plugin),
-		createScrollEventObservers(plugin),
 	]
 }
 
@@ -138,6 +137,20 @@ function createFenceCodeDecorations(
 					capture: true,
 				},
 			)
+			view.contentDOM.addEventListener(
+				"mouseenter",
+				(event: Event) => hoverListener(event, plugin),
+				{
+					capture: true,
+				},
+			)
+			view.contentDOM.addEventListener(
+				"mouseleave",
+				(event: Event) => hoverListener(event, plugin),
+				{
+					capture: true,
+				},
+			)
 		}
 
 		update(
@@ -157,7 +170,7 @@ function createFenceCodeDecorations(
 			const scrollEffects = transactions.reduce(
 				(result: Array<StateEffect<any>>, transaction: Transaction) => {
 					transaction.effects.forEach(
-						(effect: StateEffect<any>) => {
+				 		(effect: StateEffect<any>) => {
 							if (effect.is(fenceScroll))
 								result.push(effect)
 
@@ -495,30 +508,4 @@ function addScrollInteractions(
 		filterFrom: view.viewport.from,
 		filterTo: view.viewport.to,
 	})
-}
-
-function setScroll(
-	view: EditorView,
-	fenceStart: number,
-	scrollPosition: number,
-): void {
-	const originalScrollLine = lineDOMatPos(view, fenceStart)
-	if (!originalScrollLine)
-		return
-
-	const scrollLines: Array<Element> = [originalScrollLine]
-
-	let next = originalScrollLine.nextElementSibling
-	while (next && next.hasClass("HyperMD-codeblock") && !next.hasClass("HyperMD-codeblock-end")) {
-		// if (!next.hasAttribute(SKIP_ATTRIBUTE))
-		scrollLines.push(next)
-		next = next.nextElementSibling
-	}
-
-	scrollLines.forEach(
-		(scrolledLine: HTMLElement) => {
-			if (scrolledLine.scrollLeft !== scrollPosition)
-				scrolledLine.scrollLeft = scrollPosition
-		}
-	)
 }

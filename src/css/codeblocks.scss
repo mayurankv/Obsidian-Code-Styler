@@ -1,16 +1,11 @@
 /** Define CSS Variables */
 body {
-	/* Codeblock Body */
-	--border-radius: 10px;
-	--gradient-background-colour: transparent;
 	--code-padding: 8px;
 	--container-height: calc(var(--language-icon-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size));
 	--container-min-height: calc((var(--header-font-size) + 2 * var(--header-inner-vertical-padding) * var(--header-font-size)) * var(--line-height-normal));
 	--language-border-colour: var(--code-styler-codeblock-background-colour);
-	--language-border-width: 0px;
 
 	/* Header */
-	--header-font-size: var(--code-size);
 	--header-padding: 0px;
 	--header-inner-vertical-padding: 0.3;
 	--header-spacing: 15px;
@@ -19,53 +14,24 @@ body {
 	--header-separator-width-padding: var(--header-separator-width);
 	--code-styler-header-border: none;
 	--folded-bottom-border: 0 solid transparent;
-	--language-icon-size: 28px;
-	--language-icon-filter: none;
-
-	/* Lines */
-	--gradient-highlights-colour-stop: 100%;
 
 	/* Line Numbers */
-	--line-number-height-correction: 2px;
 	--line-number-gutter-padding: 16px;
-	--line-number-gutter-min-width: 32.67px;
 
-	/* Line Text */
-	--line-wrapping: pre-wrap;
-	--line-active-wrapping: var(--line-wrapping);
-
-	/* Buttons */
-	--code-styler-button-colour: var(--text-muted);
-	--code-styler-button-active-colour: white;
 	--duration-button: 240ms;
 	--dent-difference: 30px;
-	--polygon-in: polygon(0 0, 16px 0, 16px 36px, 0 36px);
-	--polygon-out: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 	--copy-code-header-right-margin: calc(3 * var(--header-button-spacing));
 
 }
 
-// @font-face {
-// 	font-family: code-styler-nerdfont;
-// 	src: url('https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf') format('truetype');
-// }
-
-
-
 body.cs-plugin {
-	/** Pre elements */
 	pre.cs-pre {
-		min-height: unset;
-
 		[class*='language-'] {
 			background: linear-gradient(90deg, var(--language-border-colour), var(--language-border-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) var(--language-border-width), var(--code-styler-codeblock-background-colour) 100%), var(--code-styler-codeblock-background-colour) !important;
 		}
 
 		> code {
-			max-height: unset;
-			transition-duration: var(--duration-button);
 			transition-property: max-height, padding-top, padding-bottom, border-top;
-			transition-timing-function: ease-in-out;
 		}
 	}
 
@@ -75,17 +41,6 @@ body.cs-plugin {
 			border-top: none !important;
 			border-top-left-radius: 0px !important;
 			border-top-right-radius: 0px !important;
-		}
-		[class*="code-styler-line"].HyperMD-codeblock-end {
-			border-bottom-left-radius: var(--border-radius);
-			border-bottom-right-radius: var(--border-radius);
-		}
-		&:not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin {
-			border-top-left-radius: var(--border-radius) !important;
-			border-top-right-radius: var(--border-radius) !important
-		}
-		&:not(pre.code-styler-pre) > .code-styler-header-container-hidden + [class*="code-styler-line"].HyperMD-codeblock-begin .code-styler-line-number {
-			border-top-left-radius: var(--border-radius) !important;
 		}
 		.HyperMD-codeblock[class*='code-styler-line'] {
 			overflow: hidden;
@@ -106,7 +61,7 @@ body.cs-plugin {
 		box-sizing: content-box;
 		margin-top: 0px !important;
 		font-size: var(--header-font-size);
-		transition: border-bottom ease-in-out var(--duration-button);
+		transition: border-bottom;
 	}w
 	.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container {
 		padding-bottom: var(--header-separator-width);
@@ -144,12 +99,8 @@ body.cs-plugin {
 		border-radius: var(--border-radius) var(--border-radius) 0px 0px;
 		margin-right: var(--header-spacing);
 		background-color: var(--code-styler-header-language-tag-background-colour);
-		color: var(--code-styler-header-language-tag-text-colour);
-		font-size: inherit;
-		font-style: var(--code-styler-header-language-tag-text-italic, normal);
-		font-weight: var(--code-styler-header-language-tag-text-bold, normal);
 		text-align: center;
-		transition: border-radius ease-in-out var(--duration-button), padding ease-in-out var(--duration-button);
+		transition: border-radius, padding ease-in-out var(--duration-button);
 	}
 	.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.code-styler-header-folded .code-styler-header-language-tag,
 	pre.code-styler-pre.code-styler-folded .code-styler-header-container .code-styler-header-language-tag {
@@ -353,28 +304,9 @@ body.cs-plugin {
 	}
 	.code-styler-header-container::after {
 		position: relative;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		width: 20px;
-		height: 20px;
-		margin: auto;
-		margin-right: var(--header-button-spacing);
-		background-color: var(--code-styler-button-colour);
-		content: "\200b";
-		-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' xml:space='preserve'%3E%3Cpath d='M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z'/%3E%3Cpath fill='none' d='M0 0h32v32H0z'/%3E%3C/svg%3E");
-		mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' %3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-		-webkit-mask-repeat: no-repeat;
-		mask-repeat: no-repeat;
 		opacity: 1;
 		scale: 0.8;
 		transition: transform var(--duration-button) ease-out, visibility var(--duration-button), opacity var(--duration-button), scale var(--duration-button) cubic-bezier(0.4, 0.14, 0.3, 1);
-		visibility: visible;
-	}
-	pre.code-styler-pre.code-styler-folded .code-styler-header-container::after,
-	.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container:not(:has(+ .HyperMD-codeblock-begin))::after {
-		transform: rotate(-90deg);
 	}
 	.code-styler-header-container:hover::after {
 		scale: 1;
@@ -390,13 +322,11 @@ body.cs-plugin {
 	pre.code-styler-pre button.copy-code-button {
 		top: max(calc(0.5 * var(--container-height) * 1),calc(0.5 * var(--container-min-height) * 1)) !important;
 		bottom: unset !important;
-		transform: translateY(-50%);
 	}
 	pre.code-styler-pre button.copy-code-button,
 	pre.code-styler-pre button.run-code-button, /*? Execute Code Plugin Compatibility */
 	.markdown-source-view.mod-cm6 .HyperMD-codeblock.code-styler-line span.code-block-flair {
 		margin-right: calc(var(--copy-code-header-right-margin) - var(--dent-difference));
-		clip-path: var(--polygon-in);
 		will-change: margin-right, clip-path;
 	}
 	pre.code-styler-pre button.copy-code-button:not(:active),
@@ -410,7 +340,6 @@ body.cs-plugin {
 		margin-right: var(--copy-code-header-right-margin);
 		animation: outdent var(--duration-button);
 		background-color: transparent;
-		clip-path: var(--polygon-out);
 	}
 	pre.code-styler-pre button.copy-code-button:active,
 	pre.code-styler-pre button.run-code-button:active, /*? Execute Code Plugin Compatibility */

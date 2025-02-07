@@ -1,0 +1,298 @@
+style live preview
+	fold by clicking and commands
+
+Refactor:
+	☐ Add highlights in css
+	☐ make external reference titles link but remain styled
+	☐ SettingsTabs
+	☐ Checks:
+		☐ Check wrapped and active unwrap looks and works ok in live preview
+	☐ Fixes:
+		☐ fold code then scroll doesn't work live preview
+		☐ Make edit button work as intended in rendering mode (how to get position of rendered element in codemirror)
+		☐ Folding when full codeblock isn't found
+		☐ Cursor disppears before live preview filler elements
+		☐ scroll into view long lines when cursor moves
+		☐ Mouse leaves for hover when focus goes
+		☐ issue with startup reference
+		☐ Live Preview selection of lines: right edges of filler elements are selected, shouldn't be though
+
+		Hard fixes:
+			☐ Scrolling is laggy
+
+	☐ Add active wrap setting to live preview
+	☐ Canvas parsing
+	☐ Compatibility
+		☐ Execute Code
+		☐ Code Emitter
+	☐ fix
+	☐ README and documentation
+	☐ settings modifiers: Set inline syntax highlighting language for file in frontmatter, all options as frontmatter affect code parsing (code-styler- and fence-/inline- prefixes)
+	☐ Guide for adding Icons and note about language support: https://github.com/mayurankv/Obsidian-Code-Styler/discussions/185
+	☐ code emitter compatibility
+	☐ execute code compatibility
+	☐ Add codemirror to work syntax highlighting with rmarkdown block and py -> python
+	☐ Minor in built styling, expose more to style settings
+		☐ Guide to styling by css variables as well
+	☐ Update actions to use https://docs.obsidian.md/Reference/TypeScript+API/Workspace/activeEditor
+
+Next Refactor:
+	☐ Add styles not exposed to style settings or settings for padding and margin settings
+	☐ add default code icon svg based on < > icon and reference code icon svg
+	☐ add mermaid icon
+	☐ Document what in CSS is needed for what
+	☐ Indentation and code folding in rendered mode
+	☐ Consider line numbers as gutter instead of in document
+	☐ Make references saved in settings instead of external cache
+	☐ Read https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Radiuses and https://docs.obsidian.md/Reference/CSS+variables/Editor/Code and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Colors and https://docs.obsidian.md/Reference/CSS+variables/Foundations/Typography
+	☐ Colour of title backgrounds and variable padding widths and margin widths and other sizes added to styles (for consistent sizing)
+	☐ Add command to select whole codeblock in editing mode
+	☐ Codemirror fold transitions?
+	☐ Make lines numbers and header not selectable
+	☐ Add border styling
+	☐ Option to make all live preview codeblocks a reading codeblock
+	☐ Consistent syntax highlighting
+	☐ Use cm6 highlighters for syntax highlighting
+	☐ Clean files an dupdate all css to obsidian spacing and clean up css
+	☐ Semi fold setting
+	☐ Proper diff notation
+		☐ Set highlight lines using base highlight techniques (overriden by actual highlights)
+	☐ Check reference with no internet
+
+Later Refactors:
+	☐ Look into tokenising with textmate tokeniser
+		☐ https://shiki.style
+			☐ https://github.com/mProjectsCode/obsidian-shiki-plugin/issues/25
+			☐ get shiki base theme to class names
+			☐ add shiki to fence rendered and codemirror both
+			☐ add not shiki clauses for decorating colours
+			☐ interesting, it exists: https://github.com/mProjectsCode/obsidian-shiki-plugin
+		☐ Textmate tokeniser
+		☐ https://github.com/wooorm/starry-night
+		☐ https://github.com/highlightjs/highlight.js
+
+Refactor Issues:
+	☐ Admonitions: Aren't properly classified in exporting
+	☐ Doesn't work with Advanced Slides (what about new alt plugin?)
+	☐ codeblock in list setting (bullet, number, checkbox)
+	☐ On initial load, codeblocks can be rendered incorrectly
+
+	☐ When marking u8p highlights (as html), ensure in theme highlights
+	☐ OR when marking up highlights (as html), add new shades automatically to highlight keys
+
+Plugins Interesting:
+	☐ https://github.com/MrGVSV/obsidian-github-embeds embeds
+	☐ https://github.com/mugiwara85/CodeblockCustomizer features
+
+Clean Up:
+	☐ Clean up and tidy Fenced
+
+Understand:
+	ViewPlugin:
+		//TODO (@mayurankv) Move selection back to original position - Currently done with setTimeout
+		// const previous: number = update.transactions.flatMap(t => t.effects).filter(effect => effect.is(rerender))?.[0]?.value?.pos;
+		// console.log(previous);
+		// if (previous)
+		// 	update.view.dispatch({selection: { anchor: previous, head: previous }});
+	LineNumberWidget Element:
+		// TODO: Needed?
+		// attr: {
+		// 	style: this.maxLineNum.toString().length > (this.lineNumber + this.lineNumbers.offset).toString().length
+		// 		? "width: var(--line-number-gutter-width);"
+		// 		: ""
+		// },
+
+----------------
+
+Syntax Highlighting:
+	☐ https://lezer.codemirror.net/examples/highlight/#running-a-highlighter
+	☐ https://marijnhaverbeke.nl/blog/codemirror-mode-system.html
+	☐ https://tivac.com/2020/02/28/codemirror-static-highlighting/
+	☐ https://github.com/tivac/modular-css/blob/469c8597d0535a2e1b723ee8ebb974326cddefdb/packages/www/build/rollup-plugin-md.js
+	☐ https://github.com/tivac/modular-css/blob/469c8597d0535a2e1b723ee8ebb974326cddefdb/packages/www/build/codemirror-mcss-mime.js
+	☐ https://shiki.style/guide/install
+
+----------------
+
+Next Release:
+	☐ Inline code copy button and settings for icons
+	☐ Performance issues
+	☐
+
+New Issues to Triage:
+	Up to 262
+	☐ #229
+	☐ #230
+	☐ #232
+	☐ #234
+	☐ #235
+	☐ #242
+	☐ #243
+	☐ #245
+	☐ #249
+	☐ #261
+
+Features:
+	Code Referencing:
+		Local References:
+			☐ File watcher? Or refresh button? How to make changes to local file update in Obsidian?
+			☐ Embed code files by `![[file.py]]`
+
+		External References:
+			☐ External reference for quickly referring to github and gitlab links etc.: (?site/author/repo/?verion)
+			☐ Full Embed other online markdown files? `![[hhtps:/.../fil1.md]]`
+			☐ Allow iframe type embed
+			☐ Non github compatibility
+				☐ Gitlab compatibility proper
+				☐ Gitlab based things
+					☐ https://foss.heptapod.net/mercurial/tortoisehg/thg/-/blob/branch/stable/COPYING.txt?ref_type=heads
+				☐ Bitbucket
+				☐ Sourceforge
+			☐ Add other syntax
+
+		Specific File Formats:
+			Jupyter Notebooks:
+				☐ Custom view for Jupyter Notebooks allowing viewing and running of `.ipynb` files
+				☐ Also allow reference to properly show notebooks
+
+			Quarto:
+				☐ Custom view for `.qmd` files https://forum.obsidian.md/t/quarto-support-open-source-scientific-and-technical-publishing-system/32625/4
+
+			Rmarkdown:
+				☐ Custom view for `.rmd` files
+
+			Pandoc:
+				☐ Custom pandoc view
+
+			LaTeX:
+				☐ Compiling and Previewing referenced files
+					☐ pdfjs synctex
+						☐ https://github.com/tdurieux/synctex-js
+						☐ https://github.com/James-Yu/LaTeX-Workshop/wiki/View
+				☐ Option to compils latex codeblocks?
+					☐ Should be different name than latex?
+
+				Other LaTeX:
+					☐ Highlight specific part of latex that you are inside in the preview
+
+			Terminal:
+				☐ Terminal Appearance #9 https://forum.obsidian.md/t/creating-a-command-line-formatted-code-block/57329/4
+
+		General:
+			☐ Prevent clicking reading mode external links causing fold
+			☐ Package nerdfont better
+
+	Codeblocks:
+		Implementation:
+			Folding:
+				☐ Folding Fade #128
+				☐ Remember and Sync Fold State #126
+				☐ Alternative Fold Toggler Button at bottom of Codeblock #129
+				☐ Edit Mode Folding Transitions #11
+
+			Code Folding:
+				☐ Reading Mode Section Code Folding #110
+
+			Wrapping:
+				☐ Hanging Indents #109
+				☐ Edit Mode Line Wrapping #12
+
+			Indentation:
+				☐ Indented Codeblocks not properly parsed (i.e. 4\t code) #7
+				☐ List codeblocks not indented properly #13
+
+			Links:
+				☐ Automatic Link Updating #204
+
+			Tabs:
+				☐ Tabbed codeblocks with higher fencing level compiles all codeblocks inside to single block https://forum.obsidian.md/t/add-the-support-for-tabbed-code-blocks/62724
+
+			Comments:
+				☐ Comments depending on language type
+
+			Autocompletion:
+				☐ Codeblock type autocompletion https://forum.obsidian.md/t/autocompletion-for-code-block-types/35133
+				☐ Autocompletion for my codeblock header parameters
+				☐ Reference block autocompletion for my parameters
+				☐ General code autocompletion https://forum.obsidian.md/t/general-autocompletion/7331
+				☐ Autocompletion for other plugins like dataview etc.
+				☐ Code snippets https://forum.obsidian.md/t/fuzzy-code-snippets-search-obsidian-ide-copilot/58637
+					☐ Define
+					☐ Call from commmandline
+					☐ Autocomplete in codeblocks based on language
+
+			Command Selection:
+				☐ Command to select all modified
+					☐ Select all text in codeblock #75
+					☐ Select all text in inline code
+				☐ Turn selection into codeblock a-la https://github.com/dy-sh/obsidian-code-block-from-selection
+
+			Linting:
+				☐ Way to paste copied code content properly without Cmd-Shift-V
+				☐ Match current indentation on paste
+				☐ Remove indentation on copy option
+				☐ Overall linter
+				☐ Specify linter for specific codeblocks i.e. black for python etc.
+
+			Other:
+				☐ Smooth Caret Animation https://forum.obsidian.md/t/cursor-smooth-caret-animation/31068
+				☐ Save codeblock files to file via button or command
+					☐ Option to automatically turn converted file into referenced block based on file
+
+		Prettification:
+			☐ Change token colours
+				☐ Match in both live preview and reading mode
+			☐ Codeblock Shadow #25
+			☐ Codeblock Border #24
+			☐ Retain some styling in source mode #74
+
+	Inline Code:
+		☐ Add copy button via settings and parameter #88
+		☐ Add optional pandoc style marking
+		☐ Empty backticks followed by new line "``\n" disappear
+
+	General:
+		Improvements:
+			☐ Error Handling
+				☐ Colors #210
+
+		Settings:
+			☐ Always display inline code #35
+			☐ Settings Improvements #124
+
+		Plugin Compatibility:
+			Execute Code:
+				☐ `run-*` codeblocks not styled #27
+				☐ Better Compatibility with Execute Code Parameters #98
+			Dataview:
+				☐ Dataview created codeblocks #10
+			Tasks:
+				☐ Check if conflict
+
+	For Me:
+		☐ Properly use nerdfonts and ligatures
+
+Bugs:
+	Minor Bugs:
+		☐ Copy and Paste in Reading Mode retains line numbers, header and icons #23
+		☐ In reading mode, folding from uncollapsed to collapsed, but interrupting the fold by unfolding causes a non-smooth transition #65
+		☐ Editing Mode Folded Codeblock Issues #67
+
+Testing:
+	☐ Set up unit Tests #120
+
+Documentation:
+	☐ Proper documentation #14
+	☐ `throw Error` s instead of `return`
+	☐ Use docstrings and better commenting #119
+	☐ Add test vault #15
+		☐ Notes for each feature
+
+Device Compatibility:
+	Phone:
+		☐ Phone version working badly #20 #151
+
+Upstream:
+	☐ Links don't show up in metadata #203
+	☐ High DPI Flicker on Collapse #18
+	☐ Instant Reading Mode Updates #16

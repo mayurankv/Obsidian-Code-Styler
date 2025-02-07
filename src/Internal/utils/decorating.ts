@@ -2,10 +2,11 @@ import { MarkdownRenderer } from "obsidian";
 import { ElementContent, Element } from "hast";
 import { fromHtml } from "hast-util-from-html";
 import CodeStylerPlugin from "src/main";
-import { FenceCodeParameters, Highlights, InlineCodeParameters } from "src/Internal/types/parsing";
+import { FenceCodeParameters, Highlights, InlineCodeParameters, LinkInfo } from "src/Internal/types/parsing";
 import { PREFIX } from "../constants/general";
 import { toKebabCase } from "./string";
 import { LANGUAGE_NAMES } from "../constants/parsing";
+import { parseLinks } from "./parsing";
 
 // TODO: Clean up
 
@@ -51,37 +52,64 @@ export function convertCommentLinks(
 	sourcePath: string,
 	plugin: CodeStylerPlugin,
 ): Array<ElementContent> {
-	const linkMatches = [...commentText.matchAll(/(?:\[\[[^\]|\r\n]+?(?:\|[^\]|\r\n]+?)?\]\]|\[.*?\]\(.+\))/g)].reverse();
+	const linkInfos = parseLinks(commentText);
 
-	const newChildren = linkMatches.reduce(
-		(result: Array<ElementContent>, linkMatch: RegExpMatchArray): Array<ElementContent> => {
-			if (typeof linkMatch?.index === "undefined")
-				return result;
+	const children = linkInfos.reduce(
+		(result: Array<ElementContent>, linkInfo: LinkInfo, idx: number, linkInfos: Array<LinkInfo>): Array<ElementContent> => {
 
-			const ending = commentText.slice(linkMatch.index + linkMatch[0].length);
-			const linkText = commentText.slice(linkMatch.index, linkMatch.index + linkMatch[0].length);
-			const linkContainer = createDiv();
-			MarkdownRenderer.render(plugin.app, linkText, linkContainer, sourcePath, plugin);
+			const linkText = linkInfo.type === "wiki"
+				? `[[${linkInfo.reference}|${linkInfo.title}]]`
+				: `[${linkInfo.title}](${linkInfo.reference})`
+
+			const linkContainer = createEl(
+				"div",
+				{
+					cls: [
+						PREFIX + "comment",
+					],
+				},
+			);
+
+			MarkdownRenderer.render(
+				plugin.app,
+				linkText,
+				linkContainer,
+				sourcePath,
+				plugin,
+			);
+
 			const linkChild = (
 				fromHtml(
 					linkContainer.innerHTML,
-					{ fragment: true },
+					{
+						fragment: true,
+					},
 				)?.children?.[0] as Element
 			)?.children?.[0];
 
-			result.push({type: "text",value: ending}, linkChild);
+			result.push(linkChild);
 
-			commentText = commentText.slice(0, linkMatch.index); //TODO: Needed?
+			if (linkInfos.length - idx !== 1)
+				result.push({
+					type: "text",
+					value: commentText.slice(linkInfo.offset + linkInfo.match.length, linkInfos[idx + 1].offset),
+				})
+			else
+				result.push({
+					type: "text",
+					value: commentText.slice(linkInfo.offset + linkInfo.match.length),
+				})
 
-			return result;
+
+			return result
 		},
-		[],
-	).reverse();
-
-	const children = [
-		{ type: "text", value: commentText } as ElementContent,
-		...newChildren,
-	]
+		[
+			{
+				type: "text",
+				value: commentText.slice(0, linkInfos?.[0]?.offset),
+			},
+		],
+	)
 
 	return children;
 }

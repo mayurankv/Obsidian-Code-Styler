@@ -54,14 +54,14 @@ export function parseFenceCodeParameters(
 					) as Partial<FenceCodeParameters>;
 
 			for (const parameterKey of FENCE_PARAMETERS_KEY_VALUE)
-				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection))
+				if (new RegExp(`^${parameterKey}[:=]`, "g").test(parameterSection) && (parameterKey !== "hl"))
 					return { ...result, ...inferFenceValue(parameterKey, removeBoundaryQuotes(parameterSection.slice(parameterKey.length + 1)).trim()) };
 
 			for (const parameterShorthand of FENCE_PARAMETERS_SHORTHAND)
 				if (parameterSection === parameterShorthand)
 					return { ...result, ...inferFenceShorthand(parameterShorthand) }
 
-			const highlightMatch = parameterSection.match(new RegExp(`^(\\w+)[:=](.+)$`, "g"))
+			const highlightMatch = parameterSection.match(new RegExp(`^(\\w+?)[:=](.+?)$`))
 			if (highlightMatch)
 				return addHighlights(
 					highlightMatch[2],
@@ -197,7 +197,7 @@ function inferFenceValue(
 
 
 	else if (parameterKey === "unwrap") {
-		return { lineUnwrap: (parameterValue === "inactive") ? "inactive" : convertBoolean(parameterValue)}
+		return { lineUnwrap: (parameterValue === "inactive") ? "inactive" : convertBoolean(parameterValue) }
 
 	} else if (parameterKey === "fold") {
 		return {
