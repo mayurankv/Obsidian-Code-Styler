@@ -34,7 +34,7 @@ function parseInlineCodeParameters(parameterLine: string): InlineCodeParameters 
 }
 function parseInlineCodeParameterString(parameterString: string, inlineCodeParameters: InlineCodeParameters): void {
 	if (parameterString.startsWith("title:") || parameterString.startsWith("title=")) {
-		const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
+		const titleMatch = /(["']?)([^"']+)\1/.exec(parameterString.slice("title:".length));
 		if (titleMatch)
 			inlineCodeParameters.title = titleMatch[2].trim().replace(/\\{/g, "{");
 	} else if (parameterString === "icon" || (parameterString.startsWith("icon:") && parameterString.toLowerCase() === "icon:true"))

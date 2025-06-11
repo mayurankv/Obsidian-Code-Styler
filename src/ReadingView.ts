@@ -6,7 +6,7 @@ import { ElementContent, Element } from "hast";
 
 import CodeStylerPlugin from "./main";
 import { SETTINGS_SOURCEPATH_PREFIX, TRANSITION_LENGTH } from "./Settings";
-import { CodeblockParameters, getFileContentLines, isCodeblockIgnored, isLanguageIgnored, parseCodeblockSource } from "./Parsing/CodeblockParsing";
+import { CodeblockParameters, getFileContentLines, isCodeblockIgnored, isLanguageIgnored, parseCodeblockSource, parseCodeblockParameters } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLineClass as getLineClasses } from "./CodeblockDecorating";
 
@@ -93,7 +93,22 @@ async function renderSettings(codeblockPreElements: Array<HTMLElement>, sourcePa
 	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,true,false,plugin);
 }
 async function renderDocument(codeblockPreElements: Array<HTMLElement>, sourcePath: string, cache: CachedMetadata | null, editingEmbeds: boolean, printing: boolean, plugin: CodeStylerPlugin) {
-	const codeblocksParameters: Array<CodeblockParameters> = await getCodeblocksParameters(sourcePath,cache,plugin,editingEmbeds);
+	let codeblocksParameters: Array<CodeblockParameters> = await getCodeblocksParameters(sourcePath,cache,plugin,editingEmbeds);
+	
+	// Handle case where execute-code has transformed run-* blocks
+	if (codeblocksParameters.length !== codeblockPreElements.length) {
+		// Fallback: infer parameters from actual DOM elements
+		codeblocksParameters = codeblockPreElements.map(preElement => {
+			const codeElement = preElement.querySelector("code");
+			const classList = Array.from(codeElement?.classList || []);
+			const languageClass = classList.find(cls => cls.startsWith("language-"));
+			const language = languageClass ? languageClass.replace("language-", "") : "";
+			
+			// Create full parameters with proper defaults from theme
+			return parseCodeblockParameters(`${language}`, plugin.settings.currentTheme);
+		});
+	}
+	
 	await remakeCodeblocks(codeblockPreElements,codeblocksParameters,sourcePath,!printing,true,plugin);
 }
 async function retriggerProcessor(element: HTMLElement, context: {sourcePath: string, getSectionInfo: (element: HTMLElement) => MarkdownSectionInformation | null, frontmatter: FrontMatterCache | undefined}, plugin: CodeStylerPlugin, editingEmbeds: boolean) {
