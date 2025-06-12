@@ -4,7 +4,7 @@ import { Extension, EditorState, StateField, StateEffect, StateEffectType, Range
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { SyntaxNodeRef } from "@lezer/common";
 
-import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES } from "./Settings";
+import { CodeStylerSettings, CodeStylerThemeSettings, SPECIAL_LANGUAGES, EXECUTE_CODE_SUPPORTED_LANGUAGES } from "./Settings";
 import { CodeblockParameters, parseCodeblockParameters, testOpeningLine, trimParameterLine, isCodeblockIgnored, isLanguageIgnored } from "./Parsing/CodeblockParsing";
 import { InlineCodeParameters, parseInlineCode } from "./Parsing/InlineCodeParsing";
 import { createHeader, createInlineOpener, getLanguageIcon, getLineClass, isHeaderHidden } from "./CodeblockDecorating";
@@ -344,6 +344,15 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				if (syntaxNode.type.name.includes("HyperMD-codeblock-begin")) {
 					const startLine = state.doc.lineAt(syntaxNode.from);
 					codeblockParameters = parseCodeblockParameters(trimParameterLine(startLine.text.toString()),settings.currentTheme);
+					
+					// Apply run-* language transformation BEFORE ignore check
+					if (/run-\w*/.test(codeblockParameters.language)) {
+						const baseLanguage = codeblockParameters.language.slice(4);
+						if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(baseLanguage)) {
+							codeblockParameters.language = baseLanguage;
+						}
+					}
+					
 					if (!isLanguageIgnored(codeblockParameters.language,settings.excludedLanguages) && !isCodeblockIgnored(codeblockParameters.language,settings.processedCodeblocksWhitelist) && !codeblockParameters.ignore) {
 						if (!SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(codeblockParameters.language)))
 							builder.add(startLine.from,startLine.from,Decoration.widget({widget: new HeaderWidget(codeblockParameters,foldValue(startLine.from,codeblockParameters.fold.enabled),settings.currentTheme.settings,sourcePath,plugin), block: true, side: -1}));
@@ -368,7 +377,8 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 				maxLineNum = foldEnd.to-foldStart.from-1+codeblockParameters.lineNumbers.offset;
 			});
 			const lineNumberMargin = (maxLineNum.toString().length > 2)?maxLineNum.toString().length * state.field(charWidthState):undefined;
-			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+			const effectiveLanguage = codeblockParameters.language;
+			builder.add(foldStart.from,foldStart.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(effectiveLanguage))?"":` language-${effectiveLanguage}`)}}));
 			if (showLineNumbers)
 				builder.add(foldStart.from,foldStart.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			for (let i = foldStart.number+1; i <= state.doc.lines; i++) {
@@ -380,15 +390,24 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 					foldEnd = line;
 					break;
 				}
-				builder.add(line.from,line.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: ((SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test((iter.value as Decoration).spec.widget.codeblockParameters.language)))?"code-styler-line":getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" "))+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+				const lineClasses = SPECIAL_LANGUAGES.some(regExp => new RegExp(regExp).test(effectiveLanguage))
+					? "code-styler-line" 
+					: getLineClass(codeblockParameters,i-foldStart.number,line.text).join(" ");
+				const languageClass = ["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(effectiveLanguage))
+					? "" 
+					: ` language-${effectiveLanguage}`;
+				builder.add(line.from,line.from,Decoration.line({attributes: {
+					style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, 
+					class: lineClasses + languageClass
+				}}));
 				if (showLineNumbers)
 					builder.add(line.from,line.from,Decoration.widget({widget: new LineNumberWidget(i - foldStart.number, codeblockParameters, maxLineNum)}));
-				if (codeblockParameters.language === "markdown")
+				if (effectiveLanguage === "markdown")
 					continue;
 				convertCommentLinks(state, line, sourcePath, builder, sourceMode);
 			}
 			if (foldEnd !== null) {
-				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(codeblockParameters.language))?"":` language-${codeblockParameters.language}`)}}));
+				builder.add(foldEnd.from,foldEnd.from,Decoration.line({attributes: {style: `--line-number-gutter-width: ${lineNumberMargin?lineNumberMargin+"px":"calc(var(--line-number-gutter-min-width) - 12px)"};`, class: "code-styler-line"+(["^$"].concat(SPECIAL_LANGUAGES).some(regExp => new RegExp(regExp).test(effectiveLanguage))?"":` language-${effectiveLanguage}`)}}));
 				if (showLineNumbers)
 					builder.add(foldEnd.from,foldEnd.from,Decoration.widget({widget: new LineNumberWidget(0,codeblockParameters,maxLineNum,true)}));
 			}
@@ -490,6 +509,7 @@ export function createCodeblockCodeMirrorExtensions(settings: CodeStylerSettings
 		}
 		return addEffects;
 	}
+
 
 	return [
 		interaction,

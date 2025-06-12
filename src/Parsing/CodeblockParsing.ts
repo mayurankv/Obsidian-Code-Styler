@@ -218,9 +218,12 @@ function pluginAdjustExecuteCode(codeblockParameters: CodeblockParameters, plugi
 	return codeblockParameters;
 }
 function pluginAdjustExecuteCodeRun(codeblockParameters: CodeblockParameters, plugin: CodeStylerPlugin, plugins: Record<string,ExternalPlugin>): CodeblockParameters {
-	if ("execute-code" in plugins) {
-		if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(codeblockParameters.language.slice(4)) && !isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist))
-			codeblockParameters.language = codeblockParameters.language.slice(4);
+	// Transform run-* languages regardless of whether execute-code is present
+	if (/run-\w*/.test(codeblockParameters.language)) {
+		const baseLanguage = codeblockParameters.language.slice(4);
+		if (EXECUTE_CODE_SUPPORTED_LANGUAGES.includes(baseLanguage) && !isCodeblockIgnored(codeblockParameters.language,plugin.settings.processedCodeblocksWhitelist)) {
+			codeblockParameters.language = baseLanguage;
+		}
 	}
 	return codeblockParameters;
 }
@@ -242,7 +245,7 @@ function parseCodeblockParameterString(parameterString: string, codeblockParamet
 		addHighlights(parameterString,codeblockParameters,theme);
 }
 function manageTitle(parameterString: string, codeblockParameters: CodeblockParameters) {
-	const titleMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("title:".length));
+	const titleMatch = /(["']?)([^"']+)\1/.exec(parameterString.slice("title:".length));
 	if (titleMatch)
 		codeblockParameters.title = titleMatch[2].trim();
 	parameterString = parameterString.slice("title:".length);
@@ -287,7 +290,7 @@ function manageFolding(parameterString: string, codeblockParameters: CodeblockPa
 			placeholder: "",
 		};
 	} else {
-		const foldPlaceholderMatch = /(["']?)([^\1]+)\1/.exec(parameterString.slice("fold:".length));
+		const foldPlaceholderMatch = /(["']?)([^"']+)\1/.exec(parameterString.slice("fold:".length));
 		if (foldPlaceholderMatch) {
 			codeblockParameters.fold = {
 				enabled: true,

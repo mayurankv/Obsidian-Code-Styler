@@ -130,9 +130,9 @@ function styleThemeSettings (themeSettings: CodeStylerThemeSettings, currentThem
 		}
 		${THEME_STYLES?.[currentTheme]?.border?`
 			.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container {
-				--code-styler-header-border:`+ //@ts-expect-error Does Exist
+				--code-styler-header-border:`+
 					THEME_STYLES[currentTheme].border.style+`;
-				--header-separator-width-padding: calc(var(--header-separator-width) - `+ //@ts-expect-error Does Exist
+				--header-separator-width-padding: calc(var(--header-separator-width) - `+
 					THEME_STYLES[currentTheme].border.size+`px);
 				--folded-bottom-border: var(--code-styler-header-border);
 			}
@@ -161,7 +161,7 @@ function styleLanguageColours (themeSettings: CodeStylerThemeSettings, redirectL
 			if (THEME_STYLES?.[currentTheme]?.border) {
 				result += `
 					.markdown-source-view :not(pre.code-styler-pre) > .code-styler-header-container.language-${languageName}  {
-						--language-border-width: ${ //@ts-expect-error Does exist
+						--language-border-width: ${
 	themeSettings.advanced.languageBorderColour?themeSettings.advanced.languageBorderWidth+THEME_STYLES[currentTheme].border.size:0}px;
 					}`;
 			}
