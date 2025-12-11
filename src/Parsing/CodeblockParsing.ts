@@ -355,9 +355,9 @@ function manageWrapping(parameterString: string, codeblockParameters: CodeblockP
 	}
 }
 function addHighlights(parameterString: string, codeblockParameters: CodeblockParameters, theme: CodeStylerTheme) {
-	const highlightMatch = /^(\w+)[:=](.+)$/.exec(parameterString);
+	const highlightMatch = /^(\w+)[:=]"?([^"]+)"?$/.exec(parameterString);
 	if (highlightMatch) {
-		if (highlightMatch[1] === "hl")
+		if (highlightMatch[1].startsWith("hl"))
 			codeblockParameters.highlights.default = parseHighlightedLines(highlightMatch[2]);
 		else if (highlightMatch[1] in theme.colours.light.highlights.alternativeHighlights)
 			codeblockParameters.highlights.alternative[highlightMatch[1]] = parseHighlightedLines(highlightMatch[2]);
@@ -365,7 +365,7 @@ function addHighlights(parameterString: string, codeblockParameters: CodeblockPa
 		codeblockParameters.highlights.default = parseHighlightedLines(parameterString.slice(1,-1));
 }
 function parseHighlightedLines(highlightedLinesString: string): Highlights {
-	const highlightRules = highlightedLinesString.split(",");
+	const highlightRules = highlightedLinesString.split(/[\s,]+/); // Split by space or comma
 	const lineNumbers: Set<number> = new Set();
 	const plainText: Set<string> = new Set();
 	const regularExpressions: Set<RegExp> = new Set();
