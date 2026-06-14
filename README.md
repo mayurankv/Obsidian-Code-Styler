@@ -358,7 +358,7 @@ Please try to create bug reports/issues that are:
 
 ### Maintainers
 
-- [@mayurankv](https://github.com/mayurankv)
+- [@mayurankv](https://github.com/noahevers97)
 
 ### Contributors
 
