@@ -362,13 +362,10 @@ Please try to create bug reports/issues that are:
 
 ### Contributors
 
-[![List of contributors via https://contrib.rocks](https://contrib.rocks/image?repo=mayurankv/Obsidian-Code-Styler)](https://github.com/mayurankv/Obsidian-Code-Styler/graphs/contributors)
+[![List of contributors via https://contrib.rocks](https://contrib.rocks/image?repo=noahevers97/Obsidian-CodeSnippets)](https://github.com/noahevers97/Obsidian-CodeSnippets/graphs/contributors)
 
 ## Support
 
-If you like this plugin, and would like to help support continued development, use the button below!
-
-[![Buy me a coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee%20&emoji=&slug=mayurankv&button_colour=e3e7ef&font_colour=262626&font_family=Inter&outline_colour=262626&coffee_colour=a0522d)](https://www.buymeacoffee.com/mayurankv)
 
 ## License
 
